@@ -1,0 +1,322 @@
+\documentclass[10pt, a4paper]{article}
+
+% Page
+\usepackage{pdflscape} % make certain pages landscape
+\usepackage{geometry} % set page geometry
+\usepackage[indent=2em, skip=0.8em plus 0.1 em minus 0.2 em]{parskip} % set paragraph spacing
+
+% Font and Text
+\usepackage[utf8]{inputenc}
+\usepackage{bbm} % blackboard bold fonts
+\usepackage{lmodern} % bold teletype font
+\usepackage{csquotes} % allows quoting blocks of text
+\usepackage{textcomp} % allow text settings
+\usepackage{xcolor} % allows for colouring of source code blocks
+\usepackage{url} % better URLs
+\usepackage{indentfirst} % indent the first line after a heading
+\usepackage{enumitem} % gives alphabet list headers
+
+% Notation
+\usepackage{amssymb} % allows for maths mode symbols
+\usepackage{amsmath} % allows for many maths mode commands
+\usepackage{amsthm} % allows for QED tombstone
+\usepackage{mathtools}
+\allowdisplaybreaks% allow display elements to break across pages
+\usepackage{siunitx} % allows SI units to be formatted
+\usepackage{braket} % support Dirac notation
+\usepackage{esvect} % nicer vector arrows
+\usepackage[thinc]{esdiff} % derivatives 
+\usepackage{esint} % integrals
+\usepackage{cancel} % allow cancellation
+
+% Tables
+\usepackage{tabulary} % allows for better tables
+\usepackage{longtable} % allows tables to span pages
+\usepackage{makecell} % allow nice table titles
+\usepackage[export]{adjustbox} % allow tables to take up the space they need, and export additional scaling stuff for graphicx
+\usepackage{diagbox} % diagonal box in table
+\usepackage{multirow} % cells in tables can span rows/columns
+\usepackage{tablefootnote} % use \tablefootnote for footnotes in tables
+
+% Code
+\usepackage{listings} % allows for source code blocks
+\usepackage{algorithm} % typeset algorithms
+\usepackage{algpseudocode} % pseudocode style algorithms
+
+% Graphics
+\usepackage[justification=centering]{caption} % centres captions
+\usepackage{float} % stop LaTeX from making stuff float everywhere with H
+\usepackage{graphicx} % allows figures to be inserted and scaled
+\usepackage{tikz} % programmatically draw stuff
+\usepackage{tikzscale} % include .tikz files with includegraphics and scale them
+\usetikzlibrary{shapes, shapes.geometric, automata, positioning, arrows}
+
+\RequirePackage{luatex85}
+% Default preamble
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{polar}
+\usepgfplotslibrary{smithchart}
+\usepgfplotslibrary{statistics}
+\usepgfplotslibrary{dateplot}
+\usepgfplotslibrary{ternary}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{backgrounds}
+\usepgfplotslibrary{patchplots}
+\usepgfplotslibrary{fillbetween}
+\pgfplotsset{%
+  layers/standard/.define layer set={%
+    background,axis background,axis grid,axis ticks,axis lines,axis tick labels,pre main,main,axis descriptions,axis foreground%
+    }{grid style= {/pgfplots/on layer=axis grid},%
+    tick style= {/pgfplots/on layer=axis ticks},%
+    axis line style= {/pgfplots/on layer=axis lines},%
+    label style= {/pgfplots/on layer=axis descriptions},%
+    legend style= {/pgfplots/on layer=axis descriptions},%
+    title style= {/pgfplots/on layer=axis descriptions},%
+    colorbar style= {/pgfplots/on layer=axis descriptions},%
+    ticklabel style= {/pgfplots/on layer=axis tick labels},%
+    axis background@ style={/pgfplots/on layer=axis background},%
+    3d box foreground style={/pgfplots/on layer=axis foreground},%
+  },
+}
+
+\tikzset{%
+  ->, % makes the edges directed
+  >=stealth, % makes the arrow heads bold
+  node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
+  every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
+  initial text=$ $, % sets the text that appears on the start arrow
+}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codered}{rgb}{0.6,0,0}
+\definecolor{codeblue}{rgb}{0,0,0.6}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.95}
+
+\lstset{%
+  numbers=left,                   % where to put the line-numbers
+  stepnumber=1,                   % the step between two line-numbers.        
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  % breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
+  upquote=true, 			% set all single quotes to straight quotes
+  basicstyle={\ttfamily\small},           % hackerman teletype font
+  keywordstyle={\color{codegreen}\bfseries\ttfamily}, % hackerman teletype font
+  commentstyle={\color{codeblue}\textit},           % fancy italic comments
+  stringstyle={\color{codered}},           % string literal highlighting
+  identifierstyle={}, 
+  %title=\lstname,                % show the filename of files included with \lstinputlisting;
+  frame=single,			% put a frame around the source code
+  aboveskip=2em, % add space before code
+  inputpath={./code/}
+}
+
+% analysis and calculus
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\indif}{{\mathop{}\!\mkern3mu\mathchar'26\mkern-12mu \mathrm{d}}}
+\newcommand{\Dif}{\mathop{}\!\mathrm{D}} % Difference operator
+\newcommand{\dif}{\mathop{}\!\mathrm{d}} % differential d
+
+% CS, discrete maths, algebra
+\DeclareMathSymbol{\lneg}{\mathord}{symbols}{"18} % tildes for negation
+\newcommand{\st}{\mathrel{:}} % 'such that'
+\newcommand{\?}{\mathrel{?}} % ternary operator
+\newcommand{\concat}{\mathbin{\Vert}} % string concatenation operator
+\newcommand{\Mod}{~\mathbf{mod}~} % for mod operator
+\newcommand{\Div}{~\mathbf{div}~} % for div operator
+\newcommand{\Rem}{~\mathbf{rem}~} % for rem operator
+\newcommand{\Z}{\mathbb{Z}} % for integers
+\newcommand{\R}{\mathbb{R}} % for reals
+\newcommand{\C}{\mathbb{C}} % for complex
+\newcommand{\ceil}[1]{\left\lceil#1\right\rceil} % enables \ceil{} for ceil delimiter
+\newcommand{\floor}[1]{\left\lfloor#1\right\rfloor} % enables \floor{} for floor delimiter
+
+% linear algebra
+\newcommand{\cvec}[1]{\boldsymbol{\mathbf{#1}}}    % column vectors
+\newcommand{\rvec}[1]{\boldsymbol{\mathbf{#1}}^{\mathrm{T}}} % row vectors (transposed from column vectors)
+\newcommand{\bvec}[1]{\hat{\boldsymbol{\mathbf{#1}}}} % basis vectors
+\newcommand{\matr}[1]{\left[\mathbf{#1}\right]} % matrices
+\newcommand{\matrp}[2]{\left[\mathbf{#1}#2\right]} % matrices with subscripts/superscripts
+\newcommand{\inner}[2]{\left\langle#1,#2\right\rangle} % inner product
+% \newcommand{\dim}{\rm dim} % dimension
+
+% probability and statistics
+\newcommand{\rv}[1]{\boldsymbol{\mathbf{#1}}} % random variable
+\newcommand{\E}{\mathbb{E}} % expectation
+\newcommand{\angleb}[1]{\left\langle #1 \right\rangle} % physicist's notation for mean
+\newcommand{\Var}{\mathrm{Var}} % variance
+\newcommand{\indep}{\perp \!\!\! \perp} % independence symbol
+\newcommand{\indic}[1]{\mathbbm{1}{\left\{#1\right\}}} % indicator function
+\newcommand{\iid}{i.i.d.\ } % independently and identically distributed
+
+% quantum physics
+\newcommand{\tr}{\mathrm{tr}} % enables Trace operator
+\newcommand{\Hs}{\mathcal{H}} % enables H for Hilbert space
+
+% category theory
+% \newcommand{\hom}{\mathrm{hom}} % collection of morphisms in a category
+\newcommand{\Hom}{\mathrm{Hom}} % collection of between two objects
+\newcommand{\ob}{\mathrm{ob}} % collection of objects
+\newcommand{\id}{\mathrm{id}} % identity morphism
+
+% Custom lengths
+\addtolength{\jot}{0.5em} % gives spacing between align* rows
+
+\newenvironment{Tabular}[1] % less cramped tables
+{\def\arraystretch{1.75}\begin{tabular}{#1}}
+{\end{tabular}}
+\newenvironment{Array}[1] % less cramped display mode arrays
+{\def\arraystretch{1.75}\everymath={\displaystyle}\[\begin{array}{#1}}
+{\end{array}\]}
+\newenvironment{displaytable}[1] % environment for a simple inline table to present some information
+{\vspace\abovedisplayskip\begin{center}\begin{tabular}{#1}}
+{\end{tabular}\end{center}\vspace\belowdisplayskip}
+
+\newcommand{\tableline}[1]{\dimexpr \linewidth/#1 - 2\tabcolsep}
+
+% temporarily change margins
+\newenvironment{changemargin}[2]{% 
+  \begin{list}{}{%
+      \setlength{\topsep}{0pt}%
+      \setlength{\leftmargin}{#1}%
+      \setlength{\rightmargin}{#2}%
+      \setlength{\listparindent}{\parindent}%
+      \setlength{\itemindent}{\parindent}%
+      \setlength{\parsep}{\parskip}%
+    }%
+\item[]}{\end{list}}
+
+  \usepackage[backend=biber, style=ieee]{biblatex}
+  \addbibresource{../cg4003.bib}
+  \graphicspath{{../images/}}
+  \usepackage{hyperref} % hyperlinks
+  \hypersetup{%
+    colorlinks=true,
+    linkcolor=purple,
+    urlcolor=blue
+  }
+  \usepackage{cleveref} % references are automatically of the form "Section 1" etc.
+  \Crefname{subsection}{Subsection}{Subsections}
+
+  \numberwithin{equation}{section} % eqn counter rolls over at each section
+
+  \newcounter{stmt} % definitions, theorems and lemmas share this counter
+  \theoremstyle{definition}
+  \newtheorem{defn}[stmt]{Definition}
+  \theoremstyle{plain}
+  \newtheorem{theorem}[stmt]{Theorem}
+  \theoremstyle{plain}
+  \newtheorem{lemma}[stmt]{Lemma}
+
+  \newcommand{\sM}{\mathcal{M}}
+  \newcommand{\sS}{\mathcal{S}}
+  \newcommand{\sK}{\mathcal{K}}
+  \newcommand{\sT}{\mathcal{T}}
+  \newcommand{\sH}{\mathcal{H}}
+  \newcommand{\sV}{\mathcal{V}}
+  \newcommand{\sX}{\mathcal{X}}
+  \newcommand{\sZ}{\mathcal{Z}}
+  \newcommand{\cF}{\mathcal{F}}
+
+  \newcommand{\AU}{\mathrm{AU}_{2}}
+  \newcommand{\AXU}{\mathrm{AXU}_{2}}
+  \newcommand{\ASU}{\mathrm{ASU}_{2}}
+  \newcommand{\eAU}{\epsilon\text{-}\AU}
+  \newcommand{\eAXU}{\epsilon\text{-}\AXU}
+  \newcommand{\eASU}{\epsilon\text{-}\ASU}
+
+
+  \newcommand{\frI}{\mathfrak{I}}
+  \newcommand{\frX}{\mathfrak{X}}
+  \newcommand{\frA}{\mathfrak{A}}
+  \newcommand{\frC}{\mathfrak{C}}
+  \newcommand{\frR}{\mathfrak{R}}
+
+  \newcommand{\cE}{\mathcal{E}}
+
+  \newcommand{\meas}{\rm meas}
+  \newcommand{\perm}{\rm perm}
+  \newcommand{\pe}{\rm pe}
+  \newcommand{\pa}{\rm pa}
+  \newcommand{\ir}{\rm ir}
+  \newcommand{\leakir}{\mathrm{leak}_{\ir}}
+  \newcommand{\auth}{\rm auth}
+  \newcommand{\key}{\rm key}
+  \newcommand{\rob}{\rm rob}
+  \newcommand{\cor}{\rm cor}
+  \newcommand{\secur}{\rm sec}
+
+  \title{Device-independent quantum key distribution with local wiring}
+  \author{John Khoo\\ \href{mailto:john_khoo@u.nus.edu}{\texttt{john\_khoo@u.nus.edu}} \\\\ AD MAIOREM DEI GLORIAM} 
+
+  \begin{document}
+
+  Alice and Bob have an uncharacterised source, they randomly choose settings \(x\) and \(y\) to measure, obtaining outputs \(a\) and \(b\) respectively. They estimate \(p(a,b|x,y)\) and quantities like QBER \(p(a \neq b|\text{settings})\), Bell inequality violation e.g.\ CHSH value
+  \[ S = \sum_{x=0}^1 \sum_{y=0}^1 {(-1)}^{xy} \langle A_x B_y \rangle, \langle A_x B_y \rangle \coloneqq p(a=b|x,y) - p(a\neq b|x,y) \]
+
+  Pironio et al. in NJP:
+  \[ r \geq 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{(S/2)^2-1}}{2} \right) \]
+  \[ \diffp{{h_2(x)}}{x} = \frac{1}{\ln 2} \log \left(\frac{1-x}{x}\right) \]
+  \begin{align*}
+    \ln (2) \diffp{r}{S} &= - \left( \diffp{}{S} \frac{1 + \sqrt{(S/2)^2-1}}{2} \right) \log \left( \frac{1 - \sqrt{(S/2)^2-1}}{2} / \frac{1 + \sqrt{(S/2)^2-1}}{2} \right) \\
+                 &= - \left( \frac{1}{4} \left( (S/2)^2-1 \right)^{-1/2} \diffp{}{S} \left[ (S/2)^2-1 \right] \right) \log \left( \frac{1 - \sqrt{(S/2)^2-1}}{1 + \sqrt{(S/2)^2-1}} \right) \\
+                 &= \underbrace{\left( \frac{S}{ 8\sqrt{(S/2)^2-1} } \right)}_{\geq 0} \log \underbrace{ \left( \frac{1 + \sqrt{(S/2)^2-1}}{1 - \sqrt{(S/2)^2-1}} \right) }_{\geq 1} \because \sqrt{(S/2)^2-1} \geq 0 \\
+                 &\geq 0
+  \end{align*}
+
+  Noisy preprocessing: add noise to \(A\), improve key rate
+
+  Local wiring: function of two copies of devices with \(r(Q, S) = 0\) can achieve \(r \geq 0\). Either NJP is not tight, or we are doing magic. If we can show that the upper bound is 0, then we are doing magic.
+
+  Most upper bounds are useless, because they are faithful: 0 if separable, \(\geq 0\) for all entangled.
+
+  Farkas et al., PRL 2021: nonlocality is necessary but not sufficient for DIQKD.\@ In some Werner states, they exhibit nonlocality, but no projective measurements can extract secrecy (which can produce those correlations). Eve ``forgets'' some local parts to create a uniform distribution in the nonlocal region.
+
+  Intrinsic information \(I(A:B|E)\) is upper bound on secrecy.
+
+  \[ \ket{\psi} = \cos \theta \ket{00} + \sin \theta \ket{11} \]
+
+  Projective measurement with some inefficiency, or convex combination of this measurement with deterministic output and uncorrelated output.
+
+  For box with two small boxes inside:
+  \[ \langle A_x B_y \rangle' = 1 - \frac{1}{4} \left[ (1 - C_{xy}) (3 - 2m_a - 2 m_b + C_{xy} ) \right] \]
+      \[ m_a = \langle A_x \rangle, m_b = \langle B_y \rangle C_{xy} = \langle A_x B_y \rangle \]
+      \[ {\rm QBER} = \frac{1 - \langle A_x B_y \rangle'}{2} \]
+
+      For \(N\) boxes,
+    \[ \langle A_x B_y \rangle_{N}' = 1 - \frac{{(1-m_b)}^N + {(1-m_a)}^N}{2^{N-1}} + \frac{1}{4^{N-1}} {(1-m_a-m_b+C_{xy})}^{N} \]
+
+    \section{Local Wirings}
+
+    With \(N\) boxes in total, Bob couples \(n\) boxes with inputs \(\cvec{y}\) and outputs \(\cvec{b}\), and \(\breve{n}\) boxes with \(\breve{\cvec{y}}\) and outputs \(\breve{\cvec{b}}\), while Alice has the remaining \(m = N - n\) boxes with inputs \(\cvec{x}\) and outputs \(\cvec{a}\).
+
+    In general, \(b'\) is dependent on \(\cvec{x}\), \(\cvec{a}\), \(\breve{\cvec{y}}\) and \(\breve{\cvec{b}}\) since Alice and Bob can always perform those measurements first. However, conditional probability \(P(\cvec{a}\breve{\cvec{b}}|\cvec{x}\breve{\cvec{y}})\) governing these four variables is independent of \(b'\), \(\cvec{b}\) and \(\cvec{y}\).
+
+    \[ P'(\cvec{a}\breve{\cvec{b}}b'|\cvec{x}\breve{\cvec{y}}) = P(\cvec{a}\breve{\cvec{b}}|\cvec{x}\breve{\cvec{y}}) P'_{(\cvec{a}\breve{\cvec{b}}\cvec{x}\breve{\cvec{y}})}(b')  \]
+
+    No signalling from Alice to Bob
+    \begin{align}
+      \sum_{\cvec{a}} P(\cvec{a}\breve{\cvec{b}}|\cvec{x}\breve{\cvec{y}}) P'_{(\cvec{a}\breve{\cvec{b}}\cvec{x}\breve{\cvec{y}})}(b') = P'(b'|\breve{\cvec{b}}\breve{\cvec{y}}) P(\breve{\cvec{b}}|\breve{\cvec{y}})
+    \end{align}
+
+    No signalling from Bob to Alice
+    \begin{align}
+      \sum_{\cvec{\breve{b}}, b'} P(\cvec{a}\breve{\cvec{b}}|\cvec{x}\breve{\cvec{y}}) P'_{(\cvec{a}\breve{\cvec{b}}\cvec{x}\breve{\cvec{y}})}(b') &= \sum_{\cvec{\breve{b}}} P(\cvec{a}\breve{\cvec{b}}|\cvec{x}\breve{\cvec{y}}) \\
+                                                                                                                                                     &= P(\cvec{a}|\cvec{x})
+    \end{align}
+
+    82 local wirings for two boxes. Convex combinations do not help for CHSH\@.
+
+  \end{document}
+
