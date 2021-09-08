@@ -281,7 +281,7 @@
 
   Most upper bounds are useless, because they are faithful: 0 if separable, \(\geq 0\) for all entangled.
 
-  Farkas et al., PRL 2021: nonlocality is necessary but not sufficient for DIQKD.\@ In some Werner states, they exhibit nonlocality, but no projective measurements can extract secrecy (which can produce those correlations). Eve ``forgets'' some local parts to create a uniform distribution in the nonlocal region.
+  Farkas et al., PRL 2021: nonlocality is necessary but not sufficient for DIQKD\@. In some Werner states, they exhibit nonlocality, but no projective measurements can extract secrecy (which can produce those correlations). Eve ``forgets'' some local parts to create a uniform distribution in the nonlocal region.
 
   Intrinsic information \(I(A:B|E)\) is upper bound on secrecy.
 
@@ -316,7 +316,79 @@
                                                                                                                                                      &= P(\cvec{a}|\cvec{x})
     \end{align}
 
-    82 local wirings for two boxes. Convex combinations do not help for CHSH\@.
+    Convex combinations do not help for CHSH\@. We assume all boxes are distributed iid; if we only care about \(Q\) and expectation values (marginals and correlators) averaged over the whole protocol we can simply take this to be equal to the empirical distribution, although we might need to be a bit more careful if we consider other quantities.
+
+    The wiring paper may not capture the full range of dynamics. Let each player have \(c\) boxes, and let subscripts denote the order in which the boxes are used. The most general wiring for Alice would be a sequence of \(c\) functions with range \(\{1..i_A\}\)
+    \begin{equation} x_1 = x \end{equation}
+    \begin{equation} x_j = C_j^A(x_1, \ldots, x_{j-1}, a_1, \ldots, a_{j-1}),\,j \in \{2..c\} \end{equation}
+    and a final output function with range \(\{1..o_A\}\)
+    \begin{equation} a = C^A(x_1, \ldots, x_{c}, a_1, \ldots, a_{c}). \end{equation}
+
+    Simple combinatorics gives us \(i_A^{j-1} o_A^{j-1}\) possible inputs for \(C_j^A\), so the number of possible \(C_j^A\) is \(\exp_{i_A}(i_A^{j-1} o_A^{j-1})\), and the number of possible \(C^A\) is \(\exp_{o_A}(i_A^{c} o_A^{c})\). The total number of wirings is then
+    \begin{equation}
+      \exp_{o^A}(i_A^c o_A^c) \prod_{j=2}^c \exp_{i_A}(i_A^{j-1} o_A^{j-1}).
+    \end{equation}
+    The same applies to Bob with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). 
+
+    Let us fix the key generating settings \(A_1\) and \(B_3\) to be AND-wired, so that all functions with \(x_1 = 1\) or \(y_1 = 3\) are fixed to the AND wiring. This gives us
+    \begin{equation}
+      \exp_{o^A}((i_A-1)i_A^{c-1} o_A^c) \prod_{j=2}^c \exp_{i_A}((i_A-1)i_A^{j-2} o_A^{j-1})
+    \end{equation}
+    wirings for Alice, with the analogous relabelling for Bob.
+
+    \section{Quantum Model}
+
+    The probability of no signal being produced is \(n_c\), while the efficiencies of Alice and Bob's detectors are \(\eta_A\) and \(\eta_B\) respectively. When nothing is detected, either due to no signal being produced or the detector failing, we assign the \(-1\) outcome. Therefore, the probabilities are
+    \begin{align*}
+      p(a|x) &= \delta_{a,-1}(n_c + 1 - \eta_A) + (\eta_A - n_c)\tilde{p}(a|x) \\
+      p(b|y) &= \delta_{b,-1}(n_c + 1 - \eta_B) + (\eta_B - n_c)\tilde{p}(b|y) \\
+      p(ab|xy) &= \begin{aligned}[c] \delta_{a,-1}\delta_{b,-1}n_c + (1-n_c) [ \delta_{a,-1} \delta_{b,-1}(1-\eta_A\eta_B) + \eta_A\eta_B \tilde{p}(ab|xy) \\
+        + \delta_{b,-1}\eta_A(1-\eta_B)\tilde{p}(a|x) + \delta_{a,-1}\eta_B(1-\eta_A)\tilde{p}(b|y) ] 
+      \end{aligned}
+    \end{align*}
+
+    For our purposes, we fix \(\eta_A = \eta_B = \eta\). Then, we have
+    \begin{align*}
+      \diffp{}{{n_c}} \angleb{A_x B_y} &= \eta \left( \left(1-\eta\right) \left(\langle\tilde{A}_x\rangle + \langle\tilde{B}_y\rangle\right) - \eta \langle\tilde{A}_x\tilde{B}_y\rangle + \left(2 - \eta\right) \right) \\
+      \diffp{}{{\eta}} \angleb{A_x B_y} &= \left(1 - n_{c}\right) \left( \left(1-2\eta\right) \left(\langle\tilde{A}_x\rangle+\langle\tilde{B}_y\rangle\right) - 2\eta \langle\tilde{A}_x\tilde{B}_y\rangle + (2-2\eta) \right) \\
+      \diffp{}{S} H^S(A|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right]
+    \end{align*}
+
+
+    \section{Asymmetric CHSH}
+
+    The lower bound for \(H(A_1|E)\), with \(s = S_{\alpha}\) from the test statistics, is
+    \[ H(A_1|E) \geq g_{q,\alpha}(s) = \begin{cases}
+      g(s) & \text{ for } \abs{\alpha} \geq 1 \text{ or } s \geq s^* \\
+      h(q) + g'(s^*)(\abs{s}-2) & \text{ otherwise},
+    \end{cases}
+    \]
+    where
+    \begin{equation}
+      g_{q,\alpha}(s) = 1 + \phi\left(R_1\right) - \phi\left(R_2\right),
+    \end{equation}
+    with
+    \begin{equation} 
+      R_1 = \sqrt{{(1-2q)}^2 + 4q(1-q)(s^2/4-\alpha^2)} \qquad R_2 = \sqrt{s^2/4-\alpha^2}
+    \end{equation}
+    and where \(s^*\) is the solution to
+    \begin{equation}
+      h(q) + g'(s^*) (s^*-2) = g(s^*).
+    \end{equation}
+
+    For a function \(R(s)\) of \(s\), it can easily be verified that
+    \begin{equation}
+      \diff{\phi(R)}{s} = \frac{1}{2} \diff{R}{s} \log\frac{1-R}{1+R},
+    \end{equation}
+    and since
+    \begin{equation} 
+      R_1'(s) = \frac{qs(1-q)}{R_1} \qquad R_2'(s) = \frac{s}{4R_2},
+    \end{equation}
+    we have
+    \begin{equation}
+      g_{q,\alpha}'(s) = \frac{qs(1-q)}{2R_1} \log\frac{1-R_1}{1+R_1} - \frac{s}{4R_2} \log\frac{1-R_2}{1+R_2}.
+    \end{equation}
+
 
   \end{document}
 

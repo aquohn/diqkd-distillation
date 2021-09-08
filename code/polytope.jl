@@ -2,6 +2,29 @@ using LazySets, Polyhedra, Symbolics, CDDLib, LRSLib
 
 # TODO: optimise for cache efficiency - iterate from last to first indices
 
+macro printvals(syms...)
+  l = length(syms)
+  quote
+    $([(i == l) ? :(print(String($(Meta.quot(syms[i]))) * " = "); println($(syms[i]))) :
+       :(print(String($(Meta.quot(syms[i]))) * " = "); print($(syms[i])); print(", ")) for i in eachindex(syms)]...)
+  end |> esc
+end
+
+macro sliceup(arr, info...)
+  l = Integer(length(info)/2)
+  names = Vector{Any}(undef, l)
+  steps = Vector{Any}(undef, l)
+  for i in eachindex(names)
+    names[i] = info[2*i-1]
+    steps[i] = info[2*i]
+  end
+
+  quote
+    curr = 1
+    $([:(next = curr + $(steps[j]) - 1; $(names[j]) = $arr[curr:next]; curr = next + 1) for j in 1:l]...)
+  end |> esc
+end
+
 function full_polytope(iA, oA, iB, oB)
   vars = @variables pabxy[1:oA, 1:oB, 1:iA, 1:iB], pax[1:oA, 1:iA], pby[1:oB, 1:iB]
   allvars = vcat([vec(ps) for ps in vars]...)
@@ -43,20 +66,11 @@ function cg_to_full(v, iA, oA, iB, oB)
   pax = fill(NaN, oA, iA)
   pby = fill(NaN, oB, iB)
 
-  curr = 1
-  next = ((oA-1) * (oB-1) * iA * iB)
-  pabxy_range = curr:next
-  pabxy[1:oA-1, 1:oB-1, 1:iA, 1:iB] = reshape(v[pabxy_range], oA-1, oB-1, iA, iB)
+  @sliceup(v, pabxy_vec, ((oA-1) * (oB-1) * iA * iB), pax_vec, (oA-1) * iA, pby_vec, (oB-1) * iB)
 
-  curr = next + 1
-  next = curr + (oA-1) * iA - 1
-  pax_range = curr:next
-  pax[1:oA-1, 1:iA] = reshape(v[pax_range], oA-1, iA)
-
-  curr = next + 1
-  next = curr + (oB-1) * iB - 1
-  pby_range = curr:next
-  pby[1:oB-1, 1:iB] = reshape(v[pby_range], oB-1, iB)
+  pabxy[1:oA-1, 1:oB-1, 1:iA, 1:iB] = reshape(pabxy_vec, oA-1, oB-1, iA, iB)
+  pax[1:oA-1, 1:iA] = reshape(pax_vec, oA-1, iA)
+  pby[1:oB-1, 1:iB] = reshape(pby_vec, oB-1, iB)
 
   for x in eachindex(pax[oA, :])
     pax[oA, x] = 1 - sum(pax[1:oA-1, x])
@@ -107,10 +121,12 @@ function cg_find_probs(behavs, iA, oA, iB, oB)
   end
 end
 
-function find_couplers(pbys, n)
-  oB, iB = size(pbys[1])
-  l = length(pbys) 
+function find_couplers(iA, oA, iB, oB, n)
+  poly = cg_polytope(iA, oA, iB, oB)
+  vs = vertices_list(poly)
+  l = length(vs) 
 
+  # compute coupler for each party independently
   bsysdims = ((oB for i in 1:n)..., (iB for i in 1:n)...)
   bsysranges = (1:d for d in bsysdims)
   vars = @variables C[1:oB-1, bsysranges...]
@@ -120,7 +136,9 @@ function find_couplers(pbys, n)
   lnormconstrs = Vector{Num}(undef, l * oB)
 
   total_pbp = 0
-  for idx in eachindex(pbys)
+  for idx in eachindex(vs)
+    v = vs[idx]
+    pabxy, pax, pby = cg_to_full(v, iA, oA, iB, oB)
     pby = pbys[idx]
     constridx = (idx - 1) * oB
     iter = Iterators.product(bsysranges...)

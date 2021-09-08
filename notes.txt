@@ -1,4 +1,0 @@
-- Focus only on Pironio protocol
-- Explore variation of wiring performance with behaviour
-- Compute tilted CHSH value
-- Try noisy pre-processing, both for the overall box and the smaller boxes
