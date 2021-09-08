@@ -151,7 +151,7 @@ function wiring_prob(CA, CAj, CB, CBj, pax, pby, pabxy)
   for params in Iterators.product(vcat([[1:n for i in 1:c] for n in [oA, oB, iA, iB]]...)...)
     @sliceup params as c bs c xs c ys c
     pABXY = 1
-    for j in 1:c
+    for j in 2:c
       if CAj[j][as[1:j-1]..., xs[1:j-1]...] != xs[j] || CBj[j][bs[1:j-1]..., ys[1:j-1]...] != ys[j]
         pABXY = 0
         break
@@ -370,6 +370,10 @@ function diqkd_wiring_iters(c = 2)
   CBiters = fill(1:oB, CBshapes...)
   CAjiters = [fill(1:iA, CAjshapes[j]...) for j in 1:c]
   CBjiters = [fill(1:iB, CBjshapes[j]...) for j in 1:c]
+
+  # first function is trivial
+  CAjiters[1][] = 0:0
+  CBjiters[1][] = 0:0
 
   # Fix keygen settings x = 1 and y = 3 to be AND-gated
   for params in Iterators.product([1:oA for i in 1:c]..., [1:iA for i in 2:c]...)
