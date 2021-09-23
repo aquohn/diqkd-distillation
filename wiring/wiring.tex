@@ -176,9 +176,12 @@
 \newenvironment{Tabular}[1] % less cramped tables
 {\def\arraystretch{1.75}\begin{tabular}{#1}}
 {\end{tabular}}
-\newenvironment{Array}[1] % less cramped display mode arrays
+\newenvironment{Array*}[1] % less cramped display mode arrays
 {\def\arraystretch{1.75}\everymath={\displaystyle}\[\begin{array}{#1}}
 {\end{array}\]}
+\newenvironment{Array}[1] % less cramped display mode arrays
+{\def\arraystretch{1.75}\everymath={\displaystyle}\begin{equation}\begin{array}{#1}}
+{\end{array}\end{equation}}
 \newenvironment{displaytable}[1] % environment for a simple inline table to present some information
 {\vspace\abovedisplayskip\begin{center}\begin{tabular}{#1}}
 {\end{tabular}\end{center}\vspace\belowdisplayskip}
@@ -198,9 +201,10 @@
 \item[]}{\end{list}}
 
   \usepackage[backend=biber, style=ieee]{biblatex}
-  \addbibresource{../cg4003.bib}
-  \graphicspath{{../images/}}
+  \addbibresource{../wiring.bib}
+  % \graphicspath{{../images/}}
   \usepackage{hyperref} % hyperlinks
+  \usepackage{bookmark} % PDF bookmarks
   \hypersetup{%
     colorlinks=true,
     linkcolor=purple,
@@ -257,10 +261,15 @@
   \newcommand{\cor}{\rm cor}
   \newcommand{\secur}{\rm sec}
 
+  \newcommand{\HC}{\mathrm{HC}}
+  \newcommand{\MC}{\mathrm{MC}}
+
   \title{Device-independent quantum key distribution with local wiring}
   \author{John Khoo\\ \href{mailto:john_khoo@u.nus.edu}{\texttt{john\_khoo@u.nus.edu}} \\\\ AD MAIOREM DEI GLORIAM} 
 
   \begin{document}
+
+  \maketitle
 
   Alice and Bob have an uncharacterised source, they randomly choose settings \(x\) and \(y\) to measure, obtaining outputs \(a\) and \(b\) respectively. They estimate \(p(a,b|x,y)\) and quantities like QBER \(p(a \neq b|\text{settings})\), Bell inequality violation e.g.\ CHSH value
   \[ S = \sum_{x=0}^1 \sum_{y=0}^1 {(-1)}^{xy} \langle A_x B_y \rangle, \langle A_x B_y \rangle \coloneqq p(a=b|x,y) - p(a\neq b|x,y) \]
@@ -283,7 +292,7 @@
 
   Farkas et al., PRL 2021: nonlocality is necessary but not sufficient for DIQKD\@. In some Werner states, they exhibit nonlocality, but no projective measurements can extract secrecy (which can produce those correlations). Eve ``forgets'' some local parts to create a uniform distribution in the nonlocal region.
 
-  Intrinsic information \(I(A:B|E)\) is upper bound on secrecy.
+  Intrinsic information \(I(A:B \downarrow E)\) is upper bound on secrecy.
 
   \[ \ket{\psi} = \cos \theta \ket{00} + \sin \theta \ket{11} \]
 
@@ -295,7 +304,7 @@
       \[ {\rm QBER} = \frac{1 - \langle A_x B_y \rangle'}{2} \]
 
       For \(N\) boxes,
-    \[ \langle A_x B_y \rangle_{N}' = 1 - \frac{{(1-m_b)}^N + {(1-m_a)}^N}{2^{N-1}} + \frac{1}{4^{N-1}} {(1-m_a-m_b+C_{xy})}^{N} \]
+    \[ \langle A_x B_y \rangle_{N}' = 1 - \frac{{(1-m_b)}^N + {(1-m_a)}^N}{2^{N-1}} + \frac{1}{4^{N-1}} {(1-m_a-m_b+C_{xy})}^{N}. \]
 
     \section{Local Wirings}
 
@@ -354,7 +363,6 @@
       \diffp{}{S} H^S(A|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right]
     \end{align*}
 
-
     \section{Asymmetric CHSH}
 
     The lower bound for \(H(A_1|E)\), with \(s = S_{\alpha}\) from the test statistics, is
@@ -389,6 +397,108 @@
       g_{q,\alpha}'(s) = \frac{qs(1-q)}{2R_1} \log\frac{1-R_1}{1+R_1} - \frac{s}{4R_2} \log\frac{1-R_2}{1+R_2}.
     \end{equation}
 
+    \section{Nonlocality Monotones}
+
+    The maximal correlation between two rvs \(A,B\) is denoted as \(\rho(A,B)\) and defined as
+    \begin{equation}
+      \rho(A,B) = \max_{f,g} \frac{\E[(f(A)-\E[f(A)])(g(B)-\E[g(B)])]}{\sqrt{\Var[f(A)]\Var[g(B)]}}
+    \end{equation}
+    or equivalently
+    \begin{Array}{rcl}
+      \rho(A,B) = & \max_{f,g}  & \E[f(A)g(B)] \\
+                  & \text{s.t.} & \E[f(A)] = \E[g(B)] = 0 \\
+                  &             & \E[f(A)^2] = \E[g(B)^2] = 1.
+    \end{Array}
+
+    For the maximal correlation \(\rho(A,B|X=x,Y=y)\), where we simply use the conditional distributions in place of the unconditioned distributions, we define the matrices
+    \begin{align}
+      \matrp{P}{_{AB|xy}}_{ab} &= \Pr(A = a, B = b|X = x, Y = y) \\
+      \matrp{P}{_{A|x}}_{ab} &= \delta_{ab} \Pr(A = a|X = x) \\
+      \matrp{P}{_{B|y}}_{ab} &= \delta_{ab} \Pr(B = b|Y = y) \\
+      \matrp{\tilde{P}}{_{AB|xy}} &= \matrp{P}{_{A|x}}^{-1/2} \matrp{P}{_{AB|xy}} \matrp{P}{_{B|y}}^{-1/2} \\
+      \therefore \matrp{\tilde{P}}{_{AB|xy}}_{ab} &= \frac{p(a,b|x,y)}{\sqrt{p(a|x)p(b|y)}},
+    \end{align}
+    where \(\matrp{P}{_{A|x}}_{ab}\), \(\matrp{P}{_{B|y}}_{ab}\), \(\matrp{P}{_{AB|xy}}_{ab}\) and \(\matrp{\tilde{P}}{_{AB|xy}}\) have dimensions \(o_A \times o_A\), \(o_B \times o_B\), \(o_A \times o_B\), \(o_A \times o_B\) respectively. We use the Moore-Penrose inverse for this inversion, which, since \(\matrp{P}{_{A|x}}_{ab}\) and \(\matrp{P}{_{B|y}}_{ab}\) are diagonal, involves inverting their non-zero diagonal entries and leaving the zero entries in place.
+
+    Let the singular values of \(\matrp{\tilde{P}}{_{AB|xy}}\) be \(\lambda_i\) for \(i \in [1, \min\{o_A, o_B\}] \cap \Z\) such that \(\lambda_{i} \geq \lambda_{i+1}\),
+    \begin{equation}
+      \rho(A,B|X=x,Y=y) = \lambda_2\left( \matrp{\tilde{P}}{_{AB|xy}} \right).
+    \end{equation}
+
+    Working with the normalised form of the maximum correlation function, and so considering only normalised functions, we have
+    \begin{align}
+      \E[f(A)g(B)|xy] &= \sum_{a,b} p(a,b|x,y) f(a)g(b) \\
+                      &= \sum_{a,b} \sqrt{p(a|x)} f(a) \frac{p(a,b|x,y)}{\sqrt{p(a|x)p(b|y)}} \sqrt{p(b|y)} g(b) \\
+                      &= \rvec{f} \matrp{\tilde{P}}{_{AB|xy}} \cvec{g},
+    \end{align}
+    where we have defined
+    \begin{equation}
+      \cvec{f} = {[\sqrt{p(a|x)} f(a)]}^T_a \qquad \cvec{g} = {[\sqrt{p(b|y)} g(b)]}^T_b.
+    \end{equation}
+    The technicalities arising from cases where \(p(a|x)\) or \(p(b|y)\) are zero, and therefore \(p(a,b|x,y) = 0\), are handled by the Moore-Penrose inverse, which maps those entries of \(\matrp{\tilde{P}}{_{AB|xy}}\) to zero.
+
+    We also represent \(\matrp{\tilde{P}}{_{AB|xy}}\) in its compact singular value decomposition as
+    \begin{equation}
+      \matrp{\tilde{P}}{_{AB|xy}} = \sum_i \lambda_i \cvec{u}_i \rvec{v}_i,
+    \end{equation}
+    where \(\{\cvec{u}_i\}\) and \(\{\cvec{v}_i\}\) are sets of orthonormal vectors in \(\R^{o_A}\) and \(\R^{o_B}\) respectively.
+
+    % ~\cite[Thm 1]{ComputingMaxCorr}
+    It is known that \(\lambda_i \in [0, 1]\), and
+    \begin{equation}
+      \lambda_1 = 1 \qquad \cvec{u}_1 = {[\sqrt{p(a|x)}]}_a^T \qquad \cvec{v}_1 = {[\sqrt{p(b|y)}]}_b^T.
+    \end{equation}
+    This gives us that
+    \begin{align}
+      \rvec{f} \cvec{u}_1 &= \sum_a p(a|x) f(a) = \E[f(A)|x] = 0 \\
+      \norm{\cvec{f}}_2 &= \sum_a p(a|x) {f(a)}^2 = \E[{f(A)}^2|x] = 1 \\
+      \rvec{v}_1 \cvec{g} &= \sum_b p(b|y) g(b) = \E[g(B)|y] = 0 \\
+      \norm{\cvec{g}}_2 &= \sum_b p(b|y) {g(b)}^2 = \E[{g(B)}^2|y] = 1.
+    \end{align}
+
+    The singular value decomposition can be characterised variationally by
+    \begin{Array}{rcl}
+      \lambda_1(\matr{M}) = & \max_{\cvec{f},\cvec{g}} & \rvec{f} \matr{M} \cvec{g} \\
+                            & \text{s.t.} & \norm{\cvec{f}}_2 = \norm{\cvec{g}}_2 = 1, \\
+    \end{Array}
+    for an arbitrary matrix \(\matr{M}\) by using Lagrange multipliers to constrain \(\cvec{f}\) and \(\cvec{g}\). This maximum is achieved by \(\cvec{f} = \cvec{u}_1\), \(\cvec{g} = \cvec{v}_1\). With the additional constraint of \(\rvec{f} \cvec{u}_1 = \rvec{v}_1 \cvec{g} = 0\), the maximum is \(\lambda_2(\matr{M})\), achieved by \(\cvec{f} = \cvec{u}_2\), \(\cvec{g} = \cvec{v}_2\). We can apply this property directly to find the maximal correlation, and the functions which achieve it, from the singular value and corresponding singular vectors for \(i = 2\).
+
+    Observe that, for \(K_A\) and \(K_B\), two perfectly correlated and uniformly distributed secret keys, we have \(\rho(K_A, K_B) = 1\), with the maximum achieved by mapping half of the keys to \(1\) and half to \(-1\) for both \(f\) and \(g\). However, if the two keys are independent, then \(\rho(K_A,K_B) = \E[f(K_A)g(K_B)] = \E[f(K_A)]\E[g(K_B)] = 0\). Likewise, if the two keys are deterministic (not secret), then \(f(K_A) = g(K_B) = 0\) and so \(\rho(K_A, K_B) = 0\). However, this poses an issue for longer keys. Even if there are only two possible values for the key, as long as they are uniformly distributed, \(\rho(K_A, K_B) = 1\), even though Alice and Bob effectively share only one bit of secrecy! Therefore, we need to find a bound that looks something like
+    \begin{equation}
+      \max_{E|AB} \frac{H(A|E) - H(A|B)}{H(A)} \leq f(\rho(A,B)).
+    \end{equation}
+
+    Some other related measures are the hypercontractivity (HC) ribbon:
+    \begin{equation}
+      \HC(A,B) = \{(\lambda_A, \lambda_B) \in {[0,1]}^2 \st \forall U, \lambda_A I(U;A) + \lambda_B I(U;B) \leq I(U;AB)\},
+    \end{equation}
+    or equivalently,
+    \begin{equation}
+      \HC(A,B) = \{(\lambda_A, \lambda_B) \in {[0,1]}^2 \st \forall f,g; \E[f(A)g(B)] \leq {\E[\abs{f(A)}^{1/\lambda_A}]}^{\lambda_A} {\E[\abs{g(B)}^{1/\lambda_B}]}^{\lambda_B} \},
+    \end{equation}
+    or, with \(\Upsilon_{AB}(\lambda_A, \lambda_B) = \lambda_A H(A) + \lambda_B H(B) - H(AB)\) and \(\tilde{\Upsilon}_{AB}\) its lower convex envelope (pointwise largest convex function that fulfills \(\tilde{\Upsilon}_{AB}(\lambda_A, \lambda_B) \leq \Upsilon_{AB}(\lambda_A, \lambda_B)\) for all \(\lambda_A, \lambda_B\)):
+    \begin{equation}
+      \HC(A,B) = \{(\lambda_A, \lambda_B) \in {[0,1]}^2 \st \Upsilon_{AB}(\lambda_A, \lambda_B) = \tilde{\Upsilon}_{AB}(\lambda_A, \lambda_B) \};
+    \end{equation}
+    and the maximal correlation (MC) ribbon:
+    \begin{equation}
+      \MC(A,B) = \{(\lambda_A, \lambda_B) \in {[0,1]}^2 \st \forall f; \Var[f(A,B)] \geq \lambda_A \Var_A[\E_{B|A}[f(A,B)]] + \lambda_B \Var_B[\E_{A|B}[f(A,B)]] \},
+    \end{equation}
+    which can be normalised by restricting to \(\E[f(A,B)] = 0\), giving
+    \begin{equation}
+      \MC(A,B) = \{(\lambda_A, \lambda_B) \in {[0,1]}^2 \st \forall f; \E[{f(A,B)}^2] \geq \lambda_A \E_A[{(\E_{B|A}[f(A,B)])}^2] + \lambda_B \E_B[{(\E_{A|B}[f(A,B)])}^2] \}.
+    \end{equation}
+    These ribbons can be defined as the union of the ribbons for the conditional distributions for the boxes, and are notable because they expand under wirings and occupy the whole of \({[0,1]}^2\) for independent variables.
+
+    The relations between them are
+    \begin{gather}
+      {\rho(A,B)}^2 = \inf_{\substack{(\lambda_A, \lambda_B) \in \MC(A,B) \\ \lambda_B \neq 0}} \frac{1 - \lambda_A}{\lambda_B} \\
+      \HC(A,B) \subseteq \MC(A,B) \\
+      s^*(A,B) \coloneqq \inf_{\substack{(\lambda_A, \lambda_B) \in \HC(A,B) \\ \lambda_B \neq 0}} \frac{1 - \lambda_A}{\lambda_B} \geq {\rho(A,B)}^2
+    \end{gather}
+
+    \section{Correlation Space for (2, 2, 3, 2)}
+
+    We have 24 positivity facets of the local polytope, and 24 liftings of CHSH\@.
 
   \end{document}
-

@@ -33,6 +33,8 @@ tags
 *.synctex.gz
 *.toc
 
+.ipynb_checkpoints
+
 .pnpm
 pnpm-lock.yaml
 node_modules
