@@ -10,6 +10,35 @@ includet("wiring.jl")
 includet("maxcorr.jl")
 
 # %%
+# Constants
+
+# Impt states
+EaxQ = [0.0, 0.0]
+EbyQ = [0.0, 0.0, 0.0]
+EabxyQ = [1/sqrt(2) 1/sqrt(2) 1
+          1/sqrt(2) -1/sqrt(2) 0]
+
+Eaxbound = [0.0, 0.0]
+Ebybound = [0.0, 0.0, 0.0]
+Eabxybound = [0.5 0.5 0.5
+              0.5 -0.5 0.5]
+
+EaxPR = [0.0, 0.0]
+EbyPR = [0.0, 0.0, 0.0]
+EabxyPR = [1.0 1.0 1.0;
+           1.0 -1.0 1.0]
+
+Eaxmix = [0.0, 0.0]
+Ebymix = [0.0, 0.0, 0.0]
+Eabxymix = [0.0 0.0 0.0
+            0.0 0.0 0.0]
+
+EaxLD = [1.0, 1.0]
+EbyLD = [1.0, 1.0, 1.0]
+EabxyLD = [1.0 1.0 1.0
+           1.0 1.0 1.0]
+
+# %%
 # Pironio rates
 
 function plot_pironio(Qval=nothing, Sval=nothing, samples=100)
@@ -26,6 +55,7 @@ end
 
 # %%
 # Asymmetric CHSH
+
 function plot_sstar(q, alpha)
   starfn = s -> h(q) - dg(q, alpha, s) * (s - 2) - g(q, alpha, s)
   starl = 2*sqrt(1+alpha^2-alpha^4)
@@ -36,54 +66,93 @@ function plot_sstar(q, alpha)
   plot(starfn, xlims=(starl, staru))
 end
 
-# %%
-# Quantum plots
+# %% 3D plot data generators
 
-function entropy_data(ncs, etas, Atlds, Btlds, ABtlds)
-  oA, oB = 2,2
-  iA = length(Atlds); iB = length(Btlds) 
-
-  ncl = length(ncs); etal = length(etas)
-  pts = Array{Tuple{Float64, Float64}}(undef, ncl, etal)
-  grads = Array{Tuple{Float64, Float64}}(undef, ncl, etal)
-
-  for nci in eachindex(ncs), etai in eachindex(etas)
-    nc = ncs[nci]; eta = etas[etai]
-    Eax, Eby, Eabxy, gradeta, gradnc = expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
-
-    # TODO generalise to other ways to bound H(A|E)
-    Q = (1 - Eabxy[1,3]) / 2 # QBER H(A|B)
-    S = Eabxy[1,1] + Eabxy[1,2] + Eabxy[2,1] - Eabxy[2,2]
-    if abs(S) < 2
-      S = sign(S) * 2
+function maxcorrval_from_corrs(Eax, Eby, Eabxy)
+    pax, pby, pabxy = probs_from_corrs(Eax, Eby, Eabxy)
+    maxcorrvals = maxcorrs(pax, pby, pabxy)
+    xsel, ysel = xysel
+    if modesel == :maxdiff
+      maxcorrval = max(maxcorrvals...) - min(maxcorrvals...)
+    elseif modesel == :avg
+      maxcorrval = sum(maxcorrvals) / length(maxcorrvals)
+    elseif modesel == :corr && xsel != 0 && ysel != 0
+      maxcorrval = Eabxy[xsel, ysel]
+    else
+      if xsel == 0 && ysel == 0
+        maxcorrval = max(maxcorrvals...)
+      elseif xsel == 0
+        maxcorrval = max(maxcorrvals[:, ysel]...)
+      elseif ysel == 0
+        maxcorrval = max(maxcorrvals[xsel, :]...)
+      else
+        maxcorrval = maxcorrvals[xsel, ysel]
+      end
     end
-    pts[nci, etai] = (Q, gchsh(S))
+end
 
-    Qgradnc = - gradnc[1,3]
-    if !isfinite(Qgradnc)
-      Qgradnc = 0
-    end
-    Sgradnc = gradnc[1,1] + gradnc[1,2] + gradnc[2,1] - gradnc[2,2]
-    if !isfinite(Sgradnc)
-      Sgradnc = 0
-    end
-    HgradS = S/(4*sqrt(S^2-4)) * log2( (2+sqrt(S^2-4)) / (2-sqrt(S^2-4)) )
-    if !isfinite(HgradS)
-      HgradS = 0
-    end
-    Hgradnc = Sgradnc * HgradS
-    grads[nci, etai] = (Qgradnc, Hgradnc)
+function maxcorr_data(is, js, HAB::Function, HAE::Function, corrf::Function;
+    xysel=(0,0), modesel=:reg, type::Type{T} = Float64) where {T <: Real}
+  il = length(is); jl = length(js)
+  pts = Array{Tuple{T, T}}(undef, il, jl)
+  rhos = Array{T}(undef, il, jl)
+
+  for ii in eachindex(is), ji in eachindex(js)
+    i = is[ii]; j = js[ji]
+    Eax, Eby, Eabxy = corrf(i, j)
+    pts[ii, ji] = (HAB(Eax, Eby, Eabxy), HAE(Eax, Eby, Eabxy))
+    rhos[ii, ji] = maxcorrval_from_corrs(Eax, Eby, Eabxy)
+  end
+
+  return pts, rhos
+end
+
+function grad_data(is, js, HAB::Function, HAE::Function, corrf::Function, gradf::Function;
+    type::Type{T} = Float64) where {T <: Real}
+  il = length(is); jl = length(js)
+  pts = Array{Tuple{T, T}}(undef, il, jl)
+  grads = Array{Tuple{T, T}}(undef, il, jl)
+
+  for ii in eachindex(is), ji in eachindex(js)
+    i = is[ii]; j = js[ji]
+    Eax, Eby, Eabxy = corrf(i, j)
+    pts[ii, ji] = (HAB(Eax, Eby, Eabxy), HAE(Eax, Eby, Eabxy))
+    grads[ii, ji] = gradf(Eax, Eby, Eabxy)
   end
 
   return pts, grads
 end
+
+# %%
+# NS polytope slice
+
+function nspoly_plot(QLDsamples = 20, boundsamples = 20)
+  # TODO
+  ps = range(0,1,length=boundsamples) |> collect
+  qs = range(0,1,length=QLDsamples) |> collect
+
+  oA, oB = 2, 2
+  iA = length(Atlds); iB = length(Btlds) 
+
+  for pidx in eachindex(ps), qidx in eachindex(qs)
+    p = ps[pidx]; q = qs[qidx]
+    Eax, Eby, Eabxy = ((p .* ((q .* EaxQ) .+ ((1-q) .* EaxLD))) .+ ((1-p) .* Eaxbound),
+                      (p .* ((q .* EbyQ) .+ ((1-q) .* EbyLD))) .+ ((1-p) .* Ebybound),
+                      (p .* ((q .* EabxyQ) .+ ((1-q) .* EabxyLD))) .+ ((1-p) .* Eabxybound),)
+  end
+end
+
+# %%
+# Quantum plots
 
 function entropy_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=20, etasamples=5, etastart=0.8, kwargs...)
   ncs = range(0, stop=1, length=ncsamples)
   etas = range(etastart, stop=1, length=etasamples)
 
   Atlds, Btlds, ABtlds = meas_corrs(theta=theta, mus=mus, nus=nus)
-  qSreg, qSreggrad = entropy_data(ncs, etas, Atlds, Btlds, ABtlds)
+  corrf = (nc, eta) -> expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
+  ncgradf = (Eax, Eby, Eabxy) -> expt_chsh_ncgrads(expt_grads(Eax, Eby, Eabxy)...)
+  qSreg, qSreggrad = grad_data(ncs, etas, HAB_oneway, HAE_CHSH, corrf, gradf)
 
   Hmaxs = map(max, qSreg...)
   Hmins = map(min, qSreg...)
@@ -91,7 +160,7 @@ function entropy_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, 
   Hlims = [(Hmins[i] - Hranges[i]*0.1, Hmaxs[i] + Hranges[i]*0.1) for i in 1:2]
 
   etas_const_nc = range(etastart, stop=1, length=50)
-  const_nc, const_nc_grad = entropy_data([0.0], etas_const_nc, Atlds, Btlds, ABtlds)
+  const_nc, const_nc_grad = grad_data([0.0], etas_const_nc, HAB_oneway, HAE_CHSH, corrf, gradf)
 
   # plot qSs/qQs on plot of H(A|E) against H(A|B)
   plt = plot(range(0,stop=1,length=100), range(0,stop=1,length=100), xlabel="H(A|B)",ylabel="H(A|E)", label="Devetak-Winter bound", xlims=Hlims[1], ylims=Hlims[2])
@@ -113,49 +182,6 @@ function entropy_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, 
   return plt
 end
 
-function maxcorr_data(ncs, etas, Atlds, Btlds, ABtlds; xysel=(0,0), modesel=:reg)
-  oA, oB = 2,2
-  iA = length(Atlds); iB = length(Btlds) 
-
-  ncl = length(ncs); etal = length(etas)
-  pts = Array{Tuple{Float64, Float64, Float64}}(undef, ncl, etal)
-
-  for nci in eachindex(ncs), etai in eachindex(etas)
-    nc = ncs[nci]; eta = etas[etai]
-    Eax, Eby, Eabxy, gradeta, gradnc = expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
-
-    # TODO generalise to other ways to bound H(A|E)
-    Q = (1 - Eabxy[1,3]) / 2 # QBER H(A|B)
-    S = Eabxy[1,1] + Eabxy[1,2] + Eabxy[2,1] - Eabxy[2,2]
-    if abs(S) < 2
-      S = sign(S) * 2
-    end
-    pax, pby, pabxy = probs_from_corrs(Eax, Eby, Eabxy)
-    maxcorrvals = maxcorrs(pax, pby, pabxy)
-    xsel, ysel = xysel
-    if modesel == :maxdiff
-      maxcorrval = max(maxcorrvals...) - min(maxcorrvals...)
-    elseif modesel == :avg
-      maxcorrval = sum(maxcorrvals) / length(maxcorrvals)
-    elseif modesel == :corr && xsel != 0 && ysel != 0
-      maxcorrval = Eabxy[xsel, ysel]
-    else
-      if xsel == 0 && ysel == 0
-        maxcorrval = max(maxcorrvals...)
-      elseif xsel == 0
-        maxcorrval = max(maxcorrvals[:, ysel]...)
-      elseif ysel == 0
-        maxcorrval = max(maxcorrvals[xsel, :]...)
-      else
-        maxcorrval = maxcorrvals[xsel, ysel]
-      end
-    end
-    pts[nci, etai] = (Q, gchsh(S), maxcorrval)
-  end
-
-  return pts
-end
-
 function maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Array{T}=[2.8*pi, 1.23*pi, pi], ncsamples=20, etasamples=100, etastart::T=0.65, kwargs...) where T <: Real
   kwargs = Dict(kwargs)
   ncs = range(0, stop=1, length=ncsamples)
@@ -166,13 +192,9 @@ function maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Arra
   ncontours = get(kwargs, :ncontours, 10)
 
   Atlds, Btlds, ABtlds = meas_corrs(theta=theta, mus=mus, nus=nus)
-  pts = maxcorr_data(ncs, etas, Atlds, Btlds, ABtlds; xysel=xysel, modesel=modesel)
+  corrf = (nc, eta) -> expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
+  Hs, rhos = maxcorr_data(ncs, etas, HAB_oneway, HAE_CHSH, corrf; xysel=xysel, modesel=modesel)
 
-  Hs = Vector{Tuple{T, T}}(undef, length(pts))
-  rhos = Vector{T}(undef, length(pts))
-  for i in eachindex(pts)
-    Hs[i] = pts[i][1:2]
-    rhos[i] = pts[i][3] end
   Hmaxs = map(max, Hs...)
   Hmins = map(min, Hs...)
   Hranges = [Hmaxs[i] - Hmins[i] for i in 1:2]
@@ -187,13 +209,6 @@ function maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Arra
   plt = plot([(0, 0, 0), (1, 1, rhomax), (-0.01, 0, rhomax), (1.01, 1, 0)], st=:mesh3d, colorbar_entry=false, seriescolor=greyscheme, alpha=0.5, label="Devetak-Winter bound", xlabel=L"H(A|B)",ylabel=L"H(A|E)",zlabel=L"\max_{x,y} \rho(A,B|x,y)", xlims=Hlims[1], ylims=Hlims[2])
 
   # find S region
-  #=
-  for etai in 1:etasamples
-  plot!(plt, vec(pts[:, etai]), label=@sprintf "eta = %.3f" etas[etai])
-  end
-  plot!(plt, vec(const_nc), label="nc = 0")
-  =#
-
   xs, ys, zs = [Array{T}(undef, ncsamples, etasamples) for i in 1:3]
   for nci in 1:ncsamples, etai in 1:etasamples
     xs[nci, etai], ys[nci, etai], zs[nci, etai] = pts[nci, etai]
@@ -220,7 +235,7 @@ function maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Arra
     for line in lines(cl)
       _xs, _ys = coordinates(line) # coordinates of this line segment
       _zs = 0 .* _xs
-      plot!(plt, _xs, _ys, _zs, linecolor=:black, primary=false, label="$contourlabel = $lvl")        # add curve on x-y plane
+      plot!(plt, _xs, _ys, _zs, linecolor=:black, primary=false, label="$contourlabel = $lvl") # add curve on x-y plane
     end
   end
 

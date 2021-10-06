@@ -271,22 +271,55 @@
 
   \maketitle
 
-  Alice and Bob have an uncharacterised source, they randomly choose settings \(x\) and \(y\) to measure, obtaining outputs \(a\) and \(b\) respectively. They estimate \(p(a,b|x,y)\) and quantities like QBER \(p(a \neq b|\text{settings})\), Bell inequality violation e.g.\ CHSH value
-  \[ S = \sum_{x=0}^1 \sum_{y=0}^1 {(-1)}^{xy} \langle A_x B_y \rangle, \langle A_x B_y \rangle \coloneqq p(a=b|x,y) - p(a\neq b|x,y) \]
+  \section{Introduction}
 
-  Pironio et al. in NJP:
-  \[ r \geq 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{(S/2)^2-1}}{2} \right) \]
+  Device-independent quantum key distribution (DIQKD) is a remarkable form of quantum key distribution (QKD) that relies on fundamental properties of causality in order to certify the security of a generated secret key, removing the need to characterise the physical devices involved in generating them. These devices are then seen as black boxes with classical inputs and outputs, whose statistical correlations can certify the non-classical nature of their internal processes, and therefore the privacy of the generated data. This certification is done using \emph{Bell tests}, which detects the non-classical phenomenon of \emph{nonlocality}. Formally, in each round, the two players Alice and Bob can provide inputs \(x\) and \(y\), respectively, to their devices, and obtain outputs \(a\) and \(b\), respectively. The joint conditional distribution that is observed over asymptotically many rounds is called the \emph{behaviour} \(p(ab|xy)\). The behaviour alone (with a few weak assumptions) is sufficient for Alice and Bob to generate secret keys.
+
+  Despite this extraordinary guarantee of security, progress in understanding and implementing DIQKD has been slow. For example, given a particular behaviour, we do not have a tight expression for the amount of secrecy that can be extracted per use of the devices. This project aims to explore this aspect of DIQKD from two directions. Firstly, we aim to find an upper bound for the DIQKD key rate from a given behaviour, where each round undergoes independent classical post-processing. Secondly, we wish to see if classical post-processing that \emph{combines} multiple rounds to produce a new behaviour can lead to improvements over these upper bounds. This post-processing is referred to as \emph{wiring}, and can be seen as the act of connecting the inputs and outputs of multiple devices together, with arbitrary logic gates between them.
+
+  Our ideal outcome from this project is to find an efficient algorithm that, given a behaviour, can specify the wiring that produces the behaviour with the largest possible keyrate. A trivial, inefficient algorithm would be to simply compute all possible wirings by brute force, although this will necessarily restrict our search to a limited subset of the possible wirings, since we can wire together arbitrarily many boxes. If no such algorithm exists, we would want to understand why. Is it that wiring multiple boxes together cannot give an advantage over post-processing a single box? Is the structure of achievable boxes simply too complex to navigate efficiently?
+
+  While this task is daunting, we hope that, even if we fall far short of this ideal outcome, this project can contribute to a better understanding of the mysterious phenomenon of nonlocality, and to the work of harnessing it for human benefit.
+
+  \section{Preliminaries}
+
+  In order to be compatible with the theory of relativity, the behaviour of a device must fulfil the \emph{no-signalling condition}, which states that the marginal probabilities for each player's output cannot depend on the other player's input:
+  \begin{gather}
+    \sum_b p(ab|xy) = p(a|xy) = p(a|x)\;\forall a,x,y \\
+    \sum_a p(ab|xy) = p(b|xy) = p(b|y)\;\forall b,x,y.
+  \end{gather}
+
+  Many important statistics can be expressed in terms of the \emph{correlators} \(\angleb{A_x B_y}\) and the \emph{marginals} \(\angleb{A_x}\) and \(\angleb{B_y}\):
+  \begin{gather}
+    \angleb{A_x B_y} \coloneqq p(a=b|xy) - p(a\neq b|xy) \\
+    \angleb{A_x} \coloneqq \sum_a \lambda_a p(a|x) \qquad \angleb{B_y} \coloneqq \sum_b \lambda_b p(b|y),
+  \end{gather}
+  where \(\lambda_a\) and \(\lambda_b\) are values that are associated to those outputs when defining the setting.
+
+  In the simplest nontrivial setting, where \(a,b,x,y \in \{0,1\}\), we have the quantum bit error rate (QBER) \(Q_{xy}\) and the Clauser-Horne-Shimony-Holt (CHSH) value \(S\):
+  \begin{gather}
+    Q_{xy} \coloneqq p(a \neq b|xy) = \frac{1-\angleb{A_x B_y}}{2} \\
+    S \coloneqq \angleb{A_0 B_0} + \angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1}.
+  \end{gather}
+  Behaviours with \(S > 2\) are necessarily non-classical, while the behaviours allowed by quantum physics are constrained to have \(S \leq 2\sqrt{2}\).
+
+  Perhaps the best-known DIQKD protocol is given in~\cite{DIQKD_Lower}, which also gives a formula to explicitly calculate the keyrate \(r\) in terms of \(Q\) and \(S\). This protocol introduces an additional possible setting \(y = 2\), and uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key. Therefore, we have \(Q = Q_{02}\) and
+  \begin{equation}
+    r \geq 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right).
+  \end{equation}
+  Being the rate for an explicit, achievable protocol, this rate is a lower bound for the total secrecy extractable. It is tight amongst bounds that depend only on \(Q\) and \(S\).
+
   \[ \diffp{{h_2(x)}}{x} = \frac{1}{\ln 2} \log \left(\frac{1-x}{x}\right) \]
   \begin{align*}
     \ln (2) \diffp{r}{S} &= - \left( \diffp{}{S} \frac{1 + \sqrt{(S/2)^2-1}}{2} \right) \log \left( \frac{1 - \sqrt{(S/2)^2-1}}{2} / \frac{1 + \sqrt{(S/2)^2-1}}{2} \right) \\
                  &= - \left( \frac{1}{4} \left( (S/2)^2-1 \right)^{-1/2} \diffp{}{S} \left[ (S/2)^2-1 \right] \right) \log \left( \frac{1 - \sqrt{(S/2)^2-1}}{1 + \sqrt{(S/2)^2-1}} \right) \\
-                 &= \underbrace{\left( \frac{S}{ 8\sqrt{(S/2)^2-1} } \right)}_{\geq 0} \log \underbrace{ \left( \frac{1 + \sqrt{(S/2)^2-1}}{1 - \sqrt{(S/2)^2-1}} \right) }_{\geq 1} \because \sqrt{(S/2)^2-1} \geq 0 \\
+                 &= \underbrace{\left( \frac{S}{ 8\sqrt{(S/2)^2-1} } \right)}_{\geq 0} \log \underbrace{ \left( \frac{1 + \sqrt{(S/2)^2-1}}{1 - \sqrt{(S/2)^2-1}} \right) }_{\geq 1} \because \sqrt{{(S/2)}^2-1} \geq 0 \\
                  &\geq 0
   \end{align*}
 
-  Noisy preprocessing: add noise to \(A\), improve key rate
+  Projective measurement with some inefficiency, or convex combination of this measurement with deterministic output and uncorrelated output.
 
-  Local wiring: function of two copies of devices with \(r(Q, S) = 0\) can achieve \(r \geq 0\). Either NJP is not tight, or we are doing magic. If we can show that the upper bound is 0, then we are doing magic.
+  \subsection{Upper Bounds}
 
   Most upper bounds are useless, because they are faithful: 0 if separable, \(\geq 0\) for all entangled.
 
@@ -294,56 +327,79 @@
 
   Intrinsic information \(I(A:B \downarrow E)\) is upper bound on secrecy.
 
-  \[ \ket{\psi} = \cos \theta \ket{00} + \sin \theta \ket{11} \]
+  \subsection{AND Gates}
 
-  Projective measurement with some inefficiency, or convex combination of this measurement with deterministic output and uncorrelated output.
+    Consider the following simple wiring, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs.
 
-  For box with two small boxes inside:
-  \[ \langle A_x B_y \rangle' = 1 - \frac{1}{4} \left[ (1 - C_{xy}) (3 - 2m_a - 2 m_b + C_{xy} ) \right] \]
-      \[ m_a = \langle A_x \rangle, m_b = \langle B_y \rangle C_{xy} = \langle A_x B_y \rangle \]
-      \[ {\rm QBER} = \frac{1 - \langle A_x B_y \rangle'}{2} \]
-
-      For \(N\) boxes,
-    \[ \langle A_x B_y \rangle_{N}' = 1 - \frac{{(1-m_b)}^N + {(1-m_a)}^N}{2^{N-1}} + \frac{1}{4^{N-1}} {(1-m_a-m_b+C_{xy})}^{N}. \]
+    For \(N\) boxes,
+    \begin{gather}
+      \angleb{A_x B_y}_{N} = 1 - \frac{{(1-\angleb{B_y})}^N + {(1-\angleb{A_x})}^N}{2^{N-1}} + \frac{1}{4^{N-1}} {(1-\angleb{A_x} - \angleb{B_y} + \angleb{A_x B_y})}^{N} \\
+      \angleb{A_x}_{N} = 1 - 2 {\left(\frac{1-\angleb{A_x}}{2}\right)}^N \qquad \angleb{B_y}_{N} = 1 - 2 {\left(\frac{1-\angleb{B_y}}{2}\right)}^N.
+    \end{gather}
 
     \section{Local Wirings}
 
-    With \(N\) boxes in total, Bob couples \(n\) boxes with inputs \(\cvec{y}\) and outputs \(\cvec{b}\), and \(\breve{n}\) boxes with \(\breve{\cvec{y}}\) and outputs \(\breve{\cvec{b}}\), while Alice has the remaining \(m = N - n\) boxes with inputs \(\cvec{x}\) and outputs \(\cvec{a}\).
+    \subsection{Classifying Wirings}
 
-    In general, \(b'\) is dependent on \(\cvec{x}\), \(\cvec{a}\), \(\breve{\cvec{y}}\) and \(\breve{\cvec{b}}\) since Alice and Bob can always perform those measurements first. However, conditional probability \(P(\cvec{a}\breve{\cvec{b}}|\cvec{x}\breve{\cvec{y}})\) governing these four variables is independent of \(b'\), \(\cvec{b}\) and \(\cvec{y}\).
+    The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short et al.~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. This work attempts to generalise joint measurements to the no-signalling setting and finds a polytope of possible operations which happens to have local wirings at its extremal points. For the case of two binary-input, binary-output boxes, there are 82 extremal points, grouped into 5 possible types of wirings: deterministic output, where the input is precisely the output; one-sided, where only one box is used; sequential, where the output of the first box is used as input for the second box, and AND and XOR gated, where the respective gates are used to combine the output of the two boxes.
 
-    \[ P'(\cvec{a}\breve{\cvec{b}}b'|\cvec{x}\breve{\cvec{y}}) = P(\cvec{a}\breve{\cvec{b}}|\cvec{x}\breve{\cvec{y}}) P'_{(\cvec{a}\breve{\cvec{b}}\cvec{x}\breve{\cvec{y}})}(b')  \]
+    However, this does not mean that this polytope exhausts the possible space of local wirings. This section will be devoted to presenting an alternative framework for enumerating the possible wirings, in order to enable an exhaustive search.
 
-    No signalling from Alice to Bob
-    \begin{align}
-      \sum_{\cvec{a}} P(\cvec{a}\breve{\cvec{b}}|\cvec{x}\breve{\cvec{y}}) P'_{(\cvec{a}\breve{\cvec{b}}\cvec{x}\breve{\cvec{y}})}(b') = P'(b'|\breve{\cvec{b}}\breve{\cvec{y}}) P(\breve{\cvec{b}}|\breve{\cvec{y}})
-    \end{align}
-
-    No signalling from Bob to Alice
-    \begin{align}
-      \sum_{\cvec{\breve{b}}, b'} P(\cvec{a}\breve{\cvec{b}}|\cvec{x}\breve{\cvec{y}}) P'_{(\cvec{a}\breve{\cvec{b}}\cvec{x}\breve{\cvec{y}})}(b') &= \sum_{\cvec{\breve{b}}} P(\cvec{a}\breve{\cvec{b}}|\cvec{x}\breve{\cvec{y}}) \\
-                                                                                                                                                     &= P(\cvec{a}|\cvec{x})
-    \end{align}
-
-    Convex combinations do not help for CHSH\@. We assume all boxes are distributed iid; if we only care about \(Q\) and expectation values (marginals and correlators) averaged over the whole protocol we can simply take this to be equal to the empirical distribution, although we might need to be a bit more careful if we consider other quantities.
-
-    The wiring paper may not capture the full range of dynamics. Let each player have \(c\) boxes, and let subscripts denote the order in which the boxes are used. The most general wiring for Alice would be a sequence of \(c\) functions with range \(\{1..i_A\}\)
+    Let each player have \(c\) boxes, and let subscripts denote the order in which the boxes are used. Then, Alice's wiring can be represented by a sequence of \(c\) functions with range \(\{1..i_A\}\)
     \begin{equation} x_1 = x \end{equation}
     \begin{equation} x_j = C_j^A(x_1, \ldots, x_{j-1}, a_1, \ldots, a_{j-1}),\,j \in \{2..c\} \end{equation}
     and a final output function with range \(\{1..o_A\}\)
     \begin{equation} a = C^A(x_1, \ldots, x_{c}, a_1, \ldots, a_{c}). \end{equation}
+    Alice and Bob interact with their boxes in increasing order of the index \(j\). The condition that the input to box \(j\) can only depend on the inputs and outputs of boxes with index \(< j\) is equivalent to enforcing that Alice and Bob do not have quantum memories: both players must provide an input to a given box before it can produce an output.
+    \begin{table}
+      \begin{minipage}{0.5\linewidth}
+        \begin{center}
+          \begin{tabular}{|r|cc|} \hline
+            \diagbox{\(x_1\)}{\(a_1\)} & 0 & 1 \\ \hline
+            0 & 1 & 0 \\
+            1 & 1 & 1 \\ \hline
+          \end{tabular}
+        \end{center}
+      \end{minipage}
+      \begin{minipage}{0.5\linewidth}
+        \begin{center}
+          \begin{tabular}{|r|cccc|} \hline
+            \diagbox{\(x_1 x_2\)}{\(a_1 a_2\)} & 00 & 01 & 10 & 11 \\ \hline
+            00 & X & X & 0 & 1 \\
+            01 & 0 & 0 & X & X \\
+            11 & 1 & 0 & 0 & 0 \\
+            10 & X & X & X & X \\ \hline
+          \end{tabular}
+        \end{center}
+      \end{minipage}
+      \caption{Left: Lookup table for \(C^A_2\), giving \(x_2\). Right: Lookup table for \(C^A\), giving overall output \(a\). Entries forbidden by \(C^A_2\) are marked with X (don't care). Both are written as Karnaugh maps.}\label{tab:wiring_lut}
+    \end{table}
 
-    Simple combinatorics gives us \(i_A^{j-1} o_A^{j-1}\) possible inputs for \(C_j^A\), so the number of possible \(C_j^A\) is \(\exp_{i_A}(i_A^{j-1} o_A^{j-1})\), and the number of possible \(C^A\) is \(\exp_{o_A}(i_A^{c} o_A^{c})\). The total number of wirings is then
+    A wiring corresponding to the lookup tables in~\Cref{tab:wiring_lut} would have
     \begin{equation}
-      \exp_{o^A}(i_A^c o_A^c) \prod_{j=2}^c \exp_{i_A}(i_A^{j-1} o_A^{j-1}).
+      x_2 = \bar{a}_1x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2,
     \end{equation}
-    The same applies to Bob with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). 
+    where juxtaposition is the Boolean AND, addition is the Boolean OR, and the overbar is the Boolean NOT.\ This cannot be expressed as one of the wirings from~\cite{ShortEntangleSwap}.
 
-    Let us fix the key generating settings \(A_1\) and \(B_3\) to be AND-wired, so that all functions with \(x_1 = 1\) or \(y_1 = 3\) are fixed to the AND wiring. This gives us
+    \subsection{Number of Distinct Wirings}
+
+    Simple combinatorics gives us \(i_A^{j-1} o_A^{j-1}\) possible inputs for \(C_j^A\). However, since \(x_j\) is completely fixed by \({(x_k)}_{k=1}^{j-1}\) and \({(a_k)}_{k=1}^{j-1}\), there are only \(i_A o_A^{j-1}\) valid inputs, with the rest corresponding to don't-cares. Therefore, the number of possible \(C_j^A\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(C^A\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
     \begin{equation}
-      \exp_{o^A}((i_A-1)i_A^{c-1} o_A^c) \prod_{j=2}^c \exp_{i_A}((i_A-1)i_A^{j-2} o_A^{j-1})
+      \exp_{o_A}(i_A o_A^c) \prod_{j=2}^c \exp_{i_A}(i_A o_A^{j-1}),
     \end{equation}
-    wirings for Alice, with the analogous relabelling for Bob.
+    where we count from \(j = 2\) because for \(j = 1\), there is only one possibility. The same applies to Bob with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). 
+
+    We may wish to fix some input settings to use a given wiring. For example, it is clear that the AND gating can only increase the value of the correlator. Therefore, we can fix the key generating settings \(A_1\) and \(B_3\) to be AND-wired, so that all functions with \(x_1 = 1\) or \(y_1 = 3\) are fixed to the AND wiring. If we fix the wirings for \(f\) input settings, then we are free to choose the outputs for only \(i_A - f\) possible values of \(x_1\), so the number of possible wirings becomes
+    \begin{equation}
+      \exp_{o_A}((i_A-f) o_A^c) \prod_{j=2}^c \exp_{i_A}((i_A-f) o_A^{j-1})
+    \end{equation}
+    for Alice, with the analogous relabelling for Bob.
+
+    \subsection{Evaluation}
+
+    Unfortunately, with just two boxes, there are 4096 wirings for Alice, and \(\approx \num{2.48e10}\) for Bob. Fixing the AND gating as discussed above gives us 1024 wirings for Alice and \(\approx \num{3.10e9}\) for Bob. Since the choice of wirings for Alice and Bob are independent, we must multiply the figures for Alice and Bob together, which would make this analysis very inefficient.
+
+    This enumeration of the possible wirings is naive, and does not attempt to use symmetry arguments to remove degeneracy. This is one possible direction for us to investigate, in order to develop a tool to efficiently find the optimal wiring for a given behaviour. However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a figure of merit (either an upper bound or lower bound), it is possible to exhaustively search for the wiring for each particular behaviour that produces the largest increase in the figure of merit. However, since there is no convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Attempting to develop such a classification scheme for wirings in order to enable this analysis is another possible direction for this project, which would subsume the symmetry analysis discussed above.
 
     \section{Quantum Model}
 
@@ -380,7 +436,7 @@
       R_1 = \sqrt{{(1-2q)}^2 + 4q(1-q)(s^2/4-\alpha^2)} \qquad R_2 = \sqrt{s^2/4-\alpha^2}
     \end{equation}
     and where \(s^*\) is the solution to
-    \begin{equation}
+    \begin{equation}\label{eqn:sstar}
       h(q) + g'(s^*) (s^*-2) = g(s^*).
     \end{equation}
 
@@ -443,8 +499,7 @@
     \end{equation}
     where \(\{\cvec{u}_i\}\) and \(\{\cvec{v}_i\}\) are sets of orthonormal vectors in \(\R^{o_A}\) and \(\R^{o_B}\) respectively.
 
-    % ~\cite[Thm 1]{ComputingMaxCorr}
-    It is known that \(\lambda_i \in [0, 1]\), and
+    It is known that~\cite[Thm 1]{ComputingMaxCorr} \(\lambda_i \in [0, 1]\), and
     \begin{equation}
       \lambda_1 = 1 \qquad \cvec{u}_1 = {[\sqrt{p(a|x)}]}_a^T \qquad \cvec{v}_1 = {[\sqrt{p(b|y)}]}_b^T.
     \end{equation}

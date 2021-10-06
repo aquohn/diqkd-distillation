@@ -25,16 +25,15 @@ includet("helpers.jl")
 # %%
 # Wirings
 
-num_wirings(c, o, i) = o^(i^c * o^c) * prod([i^(i^(j-1) * o^(j-1)) for j in 2:c])
-num_wirings_fix(c, o, i, f) = o^((i-f)*i^(c-1) * o^c) * prod([i^((i-f)*i^(j-2) * o^(j-1)) for j in 2:c])
+num_wirings(c, o, i) = o^(i * o^c) * prod([i^(i * o^(j-1)) for j in 2:c])
+num_wirings_fix(c, o, i, f) = o^((i-f)*i * o^c) * prod([i^((i-f) * o^(j-1)) for j in 2:c])
 function wiring_prob(CA, CAj, CB, CBj, pax, pby, pabxy)
   oA, oB, iA, iB = size(pabxy)
   ppax, ppby, ppabxy = (zeros(size(p)) for p in [pax, pby, pabxy]) |> collect
   c = Integer((CA |> size |> length) / 2)
 
   # iterate over every possible combination
-  for params in Iterators.product(vcat([[1:n for i in 1:c] for n in [oA, oB, iA, iB]]...)...)
-    @sliceup params as c bs c xs c ys c
+  for params in Iterators.product(vcat([[1:n for i in 1:c] for n in [oA, oB, iA, iB]]...)...) @sliceup params as c bs c xs c ys c
     pABXY = 1
     for j in 2:c
       if CAj[j][as[1:j-1]..., xs[1:j-1]...] != xs[j] || CBj[j][bs[1:j-1]..., ys[1:j-1]...] != ys[j]
@@ -115,8 +114,20 @@ function probs_from_corrs(Eax, Eby, Eabxy)
   return pax, pby, pabxy
 end
 
-function corrs_from_probs(pabxy, pax, pby)
+function margps_from_jointp(pax, pby, pabxy)
   oA, oB, iA, iB = size(pabxy)
+  if isnothing(pax)
+    pax = [sum(pabxy[a,:,x,1]) for a in 1:oA, x in 1:iA]
+  end
+  if isnothing(pby)
+    pby = [sum(pabxy[:,b,1,y]) for b in 1:oB, y in 1:iB]
+  end
+  return pax, pby, pabxy
+end
+
+function corrs_from_probs(pax, pby, pabxy)
+  oA, oB, iA, iB = size(pabxy)
+  pax, pby, pabxy = margps_from_jointp(pax, pby, pabxy)
   Eax = [pax[2,x] - pax[1,x] for x in 1:iA]
   Eby = [pby[2,y] - pby[1,y] for y in 1:iB]
   Eabxy = [sum([pabxy[a,b,x,y] * ((a == b) ? 1 : -1) for a in 1:oA, b in 1:iA]) for x in 1:iA, y in 1:iB]
@@ -143,15 +154,47 @@ function expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
   Eax = Float64[-nc-(1-nc)*((1-eta)-eta*Atlds[x]) for x in 1:iA]
   Eby = Float64[-nc-(1-nc)*((1-eta)-eta*Btlds[y]) for y in 1:iB]
   Eabxy = Float64[nc + (1-nc)*(eta^2 * ABtlds[x,y] - eta*(1-eta)*(Atlds[x] + Btlds[y]) + (1-eta)^2) for x in 1:iA, y in 1:iB]
+  return Eax, Eby, Eabxy
+end
 
-  gradeta = Float64[ (1-nc)*((1-2*eta)*(Atlds[x] + Btlds[y]) - 2*eta*ABtlds[x,y] + 2 - 2*eta) for x in 1:iA, y in 1:iB ] 
-  gradnc = Float64[ eta*((1-eta)*(Atlds[x] + Btlds[y]) - eta*ABtlds[x,y] + 2 - eta) for x in 1:iA, y in 1:iB ]
+function expt_grads(nc, eta, Atlds, Btlds, ABtlds)
+  etagrad = Float64[ (1-nc)*((1-2*eta)*(Atlds[x] + Btlds[y]) - 2*eta*ABtlds[x,y] + 2 - 2*eta) for x in 1:iA, y in 1:iB ] 
+  ncgrad = Float64[ eta*((1-eta)*(Atlds[x] + Btlds[y]) - eta*ABtlds[x,y] + 2 - eta) for x in 1:iA, y in 1:iB ]
+  return etagrad, ncgrad
+end
 
-  return Eax, Eby, Eabxy, gradeta, gradnc
+function expt_chsh_ncgrads(etagrad, ncgrad)
+  Qncgrad = - ncgrad[1,3]
+  if !isfinite(Qncgrad)
+    Qncgrad = 0
+  end
+  Sncgrad = ncgrad[1,1] + ncgrad[1,2] + ncgrad[2,1] - ncgrad[2,2]
+  if !isfinite(Sncgrad)
+    Sncgrad = 0
+  end
+  HgradS = S/(4*sqrt(S^2-4)) * log2( (2+sqrt(S^2-4)) / (2-sqrt(S^2-4)) )
+  if !isfinite(HgradS)
+    HgradS = 0
+  end
+  Hncgrad = Sncgrad * HgradS
+  return Qncgrad, Hncgrad
+end
+
+
+function and_corrs(N, Eax, Eby, Eabxy)
+  iA, iB = length(Eax), length(Eby)
+
+  EaxN = [1 - 2*((1-Eax[x])/2)^N for x in 1:iA]
+  EbyN = [1 - 2*((1-Eby[y])/2)^N for y in 1:iB]
+  EabxyN = [1 - ((1-Eax[x])^N + (1-Eby[y])^N)/(2^(N-1)) + 4^(1-N) * (1-Eax[x]-Eby[y]+Eabxy[x,y])^N for x in 1:iA, y in 1:iB]
+
+  return EaxN, EbyN, EabxyN
 end
 
 # %%
 # Wiring exhaustive search
+
+# TODO incorporate don't cares
 
 function wiring_iters(iA, oA, iB, oB, c)
   # I love this language lmao
@@ -219,7 +262,7 @@ function diqkd_wiring_eval(Eabxy, Eax, Eby, HAE, HAB)
 
     pax, pby, pabxy = probs_from_corrs(Eax, Eby, Eabxy)
     ppax, ppby, ppabxy = wiring_prob(CA, CB, CAj, CBj, pax, pby, pabxy)
-    Epax, Epby, Epabxy = corrs_from_probs(ppabxy, ppax, ppby)
+    Epax, Epby, Epabxy = corrs_from_probs(ppax, ppby, ppabxy)
 
     HAEvalp = HAE(Epax, Epby, Epabxy)
     HABvalp = HAB(Epax, Epby, Epabxy)

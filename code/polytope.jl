@@ -221,15 +221,18 @@ function qkd_iso(::Type{T} = Float64) where T <: Real
 
   qkd_ldpoly = ld_polytope(qkdset..., T)
   qkd_ldconstr = constraints(qkd_ldpoly)
+  bestconstr = nothing; boundconstr = nothing
   for constr in qkd_ldconstr
     boundval = dot(constr.a, cg_boundary_qkd)
     if boundval > constr.b
       print_cg_constr(constr.a, constr.b, qkdset...)
+      boundconstr = constr
       println("Boundary value achieves $boundval)")
     end
     bestval = dot(constr.a, cg_best_qkd)
     if bestval > constr.b
       print_cg_constr(constr.a, constr.b, qkdset...)
+      bestconstr = constr
       println("Best value achieves $bestval)")
     end
   end
@@ -239,6 +242,11 @@ function qkd_iso(::Type{T} = Float64) where T <: Real
     Q, S, rhos = cg_QSrho(v, qkdset...)
     print(@sprintf "Q = %.3f, S = %.3f, " Q S)
     println(@sprintf "rho = %.3f" maximum(rhos))
+  end
+
+  for v in vertices_list(qkd_ldpoly)
+    val = dot(bestconstr.a, v) - bestconstr.b
+    println("$v: $val")
   end
 
   # TODO find intersection numerically
