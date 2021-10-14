@@ -279,20 +279,18 @@ function find_couplers(iA, oA, iB, oB, n)
   unormconstrs = Vector{Num}(undef, l * oB)
   lnormconstrs = Vector{Num}(undef, l * oB)
 
-  total_pbp = 0
   for idx in eachindex(vs)
     v = vs[idx]
     pax, pby, pabxy = cg_to_full(v, iA, oA, iB, oB)
-    pby = pbys[idx]
     constridx = (idx - 1) * oB
     iter = Iterators.product(bsysranges...)
-    pbsys = fill(Num(1), bsysdims)
-    for bys in iter # tabulate p(bs|ys) 
+    pbsys = fill(Num(1), bsysdims...)
+    for bsys in iter # tabulate p(bs|ys) 
       # TODO use commutativity to tabulate more efficiently
       for i in 1:n # find individual p(b|y) and accumulate
-        b = bys[i]
-        y = bys[i+n]
-        pbsys[bys...] *= pby[b,y]
+        b = bsys[i]
+        y = bsys[i+n]
+        pbsys[bsys...] *= pby[b,y]
       end
     end
 
@@ -300,8 +298,8 @@ function find_couplers(iA, oA, iB, oB, n)
     total_pbp = 0
     for bp in 1:oB-1 # compute the probability of an overall output bp
       pbp = 0
-      for bys in iter
-        pbp += C[bp, bys...] * pbsys[bys...]
+      for bsys in iter
+        pbp += C[bp, bsys...] * pbsys[bsys...]
       end
 
       unormconstrs[constridx + bp] = pbp <= 1
@@ -326,6 +324,26 @@ function cg_alicecouplers(vs, iA, oA, iB, oB, n)
   ps = cg_to_full.(vs, iA, oA, iB, oB)
   pbys = [p[3] for p in ps]
   return find_couplers(pbys, n)
+end
+
+function test_couplers()
+  coup_2222 = find_couplers(2,2,2,2,2)
+  coup_2222_v = coup_2222 |> vertices_list
+  for v in chsh_v
+    pax, pby, pabxy = cg_to_full(v, chshset...)
+    for coup in coup_2222_v
+      pbp1 = 0
+      coupmatr = reshape(coup, 2,2,2,2)
+      for bsys in Iterators.product(1:2, 1:2, 1:2, 1:2)
+        b1, b2, y1, y2 = bsys
+        pbsys = pby[b1, y1] * pby[b2, y2]
+        pbp1 += coupmatr[b1, b2, y1, y2] * pbsys
+      end
+      if pbp1 < 0 || pbp1 > 1
+        println("pbp1 = $pbp1, v = $v, coup = $coup")
+      end
+    end
+  end
 end
 
 chshset = (2,2,2,2)

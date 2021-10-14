@@ -44,9 +44,11 @@ end
 
 gchsh(s) = 1-phi(sqrt(s^2/4 - 1))
 
-HAB_oneway(Eax, Eby, Eabxy) = (1 - Eabxy[1,3]) / 2 # QBER H(A|B)
+QBER(Eax, Eby, Eabxy) = (1 - Eabxy[1,3]) / 2
+CHSH(Eax, Eby, Eabxy) = Eabxy[1,1] + Eabxy[1,2] + Eabxy[2,1] - Eabxy[2,2]
+HAB_oneway(Eax, Eby, Eabxy) = QBER(Eax, Eby, Eabxy)
 function HAE_CHSH(Eax, Eby, Eabxy)
-  S = Eabxy[1,1] + Eabxy[1,2] + Eabxy[2,1] - Eabxy[2,2]
+  S = CHSH(Eax, Eby, Eabxy)
   if abs(S) < 2
     S = sign(S) * 2
   end

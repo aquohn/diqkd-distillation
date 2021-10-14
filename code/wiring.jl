@@ -150,7 +150,6 @@ end
 
 function expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
   iA, iB = length(Atlds), length(Btlds)
-
   Eax = Float64[-nc-(1-nc)*((1-eta)-eta*Atlds[x]) for x in 1:iA]
   Eby = Float64[-nc-(1-nc)*((1-eta)-eta*Btlds[y]) for y in 1:iB]
   Eabxy = Float64[nc + (1-nc)*(eta^2 * ABtlds[x,y] - eta*(1-eta)*(Atlds[x] + Btlds[y]) + (1-eta)^2) for x in 1:iA, y in 1:iB]
@@ -158,12 +157,13 @@ function expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
 end
 
 function expt_grads(nc, eta, Atlds, Btlds, ABtlds)
+  iA, iB = length(Atlds), length(Btlds)
   etagrad = Float64[ (1-nc)*((1-2*eta)*(Atlds[x] + Btlds[y]) - 2*eta*ABtlds[x,y] + 2 - 2*eta) for x in 1:iA, y in 1:iB ] 
   ncgrad = Float64[ eta*((1-eta)*(Atlds[x] + Btlds[y]) - eta*ABtlds[x,y] + 2 - eta) for x in 1:iA, y in 1:iB ]
-  return etagrad, ncgrad
+  return ncgrad, etagrad
 end
 
-function expt_chsh_ncgrads(etagrad, ncgrad)
+function expt_chsh_ncgrads(ncgrad, etagrad, S)
   Qncgrad = - ncgrad[1,3]
   if !isfinite(Qncgrad)
     Qncgrad = 0

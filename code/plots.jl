@@ -68,7 +68,7 @@ end
 
 # %% 3D plot data generators
 
-function maxcorrval_from_corrs(Eax, Eby, Eabxy)
+function maxcorrval_from_corrs(Eax, Eby, Eabxy, xysel, modesel)
     pax, pby, pabxy = probs_from_corrs(Eax, Eby, Eabxy)
     maxcorrvals = maxcorrs(pax, pby, pabxy)
     xsel, ysel = xysel
@@ -101,7 +101,7 @@ function maxcorr_data(is, js, HAB::Function, HAE::Function, corrf::Function;
     i = is[ii]; j = js[ji]
     Eax, Eby, Eabxy = corrf(i, j)
     pts[ii, ji] = (HAB(Eax, Eby, Eabxy), HAE(Eax, Eby, Eabxy))
-    rhos[ii, ji] = maxcorrval_from_corrs(Eax, Eby, Eabxy)
+    rhos[ii, ji] = maxcorrval_from_corrs(Eax, Eby, Eabxy, xysel, modesel)
   end
 
   return pts, rhos
@@ -117,7 +117,7 @@ function grad_data(is, js, HAB::Function, HAE::Function, corrf::Function, gradf:
     i = is[ii]; j = js[ji]
     Eax, Eby, Eabxy = corrf(i, j)
     pts[ii, ji] = (HAB(Eax, Eby, Eabxy), HAE(Eax, Eby, Eabxy))
-    grads[ii, ji] = gradf(Eax, Eby, Eabxy)
+    grads[ii, ji] = gradf(i, j, Eax, Eby, Eabxy)
   end
 
   return pts, grads
@@ -151,8 +151,8 @@ function entropy_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, 
 
   Atlds, Btlds, ABtlds = meas_corrs(theta=theta, mus=mus, nus=nus)
   corrf = (nc, eta) -> expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
-  ncgradf = (Eax, Eby, Eabxy) -> expt_chsh_ncgrads(expt_grads(Eax, Eby, Eabxy)...)
-  qSreg, qSreggrad = grad_data(ncs, etas, HAB_oneway, HAE_CHSH, corrf, gradf)
+  ncgradf = (nc, eta, Eax, Eby, Eabxy) -> expt_chsh_ncgrads(expt_grads(nc, eta, Eax, Eby, Eabxy)..., CHSH(Eax, Eby, Eabxy))
+  qSreg, qSreggrad = grad_data(ncs, etas, HAB_oneway, HAE_CHSH, corrf, ncgradf)
 
   Hmaxs = map(max, qSreg...)
   Hmins = map(min, qSreg...)
@@ -160,7 +160,7 @@ function entropy_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, 
   Hlims = [(Hmins[i] - Hranges[i]*0.1, Hmaxs[i] + Hranges[i]*0.1) for i in 1:2]
 
   etas_const_nc = range(etastart, stop=1, length=50)
-  const_nc, const_nc_grad = grad_data([0.0], etas_const_nc, HAB_oneway, HAE_CHSH, corrf, gradf)
+  const_nc, const_nc_grad = grad_data([0.0], etas_const_nc, HAB_oneway, HAE_CHSH, corrf, ncgradf)
 
   # plot qSs/qQs on plot of H(A|E) against H(A|B)
   plt = plot(range(0,stop=1,length=100), range(0,stop=1,length=100), xlabel="H(A|B)",ylabel="H(A|E)", label="Devetak-Winter bound", xlims=Hlims[1], ylims=Hlims[2])
@@ -202,7 +202,8 @@ function maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Arra
   rhomax = maximum(x->isnan(x) ? -Inf : x, rhos)
 
   etas_const_nc = range(etastart, stop=1, length=50)
-  const_nc = maxcorr_data([0.0], etas_const_nc, Atlds, Btlds, ABtlds; xysel=xysel, modesel=modesel)
+  corrf = (nc, eta) -> expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
+  const_nc, const_nc_rhos = maxcorr_data([0.0], etas_const_nc, HAB_oneway, HAE_CHSH, corrf; xysel=xysel, modesel=modesel)
 
   # show Devetak-Winter frontier
   greyscheme = ColorPalette(ColorScheme([colorant"grey", colorant"grey"]))
@@ -211,12 +212,12 @@ function maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Arra
   # find S region
   xs, ys, zs = [Array{T}(undef, ncsamples, etasamples) for i in 1:3]
   for nci in 1:ncsamples, etai in 1:etasamples
-    xs[nci, etai], ys[nci, etai], zs[nci, etai] = pts[nci, etai]
+    xs[nci, etai], ys[nci, etai], zs[nci, etai] = Hs[nci, etai]..., rhos[nci, etai]
   end
   plot!(plt, xs, ys, zs, label="Quantum", st = :surface)
 
   # boundary
-  plot!(plt, vec([(pt[1:2]..., 0) for pt in const_nc]), primary=false, linecolor=:blue, label="nc = 0")
+  plot!(plt, vec([(pt..., 0) for pt in const_nc]), primary=false, linecolor=:blue, label="nc = 0")
 
   # contours
   if contoursel == :etas
