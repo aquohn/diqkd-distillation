@@ -68,8 +68,8 @@ end
 
 # %% 3D plot data generators
 
-function maxcorrval_from_corrs(Eax, Eby, Eabxy, xysel, modesel)
-    pax, pby, pabxy = probs_from_corrs(Eax, Eby, Eabxy)
+function maxcorrval_from_probs(pabxy, pax, pby, xysel, modesel)
+    Eax, Eby, Eabxy = corrs_from_probs(pabxy, pax, pby)
     maxcorrvals = maxcorrs(pax, pby, pabxy)
     xsel, ysel = xysel
     if modesel == :maxdiff
@@ -100,8 +100,9 @@ function maxcorr_data(is, js, HAB::Function, HAE::Function, corrf::Function;
   for ii in eachindex(is), ji in eachindex(js)
     i = is[ii]; j = js[ji]
     Eax, Eby, Eabxy = corrf(i, j)
-    pts[ii, ji] = (HAB(Eax, Eby, Eabxy), HAE(Eax, Eby, Eabxy))
-    rhos[ii, ji] = maxcorrval_from_corrs(Eax, Eby, Eabxy, xysel, modesel)
+    pabxy, pax, pby = probs_from_corrs(Eax, Eby, Eabxy)
+    pts[ii, ji] = (HAB(pabxy, pax, pby)[1], HAE(pabxy, pax, pby)[1])
+    rhos[ii, ji] = maxcorrval_from_probs(pabxy, pax, pby, xysel, modesel)
   end
 
   return pts, rhos
@@ -116,11 +117,36 @@ function grad_data(is, js, HAB::Function, HAE::Function, corrf::Function, gradf:
   for ii in eachindex(is), ji in eachindex(js)
     i = is[ii]; j = js[ji]
     Eax, Eby, Eabxy = corrf(i, j)
-    pts[ii, ji] = (HAB(Eax, Eby, Eabxy), HAE(Eax, Eby, Eabxy))
+    pabxy, pax, pby = probs_from_corrs(Eax, Eby, Eabxy)
+    pts[ii, ji] = (HAB(pabxy, pax, pby)[1], HAE(pabxy, pax, pby)[1])
     grads[ii, ji] = gradf(i, j, Eax, Eby, Eabxy)
   end
 
   return pts, grads
+end
+
+function farkas_wiring_data(n, HAE::Function, HAB::Function; c = 2, iterf = nothing, policy = wiring_policy)
+  maxrecs = Union{WiringData, Nothing}[]
+  for i in 1:n
+    Eax = EaxLD * (i-1)/n + EaxQ * (n-i+1)/n
+    Eby = EbyLD * (i-1)/n + EbyQ * (n-i+1)/n
+    Eabxy = EabxyLD * (i-1)/n + EabxyQ * (n-i+1)/n
+    pax, pby, pabxy = probs_from_corrs(Eax, Eby, Eabxy)
+
+    recs = diqkd_wiring_eval(pax, pby, pabxy, HAE, HAB, c=c, iterf=iterf, policy=policy)
+    maxrec = nothing
+    maxgain = 0
+    for rec in recs
+      gain = rec.rp - rec.r
+      if gain > maxgain
+        maxgain = gain
+        maxrec = rec
+      end
+    end
+    push!(maxrecs, maxrec)
+  end
+
+  return maxrecs
 end
 
 # %%
@@ -244,6 +270,7 @@ function maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Arra
 end
 
 # %%
+# Widget code
 function iplot(plotf)
   plotlambda = (thetapi, ncsamples, etasamples, etastart, args...) -> begin
     mus = [args[1:2]...] * pi

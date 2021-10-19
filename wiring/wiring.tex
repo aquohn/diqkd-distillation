@@ -367,8 +367,8 @@
       \begin{minipage}{0.5\linewidth}
         \begin{center}
           \begin{tabular}{|r|cccc|} \hline
-            \diagbox{\(x_1 x_2\)}{\(a_1 a_2\)} & 00 & 01 & 10 & 11 \\ \hline
-            00 & X & X & 0 & 1 \\
+            \diagbox{\(x_1 x_2\)}{\(a_1 a_2\)} & 00 & 01 & 11 & 10 \\ \hline
+            00 & X & X & 1 & 0 \\
             01 & 0 & 0 & X & X \\
             11 & 1 & 0 & 0 & 0 \\
             10 & X & X & X & X \\ \hline
@@ -382,7 +382,14 @@
     \begin{equation}
       x_2 = \bar{a}_1x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2,
     \end{equation}
-    where juxtaposition is the Boolean AND, addition is the Boolean OR, and the overbar is the Boolean NOT.\ This cannot be expressed as one of the wirings from~\cite{ShortEntangleSwap}: the boxes are clearly non-constant and dependent on each other, so they are not one-sided or deterministic, and the functional 
+    where juxtaposition is the Boolean AND, addition is the Boolean OR, and the overbar is the Boolean NOT.\ This cannot be expressed as one of the wirings from~\cite{ShortEntangleSwap}: the boxes are clearly non-constant and dependent on each other, so they are not one-sided or deterministic, and the functional dependence of the output is too complex to be expressed simply with a single AND or XOR gate.
+
+    The classification of Short et al.\ attempts to find a parametrisation of \emph{couplers}, which are a specific type of transformation which ``collapses'' multiple boxes of one party, replacing their inputs and outputs with a single output, whose probability distribution depends on the behaviours of the individual boxes that are collapsed. Importantly, this \emph{does not} replace the collapsed boxes with a larger box with one input and one output, which is what we are attempting to do through wirings, but rather simply generates one output. Although the possible couplers form a polytope that has these specific wirings as its extremal points, this is not the type of operation we are looking for.
+
+    Taking inspiration from this work, however, we might want to see if the
+
+    % TODO may be possible to form polytope of wirings, but may not be helpful -
+    % extremal points may not maximise keyrates
 
     \subsection{Number of Distinct Wirings}
 
@@ -565,20 +572,44 @@
 
     \section{State of the Art Lower Bounds}
 
-    The methods involved in casting the relative entropy into an easily optimised form are highly involved, using the operator algebra approach to quantum mechanics. For our purposes, we will simplify and specialise the involved concepts to this particular application.
+    The methods involved in casting the relative entropy into an easily optimised form are highly involved, using the operator algebra approach to quantum mechanics. We will briefly review some of the ideas used in this paper that are generally not covered in undergraduate treatments of quantum mechanics and quantum information.
 
-    \emph{Spectral measures}, or \emph{projector-valued measures} (PVMs), map a \emph{\(\sigma\)-algebra} of measurement outcomes to the orthogonal projectors associated with those outcomes. The \(\sigma\)-algebra contains subsets of the possible measurement outcomes, and is closed under set complements and unions of countable sequences. For a Hermitian operator \(H\) with eigenvalues \(\{\lambda_i\}\) and projectors into their eigenspaces \(\{\Pi_i\}\), the spectral measure \(E_H(x)\) of \(H\) is then
-    \[ E_H(x) = \begin{cases}
-      \Pi_i & x = \lambda_i \\
-      0 & x \not\in \{\lambda_i\} \\
-    \end{cases} \]
-    A \emph{joint spectral measure} of two commuting Hermitian operators \(H^{(1)}\) and \(H^{(2)}\) is
-    \[ E_{H^{(1)},H^{(2)}}(x,y) = \begin{cases}
-      \Pi_i^{(1)}\Pi_j^{(2)} & x = \lambda^{(1)}_i, y = \lambda^{(2)}_j\\
-      0 & x \not\in \{\lambda^{(1)}_i\} \vee y \not\in \{\lambda^{(2)}_j\}, \\
-    \end{cases} \]
-    with analogous extensions to more than two commuting operators.
+    The set of \emph{bounded operators} \(\mathcal{B}(\Hs)\) on the Hilbert space \(\Hs\) is the set \(\mathcal{L}(\Hs)\) of all linear operators on \(\Hs\) such that the \emph{operator norm} of \(X \in \mathcal{L}(\Hs)\)
+    \[ \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}} \]
+    is finite. For an operator \(A\), its \emph{spectrum} \(\sigma(A)\) is the subset of \(\C\) such that, for all \(\lambda \in \sigma(A)\), \(A - \lambda I\) does not have a \emph{bounded inverse}: there does not exist an operator \(S\) such that \(S\left( A - \lambda I \right) = \left( A - \lambda I \right)S =  I\) and \(S \in \mathcal{B}(\Hs)\).
 
-  \end{document}
+    Our objective is to establish a \emph{functional calculus} that will allow us to evaluate a function  \(f\) with scalar output on operators. In the finite-dimensional case this is straightforward for normal operators (obeying \(AA^{\dagger} = A^{\dagger}A\)): for an operator \(A\) with eigenvalues \(\{\lambda_i\}\) and corresponding eigenprojectors \(\{\Pi_i\}\),
+    \[ A = \sum_i \lambda_i \Pi_i \Rightarrow f(A) = \sum_i f(\lambda_i) \Pi_i, \]
+    by the \emph{spectral theorem}.
 
-  Compute REE and compare to QMC
+    However, the approach of the paper generalises the spectral theorem to cases where the spectrum \(\sigma(A)\) is no longer a discrete set of eigenvalues, as it is in the finite-dimensional case, but a \emph{continuous spectrum}. This scenario arises in infinite-dimensional Hilbert spaces, such as those involving position and momentum operators. These particular operators are even more complex, since they are \emph{unbounded}. We will therefore sketch the standard statement of the spectral theorem, which applies to bounded normal operators and unbounded self-adjoint (\(A = A^{\dagger}\)) operators, although we leave aside technicalities regarding the domain of the operators and the functions involved in this generalisation.
+
+    This requires some additional definitions. \emph{Spectral measures}, or \emph{projector-valued measures} (PVMs), map a subset of the spectrum to a projector. More formally, they are functions between the \emph{\(\sigma\)-algebra} \(\Omega(\sigma(A))\) of \(\sigma(A)\) to \(\mathcal{B}(\Hs)\). A \(\sigma\)-algebra contains subsets of its underlying set, and is closed under set complements and unions of countable sequences, so in this case it represents subsets of the spectrum that it would be sensible to attach a projector to.
+
+    In the finite-dimensional case, the projector associated to each eigenvalue \(\lambda\) in the spectrum is the projector onto the associated eigenspace, and the direct sum of the projectors is the projector onto \(\Hs\), that is, \(I\). With a continuous spectrum, we want to divide \(\Hs\) into orthogonal spaces in the same way, providing a systematic way to attach each subspace to each element \(\omega \in \Omega(\sigma(A))\), that is, each reasonable subset of \(\sigma(A)\). Under a given spectral measure \(E : \Omega(\sigma(A)) \to \mathcal{B}(\Hs)\), the subspace \(V_{\omega} \subseteq \Hs\) associated to \(\omega\) is called a \emph{spectral subspace}, and \(E(\omega)\) is the projector onto \(V_{\omega}\). These \(V_{\omega}\) are ``generalised eigenspaces'' in the sense that they are \emph{invariant} under \(A\), that is, \(\psi \in V_{\omega} \Rightarrow A\psi \in V_{\omega}\), and that, for \(\omega \subseteq [\lambda - \epsilon, \lambda + \epsilon]\), we have \(\norm{(A - \lambda I)\psi} \leq \epsilon\norm{\psi}\), from which recover the familiar behaviour when the spectrum is discrete.
+
+    A function \(f : \sigma(A) \to \C\) can then be applied to an element of \(\mathcal{B}(\Hs)\), by integrating it against this measure
+    \[ f(A) = \int_{\lambda \in \sigma(A)} f(\lambda) \dif{E(\lambda)}, \]
+    where we have that
+    \[ \int_{\lambda \in \sigma(A)} \delta\{\lambda \in \omega\} \dif{E(\lambda)} = E(\omega), \]
+    with the \emph{indicator function} \(\delta\{P\} = 1\) when \(P\) is true, and 0 otherwise. This property can be used to define the integral for any other function. For example, for a given function \(f : \R \to \C\), we can define a sequence of functions
+    \[ f_n(\lambda) = \sum_{j = -\infty}^{\infty} f(j/n) \delta\{\lambda \in [j/n, (j+1)/n)\}, \]
+    and if this sequence \emph{converges uniformly} to \(f(\lambda)\), that is,
+    \[ \forall \lambda \in \C; \lim_{n \to \infty} \norm{f_n(\lambda) - f(\lambda)} = 0, \]
+    then
+  \[ f(A) = \lim_{n\to\infty} \int_{\lambda \in \sigma(A)} f_n(\lambda) \dif{E(\lambda)} = \lim_{n\to\infty} \sum_{j = -\infty}^{\infty} f(j/n) E([j/n, (j+1)/n)) \]
+  so that, roughly speaking, the effect of \(f(A)\) on \(E([\lambda, \lambda+\dif{\lambda}))\psi\) is multiplication by \(f(\lambda)\). The \emph{spectral theorem} then asserts that there is a \emph{unique} measure \(E_A\) on the Borel \(\sigma\)-algebra, that is, the smallest \(\sigma\)-algebra containing all open sets in \(\sigma(A)\), such that
+  \[ A = \int_{\sigma(A)} \lambda \dif{E_A(\lambda)}, \]
+  which is how \(A\) can be decomposed into orthogonal projectors.
+
+  An operator-valued measure \(E\) on \(\sigma(A)\) can be converted into a regular, scalar-valued measure \(\nu\) by specifying a vector \(\phi\), so that
+  \[ \int_{\sigma(A)} f(\lambda) \dif{\nu(\lambda)} = \angleb{\phi, \left(\int_{\sigma(A)} f(\lambda) \dif{E(\lambda)}\right) \phi}. \]
+
+  A \emph{joint spectral measure} of multiple self-adjoint operators, with \emph{commuting spectral measures} (which then implies that the operators commute) is then simply the product of their respective spectral measures, with a straightforward generalisation from the single-operator case.
+
+  % TODO replace \sigma(A) with \mathcal{X} and explain the use of joint spectral
+  % measures in the paper
+
+ \end{document}
+
+  Compute relative entropy of entanglement and compare to quantum maximal correlation

@@ -26,15 +26,16 @@ macro sliceup(arr, info...)
   end |> esc
 end
 
-function sliceup(arr, steps...)
+function sliceup(seq, steps...)
   l = length(steps)
-  sliced = Vector{Any}(undef, l)
+  sliced = Vector{Vector{eltype(seq)}}(undef, l)
   curr = 1
   for j in 1:l
     next = curr + steps[j] - 1
-    sliced[j] = arr[curr:next]
+    sliced[j] = [seq[curr:next]...]
     curr = next + 1
   end
+  return sliced
 end
 
 kd(i,j) = (i == j) ? 1 : 0

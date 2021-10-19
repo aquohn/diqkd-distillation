@@ -25,62 +25,101 @@ includet("helpers.jl")
 # %%
 # Wirings
 
+struct BoxSequence{T <: Integer}
+  boxtype::Symbol
+  as::Union{Vector{T}, Nothing}
+  bs::Union{Vector{T}, Nothing}
+  xs::Union{Vector{T}, Nothing}
+  ys::Union{Vector{T}, Nothing}
+  function BoxSequence(bt, os::Vector{T}, is::Vector{T}) where T <: Integer
+    if (bt == :A)
+      new{T}(:A, os, nothing, is, nothing)
+    elseif(bt == :B)
+      new{T}(:B, nothing, os, nothing, is)
+    else
+      throw(ArgumentError("Box type must be :A or :B!"))
+    end
+  end
+end
+
+struct Correlators
+  Eax
+  Eby
+  Eabxy
+end
+
+struct Setting
+  oA
+  oB
+  iA
+  iB
+end
+
+struct Wiring
+  CA
+  CAj
+  CB
+  CBj
+end
+
+struct EntropyData
+  HAE
+  HAB
+  HAEp
+  HABp
+end
+
+struct WiringData
+  CA
+  CAj
+  CB
+  CBj
+  r
+  rp
+  Hdata::EntropyData
+  # TODO more info about optimisation
+end
+
+
+# TODO nested iteration when applying, separate when generating
+
 num_wirings(c, o, i) = o^(i * o^c) * prod([i^(i * o^(j-1)) for j in 2:c])
 num_wirings_fix(c, o, i, f) = o^((i-f)*i * o^c) * prod([i^((i-f) * o^(j-1)) for j in 2:c])
-function wiring_prob(CA, CAj, CB, CBj, pax, pby, pabxy)
+function wiring_prob(CA, CAj, CB, CBj, pax::Array{T,2}, pby::Array{T,2}, pabxy::Array{T,4}) where T <: Real
   oA, oB, iA, iB = size(pabxy)
   ppax, ppby, ppabxy = (zeros(size(p)) for p in [pax, pby, pabxy]) |> collect
   c = Integer((CA |> size |> length) / 2)
 
-  # iterate over every possible combination
-  for params in Iterators.product(vcat([[1:n for i in 1:c] for n in [oA, oB, iA, iB]]...)...) @sliceup params as c bs c xs c ys c
-    pABXY = 1
-    for j in 2:c
-      if CAj[j][as[1:j-1]..., xs[1:j-1]...] != xs[j] || CBj[j][bs[1:j-1]..., ys[1:j-1]...] != ys[j]
-        pABXY = 0
-        break
-      else
-        pABXY *= pabxy[as[j], bs[j], xs[j], ys[j]]
+  aseqs = BoxSequence[BoxSequence(:A, [a], [x]) for (a,x) in Iterators.product(1:oA, 1:iA)] |> vec
+  while !isempty(aseqs) # depth-first search
+    aseq = pop!(aseqs)
+    j = length(aseq.as)
+    if j == c # all boxes accounted for; start iterating over Bob's boxes
+      bseqs = BoxSequence[BoxSequence(:B, [b], [y]) for (b,y) in Iterators.product(1:oB, 1:iB)] |> vec
+      while !isempty(bseqs)
+        bseq = pop!(bseqs)
+        k = length(bseq.bs)
+        if k == c
+          p = prod([pabxy[aseq.as[i], bseq.bs[i], aseq.xs[i], bseq.ys[i]] for i in 1:c])
+          ap = CA[aseq.xs..., aseq.as...]
+          bp = CB[bseq.ys..., bseq.bs...]
+          ppabxy[ap, bp, aseq.xs[1], bseq.ys[1]] += p
+        else
+          y = CBj[k+1][bseq.ys..., bseq.bs...]
+          for b in 1:oB
+            push!(bseqs, BoxSequence(:B, [bseq.bs..., b], [bseq.ys..., y]))
+          end
+        end
+      end
+    else # add all possibilities for next box
+      x = CAj[j+1][aseq.xs..., aseq.as...]
+      for a in 1:oA
+        push!(aseqs, BoxSequence(:A, [aseq.as..., a], [aseq.xs..., x]))
       end
     end
-
-    xp = CA[as..., xs...]
-    yp = CB[bs..., ys...]
-    ppabxy[as[1], bs[1], xp, yp] += pABXY
   end
 
-  for params in Iterators.product(vcat([[1:n for i in 1:c] for n in [oA, iA]]...)...)
-    @sliceup params as c xs c
-    pAX = 1
-    for j in 1:c
-      if CAj[j][as[1:j-1]..., xs[1:j-1]...] != xs[j]
-        pAX = 0
-        break
-      else
-        pAX *= pax[as[j], xs[j]]
-      end
-    end
-
-    xp = CA[as..., xs...]
-    ppax[as[1], xp] += pAX
-  end
-
-  for params in Iterators.product(vcat([[1:n for i in 1:c] for n in [oB, iB]]...)...)
-    @sliceup params bs c ys c
-    pBY = 1
-    for j in 1:c
-      if CBj[j][bs[1:j-1]..., ys[1:j-1]...] != ys[j]
-        pBY = 0
-        break
-      else
-        pBY *= pby[bs[j], ys[j]]
-      end
-    end
-
-    yp = CB[bs..., ys...]
-    ppax[bs[1], yp] += pBY
-  end
-
+  ppax, ppby, ppabxy = margps_from_jointp(nothing, nothing, ppabxy)
   return ppax, ppby, ppabxy
 end
 
@@ -194,80 +233,156 @@ end
 # %%
 # Wiring exhaustive search
 
-# TODO incorporate don't cares
-
-function wiring_iters(iA, oA, iB, oB, c)
-  # I love this language lmao
-  CAshapes = tuple((iA for j in 1:c)..., (oA for j in 1:c)...)
-  CBshapes = tuple((iB for j in 1:c)..., (oB for j in 1:c)...)
-  CAjshapes = [tuple((iA for k in 1:j-1)..., (oA for k in 1:j-1)...) for j in 1:c]
-  CBjshapes = [tuple((iB for k in 1:j-1)..., (oB for k in 1:j-1)...) for j in 1:c]
-
-  CAiters = fill(1:oA, CAshapes...)
-  CBiters = fill(1:oB, CBshapes...)
-  CAjiters = [fill(1:iA, CAjshapes[j]...) for j in 1:c]
-  CBjiters = [fill(1:iB, CBjshapes[j]...) for j in 1:c]
-
-  # first function is trivial
-  CAjiters[1][] = 0:0
-  CBjiters[1][] = 0:0
+function wiring_iters(iA::T, oA::T, iB::T, oB::T, c::T) where T <: Integer
+  CAiters = [1:oA for i in 1:(iA * oA^c)]
+  CBiters = [1:oB for i in 1:(iB * oB^c)]
+  CAjiters = vcat([fill(T, 0:0, 0)], [[1:iA for i in 1:(iA * oA^(j-1))] for j in 2:c])
+  CBjiters = vcat([fill(T, 0:0, 0)], [[1:iB for i in 1:(iB * oB^(j-1))] for j in 2:c])
 
   return CAiters, CBiters, CAjiters, CBjiters
 end
 
-function diqkd_wiring_iters(c = 2)
+function wiring_policy(CA, CAj, CB, CBj, CAvec, CBvec, CAjvec, CBjvec, iA, oA, iB, oB, c)
+  aseqs = BoxSequence[BoxSequence(:A, [a], [x]) for (a,x) in Iterators.product(1:oA, 1:iA)] |> vec
+  while !isempty(aseqs) # depth-first search
+    aseq = pop!(aseqs)
+    j = length(aseq.as)
+    if j == c # all boxes accounted for; start iterating over Bob's boxes
+      ap = pop!(CAvec)
+      CA[aseq.xs..., aseq.as...] = ap
+    else # add all possibilities for next box
+      x = pop!(CAjvec[j+1])
+      CAj[j+1][aseq.xs..., aseq.as...] = x
+      for a in 1:oA
+        push!(aseqs, BoxSequence(:A, [aseq.as..., a], [aseq.xs..., x]))
+      end
+    end
+  end
+
+  bseqs = BoxSequence[BoxSequence(:B, [b], [y]) for (b,y) in Iterators.product(1:oB, 1:iB)] |> vec
+  while !isempty(bseqs)
+    bseq = pop!(bseqs)
+    k = length(bseq.bs)
+    if k == c
+      bp = pop!(CBvec)
+      CB[bseq.ys..., bseq.bs...] = bp
+    else
+      y = pop!(CBjvec[k+1])
+      CBj[k+1][bseq.ys..., bseq.bs...] = y
+      for b in 1:oB
+        push!(bseqs, BoxSequence(:B, [bseq.bs..., b], [bseq.ys..., y]))
+      end
+    end
+  end
+end
+
+function generate_wirings(CAvec::Vector{T}, CBvec::Vector{T},
+    CAjvec::Vector{Vector{T}}, CBjvec::Vector{Vector{T}}, iA, oA, iB, oB, c, policy = wiring_policy) where T <: Integer
+  CAvec, CBvec, CAjvec, CBjvec = (deepcopy(v) for v in (CAvec, CBvec, CAjvec, CBjvec))
+  CA = zeros(T, [iA for i in 1:c]..., [oA for i in 1:c]...)
+  CB = zeros(T, [iB for i in 1:c]..., [oB for i in 1:c]...)
+  CAj = [zeros(T, [iA for i in 1:(j-1)]..., [oA for i in 1:(j-1)]...) for j in 1:c]
+  CBj = [zeros(T, [iB for i in 1:(j-1)]..., [oB for i in 1:(j-1)]...) for j in 1:c]
+
+  policy(CA, CAj, CB, CBj, CAvec, CBvec, CAjvec, CBjvec, iA, oA, iB, oB, c)
+
+  return CA, CAj, CB, CBj
+end
+
+# fixing the wirings for one i removes o^c degrees of freedom from C, and
+# o^(j-1) degrees of freedom from Cj[j]
+function diqkd_wiring_and_policy(CA, CAj, CB, CBj, CAvec, CBvec, CAjvec, CBjvec, iA, oA, iB, oB, c)
+  aseqs = BoxSequence[BoxSequence(:A, [a], [x]) for (a,x) in Iterators.product(1:oA, 1:iA)] |> vec
+  while !isempty(aseqs) # depth-first search
+    aseq = pop!(aseqs)
+    j = length(aseq.as)
+    if j == c # all boxes accounted for
+      if aseq.xs[1] == 1
+        ap = all(as .== 2) ? 2 : 1 # AND gate, 1 = F, 2 = T
+      else
+        ap = pop!(CAvec)
+      end
+      CA[aseq.xs..., aseq.as...] = ap
+    else # add all possibilities for next box
+      if aseq.xs[1] == 1
+        x = xs[1]
+      else
+        x = pop!(CAjvec[j+1])
+      end
+      for a in 1:oA
+        push!(aseqs, BoxSequence(:A, [aseq.as..., a], [aseq.xs..., x]))
+      end
+    end
+  end
+
+  bseqs = BoxSequence[BoxSequence(:B, [b], [y]) for (b,y) in Iterators.product(1:oB, 1:iB)] |> vec
+  while !isempty(bseqs)
+    bseq = pop!(bseqs)
+    k = length(bseq.bs)
+    if k == c
+      if bseq.ys[1] == 3
+        bp = all(bs .== 2) ? 2 : 1
+      else
+        bp = pop!(CBvec)
+      end
+      CB[bseq.ys..., bseq.bs...] = bp
+    else
+      if bseq.ys[1] == 3
+        y = ys[1]
+      else
+        y = pop!(CBjvec[j+1])
+      end
+      for b in 1:oB
+        push!(bseqs, BoxSequence(:B, [bseq.bs..., b], [bseq.ys..., y]))
+      end
+    end
+  end
+end
+
+function diqkd_wiring_and_iters(c = 2)
   iA, oA, iB, oB = 2, 2, 3, 2
   CAiters, CBiters, CAjiters, CBjiters = wiring_iters(iA, oA, iB, oB, c)
-
-  # Fix keygen settings x = 1 and y = 3 to be AND-gated
-  for params in Iterators.product([1:oA for i in 1:c]..., [1:iA for i in 2:c]...)
-    @sliceup params as c xs c-1
-    CAiters[1, xs..., as...] = all(as .== 2) ? (2:2) : (1:1)
-  end
-  for params in Iterators.product([1:oB for i in 1:c]..., [1:iB for i in 2:c]...)
-    @sliceup params bs c ys c-1
-    CBiters[3, ys..., bs...] = all(bs .== 2) ? (2:2) : (1:1)
-  end
-
-  # Fix keygen settings to simply broadcast initial input
-  for j in 2:c # j == 1 is a 0-dim array
-    for params in Iterators.product([1:oA for i in 1:j-1]..., [1:iA for i in 2:j-1]...)
-      @sliceup params as j-1 xs j-2
-      CAjiters[j][1, xs..., as...] = 1:1
-    end
-    for params in Iterators.product([1:oB for i in 1:j-1]..., [1:iB for i in 2:j-1]...)
-      @sliceup params bs j-1 ys j-2
-      CBjiters[j][3, ys..., bs...] = 3:3
-    end
-  end
+  CAiters = CAiters[1:end-oA^c]
+  CBiters = CBiters[1:end-oB^c]
+  CAjiters = [CAjiters[j][1:end-iA^(j-1)] for j in 1:c]
+  CBjiters = [CBjiters[j][1:end-iB^(j-1)] for j in 1:c]
 
   return CAiters, CBiters, CAjiters, CBjiters
 end
 
-function diqkd_wiring_eval(Eabxy, Eax, Eby, HAE, HAB)
-  CAiters, CBiters, CAjiters, CBjiters = diqkd_wiring_iters()
+function diqkd_wiring_eval(pax, pby, pabxy, HAE, HAB; c = 2, iterf = nothing, policy = wiring_policy)
+  oA, oB, iA, iB = size(pabxy)
+  if isnothing(iterf)
+    iterf = () -> wiring_iters(iA, oA, iB, oB, c)
+  end
+  CAiters, CBiters, CAjiters, CBjiters = iterf()
   iterarrs = [CAiters, CBiters, CAjiters..., CBjiters...]
   shapes = [size(iterarr) for iterarr in iterarrs]
   lengths = [prod(shape) for shape in shapes]
+  recs = WiringData[]
 
   for data in Iterators.product(vcat([vec(iterarr) for iterarr in iterarrs]...)...)
-    info = sliceup(data, lengths...)
-    arrs = [reshape(info[j], shapes[j]) for j in eachindex(info)]
-    js = Integer((length(arrs) - 2)/2)
-    CA, CB, CAj, CBj = sliceup(arrs, 1, 1, js, js)
+    sliced = sliceup(data, lengths...)
+    CAvec, CBvec = [sliced[1:2]...]
+    l = Integer(length(sliced[3:end]) / 2)
+    CAjvec, CBjvec = sliceup(sliced[3:end], l, l)
 
-    HAEval = HAE(Eax, Eby, Eabxy)
-    HABval = HAB(Eax, Eby, Eabxy)
+    CA, CAj, CB, CBj = generate_wirings(CAvec, CBvec, CAjvec, CBjvec, iA, oA, iB, oB, c, policy)
+
+    HAEval, HAEdata = HAE(pax, pby, pabxy)
+    HABval, HABdata = HAB(pax, pby, pabxy)
     r = HAEval - HABval
 
-    pax, pby, pabxy = probs_from_corrs(Eax, Eby, Eabxy)
-    ppax, ppby, ppabxy = wiring_prob(CA, CB, CAj, CBj, pax, pby, pabxy)
-    Epax, Epby, Epabxy = corrs_from_probs(ppax, ppby, ppabxy)
+    ppax, ppby, ppabxy = wiring_prob(CA, CAj, CB, CBj, pax, pby, pabxy)
 
-    HAEvalp = HAE(Epax, Epby, Epabxy)
-    HABvalp = HAB(Epax, Epby, Epabxy)
+    HAEvalp, HAEdatap = HAE(ppax, ppby, ppabxy)
+    HABvalp, HABdatap = HAB(ppax, ppby, ppabxy)
     rp = HAEvalp - HABvalp
 
-    # TODO implement figure of merit
+    if rp > r
+      push!(recs, WiringData(CA, CAj, CB, CBj, r, rp, EntropyData(HAEdata, HABdata, HAEdatap, HABdatap)))
+    end
   end
+
+  return recs
 end

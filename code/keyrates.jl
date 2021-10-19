@@ -46,13 +46,14 @@ gchsh(s) = 1-phi(sqrt(s^2/4 - 1))
 
 QBER(Eax, Eby, Eabxy) = (1 - Eabxy[1,3]) / 2
 CHSH(Eax, Eby, Eabxy) = Eabxy[1,1] + Eabxy[1,2] + Eabxy[2,1] - Eabxy[2,2]
-HAB_oneway(Eax, Eby, Eabxy) = QBER(Eax, Eby, Eabxy)
-function HAE_CHSH(Eax, Eby, Eabxy)
+function HAB_oneway(pax, pby, pabxy)
+  Eax, Eby, Eabxy = corrs_from_probs(pax, pby, pabxy)
+  return QBER(Eax, Eby, Eabxy), nothing
+end
+function HAE_CHSH(pax, pby, pabxy)
+  Eax, Eby, Eabxy = corrs_from_probs(pax, pby, pabxy)
   S = CHSH(Eax, Eby, Eabxy)
-  if abs(S) < 2
-    S = sign(S) * 2
-  end
-  return gchsh(S)
+  return gchsh(max(S, 2.0)), nothing
 end
 
 nl_solver = optimizer_with_attributes(Ipopt.Optimizer)
