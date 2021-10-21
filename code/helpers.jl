@@ -6,6 +6,14 @@ macro printvals(syms...)
   end |> esc
 end
 
+macro loadstruct(s)
+  quote
+    for f in fieldnames(typeof($s))
+      eval(:($f = $$s.$f))
+    end
+  end |> esc
+end
+
 macro sliceup(arr, info...)
   l = Integer(length(info)/2)
   names = Vector{Any}(undef, l)

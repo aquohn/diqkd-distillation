@@ -42,18 +42,30 @@ struct BoxSequence{T <: Integer}
   end
 end
 
+struct Setting{T}
+  oA::T
+  oB::T
+  iA::T
+  iB::T
+end
+Base.iterate(s::Setting) = s.oA, [s.iB, s.iA, s.oB]
+Base.iterate(s::Setting, state) = isempty(state) ? nothing : (pop!(state), state)
+
 struct Correlators
   Eax
   Eby
   Eabxy
 end
+Base.iterate(C::Correlators) = C.Eax, [C.Eabxy, C.Eby]
+Base.iterate(C::Correlators, state) = isempty(state) ? nothing : (pop!(state), state)
 
-struct Setting
-  oA
-  oB
-  iA
-  iB
+struct Behaviour
+  pax
+  pby
+  pabxy
 end
+Base.iterate(P::Behaviour) = P.pax, [P.pabxy, P.pby]
+Base.iterate(P::Behaviour, state) = isempty(state) ? nothing : (pop!(state), state)
 
 struct Wiring
   CA
@@ -61,6 +73,8 @@ struct Wiring
   CB
   CBj
 end
+Base.iterate(W::Wiring) = W.CA, [W.CBj, W.CB, W.CAj]
+Base.iterate(W::Wiring, state) = isempty(state) ? nothing : (pop!(state), state)
 
 struct EntropyData
   HAE
@@ -70,18 +84,13 @@ struct EntropyData
 end
 
 struct WiringData
-  CA
-  CAj
-  CB
-  CBj
+  wiring::Wiring
   r
   rp
   Hdata::EntropyData
-  # TODO more info about optimisation
 end
 
-
-# TODO nested iteration when applying, separate when generating
+# TODO rewrite functions to take structs as args
 
 num_wirings(c, o, i) = o^(i * o^c) * prod([i^(i * o^(j-1)) for j in 2:c])
 num_wirings_fix(c, o, i, f) = o^((i-f)*i * o^c) * prod([i^((i-f) * o^(j-1)) for j in 2:c])

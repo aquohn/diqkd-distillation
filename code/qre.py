@@ -15,23 +15,21 @@ third input for key generation and doesn't bin his no-click when generating key.
 """
 
 import numpy as np
+from itertools import product as itprod
 from math import log2, log, pi, cos, sin
 import ncpol2sdpa as ncp
-import qutip as qtp
 from scipy.optimize import minimize
 from sympy.physics.quantum.dagger import Dagger
 
 # import mosek
-import chaospy
+# import chaospy
 
 
 LEVEL = 2  # NPA relaxation level
 M = 6  # Number of nodes / 2 in gaussian quadrature
 KEEP_M = 0  # Optimizing mth objective function?
-VERBOSE = 0  # If > 1 then ncpol2sdpa will also be verbose
+VERBOSE = 2  # If > 1 then ncpol2sdpa will also be verbose
 EPS_M, EPS_A = 1e-4, 1e-4  # Multiplicative/Additive epsilon in iterative optimization
-NUM_SUBWORKERS = 4  # Number of cores each worker has access to
-
 
 def generate_quadrature(m):
     """
@@ -41,9 +39,44 @@ def generate_quadrature(m):
 
          m    --    number of nodes in quadrature / 2
     """
-    t, w = chaospy.quad_gauss_radau(m, chaospy.Uniform(0, 1), 1)
+    if m == 6:
+        return np.array(
+            [
+                0.01001828,
+                0.05203545,
+                0.12461923,
+                0.22284061,
+                0.34000816,
+                0.46813761,
+                0.59849728,
+                0.72220328,
+                0.8308249,
+                0.91695839,
+                0.97472638,
+                1.0,
+            ]
+        ), np.array(
+            [
+                0.02562405,
+                0.05795374,
+                0.08638532,
+                0.10893444,
+                0.12406078,
+                0.13073283,
+                0.12849567,
+                0.11750156,
+                0.09849927,
+                0.07278183,
+                0.04208607,
+                0.00694444,
+            ]
+        )
+    else:
+        raise NotImplementedError("Sorry broskis")
+
+    """t, w = chaospy.quad_gauss_radau(m, chaospy.Uniform(0, 1), 1)
     t = t[0]
-    return t, w
+    return t, w"""
 
 
 def cond_ent(joint, marg):
@@ -68,55 +101,6 @@ def cond_ent(joint, marg):
     return hab - hb
 
 
-def HAgB(sys, eta, q):
-    """
-    Computes the error correction term in the key rate for a given system,
-    a fixed detection efficiency and noisy preprocessing. Computes the relevant
-    components of the distribution and then evaluates the conditional entropy.
-
-        sys    --    parameters of system
-        eta    --    detection efficiency
-        q      --    bitflip probability
-    """
-
-    # Computes H(A|B) required for rate
-    [id, sx, sy, sz] = [qtp.qeye(2), qtp.sigmax(), qtp.sigmay(), qtp.sigmaz()]
-    [theta, a0, a1, b0, b1, b2] = sys[:]
-    rho = (cos(theta) * qtp.ket("00") + sin(theta) * qtp.ket("11")).proj()
-
-    # Noiseless measurements
-    a00 = 0.5 * (id + cos(a0) * sz + sin(a0) * sx)
-    b20 = 0.5 * (id + cos(b2) * sz + sin(b2) * sx)
-
-    # Alice bins to 0 transforms povm
-    A00 = eta * a00 + (1 - eta) * id
-    # Final povm transformation from the bitflip
-    A00 = (1 - q) * A00 + q * (id - A00)
-    A01 = id - A00
-
-    # Bob has inefficient measurement but doesn't bin
-    B20 = eta * b20
-    B21 = eta * (id - b20)
-    B22 = (1 - eta) * id
-
-    # joint distribution
-    q00 = (rho * qtp.tensor(A00, B20)).tr().real
-    q01 = (rho * qtp.tensor(A00, B21)).tr().real
-    q02 = (rho * qtp.tensor(A00, B22)).tr().real
-    q10 = (rho * qtp.tensor(A01, B20)).tr().real
-    q11 = (rho * qtp.tensor(A01, B21)).tr().real
-    q12 = (rho * qtp.tensor(A01, B22)).tr().real
-
-    qb0 = (rho * qtp.tensor(id, B20)).tr().real
-    qb1 = (rho * qtp.tensor(id, B21)).tr().real
-    qb2 = (rho * qtp.tensor(id, B22)).tr().real
-
-    qjoint = [q00, q01, q02, q10, q11, q12]
-    qmarg = [qb0, qb1, qb2]
-
-    return cond_ent(qjoint, qmarg)
-
-
 def sdp_dual_vec(SDP):
     """
     Extracts the dual vector from the solved sdp by ncpol2sdpa
@@ -134,59 +118,6 @@ def sdp_dual_vec(SDP):
     return np.array(vec[:])
 
 
-def sys2vec(sys, eta=1.0):
-    """
-    Returns a vector of probabilities determined from the system in the same order as specified
-    in the function score_constraints()
-
-        sys    --     system parameters
-        eta    --     detection efficiency
-    """
-    # Get the system from the parameters
-    [id, sx, sy, sz] = [qtp.qeye(2), qtp.sigmax(), qtp.sigmay(), qtp.sigmaz()]
-    [theta, a0, a1, b0, b1, b2] = sys[:]
-    rho = (cos(theta) * qtp.ket("00") + sin(theta) * qtp.ket("11")).proj()
-
-    # Define the first projectors for each of the measurements of Alice and Bob
-    a00 = 0.5 * (id + cos(a0) * sz + sin(a0) * sx)
-    a01 = id - a00
-    a10 = 0.5 * (id + cos(a1) * sz + sin(a1) * sx)
-    a11 = id - a10
-    b00 = 0.5 * (id + cos(b0) * sz + sin(b0) * sx)
-    b01 = id - b00
-    b10 = 0.5 * (id + cos(b1) * sz + sin(b1) * sx)
-    b11 = id - b10
-
-    A_meas = [[a00, a01], [a10, a11]]
-    B_meas = [[b00, b01], [b10, b11]]
-
-    vec = []
-
-    # Get p(00|xy)
-    for x in range(2):
-        for y in range(2):
-            vec += [
-                (
-                    eta ** 2 * (rho * qtp.tensor(A_meas[x][0], B_meas[y][0])).tr().real
-                    + +eta
-                    * (1 - eta)
-                    * (
-                        (rho * qtp.tensor(A_meas[x][0], id)).tr().real
-                        + (rho * qtp.tensor(id, B_meas[y][0])).tr().real
-                    )
-                    + +(1 - eta) * (1 - eta)
-                )
-            ]
-
-    # And now the marginals
-    vec += [eta * (rho * qtp.tensor(A_meas[0][0], id)).tr().real + (1 - eta)]
-    vec += [eta * (rho * qtp.tensor(id, B_meas[0][0])).tr().real + (1 - eta)]
-    vec += [eta * (rho * qtp.tensor(A_meas[1][0], id)).tr().real + (1 - eta)]
-    vec += [eta * (rho * qtp.tensor(id, B_meas[1][0])).tr().real + (1 - eta)]
-
-    return vec
-
-
 class BFFProblem:
     def __init__(self, **kwargs):
         self.T, self.W = generate_quadrature(M)  # Nodes, weights of quadrature
@@ -195,12 +126,14 @@ class BFFProblem:
         # (Dont need to include 3rd input for Bob here as we only constrain the statistics
         # for the other inputs).
         self.A_config = kwargs.get("A_config", [2, 2])
-        self.B_config = kwargs.get("B_config", [2, 2])
+        self.B_config = kwargs.get("B_config", [2, 2, 2])
         self.M = kwargs.get("M", 6)
-        self.solvef = kwargs.get("solvef", lambda sdp: sdp.solve(
-            "mosek", solverparameters={"num_threads": int(NUM_SUBWORKERS)}))
+        self.solvef = kwargs.get(
+                "solvef", lambda sdp: sdp.solve()
+        )
 
-        # Operators in problem
+        # Operators in problem (only o-1 for o outputs, because the last
+        # operator is enforced by normalisation)
         self.A = [Ai for Ai in ncp.generate_measurements(self.A_config, "A")]
         self.B = [Bj for Bj in ncp.generate_measurements(self.B_config, "B")]
         self.Z = ncp.generate_operators("Z", 2, hermitian=0)
@@ -239,6 +172,12 @@ class BFFProblem:
             SDP   --   sdp relaxation object
             q     --   probability of bitflip
         """
+        SDP.process_constraints(
+            equalities=self.op_eqs,
+            inequalities=self.op_ineqs,
+            momentequalities=self.moment_eqs[:],
+            momentinequalities=self.moment_ineqs,
+        )
         ck = 0.0  # kth coefficient
         ent = 0.0  # lower bound on H(A|X=0,E)
 
@@ -268,32 +207,11 @@ class BFFProblem:
                 # If we didn't solve the SDP well enough then just bound the entropy
                 # trivially
                 ent = 0
-                if VERBOSE:
+                if VERBOSE > 0:
                     print("Bad solve: ", k, SDP.status)
                 break
 
         return ent
-
-    def compute_rate(self, SDP, sys, eta, q):
-        """
-        Computes a lower bound on the rate H(A|X=0,E) - H(A|X=0,Y=2,B) using the fast
-        method
-
-            SDP       --     sdp relaxation object
-            sys       --     parameters of the system
-            eta       --     detection efficiency
-            q         --     bitflip probability
-        """
-        score_cons = self.score_constraints(sys[:], eta)
-        SDP.process_constraints(
-            equalities=self.op_eqs,
-            inequalities=self.op_ineqs,
-            momentequalities=self.moment_eqs[:] + score_cons[:],
-            momentinequalities=self.moment_ineqs,
-        )
-        ent = self.compute_entropy(SDP, q)
-        err = HAgB(sys, eta, q)
-        return ent - err
 
     def compute_dual_vector(self, SDP, q):
         """
@@ -339,153 +257,30 @@ class BFFProblem:
 
         return dual_vec, ent
 
-    def score_constraints(self, sys, eta=1.0):
+    def behav_eqs(self, pabxy):
         """
         Returns the moment equality constraints for the distribution specified by the
-        system sys and the detection efficiency eta. We only look at constraints coming
-        from the inputs 0/1. Potential to improve by adding input 2 also?
+        observed p(ab|xy). Note that we ignore constraints for a, b = 1; as in the
+        Collins-Gisin representation, these are unecessary.
 
-            sys    --     system parameters
-            eta    --     detection efficiency
+            pabxy  --     4D numpy array such that p[a, b, x, y] = p(ab|xy)
         """
-
-        # Extract the system
-        [id, sx, sy, sz] = [qtp.qeye(2), qtp.sigmax(), qtp.sigmay(), qtp.sigmaz()]
-        [theta, a0, a1, b0, b1, b2] = sys[:]
-        rho = (cos(theta) * qtp.ket("00") + sin(theta) * qtp.ket("11")).proj()
-
-        # Define the first projectors for each of the measurements of Alice and Bob
-        a00 = 0.5 * (id + cos(a0) * sz + sin(a0) * sx)
-        a01 = id - a00
-        a10 = 0.5 * (id + cos(a1) * sz + sin(a1) * sx)
-        a11 = id - a10
-        b00 = 0.5 * (id + cos(b0) * sz + sin(b0) * sx)
-        b01 = id - b00
-        b10 = 0.5 * (id + cos(b1) * sz + sin(b1) * sx)
-        b11 = id - b10
-
-        A_meas = [[a00, a01], [a10, a11]]
-        B_meas = [[b00, b01], [b10, b11]]
 
         constraints = []
-
-        # Add constraints for p(00|xy)
-        for x in range(2):
-            for y in range(2):
-                constraints += [
-                    self.A[x][0] * self.B[y][0]
-                    - (
-                        eta ** 2
-                        * (rho * qtp.tensor(A_meas[x][0], B_meas[y][0])).tr().real
-                        + +eta
-                        * (1 - eta)
-                        * (
-                            (rho * qtp.tensor(A_meas[x][0], id)).tr().real
-                            + (rho * qtp.tensor(id, B_meas[y][0])).tr().real
-                        )
-                        + +(1 - eta) * (1 - eta)
-                    )
-                ]
-
-        # Now add marginal constraints p(0|x) and p(0|y)
-        constraints += [
-            self.A[0][0]
-            - eta * (rho * qtp.tensor(A_meas[0][0], id)).tr().real
-            - (1 - eta)
-        ]
-        constraints += [
-            self.B[0][0]
-            - eta * (rho * qtp.tensor(id, B_meas[0][0])).tr().real
-            - (1 - eta)
-        ]
-        constraints += [
-            self.A[1][0]
-            - eta * (rho * qtp.tensor(A_meas[1][0], id)).tr().real
-            - (1 - eta)
-        ]
-        constraints += [
-            self.B[1][0]
-            - eta * (rho * qtp.tensor(id, B_meas[1][0])).tr().real
-            - (1 - eta)
-        ]
-
-        return constraints[:]
-
-    def optimise_sys(self, SDP, sys, eta, q):
-        """
-        Optimizes the rate using the iterative method via the dual vectors.
-
-            SDP    --    sdp relaxation object
-            sys    --    parameters of system that are optimized
-            eta    --    detection efficiency
-            q      --    bitflip probability
-        """
-
-        NEEDS_IMPROVING = True  # Flag to check if needs optimizing still
-        FIRST_PASS = True  # Checks if first time through loop
-        improved_sys = sys[:]  # Improved choice of system
-        best_sys = sys[:]  # Best system found
-        dual_vec = np.zeros(8)  # Dual vector same length as num constraints
-
-        # Loop until we converge on something
-        while NEEDS_IMPROVING:
-            # On the first loop we just solve and extract the dual vector
-            if not FIRST_PASS:
-                # Here we optimize the dual vector
-                # The distribution associated with the improved system
-                pstar = sys2vec(improved_sys[:], eta)
-
-                # function to optimize parameters over
-                def f0(x):
-                    # x is sys that we are optimizing
-                    p = sys2vec(x, eta)
-                    return -np.dot(p, dual_vec) + HAgB(x, eta, q)
-
-                # Bounds on the parameters of sys
-                bounds = [[0, pi / 2]] + [[-pi, pi] for _ in range(len(sys) - 1)]
-                # Optmize qubit system (maximizing due to negation in f0)
-                res = minimize(f0, improved_sys[:], bounds=bounds)
-                improved_sys = res.x.tolist()[:]  # Extract optimizer
-
-            # Apply the new system to the sdp
-            score_cons = self.score_constraints(improved_sys[:], eta)
-            SDP.process_constraints(
-                equalities=self.op_eqs,
-                inequalities=self.op_ineqs,
-                momentequalities=self.moment_eqs[:] + score_cons[:],
-                momentinequalities=self.moment_ineqs,
+        oA, oB, iA, iB = pabxy.shape
+        for (a, b, x, y) in itprod(range(oA - 1), range(oB - 1), range(iA), range(iB)):
+            constraints.append(self.A[x][a] * self.B[y][b] - pabxy[a, b, x, y])
+        for (a, x) in itprod(range(oA - 1), range(iA)):
+            constraints.append(
+                self.A[x][a]
+                - sum([pabxy[a, b, x, y] for (b, y) in itprod(range(oB), range(iB))])
             )
-
-            # Compute new dual vector and the rate
-            dual_vec, new_ent = self.compute_dual_vector(SDP, q)
-            new_rate = new_ent - HAgB(improved_sys[:], eta, q)
-
-            if FIRST_PASS:
-                # If first run through then this is the initial entropy
-                starting_rate = new_rate
-                best_rate = new_rate
-                FIRST_PASS = False
-            else:
-                if (
-                    new_rate < best_rate + best_rate * EPS_M
-                    or new_rate < best_rate + EPS_A
-                ):
-                    NEEDS_IMPROVING = False
-
-            if new_rate > best_rate:
-                if VERBOSE > 0:
-                    print(
-                        "Optimizing sys (eta, q) =",
-                        (eta, q),
-                        " ... ",
-                        starting_rate,
-                        "->",
-                        new_rate,
-                    )
-                best_rate = new_rate
-                best_sys = improved_sys[:]
-
-        return best_rate, best_sys[:]
+        for (b, y) in itprod(range(oB - 1), range(iB)):
+            constraints.append(
+                self.B[y][b]
+                - sum([pabxy[a, b, x, y] for (a, x) in itprod(range(oA), range(iA))])
+            )
+        return constraints
 
     def optimise_q(self, SDP, sys, eta, q):
         """

@@ -346,12 +346,12 @@ function test_couplers()
   end
 end
 
-chshset = (2,2,2,2)
-chsh_poly = cg_polytope(chshset...)
-chsh_v = vertices_list(chsh_poly)
+const chshset = (2,2,2,2)
+const chsh_poly = cg_polytope(chshset...)
+const chsh_v = vertices_list(chsh_poly)
 
-qkdset = (2,2,3,2)
-qkd_poly = cg_polytope(qkdset...)
-qkd_v = vertices_list(qkd_poly)
-qkd_ldpoly = ld_polytope(qkdset...)
-qkd_ldconstr = constraints(qkd_ldpoly)
+const qkdset = (2,2,3,2)
+const qkd_poly = cg_polytope(qkdset...)
+const qkd_v = vertices_list(qkd_poly)
+const qkd_ldpoly = ld_polytope(qkdset...)
+const qkd_ldconstr = constraints(qkd_ldpoly)
