@@ -161,7 +161,7 @@
 \newcommand{\iid}{i.i.d.\ } % independently and identically distributed
 
 % quantum physics
-\newcommand{\tr}{\mathrm{tr}} % enables Trace operator
+\newcommand{\Tr}{\mathrm{Tr}} % enables Trace operator
 \newcommand{\Hs}{\mathcal{H}} % enables H for Hilbert space
 
 % category theory
@@ -282,15 +282,17 @@
 
   \subsection{Objectives}
 
-  Our ideal outcome from this project is to find an efficient algorithm that, given a behaviour, can specify the wiring that produces the behaviour with the largest possible keyrate. A trivial, inefficient algorithm would be to simply compute all possible wirings by brute force, although this will necessarily restrict our search to a limited subset of the possible wirings, since we can wire together arbitrarily many boxes. If no such algorithm exists, we would want to understand why. Is it that wiring multiple boxes together cannot give an advantage over post-processing a single box? Is the structure of achievable boxes simply too complex to navigate efficiently?
+  Our ideal outcome from this project is to find an efficient algorithm that, given a behaviour, can specify the wiring that produces the behaviour with the largest possible key rate. A trivial, inefficient algorithm would be to simply compute all possible wirings by brute force, although this will necessarily restrict our search to a limited subset of the possible wirings, since we can wire together arbitrarily many boxes. If no such algorithm exists, we would want to understand why. Is it that wiring multiple boxes together cannot give an advantage over post-processing a single box? Is the structure of achievable boxes simply too complex to navigate efficiently?
 
   While this task is daunting, we hope that, even if we fall far short of this ideal outcome, this project can contribute to a better understanding of the mysterious phenomenon of nonlocality, and to the work of harnessing it for human benefit.
 
   \subsection{Structure}
 
-  As this is still an interim report, we do not have many concrete results, although we have investigated and tried to understand a variety of techniques for approaching this problem. We first review the basic, relevant notions of nonlocality, then proceed to review some preliminary results. Next, we discuss how we can perform an exhaustive search through the space of possible wirings, followed by a review of techniques for upper bounding and lower bounding the achievable keyrates. Finally, we explore more unconventional approaches to analysing achievable DIQKD rates, namely nonlocality monotones and the structure of the space of achievable correlations.
+  As this is still an interim report, we do not have many concrete results, although we have investigated and tried to understand a variety of techniques for approaching this problem. We first review the basic, relevant notions of nonlocality and DIQKD, then proceed to review some preliminary results. Next, we discuss how we can perform an exhaustive search through the space of possible wirings, followed by a review of techniques for upper bounding and lower bounding the achievable key rates. Finally, we explore more unconventional approaches to analysing achievable DIQKD rates, namely nonlocality monotones and the structure of the space of achievable correlations.
 
-  \section{Nonlocality Review}
+  \section{Preliminaries}
+
+  \subsection{Nonlocality Review}
 
   In this section, we briefly summarise the relevant notions of the theory of nonlocality. A fuller exposition can be found in~\cite{BellNonlocality}. In order to be compatible with the theory of relativity, the behaviour of a device must fulfil the \emph{no-signalling conditions}, which state that the marginal probabilities for each player's output cannot depend on the other player's input:
   \begin{gather}
@@ -307,11 +309,11 @@
     p(o_A b|xy) = p(b|y) - \sum_{a < o_A} p(ab|xy)\;\forall b,x,y \\
     p(ao_B|xy) = p(a|x) - \sum_{b < o_B} p(ab|xy)\;\forall a,x,y.
   \end{gather*}
-  Therefore, none of the probabilities \(p(ab|xy)\) where \(a = o_A\) or \(b = o_B\) are independent, and we have only \((o_A-1)(o_B-1){i_A}{i_B}\) independent probabilities of this form. Therefore, the number of independent parameters of a no-signalling behaviour is
-  \[ D_{NS}(i_A, o_A, i_B, o_B) = (o_A-1)(o_B-1){i_A}{i_B} + (o_A-1)i_A + (o_B-1)i_B, \]
-  and behaviours can be seen as vectors in \(\R^{D_{NS}}\), with all entries positive and normalised.
+  Therefore, none of the probabilities \(p(ab|xy)\) with \(a = o_A\) or \(b = o_B\) are independent, and we have only \((o_A-1)(o_B-1){i_A}{i_B}\) independent probabilities of this form. Therefore, the number of independent parameters of a no-signalling behaviour is
+  \[ d_{NS}(i_A, o_A, i_B, o_B) = (o_A-1)(o_B-1){i_A}{i_B} + (o_A-1)i_A + (o_B-1)i_B, \]
+  and behaviours can be seen as vectors in \(\R^{d_{NS}}\), with all entries positive and normalised (that the remaining probabilities do not sum to more than 1 must still be enforced).
 
-  The space of no-signalling behaviours is the \emph{no-signalling polytope} \(\NSs \in \R^{D_{NS}}\). \(\NSs\) contains the \emph{local polytope} \(\Ls\), which consists of the behaviours that could be produced from pre-shared (and therefore insecure) data. The behaviours we are interested in are those in the \emph{quantum set} \(\Qs\), where \(\Ls \subsetneq \Qs \subsetneq \NSs\), which is the set of behaviours achievable according to quantum theory. This is important because, until quantum theory is superseded, the devices we engineer can only achieve behaviours within \(\Qs\). We will also need quantum theory to characterise the possible attacks against our DIQKD system, and therefore to define our key rates.
+  The space of no-signalling behaviours is the \emph{no-signalling polytope} \(\NSs \in \R^{d_{NS}}\). \(\NSs\) contains the \emph{local polytope} \(\Ls\), which consists of the behaviours that could be produced from pre-shared (and therefore insecure) data. The behaviours we are interested in are those in the \emph{quantum set} \(\Qs\), where \(\Ls \subsetneq \Qs \subsetneq \NSs\), which is the set of behaviours achievable according to quantum theory. This is important because, until quantum theory is superseded, the devices we engineer can only achieve behaviours within \(\Qs\). We will also need quantum theory to characterise the possible attacks against our DIQKD system, and therefore to define our key rates.
 
   We focus primarily on \emph{binary-output} settings, that is, settings where \(o_A = o_B = 2\), which are simpler to analyse and more helpful for applications. In this case, we can express many statistics of interest in language reminiscent of quantum theory. We define the \emph{observables} \(A_x\) and \(B_y\) for each value of \(x\) and \(y\), respectively, acting on Alice and Bob's respective Hilbert spaces\footnote{More formally, then, the observables are \(A_x \otimes I_B\) and \(I_A \otimes B_y\)}. These Hermitian operators have eigenvalues \(-1\) and \(+1\), corresponding to the measurement outcomes \(0\) and \(1\) respectively.\footnote{Another convention has \(0 \mapsto 1\) and \(1 \mapsto 2\), which is typically followed in code in languages with 1-based array indexing, such as MATLAB and Julia. We will clarify which convention we are using and try to avoid switching between conventions unnecessarily, but we will hold \(\{0,1\}\) as the ``actual'' measurement outcomes.} Each round can then be considered a measurement of the observables corresponding to the chosen measurement setting on an unknown quantum state prepared by the DIQKD system.
 
@@ -333,15 +335,52 @@
   \end{gather}
   Behaviours with \(S > 2\) are not contained in \(\Ls\), while behaviours in \(\Qs\) are constrained to have \(S \leq 2\sqrt{2}\).
 
-  Perhaps the best-known DIQKD protocol is given in~\cite{DIQKD_Lower}, which also gives a formula to explicitly calculate the keyrate \(r\) in terms of \(Q\) and \(S\). This takes place in the \((2,2,3,2)\) setting which we refer to as the \emph{QKD setting}, and uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key. Therefore, we have \(Q = Q_{02}\) and
+  \subsection{Device-independent quantum key distribution}
+
+  At the most general level, a DIQKD protocol \(\mathfrak{P}\) can be defined as finite sequence of \emph{local operations and public communication} operations (LOPC) that distills an \(\epsilon\)-\emph{secure} key of length \(\ell\) from \(n\) rounds of Bell test data~\cite{DIQKD_Limits}. Alice and Bob share a \(\epsilon\)-\emph{secure key} of length \(\ell\) if, after executing the protocol, their joint state with the eavesdropper Eve \(\rho_{ABE}\) satisfies~\cite{SecurityQKD}
   \begin{equation}
-    r \geq 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
+    (1-\epsilon_{\rob})D(\rho_{ABE}, \chi_{AB}^{\ell}\otimes\rho_E) \leq \epsilon,
   \end{equation}
-  where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, with the logarithm in base 2. \(S\) here is calculated from \(x,y \in \{0,1\}\). Being the rate for an explicit, achievable protocol, this rate is a lower bound for the total secrecy extractable.
+  where \(\epsilon_{\rob}\) is the probability of the protocol aborting without interference from Eve, and \(D(\rho,\sigma)\) is the \emph{trace distance}
+  \begin{equation}
+    D(\rho, \sigma) = \frac{1}{2}\norm{\rho - \sigma},
+  \end{equation}
+  which generalises the classical total variational distance. We also have the \emph{trace norm}
+  \begin{equation}
+    \norm{\rho}_1 = \Tr\left[ \sqrt{\rho^{\dagger}\rho} \right] = \Tr\abs{\rho},
+  \end{equation}
+  the \emph{ideal key}
+  \begin{equation}
+    \chi_{AB}^{\ell} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{A} \otimes \ket{j}\bra{j}_{B},
+  \end{equation}
+  a uniformly distributed mixture amongst all possible keys of length \(\ell\), and Eve's marginal state \(\rho_E = \Tr_{AB} \rho_{ABE}\). This definition of security is \emph{universally composable} (UC), which is crucial for applications---if two resources are \(\epsilon_1\) and \(\epsilon_2\) secure under a UC definition, then a protocol that uses only these two resources is \(\epsilon\)-secure under the same definition, with \(\epsilon \leq \epsilon_1 + \epsilon_2\).
+
+  The asymptotic rate \(r\) of the protocol \(\mathfrak{P}\) is~\cite{CQKeyDistill}
+  \begin{equation}
+    r = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\epsilon_{\rob}) \frac{\ell_n}{n},
+  \end{equation}
+  where the supremum is over all sequences \(\{\ell_n\}\) such that
+  \[ \lim_{n\to\infty} (1-\epsilon_{\rob})D(\rho_{ABE}, \chi_{AB}^{\ell_n}\otimes\rho_E) = 0. \]
+  If we consider the rounds to be \iid{}, which is justifiable in the asymptotic limit~\cite{DI_Proofs}, we can define the systems \(A\), \(B\) and \(E\) as Alice's, Bob's and Eve's systems after one Bell test round, respectively. Intuitively, the amount of information that Alice has which is secret to Eve is \({H(A|E)}_{\rho}\), where \(H\) is the von Neumann entropy, \({H(A)}_{\rho} = \Tr\left[\rho_{A}\log\rho_{A}\right]\), which reduces to the Shannon entropy for a classical system. On the other hand, \(B\) may not be perfectly correlated with \(A\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve is upper bounded by \({H(A|B)}_{\rho}\). This gives us the \emph{Devetak-Winter key rate}~\cite{DevetakWinter}
+  \begin{equation}
+    r \geq {H(A|E)}_{\rho} - {H(A|B)}_{\rho}.
+  \end{equation}
+
+  Much of the effort in bounding the DIQKD key rate has focused on this definition, and we will do likewise. While \({H(A|B)}_{\rho}\) can be computed directly as the QBER, upper and lower bounds for \({H(A|E)}_{\rho}\) are much harder to achieve.
+
+  We will now consider the first DIQKD protocol proved to be secure~\cite{DIQKD_Lower}. This takes place in the \((2,2,3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}, and it uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key. Therefore, we have \({H(A|B)}_{\rho} = Q_{02} = Q\), and it was proved that
+  \begin{equation}
+    {H(A|E)}_{\rho} \geq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
+  \end{equation}
+  where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, with the logarithm in base 2, and where \(S\) is calculated from \(x,y \in \{0,1\}\). Therefore,
+  \begin{equation}
+    r \geq 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right).
+  \end{equation}
+   Being the rate for an explicit, achievable protocol, this rate is a lower bound for the total secrecy extractable.
 
   The derivative of \(h_2(x)\) is
   \[ \diffp{{h_2(x)}}{x} = \frac{1}{\ln 2} \ln \left(\frac{1-x}{x}\right), \]
-  from which it can be seen that for \(Q \in [0, 0.5]\), the keyrate increases for decreasing \(Q\). It is always possible to achieve this value of \(Q\) by flipping all bits if the raw value for \(Q\) is \(> 0.5\).
+  from which it can be seen that for \(Q \in [0, 0.5]\), the key rate increases for decreasing \(Q\). It is always possible to achieve this value of \(Q\) by flipping all bits if the raw value for \(Q\) is \(> 0.5\).
 
   Simple differentiation also shows that \(r\) increases with increasing \(S\):
   \begin{align*}
@@ -426,7 +465,7 @@
     Taking inspiration from this work, however, we might want to see if the
 
     % TODO may be possible to form polytope of wirings, but may not be helpful -
-    % extremal points may not maximise keyrates
+    % extremal points may not maximise key rates
 
     \subsection{Number of Distinct Wirings}
 
@@ -450,7 +489,7 @@
 
   \section{Upper Bounds}
 
-  There are a number of upper bounds for key rates in the literature, computed using a large variety of techniques. These bounds can be for the keyrate achievable from a specific state, or from a specific behaivour. An important property of an upper bound is whether it is \emph{faithful}: faithful upper bounds are those that have non-zero keyrates for all entangled states or all nonlocal behaviours. For our purposes, a non-faithful upper bound is much more helpful---if local wirings between multiple copies of the same device are able to \emph{revive} the keyrate, that would be very interesting from both theoretical and practical standpoints. Theoretically, it would develop our currently limited understanding of the nature of the \emph{secrecy capacity} of no-signalling behaviours, and practically, it would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system.
+  There are a number of upper bounds for key rates in the literature, computed using a large variety of techniques. These bounds can be for the key rate achievable from a specific state, or from a specific behaivour. An important property of an upper bound is whether it is \emph{faithful}: faithful upper bounds are those that have non-zero key rates for all entangled states or all nonlocal behaviours. For our purposes, a non-faithful upper bound is much more helpful---if local wirings between multiple copies of the same device are able to \emph{revive} the key rate, that would be very interesting from both theoretical and practical standpoints. Theoretically, it would develop our currently limited understanding of the nature of the \emph{secrecy capacity} of no-signalling behaviours, and practically, it would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system.
 
   A notable non-faithful upper bound is given in~\cite{NotSufficient}, where Eve, who controls the source that provides quantum states for the devices to measure, can sometimes choose to distribute \emph{local correlations}, which she has full information on, while distributing nonlocal correlations at all other times. This \emph{convex combination} attack, so called because the resultant behaviour is a convex combination of the local and nonlocal behaviours, can simulate the correlations that are generated by inefficient projective measurements on Werner states. These behaviours are nonlocal, that is, they have \(S > 2\), but the fact that they were generated in this manner can be used to prove that standard protocols, where both Alice and Bob announce their measurement settings, cannot generate secret keys from them.
 
