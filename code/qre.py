@@ -25,11 +25,11 @@ from sympy.physics.quantum.dagger import Dagger
 # import chaospy
 
 
-LEVEL = 2  # NPA relaxation level
 M = 6  # Number of nodes / 2 in gaussian quadrature
 KEEP_M = 0  # Optimizing mth objective function?
-VERBOSE = 2  # If > 1 then ncpol2sdpa will also be verbose
+VERBOSE = 0  # If > 1 then ncpol2sdpa will also be verbose
 EPS_M, EPS_A = 1e-4, 1e-4  # Multiplicative/Additive epsilon in iterative optimization
+
 
 def generate_quadrature(m):
     """
@@ -118,7 +118,7 @@ def sdp_dual_vec(SDP):
     return np.array(vec[:])
 
 
-class BFFProblem:
+class BFFProblem(object):
     def __init__(self, **kwargs):
         self.T, self.W = generate_quadrature(M)  # Nodes, weights of quadrature
 
@@ -128,9 +128,7 @@ class BFFProblem:
         self.A_config = kwargs.get("A_config", [2, 2])
         self.B_config = kwargs.get("B_config", [2, 2, 2])
         self.M = kwargs.get("M", 6)
-        self.solvef = kwargs.get(
-                "solvef", lambda sdp: sdp.solve()
-        )
+        self.solvef = kwargs.get("solvef", lambda sdp: sdp.solve())
 
         # Operators in problem (only o-1 for o outputs, because the last
         # operator is enforced by normalisation)

@@ -240,7 +240,6 @@
   \newcommand{\eAXU}{\epsilon\text{-}\AXU}
   \newcommand{\eASU}{\epsilon\text{-}\ASU}
 
-
   \newcommand{\frI}{\mathfrak{I}}
   \newcommand{\frX}{\mathfrak{X}}
   \newcommand{\frA}{\mathfrak{A}}
@@ -264,6 +263,10 @@
   \newcommand{\HC}{\mathrm{HC}}
   \newcommand{\MC}{\mathrm{MC}}
 
+  \newcommand{\Ls}{\mathcal{L}}
+  \newcommand{\Qs}{\mathcal{Q}}
+  \newcommand{\NSs}{\mathcal{NS}}
+
   \title{Device-independent quantum key distribution with local wiring}
   \author{John Khoo\\ \href{mailto:john_khoo@u.nus.edu}{\texttt{john\_khoo@u.nus.edu}} \\\\ AD MAIOREM DEI GLORIAM} 
 
@@ -277,38 +280,64 @@
 
   Despite this extraordinary guarantee of security, progress in understanding and implementing DIQKD has been slow. For example, given a particular behaviour, we do not have a tight expression for the amount of secrecy that can be extracted per use of the devices. This project aims to explore this aspect of DIQKD from two directions. Firstly, we aim to find an upper bound for the DIQKD key rate from a given behaviour, where each round undergoes independent classical post-processing. Secondly, we wish to see if classical post-processing that \emph{combines} multiple rounds to produce a new behaviour can lead to improvements over these upper bounds. This post-processing is referred to as \emph{wiring}, and can be seen as the act of connecting the inputs and outputs of multiple devices together, with arbitrary logic gates between them.
 
+  \subsection{Objectives}
+
   Our ideal outcome from this project is to find an efficient algorithm that, given a behaviour, can specify the wiring that produces the behaviour with the largest possible keyrate. A trivial, inefficient algorithm would be to simply compute all possible wirings by brute force, although this will necessarily restrict our search to a limited subset of the possible wirings, since we can wire together arbitrarily many boxes. If no such algorithm exists, we would want to understand why. Is it that wiring multiple boxes together cannot give an advantage over post-processing a single box? Is the structure of achievable boxes simply too complex to navigate efficiently?
 
   While this task is daunting, we hope that, even if we fall far short of this ideal outcome, this project can contribute to a better understanding of the mysterious phenomenon of nonlocality, and to the work of harnessing it for human benefit.
 
-  \section{Preliminaries}
+  \subsection{Structure}
 
-  In order to be compatible with the theory of relativity, the behaviour of a device must fulfil the \emph{no-signalling condition}, which states that the marginal probabilities for each player's output cannot depend on the other player's input:
+  As this is still an interim report, we do not have many concrete results, although we have investigated and tried to understand a variety of techniques for approaching this problem. We first review the basic, relevant notions of nonlocality, then proceed to review some preliminary results. Next, we discuss how we can perform an exhaustive search through the space of possible wirings, followed by a review of techniques for upper bounding and lower bounding the achievable keyrates. Finally, we explore more unconventional approaches to analysing achievable DIQKD rates, namely nonlocality monotones and the structure of the space of achievable correlations.
+
+  \section{Nonlocality Review}
+
+  In this section, we briefly summarise the relevant notions of the theory of nonlocality. A fuller exposition can be found in~\cite{BellNonlocality}. In order to be compatible with the theory of relativity, the behaviour of a device must fulfil the \emph{no-signalling conditions}, which state that the marginal probabilities for each player's output cannot depend on the other player's input:
   \begin{gather}
     \sum_b p(ab|xy) = p(a|xy) = p(a|x)\;\forall a,x,y \\
     \sum_a p(ab|xy) = p(b|xy) = p(b|y)\;\forall b,x,y.
   \end{gather}
 
-  Many important statistics can be expressed in terms of the \emph{correlators} \(\angleb{A_x B_y}\) and the \emph{marginals} \(\angleb{A_x}\) and \(\angleb{B_y}\):
-  \begin{gather}
-    \angleb{A_x B_y} \coloneqq p(a=b|xy) - p(a\neq b|xy) \\
-    \angleb{A_x} \coloneqq \sum_a \lambda_a p(a|x) \qquad \angleb{B_y} \coloneqq \sum_b \lambda_b p(b|y),
-  \end{gather}
-  where \(\lambda_a\) and \(\lambda_b\) are values that are associated to those outputs when defining the setting.
+  A device must have a concrete number of possible inputs and outputs. We refer to the choice of the number of inputs and outputs as the \emph{setting} \((i_A, o_A, i_B, o_B)\)\footnote{To be more general, we could let each input have its own number of outputs. In Alice's case (Bob's case being analogous), we would have a function \(o_A'(x)\) to determine the number of outputs from \(x\). However, these behaviours would be a subset of the behaviour with a constant \(o_A = \max_x o_A'(x)\), which can reproduce those behaviours by setting \(p(ab|xy) = 0\) for \(a > o_A'(x)\). There is hence no loss of generality in setting \(o_A\) to be a constant.}, where
+  \[ x \in \{1, \ldots, i_A\} \qquad a \in \{1, \ldots, o_A\} \qquad y \in \{1, \ldots, i_B\} \qquad b \in \{1, \ldots, o_B\}. \]
+  Naively, it would seem that we need \(o_A o_B i_A i_B\) values of the distribution \(p(ab|xy)\), one for each tuple \((a, b, x, y)\), to describe a no-signalling behaviour (that is, a behaviour that fulfills the no-signalling conditions). However, the \emph{Collins-Gisin representation} takes advantage of the no-signalling conditions to reduce this. For each \(x\), \(p(a|x)\) must be normalised, and so the value of \(p(o_A|x)\) for each \(x\) is no longer independent. The same applies to \(p(b|y)\), yielding \((o_A-1)i_A + (o_B-1)i_B\) marginals in total. Similarly, \(p(o_A o_B|xy)\) is fixed by normalisation for a given \((x,y)\).
 
-  In the simplest nontrivial setting, where \(a,b,x,y \in \{0,1\}\), we have the quantum bit error rate (QBER) \(Q_{xy}\) and the Clauser-Horne-Shimony-Holt (CHSH) value \(S\):
+  Further, the no-signalling condition allows us to recover \emph{any} probability that involves either \(o_A\) or \(o_B\) as
+  \begin{gather*}
+    p(o_A b|xy) = p(b|y) - \sum_{a < o_A} p(ab|xy)\;\forall b,x,y \\
+    p(ao_B|xy) = p(a|x) - \sum_{b < o_B} p(ab|xy)\;\forall a,x,y.
+  \end{gather*}
+  Therefore, none of the probabilities \(p(ab|xy)\) where \(a = o_A\) or \(b = o_B\) are independent, and we have only \((o_A-1)(o_B-1){i_A}{i_B}\) independent probabilities of this form. Therefore, the number of independent parameters of a no-signalling behaviour is
+  \[ D_{NS}(i_A, o_A, i_B, o_B) = (o_A-1)(o_B-1){i_A}{i_B} + (o_A-1)i_A + (o_B-1)i_B, \]
+  and behaviours can be seen as vectors in \(\R^{D_{NS}}\), with all entries positive and normalised.
+
+  The space of no-signalling behaviours is the \emph{no-signalling polytope} \(\NSs \in \R^{D_{NS}}\). \(\NSs\) contains the \emph{local polytope} \(\Ls\), which consists of the behaviours that could be produced from pre-shared (and therefore insecure) data. The behaviours we are interested in are those in the \emph{quantum set} \(\Qs\), where \(\Ls \subsetneq \Qs \subsetneq \NSs\), which is the set of behaviours achievable according to quantum theory. This is important because, until quantum theory is superseded, the devices we engineer can only achieve behaviours within \(\Qs\). We will also need quantum theory to characterise the possible attacks against our DIQKD system, and therefore to define our key rates.
+
+  We focus primarily on \emph{binary-output} settings, that is, settings where \(o_A = o_B = 2\), which are simpler to analyse and more helpful for applications. In this case, we can express many statistics of interest in language reminiscent of quantum theory. We define the \emph{observables} \(A_x\) and \(B_y\) for each value of \(x\) and \(y\), respectively, acting on Alice and Bob's respective Hilbert spaces\footnote{More formally, then, the observables are \(A_x \otimes I_B\) and \(I_A \otimes B_y\)}. These Hermitian operators have eigenvalues \(-1\) and \(+1\), corresponding to the measurement outcomes \(0\) and \(1\) respectively.\footnote{Another convention has \(0 \mapsto 1\) and \(1 \mapsto 2\), which is typically followed in code in languages with 1-based array indexing, such as MATLAB and Julia. We will clarify which convention we are using and try to avoid switching between conventions unnecessarily, but we will hold \(\{0,1\}\) as the ``actual'' measurement outcomes.} Each round can then be considered a measurement of the observables corresponding to the chosen measurement setting on an unknown quantum state prepared by the DIQKD system.
+
+  The \emph{expectation values} of the individual observables on the state are the \emph{marginals} \(\angleb{A_x}\) and \(\angleb{B_y}\). We are also interested in the \emph{correlators} \(\angleb{A_x B_y}\). These can be computed as
+  \begin{align}
+    \angleb{A_x B_y} &= \begin{aligned}[c]
+      (1 \times 1 \times p(a=1,b=1|xy)) + (-1 \times -1 \times p(a=0,b=0|xy)) \\
+      + (1 \times -1 \times p(a=1,b=0|xy)) + (-1 \times 1 \times p(a=0,b=1|xy))
+    \end{aligned} \notag \\
+                     &= p(a=b|xy) - p(a\neq b|xy) \\
+      \angleb{A_x} &= p(a=1|x) - p(a=0|x) \\
+      \angleb{B_y} &= p(b=1|y) - p(b=0|y).
+  \end{align}
+
+  In \((2,2,2,2)\), the simplest nontrivial setting, some important statistics are the quantum bit error rate (QBER) \(Q_{xy}\) and the Clauser-Horne-Shimony-Holt (CHSH) value \(S\):
   \begin{gather}
     Q_{xy} \coloneqq p(a \neq b|xy) = \frac{1-\angleb{A_x B_y}}{2} \\
     S \coloneqq \angleb{A_0 B_0} + \angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1}.
   \end{gather}
-  Behaviours with \(S > 2\) are necessarily non-classical, while the behaviours allowed by quantum physics are constrained to have \(S \leq 2\sqrt{2}\).
+  Behaviours with \(S > 2\) are not contained in \(\Ls\), while behaviours in \(\Qs\) are constrained to have \(S \leq 2\sqrt{2}\).
 
-  Perhaps the best-known DIQKD protocol is given in~\cite{DIQKD_Lower}, which also gives a formula to explicitly calculate the keyrate \(r\) in terms of \(Q\) and \(S\). This protocol introduces an additional possible setting \(y = 2\), and uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key. Therefore, we have \(Q = Q_{02}\) and
+  Perhaps the best-known DIQKD protocol is given in~\cite{DIQKD_Lower}, which also gives a formula to explicitly calculate the keyrate \(r\) in terms of \(Q\) and \(S\). This takes place in the \((2,2,3,2)\) setting which we refer to as the \emph{QKD setting}, and uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key. Therefore, we have \(Q = Q_{02}\) and
   \begin{equation}
     r \geq 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
   \end{equation}
-  where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, with the logarithm in base 2. Being the rate for an explicit, achievable protocol, this rate is a lower bound for the total secrecy extractable. It is tight amongst bounds that depend only on \(Q\) and \(S\).
-   % TODO proof of this
+  where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, with the logarithm in base 2. \(S\) here is calculated from \(x,y \in \{0,1\}\). Being the rate for an explicit, achievable protocol, this rate is a lower bound for the total secrecy extractable.
 
   The derivative of \(h_2(x)\) is
   \[ \diffp{{h_2(x)}}{x} = \frac{1}{\ln 2} \ln \left(\frac{1-x}{x}\right), \]
@@ -322,16 +351,8 @@
                  &\geq 0.
   \end{align*}
 
-  \subsection{Upper Bounds}
-
-  There are a number of upper bounds for key rates in the literature, computed using a large variety of techniques. These bounds can be for the keyrate achievable from a specific state, or from a specific behaivour. An important property of an upper bound is whether it is \emph{faithful}: faithful upper bounds are those that have non-zero keyrates for all entangled states or all nonlocal behaviours. For our purposes, a non-faithful upper bound is much more helpful---if local wirings between multiple copies of the same device are able to \emph{revive} the keyrate, that would be very interesting from both theoretical and practical standpoints. Theoretically, it would develop our currently limited understanding of the nature of the \emph{secrecy capacity} of no-signalling behaviours, and practically, it would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system.
-
-  A notable non-faithful upper bound is given in~\cite{NotSufficient}, where Eve, who controls the source that provides quantum states for the devices to measure, can sometimes choose to distribute \emph{local correlations}, which she has full information on, while distributing nonlocal correlations at all other times. This \emph{convex combination} attack, so called because the resultant behaviour is a convex combination of the local and nonlocal behaviours, can simulate the correlations that are generated by inefficient projective measurements on Werner states. These behaviours are nonlocal, that is, they have \(S > 2\), but the fact that they were generated in this manner can be used to prove that standard protocols, where both Alice and Bob announce their measurement settings, cannot generate secret keys from them.
-
-  TODO:\ More information on other upper bounds to come.
-
-  \subsection{AND Gates}
-
+  \section{Preliminary Results}
+  
     Consider the following simple wiring, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs.
 
     For \(N\) boxes,
@@ -340,11 +361,27 @@
       \angleb{A_x}_{N} = 1 - 2 {\left(\frac{1-\angleb{A_x}}{2}\right)}^N \qquad \angleb{B_y}_{N} = 1 - 2 {\left(\frac{1-\angleb{B_y}}{2}\right)}^N.
     \end{gather}
 
+    Our preliminary results found a revival of the Pironio key rate for states that are generated according to a simple experimental model. In this model, we denote the behaviour given by the states and measurements, assuming a perfect experimental setup, by \(\tilde{p}\), while the observed probability distribution is denoted by \(p\). The probability of no signal being produced is \(n_c\), and the efficiencies of Alice and Bob's detectors are \(\eta_A\) and \(\eta_B\) respectively. When nothing is detected, either due to no signal being produced or due to detector inefficiency, we assign the \(-1\) outcome. Therefore, the observed probabilities are
+    \begin{align*}
+      p(a|x) &= \delta_{a,-1}(n_c + 1 - \eta_A) + (\eta_A - n_c)\tilde{p}(a|x) \\
+      p(b|y) &= \delta_{b,-1}(n_c + 1 - \eta_B) + (\eta_B - n_c)\tilde{p}(b|y) \\
+      p(ab|xy) &= \begin{aligned}[c] \delta_{a,-1}\delta_{b,-1}n_c + (1-n_c) [ \delta_{a,-1} \delta_{b,-1}(1-\eta_A\eta_B) + \eta_A\eta_B \tilde{p}(ab|xy) \\
+        + \delta_{b,-1}\eta_A(1-\eta_B)\tilde{p}(a|x) + \delta_{a,-1}\eta_B(1-\eta_A)\tilde{p}(b|y) ] 
+      \end{aligned}
+    \end{align*}
+
+    For our purposes, we fix \(\eta_A = \eta_B = \eta\). Then, we have
+    \begin{align*}
+      \diffp{}{{n_c}} \angleb{A_x B_y} &= \eta \left( \left(1-\eta\right) \left(\langle\tilde{A}_x\rangle + \langle\tilde{B}_y\rangle\right) - \eta \langle\tilde{A}_x\tilde{B}_y\rangle + \left(2 - \eta\right) \right) \\
+      \diffp{}{{\eta}} \angleb{A_x B_y} &= \left(1 - n_{c}\right) \left( \left(1-2\eta\right) \left(\langle\tilde{A}_x\rangle+\langle\tilde{B}_y\rangle\right) - 2\eta \langle\tilde{A}_x\tilde{B}_y\rangle + (2-2\eta) \right) \\
+      \diffp{}{S} H^S(A|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right]
+    \end{align*}
+
     \section{Local Wirings}
 
     \subsection{Classifying Wirings}
 
-    The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short et al.~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. This work attempts to generalise joint measurements to the no-signalling setting and finds a polytope of possible operations which happens to have local wirings at its extremal points. For the case of two binary-input, binary-output boxes, there are 82 extremal points, grouped into 5 possible types of wirings: deterministic output, where the input is precisely the output; one-sided, where only one box is used; sequential, where the output of the first box is used as input for the second box, and AND and XOR gated, where the respective gates are used to combine the output of the two boxes.
+    The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short et al.~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. This work attempts to generalise joint measurements to the no-signalling setting and finds a polytope of possible operations which happens to have local wirings at its extremal points. For the  \((2,2,2,2)\) setting, there are 82 extremal points, grouped into 5 possible types of wirings: deterministic output, where the input is precisely the output; one-sided, where only one box is used; sequential, where the output of the first box is used as input for the second box, and AND and XOR gated, where the respective gates are used to combine the output of the two boxes.
 
     However, this does not mean that this polytope exhausts the possible space of local wirings. This section will be devoted to presenting an alternative framework for enumerating the possible wirings, in order to enable an exhaustive search.
 
@@ -411,61 +448,13 @@
 
     This enumeration of the possible wirings is naive, and does not attempt to use symmetry arguments to remove degeneracy. This is one possible direction for us to investigate, in order to develop a tool to efficiently find the optimal wiring for a given behaviour. However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a figure of merit (either an upper bound or lower bound), it is possible to exhaustively search for the wiring for each particular behaviour that produces the largest increase in the figure of merit. However, since there is no convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Attempting to develop such a classification scheme for wirings in order to enable this analysis is another possible direction for this project, which would subsume the symmetry analysis discussed above.
 
-    \section{Quantum Model}
+  \section{Upper Bounds}
 
-    Our preliminary results found a revival of the Pironio key rate for states that are generated according to a simple experimental model. In this model, we denote the behaviour given by the states and measurements, assuming a perfect experimental setup, by \(\tilde{p}\), while the observed probability distribution is denoted by \(p\). The probability of no signal being produced is \(n_c\), and the efficiencies of Alice and Bob's detectors are \(\eta_A\) and \(\eta_B\) respectively. When nothing is detected, either due to no signal being produced or due to detector inefficiency, we assign the \(-1\) outcome. Therefore, the observed probabilities are
-    \begin{align*}
-      p(a|x) &= \delta_{a,-1}(n_c + 1 - \eta_A) + (\eta_A - n_c)\tilde{p}(a|x) \\
-      p(b|y) &= \delta_{b,-1}(n_c + 1 - \eta_B) + (\eta_B - n_c)\tilde{p}(b|y) \\
-      p(ab|xy) &= \begin{aligned}[c] \delta_{a,-1}\delta_{b,-1}n_c + (1-n_c) [ \delta_{a,-1} \delta_{b,-1}(1-\eta_A\eta_B) + \eta_A\eta_B \tilde{p}(ab|xy) \\
-        + \delta_{b,-1}\eta_A(1-\eta_B)\tilde{p}(a|x) + \delta_{a,-1}\eta_B(1-\eta_A)\tilde{p}(b|y) ] 
-      \end{aligned}
-    \end{align*}
+  There are a number of upper bounds for key rates in the literature, computed using a large variety of techniques. These bounds can be for the keyrate achievable from a specific state, or from a specific behaivour. An important property of an upper bound is whether it is \emph{faithful}: faithful upper bounds are those that have non-zero keyrates for all entangled states or all nonlocal behaviours. For our purposes, a non-faithful upper bound is much more helpful---if local wirings between multiple copies of the same device are able to \emph{revive} the keyrate, that would be very interesting from both theoretical and practical standpoints. Theoretically, it would develop our currently limited understanding of the nature of the \emph{secrecy capacity} of no-signalling behaviours, and practically, it would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system.
 
-    For our purposes, we fix \(\eta_A = \eta_B = \eta\). Then, we have
-    \begin{align*}
-      \diffp{}{{n_c}} \angleb{A_x B_y} &= \eta \left( \left(1-\eta\right) \left(\langle\tilde{A}_x\rangle + \langle\tilde{B}_y\rangle\right) - \eta \langle\tilde{A}_x\tilde{B}_y\rangle + \left(2 - \eta\right) \right) \\
-      \diffp{}{{\eta}} \angleb{A_x B_y} &= \left(1 - n_{c}\right) \left( \left(1-2\eta\right) \left(\langle\tilde{A}_x\rangle+\langle\tilde{B}_y\rangle\right) - 2\eta \langle\tilde{A}_x\tilde{B}_y\rangle + (2-2\eta) \right) \\
-      \diffp{}{S} H^S(A|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right]
-    \end{align*}
+  A notable non-faithful upper bound is given in~\cite{NotSufficient}, where Eve, who controls the source that provides quantum states for the devices to measure, can sometimes choose to distribute \emph{local correlations}, which she has full information on, while distributing nonlocal correlations at all other times. This \emph{convex combination} attack, so called because the resultant behaviour is a convex combination of the local and nonlocal behaviours, can simulate the correlations that are generated by inefficient projective measurements on Werner states. These behaviours are nonlocal, that is, they have \(S > 2\), but the fact that they were generated in this manner can be used to prove that standard protocols, where both Alice and Bob announce their measurement settings, cannot generate secret keys from them.
 
-    \section{Asymmetric CHSH}
-
-    Better key rates have been obtained from asymmetric versions of the CHSH inequality:
-    \begin{equation}
-      S_{\alpha} \coloneqq \alpha\angleb{A_0 B_0} + \alpha\angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1}.
-    \end{equation}
-    This technique can then be combined with noisy preprocessing, where Alice replaces each bit of her key with a locally random bit with probability \(q\). The lower bound for \(H(A_0|E)\), with \(s = S_{\alpha}\) from the test statistics, is
-    \[ H(A_0|E) \geq g_{q,\alpha}(s) = \begin{cases}
-      g(s) & \text{ for } \abs{\alpha} \geq 1 \text{ or } s \geq s^* \\
-      h(q) + g'(s^*)(\abs{s}-2) & \text{ otherwise},
-    \end{cases}
-    \]
-    where
-    \begin{equation}
-      g_{q,\alpha}(s) = 1 + \phi\left(R_1\right) - \phi\left(R_2\right),
-    \end{equation}
-    with
-    \begin{equation} 
-      R_1 = \sqrt{{(1-2q)}^2 + 4q(1-q)(s^2/4-\alpha^2)} \qquad R_2 = \sqrt{s^2/4-\alpha^2}
-    \end{equation}
-    and where \(s^*\) is the solution to
-    \begin{equation}\label{eqn:sstar}
-      h(q) + g'(s^*) (s^*-2) = g(s^*).
-    \end{equation}
-
-    For a function \(R(s)\) of \(s\), it can easily be verified that
-    \begin{equation}
-      \diff{\phi(R)}{s} = \frac{1}{2} \diff{R}{s} \log\frac{1-R}{1+R},
-    \end{equation}
-    and since
-    \begin{equation} 
-      R_1'(s) = \frac{qs(1-q)}{R_1} \qquad R_2'(s) = \frac{s}{4R_2},
-    \end{equation}
-    we have
-    \begin{equation}
-      g_{q,\alpha}'(s) = \frac{qs(1-q)}{2R_1} \log\frac{1-R_1}{1+R_1} - \frac{s}{4R_2} \log\frac{1-R_2}{1+R_2}.
-    \end{equation}
+  TODO:\ More information on other upper bounds to come.
 
     \section{Nonlocality Monotones}
 
@@ -572,7 +561,50 @@
 
     \section{State of the Art Lower Bounds}
 
-    The methods involved in casting the relative entropy into an easily optimised form are highly involved, using the operator algebra approach to quantum mechanics. We will briefly review some of the ideas used in this paper that are generally not covered in undergraduate treatments of quantum mechanics and quantum information.
+    \subsection{Asymmetric CHSH}
+
+    Better key rates have been obtained from asymmetric versions of the CHSH inequality:
+    \begin{equation}
+      S_{\alpha} \coloneqq \alpha\angleb{A_0 B_0} + \alpha\angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1}.
+    \end{equation}
+    This technique can then be combined with noisy preprocessing, where Alice replaces each bit of her key with a locally random bit with probability \(q\). The lower bound for \(H(A_0|E)\), with \(s = S_{\alpha}\) from the test statistics, is
+    \[ H(A_0|E) \geq g_{q,\alpha}(s) = \begin{cases}
+      g(s) & \text{ for } \abs{\alpha} \geq 1 \text{ or } s \geq s^* \\
+      h(q) + g'(s^*)(\abs{s}-2) & \text{ otherwise},
+    \end{cases}
+    \]
+    where
+    \begin{equation}
+      g_{q,\alpha}(s) = 1 + \phi\left(R_1\right) - \phi\left(R_2\right),
+    \end{equation}
+    with
+    \begin{equation} 
+      R_1 = \sqrt{{(1-2q)}^2 + 4q(1-q)(s^2/4-\alpha^2)} \qquad R_2 = \sqrt{s^2/4-\alpha^2}
+    \end{equation}
+    and where \(s^*\) is the solution to
+    \begin{equation}\label{eqn:sstar}
+      h(q) + g'(s^*) (s^*-2) = g(s^*).
+    \end{equation}
+
+    For a function \(R(s)\) of \(s\), it can easily be verified that
+    \begin{equation}
+      \diff{\phi(R)}{s} = \frac{1}{2} \diff{R}{s} \log\frac{1-R}{1+R},
+    \end{equation}
+    and since
+    \begin{equation} 
+      R_1'(s) = \frac{qs(1-q)}{R_1} \qquad R_2'(s) = \frac{s}{4R_2},
+    \end{equation}
+    we have
+    \begin{equation}
+      g_{q,\alpha}'(s) = \frac{qs(1-q)}{2R_1} \log\frac{1-R_1}{1+R_1} - \frac{s}{4R_2} \log\frac{1-R_2}{1+R_2}.
+    \end{equation}
+
+    \subsection{The BFF Method}
+
+    The essential idea is very straightforward---in order to efficiently minimise the von Neumann entropy \(H(A|E, X = x^*)\), we upper-bound the relative entropy between the variable system and the perfectly mixed (secret) key. % TODO
+
+    However, the methods involved in casting the relative entropy into an easily optimised form are highly involved, using the operator algebra approach to quantum mechanics. We will briefly review some of the ideas used in this paper that are generally not covered in undergraduate treatments of quantum mechanics and quantum information.
+    % TODO this is just to ease the generalisation to continuous
 
     The set of \emph{bounded operators} \(\mathcal{B}(\Hs)\) on the Hilbert space \(\Hs\) is the set \(\mathcal{L}(\Hs)\) of all linear operators on \(\Hs\) such that the \emph{operator norm} of \(X \in \mathcal{L}(\Hs)\)
     \[ \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}} \]
