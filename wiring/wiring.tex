@@ -378,20 +378,8 @@
   \end{equation}
    Being the rate for an explicit, achievable protocol, this rate is a lower bound for the total secrecy extractable.
 
-  The derivative of \(h_2(x)\) is
-  \[ \diffp{{h_2(x)}}{x} = \frac{1}{\ln 2} \ln \left(\frac{1-x}{x}\right), \]
-  from which it can be seen that for \(Q \in [0, 0.5]\), the key rate increases for decreasing \(Q\). It is always possible to achieve this value of \(Q\) by flipping all bits if the raw value for \(Q\) is \(> 0.5\).
-
-  Simple differentiation also shows that \(r\) increases with increasing \(S\):
-  \begin{align*}
-    \ln (2) \diffp{r}{S} &= - \left( \diffp{}{S} \frac{1 + \sqrt{(S/2)^2-1}}{2} \right) \ln \left( \frac{1 - \sqrt{(S/2)^2-1}}{2} / \frac{1 + \sqrt{(S/2)^2-1}}{2} \right) \\
-                 &= - \left( \frac{1}{4} \left( (S/2)^2-1 \right)^{-1/2} \diffp{}{S} \left[ (S/2)^2-1 \right] \right) \ln \left( \frac{1 - \sqrt{(S/2)^2-1}}{1 + \sqrt{(S/2)^2-1}} \right) \\
-                 &= \underbrace{\left( \frac{S}{ 8\sqrt{(S/2)^2-1} } \right)}_{\geq 0} \ln \underbrace{ \left( \frac{1 + \sqrt{(S/2)^2-1}}{1 - \sqrt{(S/2)^2-1}} \right) }_{\geq 1} \because \sqrt{{(S/2)}^2-1} \geq 0 \\
-                 &\geq 0.
-  \end{align*}
-
   \section{Preliminary Results}
-  
+
     Consider the following simple wiring, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs.
 
     For \(N\) boxes,
