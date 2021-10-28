@@ -48,7 +48,7 @@ struct Setting{T}
   iA::T
   iB::T
 end
-Base.iterate(s::Setting) = s.oA, [s.iB, s.iA, s.oB]
+Base.iterate(s::Setting) = s.oA, reverse([s.oB, s.iA, s.iB])
 Base.iterate(s::Setting, state) = isempty(state) ? nothing : (pop!(state), state)
 
 struct Correlators
@@ -56,7 +56,7 @@ struct Correlators
   Eby
   Eabxy
 end
-Base.iterate(C::Correlators) = C.Eax, [C.Eabxy, C.Eby]
+Base.iterate(C::Correlators) = C.Eax, reverse([C.Eby, C.Eabxy])
 Base.iterate(C::Correlators, state) = isempty(state) ? nothing : (pop!(state), state)
 
 struct Behaviour
@@ -64,7 +64,7 @@ struct Behaviour
   pby
   pabxy
 end
-Base.iterate(P::Behaviour) = P.pax, [P.pabxy, P.pby]
+Base.iterate(P::Behaviour) = P.pax, reverse([P.pby, P.pabxy])
 Base.iterate(P::Behaviour, state) = isempty(state) ? nothing : (pop!(state), state)
 
 struct Wiring
@@ -73,7 +73,7 @@ struct Wiring
   CB
   CBj
 end
-Base.iterate(W::Wiring) = W.CA, [W.CBj, W.CB, W.CAj]
+Base.iterate(W::Wiring) = W.CA, reverse([W.CAj, W.CB, W.CBj])
 Base.iterate(W::Wiring, state) = isempty(state) ? nothing : (pop!(state), state)
 
 struct EntropyData
@@ -234,7 +234,7 @@ function and_corrs(N, Eax, Eby, Eabxy)
 
   EaxN = [1 - 2*((1-Eax[x])/2)^N for x in 1:iA]
   EbyN = [1 - 2*((1-Eby[y])/2)^N for y in 1:iB]
-  EabxyN = [1 - ((1-Eax[x])^N + (1-Eby[y])^N)/(2^(N-1)) + 4^(1-N) * (1-Eax[x]-Eby[y]+Eabxy[x,y])^N for x in 1:iA, y in 1:iB]
+  EabxyN = [1 - ((1-Eax[x])^N + (1-Eby[y])^N)/(2.0^(N-1)) + (1-Eax[x]-Eby[y]+Eabxy[x,y])^N/(4.0^(N-1)) for x in 1:iA, y in 1:iB]
 
   return EaxN, EbyN, EabxyN
 end

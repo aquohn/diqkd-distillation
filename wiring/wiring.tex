@@ -43,6 +43,61 @@
 \usepackage{algorithm} % typeset algorithms
 \usepackage{algpseudocode} % pseudocode style algorithms
 
+% Document
+\usepackage[backend=biber, style=ieee]{biblatex}
+\addbibresource{../wiring.bib}
+\graphicspath{{../images/}}
+\usepackage{appendix}
+\usepackage{hyperref} % hyperlinks
+\usepackage{bookmark} % PDF bookmarks
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=purple,
+  urlcolor=blue
+}
+\usepackage{cleveref} % references are automatically of the form "Section 1" etc.
+\Crefname{subsection}{Subsection}{Subsections}
+\AtBeginEnvironment{appendices}{\crefalias{section}{appendix}}
+
+\numberwithin{equation}{section} % eqn counter rolls over at each section
+\newcounter{stmt} % definitions, theorems and lemmas share this counter
+\theoremstyle{definition}
+\newtheorem{defn}[stmt]{Definition}
+\theoremstyle{plain}
+\newtheorem{theorem}[stmt]{Theorem}
+\theoremstyle{plain}
+\newtheorem{lemma}[stmt]{Lemma}
+
+% Custom lengths
+\addtolength{\jot}{0.5em} % gives spacing between align* rows
+
+\newenvironment{Tabular}[1] % less cramped tables
+{\def\arraystretch{1.75}\begin{tabular}{#1}}
+{\end{tabular}}
+\newenvironment{Array*}[1] % less cramped display mode arrays
+{\def\arraystretch{1.75}\everymath={\displaystyle}\[\begin{array}{#1}}
+{\end{array}\]}
+\newenvironment{Array}[1] % less cramped display mode arrays
+{\def\arraystretch{1.75}\everymath={\displaystyle}\begin{equation}\begin{array}{#1}}
+{\end{array}\end{equation}}
+\newenvironment{displaytable}[1] % environment for a simple inline table to present some information
+{\vspace\abovedisplayskip\begin{center}\begin{tabular}{#1}}
+{\end{tabular}\end{center}\vspace\belowdisplayskip}
+
+\newcommand{\tableline}[1]{\dimexpr \linewidth/#1 - 2\tabcolsep}
+
+% temporarily change margins
+\newenvironment{changemargin}[2]{% 
+  \begin{list}{}{%
+      \setlength{\topsep}{0pt}%
+      \setlength{\leftmargin}{#1}%
+      \setlength{\rightmargin}{#2}%
+      \setlength{\listparindent}{\parindent}%
+      \setlength{\itemindent}{\parindent}%
+      \setlength{\parsep}{\parskip}%
+    }%
+\item[]}{\end{list}}
+
 % Graphics
 \usepackage[justification=centering]{caption} % centres captions
 \usepackage{float} % stop LaTeX from making stuff float everywhere with H
@@ -169,59 +224,6 @@
 \newcommand{\ob}{\mathrm{ob}} % collection of objects
 \newcommand{\id}{\mathrm{id}} % identity morphism
 
-% Custom lengths
-\addtolength{\jot}{0.5em} % gives spacing between align* rows
-
-\newenvironment{Tabular}[1] % less cramped tables
-{\def\arraystretch{1.75}\begin{tabular}{#1}}
-{\end{tabular}}
-\newenvironment{Array*}[1] % less cramped display mode arrays
-{\def\arraystretch{1.75}\everymath={\displaystyle}\[\begin{array}{#1}}
-{\end{array}\]}
-\newenvironment{Array}[1] % less cramped display mode arrays
-{\def\arraystretch{1.75}\everymath={\displaystyle}\begin{equation}\begin{array}{#1}}
-{\end{array}\end{equation}}
-\newenvironment{displaytable}[1] % environment for a simple inline table to present some information
-{\vspace\abovedisplayskip\begin{center}\begin{tabular}{#1}}
-{\end{tabular}\end{center}\vspace\belowdisplayskip}
-
-\newcommand{\tableline}[1]{\dimexpr \linewidth/#1 - 2\tabcolsep}
-
-% temporarily change margins
-\newenvironment{changemargin}[2]{% 
-  \begin{list}{}{%
-      \setlength{\topsep}{0pt}%
-      \setlength{\leftmargin}{#1}%
-      \setlength{\rightmargin}{#2}%
-      \setlength{\listparindent}{\parindent}%
-      \setlength{\itemindent}{\parindent}%
-      \setlength{\parsep}{\parskip}%
-    }%
-\item[]}{\end{list}}
-
-  \usepackage[backend=biber, style=ieee]{biblatex}
-  \addbibresource{../wiring.bib}
-  % \graphicspath{{../images/}}
-  \usepackage{hyperref} % hyperlinks
-  \usepackage{bookmark} % PDF bookmarks
-  \hypersetup{%
-    colorlinks=true,
-    linkcolor=purple,
-    urlcolor=blue
-  }
-  \usepackage{cleveref} % references are automatically of the form "Section 1" etc.
-  \Crefname{subsection}{Subsection}{Subsections}
-
-  \numberwithin{equation}{section} % eqn counter rolls over at each section
-
-  \newcounter{stmt} % definitions, theorems and lemmas share this counter
-  \theoremstyle{definition}
-  \newtheorem{defn}[stmt]{Definition}
-  \theoremstyle{plain}
-  \newtheorem{theorem}[stmt]{Theorem}
-  \theoremstyle{plain}
-  \newtheorem{lemma}[stmt]{Lemma}
-
   \newcommand{\sM}{\mathcal{M}}
   \newcommand{\sS}{\mathcal{S}}
   \newcommand{\sK}{\mathcal{K}}
@@ -288,11 +290,11 @@
 
   \subsection{Structure}
 
-  As this is still an interim report, we do not have many concrete results, although we have investigated and tried to understand a variety of techniques for approaching this problem. We first review the basic, relevant notions of nonlocality and DIQKD, then proceed to review some preliminary results. Next, we discuss how we can perform an exhaustive search through the space of possible wirings, followed by a review of techniques for upper bounding and lower bounding the achievable key rates. Finally, we explore more unconventional approaches to analysing achievable DIQKD rates, namely nonlocality monotones and the structure of the space of achievable correlations.
+  As this is still an interim report, we do not have many concrete results, although we have investigated and tried to understand a variety of techniques for approaching this problem. We first review the basic, relevant notions of nonlocality and DIQKD in \Cref{sec:pre}, then proceed to review some preliminary results in \Cref{sec:preres}. Next, we examine the space of possible behaviours relevant to our problem in \Cref{sec:qkdset}, and we discuss how we can perform an exhaustive search through the space of possible wirings in \Cref{sec:locwir}. We then review and compare the techniques we have studied for attacking this problem, namely upper bounds (\Cref{sec:ubound}) and lower bounds (\Cref{sec:lbound}) for DIQKD key rates, and functions that are monotones under local wiring in \Cref{sec:nlmono}
 
-  \section{Preliminaries}
+  \section{Preliminaries}\label{sec:pre}
 
-  \subsection{Nonlocality Review}
+  \subsection{Nonlocality Review}\label{sec:pre_nl}
 
   In this section, we briefly summarise the relevant notions of the theory of nonlocality. A fuller exposition can be found in~\cite{BellNonlocality}. In order to be compatible with the theory of relativity, the behaviour of a device must fulfil the \emph{no-signalling conditions}, which state that the marginal probabilities for each player's output cannot depend on the other player's input:
   \begin{gather}
@@ -326,180 +328,228 @@
                      &= p(a=b|xy) - p(a\neq b|xy) \\
       \angleb{A_x} &= p(a=1|x) - p(a=0|x) \\
       \angleb{B_y} &= p(b=1|y) - p(b=0|y).
-  \end{align}
+    \end{align}
 
-  In \((2,2,2,2)\), the simplest nontrivial setting, some important statistics are the quantum bit error rate (QBER) \(Q_{xy}\) and the Clauser-Horne-Shimony-Holt (CHSH) value \(S\):
-  \begin{gather}
-    Q_{xy} \coloneqq p(a \neq b|xy) = \frac{1-\angleb{A_x B_y}}{2} \\
-    S \coloneqq \angleb{A_0 B_0} + \angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1}.
-  \end{gather}
-  Behaviours with \(S > 2\) are not contained in \(\Ls\), while behaviours in \(\Qs\) are constrained to have \(S \leq 2\sqrt{2}\).
-
-  \subsection{Device-independent quantum key distribution}
-
-  At the most general level, a DIQKD protocol \(\mathfrak{P}\) can be defined as finite sequence of \emph{local operations and public communication} operations (LOPC) that distills an \(\epsilon\)-\emph{secure} key of length \(\ell\) from \(n\) rounds of Bell test data~\cite{DIQKD_Limits}. Alice and Bob share a \(\epsilon\)-\emph{secure key} of length \(\ell\) if, after executing \(\mathfrak{P}\), their joint state with the eavesdropper Eve \(\rho_{A^n B^n E^n}\) satisfies~\cite{SecurityQKD}
-  \begin{equation}
-    (1-\erob{n})D(\rho_{A^n B^n E^n}, \chi_{A^n B^n}^{\ell}\otimes\rho_{E^n}) \leq \epsilon,
-  \end{equation}
-  where \(\erob{n}\) is the probability of the protocol aborting without interference from Eve, and \(D(\rho,\sigma)\) is the \emph{trace distance}
-  \begin{equation}
-    D(\rho, \sigma) = \frac{1}{2}\norm{\rho - \sigma},
-  \end{equation}
-  which generalises the classical total variational distance. We also have the \emph{trace norm}
-  \begin{equation}
-    \norm{\rho}_1 = \Tr\left[ \sqrt{\rho^{\dagger}\rho} \right] = \Tr\abs{\rho},
-  \end{equation}
-  the \emph{ideal key}
-  \begin{equation}
-    \chi_{A^n B^n}^{\ell} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{A^n} \otimes \ket{j}\bra{j}_{B^n},
-  \end{equation}
-  a uniformly distributed mixture amongst all possible keys of length \(\ell\), and Eve's marginal state \(\rho_{E^n} = \Tr_{A^n B^n}\left[ \rho_{A^n B^n E^n} \right]\). This definition of security is \emph{universally composable} (UC), which is crucial for applications---if two resources are \(\epsilon_1\) and \(\epsilon_2\) secure under a UC definition, then a protocol that uses only these two resources is \(\epsilon\)-secure under the same definition, with \(\epsilon \leq \epsilon_1 + \epsilon_2\).
-
-  The asymptotic rate \(r\) of the protocol \(\mathfrak{P}\) is~\cite{CQKeyDistill}
-  \begin{equation}
-    r = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\erob{n}) \frac{\ell_n}{n},
-  \end{equation}
-  where the supremum is over all sequences \(\{\ell_n\}\) such that
-  \[ \lim_{n\to\infty} (1-\erob{n})D(\rho_{A^n B^n E^n}, \chi_{A^n B^n}^{\ell_n}\otimes\rho_{E^n}) = 0. \]
-  If we consider the rounds to be independent and identically distributed (i.i.d.)\footnote{i.i.d.\ attacks, but with Eve storing quantum information, are referred to as \emph{collective attacks} in the literature}, which is justifiable in the asymptotic limit~\cite{DI_Proofs}, we can write
-  \[ \rho_{A^n B^n E^n} = \rho_{ABE}^{\otimes n}. \]
-
-  Then, the systems \(A\), \(B\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. Intuitively, the amount of information that Alice has which is secret to Eve is \({H(A|E)}_{\rho}\), where \(H\) is the von Neumann entropy, \({H(A)}_{\rho} = -\Tr\left[\rho_{A}\log\rho_{A}\right]\), which reduces to the Shannon entropy for a classical system. On the other hand, \(B\) may not be perfectly correlated with \(A\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve is upper bounded by \({H(A|B)}_{\rho}\). This gives us the \emph{Devetak-Winter key rate}~\cite{DevetakWinter}
-  \begin{equation}
-    r \geq {H(A|E)}_{\rho} - {H(A|B)}_{\rho}.
-  \end{equation}
-
-  Much of the effort in bounding the DIQKD key rate has focused on this definition, and we will do likewise. While \({H(A|B)}_{\rho}\) can be computed directly as the QBER, upper and lower bounds for \({H(A|E)}_{\rho}\) are much harder to achieve.
-
-  We will now consider the first DIQKD protocol proved to be secure~\cite{DIQKD_Lower}. This takes place in the \((2,2,3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}, and it uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key. Therefore, we have \({H(A|B)}_{\rho} = Q_{02} = Q\), and it was proved that
-  \begin{equation}
-    {H(A|E)}_{\rho} \geq {H_S(A|E)}_{\rho} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
-  \end{equation}
-  where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, with the logarithm in base 2, and where \(S\) is calculated from \(x,y \in \{0,1\}\). Therefore,
-  \begin{equation}
-    r \geq 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
-  \end{equation}
-  which we refer to as the \emph{Pironio key rate}. Being the rate for an explicit, achievable protocol, this is a lower bound for the total secrecy extractable.
-
-  \section{Preliminary Results}
-
-  Our preliminary results found a revival of the Pironio key rate for states that are generated according to a simple experimental model. In this model, we denote the density matrix of the state as \(\rho_{AB}\) and observables as \(\tilde{A}_x\) and \(\tilde{B}_y\), for a perfect experimental setup, and let the Hilbert spaces of systems \(A\) and \(B\) be \(d_A\) and \(d_B\) respectively.
-
-  We now model some possible experimental flaws. If our source of quantum states produces one state per time bin, then \(n_c\) is the probability that a state is not produced during a given time bin (where we assume this process to be i.i.d.). Further, Alice and Bob's detectors have efficiencies \(\eta_A\) and \(\eta_B\) respectively, which are the probabilities for them to detect a state given that one is produced. If nothing is detected, either due to no signal being produced or due to detector inefficiency, we assign the \(-1\) outcome. The detector failure events are independent, but if no signal is produced, both Alice and Bob will receive no signal. We can then express the new states and observables as follows:
-  \begin{align*}
-    A_x &= (1-\eta_A)\tilde{A}_x - \eta_A I_A \\
-    B_y &= (1-\eta_B)\tilde{B}_y - \eta_B I_B \\
-    \rho_{AB} &= (1-n_c)\tilde{\rho}_{AB} + \frac{n_c}{d^{(0)}_A d^{(0)}_B} \Pi_A^{(0)} \Pi_B^{(0)},
-  \end{align*}
-  where \(I_A\) is the identity operator on Alice's Hilbert space, and \(d_A^{(0)}\) and \(\Pi_A^{(0)}\) are the dimension of the subspace corresponding to \(a={0}\) and the projector onto that subspace, respectively, with the analogous definitions holding for \(B\).
-
-  The marginals and correlators, then, are as follows
-  \begin{align*}
-    \angleb{A_x} &= -n_c + (1-n_c)(\eta_A\angleb{\tilde{A}_x} - (1-\eta_A)) \\
-    \angleb{B_y} &= -n_c + (1-n_c)(\eta_B\angleb{\tilde{B}_y} - (1-\eta_B)) \\
-    \angleb{A_x B_y} &= \begin{aligned}[c]
-      & (-1\times-1) n_c + (1-n_c)(\eta_A\eta_B\angleb{\tilde{A}_x\tilde{B}_y} - \eta_A(1-\eta_B)\angleb{\tilde{A}_x} \\
-      & -\eta_B(1-\eta_A)\angleb{\tilde{B}_y} + (-1\times-1) (1-\eta_A\eta_B) )
-    \end{aligned}
-    \end{align*}
-
-    For our purposes, we fix \(\eta_A = \eta_B = \eta\). We want to study the variation of the key rate with the variation of these parameters. Since \(S\) is a linear combination of the correlators, we only need to compute the variation of the correlators with \(\eta\) and \(n_c\). We connect this to the key rate by studying the variation of \(H_S(A|E)\) with \(S\).
-    \begin{align*}
-      \diffp{}{{n_c}} \angleb{A_x B_y} &= \eta \left( \left(1-\eta\right) \left(\langle\tilde{A}_x\rangle + \langle\tilde{B}_y\rangle\right) - \eta \langle\tilde{A}_x\tilde{B}_y\rangle + \left(2 - \eta\right) \right) \\
-      \diffp{}{{\eta}} \angleb{A_x B_y} &= \left(1 - n_{c}\right) \left( \left(1-2\eta\right) \left(\langle\tilde{A}_x\rangle+\langle\tilde{B}_y\rangle\right) - 2\eta \langle\tilde{A}_x\tilde{B}_y\rangle + (2-2\eta) \right) \\
-      \diffp{}{S} H_S(A|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right].
-    \end{align*}
-
-    Consider the following simple wiring, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs.
-
-    For \(N\) boxes, the correlators and marginals become
+    In \((2,2,2,2)\), the simplest nontrivial setting, some important statistics are the quantum bit error rate (QBER) \(Q_{xy}\) and the Clauser-Horne-Shimony-Holt (CHSH) value \(S\):
     \begin{gather}
-      \angleb{A_x B_y}_{N} = 1 - \frac{{(1-\angleb{B_y})}^N + {(1-\angleb{A_x})}^N}{2^{N-1}} + \frac{1}{4^{N-1}} {(1-\angleb{A_x} - \angleb{B_y} + \angleb{A_x B_y})}^{N} \\
-      \angleb{A_x}_{N} = 1 - 2 {\left(\frac{1-\angleb{A_x}}{2}\right)}^N \qquad \angleb{B_y}_{N} = 1 - 2 {\left(\frac{1-\angleb{B_y}}{2}\right)}^N.
+      Q_{xy} \coloneqq p(a \neq b|xy) = \frac{1-\angleb{A_x B_y}}{2} \\
+      S \coloneqq \angleb{A_0 B_0} + \angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1}.
     \end{gather}
+    Behaviours with \(S > 2\) are not contained in \(\Ls\), while behaviours in \(\Qs\) are constrained to have \(S \leq 2\sqrt{2}\).
 
-    Using the Pironio key rate, we are able to find \emph{revival} in certain parameter regimes.
+    \subsection{Device-independent quantum key distribution}\label{sec:pre_diqkd}
 
-    \section{Local Wirings}
-
-    \subsection{Classifying Wirings}
-
-    The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short et al.~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. This work attempts to generalise joint measurements to the no-signalling setting and finds a polytope of possible operations which happens to have local wirings at its extremal points. For the  \((2,2,2,2)\) setting, there are 82 extremal points, grouped into 5 possible types of wirings: deterministic output, where the input is precisely the output; one-sided, where only one box is used; sequential, where the output of the first box is used as input for the second box, and AND and XOR gated, where the respective gates are used to combine the output of the two boxes.
-
-    However, this does not mean that this polytope exhausts the possible space of local wirings. This section will be devoted to presenting an alternative framework for enumerating the possible wirings, in order to enable an exhaustive search.
-
-    Let each player have \(c\) boxes, and let subscripts denote the order in which the boxes are used. Then, Alice's wiring can be represented by a sequence of \(c\) functions with range \(\{1..i_A\}\)
-    \begin{equation} x_1 = x \end{equation}
-    \begin{equation} x_j = C_j^A(x_1, \ldots, x_{j-1}, a_1, \ldots, a_{j-1}),\,j \in \{2..c\} \end{equation}
-    and a final output function with range \(\{1..o_A\}\)
-    \begin{equation} a = C^A(x_1, \ldots, x_{c}, a_1, \ldots, a_{c}). \end{equation}
-    Alice and Bob interact with their boxes in increasing order of the index \(j\). The condition that the input to box \(j\) can only depend on the inputs and outputs of boxes with index \(< j\) is equivalent to enforcing that Alice and Bob do not have quantum memories: both players must provide an input to a given box before it can produce an output.
-    \begin{table}
-      \begin{minipage}{0.5\linewidth}
-        \begin{center}
-          \begin{tabular}{|r|cc|} \hline
-            \diagbox{\(x_1\)}{\(a_1\)} & 0 & 1 \\ \hline
-            0 & 1 & 0 \\
-            1 & 1 & 1 \\ \hline
-          \end{tabular}
-        \end{center}
-      \end{minipage}
-      \begin{minipage}{0.5\linewidth}
-        \begin{center}
-          \begin{tabular}{|r|cccc|} \hline
-            \diagbox{\(x_1 x_2\)}{\(a_1 a_2\)} & 00 & 01 & 11 & 10 \\ \hline
-            00 & X & X & 1 & 0 \\
-            01 & 0 & 0 & X & X \\
-            11 & 1 & 0 & 0 & 0 \\
-            10 & X & X & X & X \\ \hline
-          \end{tabular}
-        \end{center}
-      \end{minipage}
-      \caption{Left: Lookup table for \(C^A_2\), giving \(x_2\). Right: Lookup table for \(C^A\), giving overall output \(a\). Entries forbidden by \(C^A_2\) are marked with X (don't care). Both are written as Karnaugh maps.}\label{tab:wiring_lut}
-    \end{table}
-
-    A wiring corresponding to the lookup tables in~\Cref{tab:wiring_lut} would have
+    At the most general level, a DIQKD protocol \(\mathfrak{P}\) can be defined as finite sequence of \emph{local operations and public communication} operations (LOPC) that distills an \(\epsilon\)-\emph{secure} key of length \(\ell\) from \(n\) rounds of Bell test data~\cite{DIQKD_Limits}. Alice and Bob share a \(\epsilon\)-\emph{secure key} of length \(\ell\) if, after executing \(\mathfrak{P}\), their joint state with the eavesdropper Eve \(\rho_{A^n B^n E^n}\) satisfies~\cite{SecurityQKD}
     \begin{equation}
-      x_2 = \bar{a}_1x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2,
+      (1-\erob{n})D(\rho_{A^n B^n E^n}, \chi_{A^n B^n}^{\ell}\otimes\rho_{E^n}) \leq \epsilon,
     \end{equation}
-    where juxtaposition is the Boolean AND, addition is the Boolean OR, and the overbar is the Boolean NOT.\ This cannot be expressed as one of the wirings from~\cite{ShortEntangleSwap}: the boxes are clearly non-constant and dependent on each other, so they are not one-sided or deterministic, and the functional dependence of the output is too complex to be expressed simply with a single AND or XOR gate.
-
-    The classification of Short et al.\ attempts to find a parametrisation of \emph{couplers}, which are a specific type of transformation which ``collapses'' multiple boxes of one party, replacing their inputs and outputs with a single output, whose probability distribution depends on the behaviours of the individual boxes that are collapsed. Importantly, this \emph{does not} replace the collapsed boxes with a larger box with one input and one output, which is what we are attempting to do through wirings, but rather simply generates one output. Although the possible couplers form a polytope that has these specific wirings as its extremal points, this is not the type of operation we are looking for.
-
-    Taking inspiration from this work, however, we might want to see if the
-
-    % TODO may be possible to form polytope of wirings, but may not be helpful -
-    % extremal points may not maximise key rates
-
-    \subsection{Number of Distinct Wirings}
-
-    Simple combinatorics gives us \(i_A^{j-1} o_A^{j-1}\) possible inputs for \(C_j^A\). However, since \(x_j\) is completely fixed by \({(x_k)}_{k=1}^{j-1}\) and \({(a_k)}_{k=1}^{j-1}\), there are only \(i_A o_A^{j-1}\) valid inputs, with the rest corresponding to don't-cares. Therefore, the number of possible \(C_j^A\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(C^A\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
+    where \(\erob{n}\) is the probability of the protocol aborting without interference from Eve, and \(D(\rho,\sigma)\) is the \emph{trace distance}
     \begin{equation}
-      \exp_{o_A}(i_A o_A^c) \prod_{j=2}^c \exp_{i_A}(i_A o_A^{j-1}),
+      D(\rho, \sigma) = \frac{1}{2}\norm{\rho - \sigma},
     \end{equation}
-    where we count from \(j = 2\) because for \(j = 1\), there is only one possibility. The same applies to Bob with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). 
-
-    We may wish to fix some input settings to use a given wiring. For example, it is clear that the AND gating can only increase the value of the correlator. Therefore, we can fix the key generating settings \(A_1\) and \(B_3\) to be AND-wired, so that all functions with \(x_1 = 1\) or \(y_1 = 3\) are fixed to the AND wiring. If we fix the wirings for \(f\) input settings, then we are free to choose the outputs for only \(i_A - f\) possible values of \(x_1\), so the number of possible wirings becomes
+    which generalises the classical total variational distance. We also have the \emph{trace norm}
     \begin{equation}
-      \exp_{o_A}((i_A-f) o_A^c) \prod_{j=2}^c \exp_{i_A}((i_A-f) o_A^{j-1})
+      \norm{\rho}_1 = \Tr\left[ \sqrt{\rho^{\dagger}\rho} \right] = \Tr\abs{\rho},
     \end{equation}
-    for Alice, with the analogous relabelling for Bob.
+    the \emph{ideal key}
+    \begin{equation}
+      \chi_{A^n B^n}^{\ell} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{A^n} \otimes \ket{j}\bra{j}_{B^n},
+    \end{equation}
+    a uniformly distributed mixture amongst all possible keys of length \(\ell\), and Eve's marginal state \(\rho_{E^n} = \Tr_{A^n B^n}\left[ \rho_{A^n B^n E^n} \right]\). This definition of security is \emph{universally composable} (UC), which is crucial for applications---if two resources are \(\epsilon_1\) and \(\epsilon_2\) secure under a UC definition, then a protocol that uses only these two resources is \(\epsilon\)-secure under the same definition, with \(\epsilon \leq \epsilon_1 + \epsilon_2\).
 
-    \subsection{Evaluation}
+    The asymptotic rate \(r\) of the protocol \(\mathfrak{P}\) is~\cite{CQKeyDistill}
+    \begin{equation}
+      r = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\erob{n}) \frac{\ell_n}{n},
+    \end{equation}
+    where the supremum is over all sequences \(\{\ell_n\}\) such that
+    \[ \lim_{n\to\infty} (1-\erob{n})D(\rho_{A^n B^n E^n}, \chi_{A^n B^n}^{\ell_n}\otimes\rho_{E^n}) = 0. \]
+    If we consider the rounds to be independent and identically distributed (i.i.d.)\footnote{i.i.d.\ attacks, but with Eve storing quantum information, are referred to as \emph{collective attacks} in the literature}, which is justifiable in the asymptotic limit~\cite{DI_Proofs}, we can write
+    \[ \rho_{A^n B^n E^n} = \rho_{ABE}^{\otimes n}. \]
 
-    Unfortunately, with just two boxes, there are 4096 wirings for Alice, and \(\approx \num{2.48e10}\) for Bob. Fixing the AND gating as discussed above gives us 1024 wirings for Alice and \(\approx \num{3.10e9}\) for Bob. Since the choice of wirings for Alice and Bob are independent, we must multiply the figures for Alice and Bob together, which would make this analysis very inefficient.
+    Then, the systems \(A\), \(B\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. Intuitively, the amount of information that Alice has which is secret to Eve is \({H(A|E)}_{\rho}\), where \(H\) is the von Neumann entropy, \({H(A)}_{\rho} = -\Tr\left[\rho_{A}\log\rho_{A}\right]\), which reduces to the Shannon entropy for a classical system. On the other hand, \(B\) may not be perfectly correlated with \(A\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve is upper bounded by \({H(A|B)}_{\rho}\). This gives us the \emph{Devetak-Winter key rate}~\cite{DevetakWinter}
+    \begin{equation}
+      r \geq r_{DW} = {H(A|E)}_{\rho} - {H(A|B)}_{\rho}.
+    \end{equation}
 
-    This enumeration of the possible wirings is naive, and does not attempt to use symmetry arguments to remove degeneracy. This is one possible direction for us to investigate, in order to develop a tool to efficiently find the optimal wiring for a given behaviour. However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a figure of merit (either an upper bound or lower bound), it is possible to exhaustively search for the wiring for each particular behaviour that produces the largest increase in the figure of merit. However, since there is no convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Attempting to develop such a classification scheme for wirings in order to enable this analysis is another possible direction for this project, which would subsume the symmetry analysis discussed above.
+    Much of the effort in bounding the DIQKD key rate has focused on this definition, and this is the setting we will work in. While \({H(A|B)}_{\rho}\) can be computed directly as the QBER, upper and lower bounds for \({H(A|E)}_{\rho}\) are much harder to find.
 
-  \section{Upper Bounds}
+    We will now consider the first DIQKD protocol proved to be secure~\cite{DIQKD_Lower}. This takes place in the \((2,2,3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}, and it uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key. Therefore, we have \({H(A|B)}_{\rho} = Q_{02} = Q\), and it was proved that
+    \begin{equation}
+      {H(A|E)}_{\rho} \geq {H_S(A|E)}_{\rho} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
+    \end{equation}
+    where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, with the logarithm in base 2, and where \(S\) is calculated from \(x,y \in \{0,1\}\). Therefore,
+    \begin{equation}
+      r_{DW} \geq r_{P} = \max \left\{ 0, 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right) \right\},
+    \end{equation}
+    where we refer to \(r_P\) as the \emph{Pironio key rate}. Being the rate for an explicit, achievable protocol, this is a lower bound for the total secrecy extractable. However, because the proof of the bound involves explicitly constructing the states and measurements that gives the greatest advantage to Eve while still producing the observed value of \(S\), it is also an upper bound for key rates based only on \(S\), since any observed \(S\) could have been produced by those states.
 
-  There are a number of upper bounds for key rates in the literature, computed using a large variety of techniques. These bounds can be for the key rate achievable from a specific state, or from a specific behaivour. An important property of an upper bound is whether it is \emph{faithful}: faithful upper bounds are those that have non-zero key rates for all entangled states or all nonlocal behaviours. For our purposes, a non-faithful upper bound is much more helpful---if local wirings between multiple copies of the same device are able to \emph{revive} the key rate, that would be very interesting from both theoretical and practical standpoints. Theoretically, it would develop our currently limited understanding of the nature of the \emph{secrecy capacity} of no-signalling behaviours, and practically, it would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system.
+    \section{Preliminary Results}\label{sec:preres}
 
-  A notable non-faithful upper bound is given in~\cite{NotSufficient}, where Eve, who controls the source that provides quantum states for the devices to measure, can sometimes choose to distribute \emph{local correlations}, which she has full information on, while distributing nonlocal correlations at all other times. This \emph{convex combination} attack, so called because the resultant behaviour is a convex combination of the local and nonlocal behaviours, can simulate the correlations that are generated by inefficient projective measurements on Werner states. These behaviours are nonlocal, that is, they have \(S > 2\), but the fact that they were generated in this manner can be used to prove that standard protocols, where both Alice and Bob announce their measurement settings, cannot generate secret keys from them.
+    Our preliminary results found a revival of the Pironio key rate for states that are generated according to a simple experimental model. We will be using it to illustrate the relevant issues and directions we wish to pursue in our analysis. In this model, we denote the density matrix of the state as \(\rho_{AB}\) and observables as \(\tilde{A}_x\) and \(\tilde{B}_y\), for a perfect experimental setup, and let the Hilbert spaces of systems \(A\) and \(B\) be \(d_A\) and \(d_B\) respectively.
 
-  TODO:\ More information on other upper bounds to come.
+    We now model some possible experimental flaws. If our source of quantum states produces one state per time bin, then \(n_c\) is the probability that a state is not produced during a given time bin (where we assume this process to be i.i.d.). Further, Alice and Bob's detectors have efficiencies \(\eta_A\) and \(\eta_B\) respectively, which are the probabilities for them to detect a state given that one is produced. If nothing is detected, either due to no signal being produced or due to detector inefficiency, we assign the \(-1\) outcome. The detector failure events are independent, but if no signal is produced, both Alice and Bob will receive no signal. We can then express the new states and observables as follows:
+    \begin{align*}
+      A_x &= (1-\eta_A)\tilde{A}_x - \eta_A I_A \\
+      B_y &= (1-\eta_B)\tilde{B}_y - \eta_B I_B \\
+      \rho_{AB} &= (1-n_c)\tilde{\rho}_{AB} + \frac{n_c}{d^{(0)}_A d^{(0)}_B} \Pi_A^{(0)} \Pi_B^{(0)},
+    \end{align*}
+    where \(I_A\) is the identity operator on Alice's Hilbert space, and \(d_A^{(0)}\) and \(\Pi_A^{(0)}\) are the dimension of the subspace corresponding to \(a={0}\) and the projector onto that subspace, respectively, with the analogous definitions holding for \(B\).
 
-    \section{Nonlocality Monotones}
+    The marginals and correlators, then, are as follows:
+    \begin{align*}
+      \angleb{A_x} &= -n_c + (1-n_c)(\eta_A\angleb{\tilde{A}_x} - (1-\eta_A)) \\
+      \angleb{B_y} &= -n_c + (1-n_c)(\eta_B\angleb{\tilde{B}_y} - (1-\eta_B)) \\
+      \angleb{A_x B_y} &= \begin{aligned}[c]
+      & n_c + (1-n_c)(\eta_A\eta_B\angleb{\tilde{A}_x\tilde{B}_y} - \eta_A(1-\eta_B)\angleb{\tilde{A}_x} \\
+      & -\eta_B(1-\eta_A)\angleb{\tilde{B}_y} + (1-\eta_A\eta_B) )
+      \end{aligned}
+      \end{align*}
+
+      For our purposes, we fix \(\eta_A = \eta_B = \eta\). We want to study the variation of the key rate with the variation of these parameters. Since \(S\) is a linear combination of the correlators, we only need to compute the variation of the correlators with \(\eta\) and \(n_c\). We connect this to the key rate by studying the variation of \(H_S(A|E)\) with \(S\).
+      \begin{align*}
+        \diffp{}{{n_c}} \angleb{A_x B_y} &= \eta \left( \left(1-\eta\right) \left(\langle\tilde{A}_x\rangle + \langle\tilde{B}_y\rangle\right) - \eta \langle\tilde{A}_x\tilde{B}_y\rangle + \left(2 - \eta\right) \right) \\
+        \diffp{}{{\eta}} \angleb{A_x B_y} &= \left(1 - n_{c}\right) \left( \left(1-2\eta\right) \left(\langle\tilde{A}_x\rangle+\langle\tilde{B}_y\rangle\right) - 2\eta \langle\tilde{A}_x\tilde{B}_y\rangle + (2-2\eta) \right) \\
+        \diffp{}{S} H_S(A|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right].
+      \end{align*}
+
+      Consider the following simple wiring, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs. Clearly, this can only increase the correlations between Alice and Bob, since \(a \neq b\) only if all \(N\) boxes return different outputs to Alice and Bob. However, this means that if Eve knows that any of the boxes produced 0, she can conclude that the overall output is 0, increasing her correlation with Alice. If the increase in \(H(A|B)\) can make up for the decrease in \(H(A|E)\), then this wiring improves the key rate.
+
+      For \(N\) boxes, the correlators and marginals become
+      \begin{gather}
+        \angleb{A_x B_y}_{N} = 1 - \frac{{(1-\angleb{B_y})}^N + {(1-\angleb{A_x})}^N}{2^{N-1}} + \frac{1}{4^{N-1}} {(1-\angleb{A_x} - \angleb{B_y} + \angleb{A_x B_y})}^{N} \\
+        \angleb{A_x}_{N} = 1 - 2 {\left(\frac{1-\angleb{A_x}}{2}\right)}^N \qquad \angleb{B_y}_{N} = 1 - 2 {\left(\frac{1-\angleb{B_y}}{2}\right)}^N.
+      \end{gather}
+
+      Using the Pironio key rate, we are able to find \emph{revival} in certain parameter regimes: behaviours with \(r_P = 0\), but which have \(r_P > 0\) after wiring.
+
+      \section{The Quantum Key Distribution Setting}\label{sec:qkdset}
+
+      We have 24 positivity facets of the local polytope, and 24 liftings of CHSH\@.
+
+      \section{Local Wirings}\label{sec:locwir}
+
+      \subsection{Classifying Wirings}
+
+      The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short et al.~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. This work attempts to generalise joint measurements to the no-signalling setting and finds a polytope of possible operations which happens to have local wirings at its extremal points. For the  \((2,2,2,2)\) setting, there are 82 extremal points, grouped into 5 possible types of wirings: deterministic output, where the input is precisely the output; one-sided, where only one box is used; sequential, where the output of the first box is used as input for the second box, and AND and XOR gated, where the respective gates are used to combine the output of the two boxes.
+
+      However, a wiring corresponding to the lookup tables in~\Cref{tab:wiring_lut} would have
+      \begin{equation}
+        x_2 = \bar{a}_1x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2,
+      \end{equation}
+      where juxtaposition is the Boolean AND, addition is the Boolean OR, and the overbar is the Boolean NOT.\ This cannot be expressed as one of the wirings from~\cite{ShortEntangleSwap}: the boxes are clearly non-constant and dependent on each other, so they are not one-sided or deterministic, and the functional dependence of the output is too complex to be expressed simply with a single AND or XOR gate.
+
+      \begin{table}
+        \begin{minipage}{0.5\linewidth}
+          \begin{center}
+            \begin{tabular}{|r|cc|} \hline
+              \diagbox{\(x_1\)}{\(a_1\)} & 0 & 1 \\ \hline
+              0 & 1 & 0 \\
+              1 & 1 & 1 \\ \hline
+            \end{tabular}
+          \end{center}
+        \end{minipage}
+        \begin{minipage}{0.5\linewidth}
+          \begin{center}
+            \begin{tabular}{|r|cccc|} \hline
+              \diagbox{\(x_1 x_2\)}{\(a_1 a_2\)} & 00 & 01 & 11 & 10 \\ \hline
+              00 & X & X & 1 & 0 \\
+              01 & 0 & 0 & X & X \\
+              11 & 1 & 0 & 0 & 0 \\
+              10 & X & X & X & X \\ \hline
+            \end{tabular}
+          \end{center}
+        \end{minipage}
+        \caption{Left: Lookup table for \(C_A^{(2)}\), giving \(x_2\). Right: Lookup table for \(C_A\), giving overall output \(a\). Entries forbidden by \(C_A^{(2)}\) are marked with X (don't care). Both are written as Karnaugh maps.}\label{tab:wiring_lut}
+      \end{table}
+
+      Let us see why this is the case. The classification of Short et al.\ attempts to find a parametrisation of \emph{couplers}, which are a specific type of transformation which ``collapses'' multiple boxes of one party, replacing their inputs and outputs with a single output, whose probability distribution depends on the behaviours of the individual boxes that are collapsed. Importantly, this \emph{does not} replace the collapsed boxes with a larger box with one input and one output, which is what we are attempting to do through wirings, but rather simply generates one output. Although couplers can be characterised by a vector of parameters, and the possible vectors form a polytope that has these specific wirings as its extremal points, this is not the type of operation we are looking for.
+
+      Nonetheless, finding an analogous linear structure for the space of possible wirings might be helpful. However, there are serious difficulties with this idea. The strength of this linear characterisation of the possible couplers was that any coupler inside the polytope could be expressed as a convex combination of the extremal points, that is, a probabilistic mixture of the deterministic wirings corresponding to those points. Therefore, it is possible to continuously transform the resultant behaviour from that produced by one coupler to another.
+
+      Since the wirings are done locally by Alice and Bob, the choice of wiring in each round will be determined by local randomness. In the similar technique of \emph{noisy preprocessing}, Alice flips her bits based on her local randomness with a probability \(q\), which has been shown to improve key rates~\cite{AsymmetricCHSH}. Now, if Alice and Bob use a non-deterministic wiring, and the probability of them selecting wirings that give different results, averaged over all rounds, is \(w\), the resultant behaviour would be identical to the behaviour from noisy preprocessing with \(w = q\). Therefore, there is no need to model non-deterministic wirings, since the same effect can be achieved by the established technique of noisy preprocessing.
+
+      Identifying the extremal points of such a polytope, if it even exists, would also not be helpful, since there is no \emph{a priori} reason why the extremal points should produce the behaviour with the highest key rate. As neither the linear structure of the polytope or its extremal points would be helpful for us, we will not pursue this line of investigation.
+
+      Instead, we will characterise each wiring in the following way. Let each player have \(c\) boxes, and let subscripts denote the order in which the boxes are used. Then, Alice's wiring can be represented by a sequence of \(c\) functions with range \(\{1..i_A\}\)
+      \begin{equation} x_1 = x \end{equation}
+      \begin{equation} x_j = C^{(j)}_A(x_1, \ldots, x_{j-1}, a_1, \ldots, a_{j-1}),\,j \in \{2..c\} \end{equation}
+      and a final output function with range \(\{1..o_A\}\)
+      \begin{equation} a = C_A(x_1, \ldots, x_{c}, a_1, \ldots, a_{c}). \end{equation}
+      Alice and Bob interact with their boxes in increasing order of the index \(j\). The condition that the input to box \(j\) can only depend on the inputs and outputs of boxes with index \(< j\) is equivalent to enforcing that Alice and Bob do not have quantum memories: both players must provide an input to a given box before it can produce an output.
+
+      \subsection{Number of Distinct Wirings}
+
+      Simple combinatorics gives us \(i_A^{j-1} o_A^{j-1}\) possible inputs for \(C_j^A\). However, since \(x_j\) is completely fixed by \({(x_k)}_{k=1}^{j-1}\) and \({(a_k)}_{k=1}^{j-1}\), there are only \(i_A o_A^{j-1}\) valid inputs, with the rest corresponding to don't-cares. Therefore, the number of possible \(C^{(j)}_A\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(C_A\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
+      \begin{equation}
+        \exp_{o_A}(i_A o_A^c) \prod_{j=2}^c \exp_{i_A}(i_A o_A^{j-1}),
+      \end{equation}
+      where we count from \(j = 2\) because for \(j = 1\), there is only one possibility. The same applies to Bob with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). 
+
+      We may wish to fix some input settings to use a given wiring. For example, it is clear that the AND gating can only increase the value of the correlator. Therefore, we can fix the key generating settings \(A_1\) and \(B_3\) to be AND-wired, so that all functions with \(x_1 = 1\) or \(y_1 = 3\) are fixed to the AND wiring. If we fix the wirings for \(f\) input settings, then we are free to choose the outputs for only \(i_A - f\) possible values of \(x_1\), so the number of possible wirings becomes
+      \begin{equation}
+        \exp_{o_A}((i_A-f) o_A^c) \prod_{j=2}^c \exp_{i_A}((i_A-f) o_A^{j-1})
+      \end{equation}
+      for Alice, with the analogous relabelling for Bob.
+
+      \subsection{Evaluation}
+
+      Unfortunately, with just two boxes, there are 4096 wirings for Alice, and \(\approx \num{2.48e10}\) for Bob. Fixing the AND gating as discussed above gives us 1024 wirings for Alice and \(\approx \num{3.10e9}\) for Bob. Since the choice of wirings for Alice and Bob are independent, we must multiply the figures for Alice and Bob together, which would make this analysis very inefficient.
+
+      This enumeration of the possible wirings is naive, and does not attempt to use symmetry arguments to remove degeneracy. This is one possible direction for us to investigate, in order to develop a tool to efficiently find the optimal wiring for a given behaviour. However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a figure of merit (either an upper bound or lower bound), it is possible to exhaustively search for the wiring for each particular behaviour that produces the largest increase in the figure of merit. However, since there is no convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Attempting to develop such a classification scheme for wirings in order to enable this analysis is another possible direction for this project, which would subsume the symmetry analysis discussed above.
+
+      \section{Upper Bounds}\label{sec:ubound}
+
+      There are a number of upper bounds for key rates in the literature, computed using a large variety of techniques. These bounds can be for the key rate achievable from a specific state, or from a specific behaivour. An important property of an upper bound is whether it is \emph{faithful}: faithful upper bounds are those that have non-zero key rates for all entangled states or all nonlocal behaviours. For our purposes, a non-faithful upper bound is much more helpful---if local wirings between multiple copies of the same device are able to \emph{revive} the key rate, that would be very interesting from both theoretical and practical standpoints. Theoretically, it would develop our currently limited understanding of the nature of the \emph{secrecy capacity} of no-signalling behaviours, and practically, it would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system.
+
+      A notable non-faithful upper bound is given in~\cite{NotSufficient}, where Eve, who controls the source that provides quantum states for the devices to measure, can sometimes choose to distribute \emph{local correlations}, which she has full information on, while distributing nonlocal correlations at all other times. This \emph{convex combination} attack, so called because the resultant behaviour is a convex combination of the local and nonlocal behaviours, can simulate the correlations that are generated by inefficient projective measurements on Werner states. These behaviours are nonlocal, that is, they have \(S > 2\), but the fact that they were generated in this manner can be used to prove that standard protocols, where both Alice and Bob announce their measurement settings, cannot generate secret keys from them.
+
+      TODO:\ More information on other upper bounds to come.
+
+      \section{Lower Bounds}\label{sec:lbound}
+
+      \subsection{Asymmetric CHSH}
+
+      Better key rates have been obtained from asymmetric versions of the CHSH inequality:
+      \begin{equation}
+        S_{\alpha} \coloneqq \alpha\angleb{A_0 B_0} + \alpha\angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1}.
+      \end{equation}
+      This technique can then be combined with noisy preprocessing, where Alice replaces each bit of her key with a locally random bit with probability \(q\). The lower bound for \(H(A_0|E)\), with \(s = S_{\alpha}\) from the test statistics, is
+      \[ H(A_0|E) \geq g_{q,\alpha}(s) = \begin{cases}
+        g(s) & \text{ for } \abs{\alpha} \geq 1 \text{ or } s \geq s^* \\
+        h(q) + g'(s^*)(\abs{s}-2) & \text{ otherwise},
+      \end{cases}
+    \]
+    where
+    \begin{equation}
+      g_{q,\alpha}(s) = 1 + \phi\left(R_1\right) - \phi\left(R_2\right),
+    \end{equation}
+    with
+    \begin{equation} 
+      R_1 = \sqrt{{(1-2q)}^2 + 4q(1-q)(s^2/4-\alpha^2)} \qquad R_2 = \sqrt{s^2/4-\alpha^2}
+    \end{equation}
+    and where \(s^*\) is the solution to
+    \begin{equation}\label{eqn:sstar}
+      h(q) + g'(s^*) (s^*-2) = g(s^*).
+    \end{equation}
+
+    For a function \(R(s)\) of \(s\), it can easily be verified that
+    \begin{equation}
+      \diff{\phi(R)}{s} = \frac{1}{2} \diff{R}{s} \log\frac{1-R}{1+R},
+    \end{equation}
+    and since
+    \begin{equation} 
+      R_1'(s) = \frac{qs(1-q)}{R_1} \qquad R_2'(s) = \frac{s}{4R_2},
+    \end{equation}
+    we have
+    \begin{equation}
+      g_{q,\alpha}'(s) = \frac{qs(1-q)}{2R_1} \log\frac{1-R_1}{1+R_1} - \frac{s}{4R_2} \log\frac{1-R_2}{1+R_2}.
+    \end{equation}
+
+    \subsection{Quasi-Relative Entropies}
+
+    The essential idea behind the use of quasi-relative entropies is very straightforward---in order to efficiently minimise the von Neumann entropy \(H(A|E, X = x^*)\), we upper-bound the relative entropy between the variable system and the perfectly mixed (secret) key. However, as the authors wanted to develop highly general tools that can be used to calculate a variety of quantities and work even for infinite-dimensional cases, they made use of the operator algebra approach to quantum mechanics and spectral theory, which are generally not covered in undergraduate treatments of quantum mechanics and quantum information. Some of these technicalities have been reviewed in \Cref{sec:qretech}, but for our purposes, we can simply consider the application of these techniques to DIQKD specifically.
+
+    \section{Nonlocality Monotones}\label{sec:nlmono}
 
     The maximal correlation between two rvs \(A,B\) is denoted as \(\rho(A,B)\) and defined as
     \begin{equation}
@@ -598,93 +648,49 @@
       s^*(A,B) \coloneqq \inf_{\substack{(\lambda_A, \lambda_B) \in \HC(A,B) \\ \lambda_B \neq 0}} \frac{1 - \lambda_A}{\lambda_B} \geq {\rho(A,B)}^2
     \end{gather}
 
-    \section{Correlation Space for (2, 2, 3, 2)}
+    \printbibliography{}
 
-    We have 24 positivity facets of the local polytope, and 24 liftings of CHSH\@.
+    \begin{appendices}
+      \section{Technicalities for Quasi-Relative Entropies}\label{sec:qretech}
 
-    \section{State of the Art Lower Bounds}
+      The set of \emph{bounded operators} \(\mathcal{B}(\Hs)\) on the Hilbert space \(\Hs\) is the set \(\mathcal{L}(\Hs)\) of all linear operators on \(\Hs\) such that the \emph{operator norm} of \(X \in \mathcal{L}(\Hs)\)
+      \[ \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}} \]
+      is finite. For an operator \(A\), its \emph{spectrum} \(\sigma(A)\) is the subset of \(\C\) such that, for all \(\lambda \in \sigma(A)\), \(A - \lambda I\) does not have a \emph{bounded inverse}: there does not exist an operator \(S\) such that \(S\left( A - \lambda I \right) = \left( A - \lambda I \right)S =  I\) and \(S \in \mathcal{B}(\Hs)\).
 
-    \subsection{Asymmetric CHSH}
+      Our objective is to establish a \emph{functional calculus} that will allow us to evaluate a function  \(f\) with scalar output on operators. In the finite-dimensional case this is straightforward for normal operators (obeying \(AA^{\dagger} = A^{\dagger}A\)): for an operator \(A\) with eigenvalues \(\{\lambda_i\}\) and corresponding eigenprojectors \(\{\Pi_i\}\),
+      \[ A = \sum_i \lambda_i \Pi_i \Rightarrow f(A) = \sum_i f(\lambda_i) \Pi_i, \]
+      by the \emph{spectral theorem}.
 
-    Better key rates have been obtained from asymmetric versions of the CHSH inequality:
-    \begin{equation}
-      S_{\alpha} \coloneqq \alpha\angleb{A_0 B_0} + \alpha\angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1}.
-    \end{equation}
-    This technique can then be combined with noisy preprocessing, where Alice replaces each bit of her key with a locally random bit with probability \(q\). The lower bound for \(H(A_0|E)\), with \(s = S_{\alpha}\) from the test statistics, is
-    \[ H(A_0|E) \geq g_{q,\alpha}(s) = \begin{cases}
-      g(s) & \text{ for } \abs{\alpha} \geq 1 \text{ or } s \geq s^* \\
-      h(q) + g'(s^*)(\abs{s}-2) & \text{ otherwise},
-    \end{cases}
-    \]
-    where
-    \begin{equation}
-      g_{q,\alpha}(s) = 1 + \phi\left(R_1\right) - \phi\left(R_2\right),
-    \end{equation}
-    with
-    \begin{equation} 
-      R_1 = \sqrt{{(1-2q)}^2 + 4q(1-q)(s^2/4-\alpha^2)} \qquad R_2 = \sqrt{s^2/4-\alpha^2}
-    \end{equation}
-    and where \(s^*\) is the solution to
-    \begin{equation}\label{eqn:sstar}
-      h(q) + g'(s^*) (s^*-2) = g(s^*).
-    \end{equation}
+      However, the approach of the paper generalises the spectral theorem to cases where the spectrum \(\sigma(A)\) is no longer a discrete set of eigenvalues, as it is in the finite-dimensional case, but a \emph{continuous spectrum}. This scenario arises in infinite-dimensional Hilbert spaces, such as those involving position and momentum operators. These particular operators are even more complex, since they are \emph{unbounded}. We will therefore sketch the standard statement of the spectral theorem, which applies to bounded normal operators and unbounded self-adjoint (\(A = A^{\dagger}\)) operators, although we leave aside technicalities regarding the domain of the operators and the functions involved in this generalisation.
 
-    For a function \(R(s)\) of \(s\), it can easily be verified that
-    \begin{equation}
-      \diff{\phi(R)}{s} = \frac{1}{2} \diff{R}{s} \log\frac{1-R}{1+R},
-    \end{equation}
-    and since
-    \begin{equation} 
-      R_1'(s) = \frac{qs(1-q)}{R_1} \qquad R_2'(s) = \frac{s}{4R_2},
-    \end{equation}
-    we have
-    \begin{equation}
-      g_{q,\alpha}'(s) = \frac{qs(1-q)}{2R_1} \log\frac{1-R_1}{1+R_1} - \frac{s}{4R_2} \log\frac{1-R_2}{1+R_2}.
-    \end{equation}
+      This requires some additional definitions. \emph{Spectral measures}, or \emph{projector-valued measures} (PVMs), map a subset of the spectrum to a projector. More formally, they are functions between the \emph{\(\sigma\)-algebra} \(\Omega(\sigma(A))\) of \(\sigma(A)\) to \(\mathcal{B}(\Hs)\). A \(\sigma\)-algebra contains subsets of its underlying set, and is closed under set complements and unions of countable sequences, so in this case it represents subsets of the spectrum that it would be sensible to attach a projector to.
 
-    \subsection{The BFF Method}
+      In the finite-dimensional case, the projector associated to each eigenvalue \(\lambda\) in the spectrum is the projector onto the associated eigenspace, and the direct sum of the projectors is the projector onto \(\Hs\), that is, \(I\). With a continuous spectrum, we want to divide \(\Hs\) into orthogonal spaces in the same way, providing a systematic way to attach each subspace to each element \(\omega \in \Omega(\sigma(A))\), that is, each reasonable subset of \(\sigma(A)\). Under a given spectral measure \(E : \Omega(\sigma(A)) \to \mathcal{B}(\Hs)\), the subspace \(V_{\omega} \subseteq \Hs\) associated to \(\omega\) is called a \emph{spectral subspace}, and \(E(\omega)\) is the projector onto \(V_{\omega}\). These \(V_{\omega}\) are ``generalised eigenspaces'' in the sense that they are \emph{invariant} under \(A\), that is, \(\psi \in V_{\omega} \Rightarrow A\psi \in V_{\omega}\), and that, for \(\omega \subseteq [\lambda - \epsilon, \lambda + \epsilon]\), we have \(\norm{(A - \lambda I)\psi} \leq \epsilon\norm{\psi}\), from which recover the familiar behaviour when the spectrum is discrete.
 
-    The essential idea is very straightforward---in order to efficiently minimise the von Neumann entropy \(H(A|E, X = x^*)\), we upper-bound the relative entropy between the variable system and the perfectly mixed (secret) key. % TODO
+      A function \(f : \sigma(A) \to \C\) can then be applied to an element of \(\mathcal{B}(\Hs)\), by integrating it against this measure
+      \[ f(A) = \int_{\lambda \in \sigma(A)} f(\lambda) \dif{E(\lambda)}, \]
+      where we have that
+      \[ \int_{\lambda \in \sigma(A)} \delta\{\lambda \in \omega\} \dif{E(\lambda)} = E(\omega), \]
+      with the \emph{indicator function} \(\delta\{P\} = 1\) when \(P\) is true, and 0 otherwise. This property can be used to define the integral for any other function. For example, for a given function \(f : \R \to \C\), we can define a sequence of functions
+      \[ f_n(\lambda) = \sum_{j = -\infty}^{\infty} f(j/n) \delta\{\lambda \in [j/n, (j+1)/n)\}, \]
+      and if this sequence \emph{converges uniformly} to \(f(\lambda)\), that is,
+      \[ \forall \lambda \in \C; \lim_{n \to \infty} \norm{f_n(\lambda) - f(\lambda)} = 0, \]
+      then
+      \[ f(A) = \lim_{n\to\infty} \int_{\lambda \in \sigma(A)} f_n(\lambda) \dif{E(\lambda)} = \lim_{n\to\infty} \sum_{j = -\infty}^{\infty} f(j/n) E([j/n, (j+1)/n)) \]
+      so that, roughly speaking, the effect of \(f(A)\) on \(E([\lambda, \lambda+\dif{\lambda}))\psi\) is multiplication by \(f(\lambda)\). The \emph{spectral theorem} then asserts that there is a \emph{unique} measure \(E_A\) on the Borel \(\sigma\)-algebra, that is, the smallest \(\sigma\)-algebra containing all open sets in \(\sigma(A)\), such that
+      \[ A = \int_{\sigma(A)} \lambda \dif{E_A(\lambda)}, \]
+      which is how \(A\) can be decomposed into orthogonal projectors.
 
-    However, the methods involved in casting the relative entropy into an easily optimised form are highly involved, using the operator algebra approach to quantum mechanics. We will briefly review some of the ideas used in this paper that are generally not covered in undergraduate treatments of quantum mechanics and quantum information.
-    % TODO this is just to ease the generalisation to continuous
+      An operator-valued measure \(E\) on \(\sigma(A)\) can be converted into a regular, scalar-valued measure \(\nu\) by specifying a vector \(\phi\), so that
+      \[ \int_{\sigma(A)} f(\lambda) \dif{\nu(\lambda)} = \angleb{\phi, \left(\int_{\sigma(A)} f(\lambda) \dif{E(\lambda)}\right) \phi}. \]
 
-    The set of \emph{bounded operators} \(\mathcal{B}(\Hs)\) on the Hilbert space \(\Hs\) is the set \(\mathcal{L}(\Hs)\) of all linear operators on \(\Hs\) such that the \emph{operator norm} of \(X \in \mathcal{L}(\Hs)\)
-    \[ \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}} \]
-    is finite. For an operator \(A\), its \emph{spectrum} \(\sigma(A)\) is the subset of \(\C\) such that, for all \(\lambda \in \sigma(A)\), \(A - \lambda I\) does not have a \emph{bounded inverse}: there does not exist an operator \(S\) such that \(S\left( A - \lambda I \right) = \left( A - \lambda I \right)S =  I\) and \(S \in \mathcal{B}(\Hs)\).
+      A \emph{joint spectral measure} of multiple self-adjoint operators, with \emph{commuting spectral measures} (which then implies that the operators commute) is then simply the product of their respective spectral measures, with a straightforward generalisation from the single-operator case.
 
-    Our objective is to establish a \emph{functional calculus} that will allow us to evaluate a function  \(f\) with scalar output on operators. In the finite-dimensional case this is straightforward for normal operators (obeying \(AA^{\dagger} = A^{\dagger}A\)): for an operator \(A\) with eigenvalues \(\{\lambda_i\}\) and corresponding eigenprojectors \(\{\Pi_i\}\),
-    \[ A = \sum_i \lambda_i \Pi_i \Rightarrow f(A) = \sum_i f(\lambda_i) \Pi_i, \]
-    by the \emph{spectral theorem}.
+      % TODO replace \sigma(A) with \mathcal{X} and explain the use of joint spectral
+      % measures in the paper
 
-    However, the approach of the paper generalises the spectral theorem to cases where the spectrum \(\sigma(A)\) is no longer a discrete set of eigenvalues, as it is in the finite-dimensional case, but a \emph{continuous spectrum}. This scenario arises in infinite-dimensional Hilbert spaces, such as those involving position and momentum operators. These particular operators are even more complex, since they are \emph{unbounded}. We will therefore sketch the standard statement of the spectral theorem, which applies to bounded normal operators and unbounded self-adjoint (\(A = A^{\dagger}\)) operators, although we leave aside technicalities regarding the domain of the operators and the functions involved in this generalisation.
+    \end{appendices}
 
-    This requires some additional definitions. \emph{Spectral measures}, or \emph{projector-valued measures} (PVMs), map a subset of the spectrum to a projector. More formally, they are functions between the \emph{\(\sigma\)-algebra} \(\Omega(\sigma(A))\) of \(\sigma(A)\) to \(\mathcal{B}(\Hs)\). A \(\sigma\)-algebra contains subsets of its underlying set, and is closed under set complements and unions of countable sequences, so in this case it represents subsets of the spectrum that it would be sensible to attach a projector to.
-
-    In the finite-dimensional case, the projector associated to each eigenvalue \(\lambda\) in the spectrum is the projector onto the associated eigenspace, and the direct sum of the projectors is the projector onto \(\Hs\), that is, \(I\). With a continuous spectrum, we want to divide \(\Hs\) into orthogonal spaces in the same way, providing a systematic way to attach each subspace to each element \(\omega \in \Omega(\sigma(A))\), that is, each reasonable subset of \(\sigma(A)\). Under a given spectral measure \(E : \Omega(\sigma(A)) \to \mathcal{B}(\Hs)\), the subspace \(V_{\omega} \subseteq \Hs\) associated to \(\omega\) is called a \emph{spectral subspace}, and \(E(\omega)\) is the projector onto \(V_{\omega}\). These \(V_{\omega}\) are ``generalised eigenspaces'' in the sense that they are \emph{invariant} under \(A\), that is, \(\psi \in V_{\omega} \Rightarrow A\psi \in V_{\omega}\), and that, for \(\omega \subseteq [\lambda - \epsilon, \lambda + \epsilon]\), we have \(\norm{(A - \lambda I)\psi} \leq \epsilon\norm{\psi}\), from which recover the familiar behaviour when the spectrum is discrete.
-
-    A function \(f : \sigma(A) \to \C\) can then be applied to an element of \(\mathcal{B}(\Hs)\), by integrating it against this measure
-    \[ f(A) = \int_{\lambda \in \sigma(A)} f(\lambda) \dif{E(\lambda)}, \]
-    where we have that
-    \[ \int_{\lambda \in \sigma(A)} \delta\{\lambda \in \omega\} \dif{E(\lambda)} = E(\omega), \]
-    with the \emph{indicator function} \(\delta\{P\} = 1\) when \(P\) is true, and 0 otherwise. This property can be used to define the integral for any other function. For example, for a given function \(f : \R \to \C\), we can define a sequence of functions
-    \[ f_n(\lambda) = \sum_{j = -\infty}^{\infty} f(j/n) \delta\{\lambda \in [j/n, (j+1)/n)\}, \]
-    and if this sequence \emph{converges uniformly} to \(f(\lambda)\), that is,
-    \[ \forall \lambda \in \C; \lim_{n \to \infty} \norm{f_n(\lambda) - f(\lambda)} = 0, \]
-    then
-  \[ f(A) = \lim_{n\to\infty} \int_{\lambda \in \sigma(A)} f_n(\lambda) \dif{E(\lambda)} = \lim_{n\to\infty} \sum_{j = -\infty}^{\infty} f(j/n) E([j/n, (j+1)/n)) \]
-  so that, roughly speaking, the effect of \(f(A)\) on \(E([\lambda, \lambda+\dif{\lambda}))\psi\) is multiplication by \(f(\lambda)\). The \emph{spectral theorem} then asserts that there is a \emph{unique} measure \(E_A\) on the Borel \(\sigma\)-algebra, that is, the smallest \(\sigma\)-algebra containing all open sets in \(\sigma(A)\), such that
-  \[ A = \int_{\sigma(A)} \lambda \dif{E_A(\lambda)}, \]
-  which is how \(A\) can be decomposed into orthogonal projectors.
-
-  An operator-valued measure \(E\) on \(\sigma(A)\) can be converted into a regular, scalar-valued measure \(\nu\) by specifying a vector \(\phi\), so that
-  \[ \int_{\sigma(A)} f(\lambda) \dif{\nu(\lambda)} = \angleb{\phi, \left(\int_{\sigma(A)} f(\lambda) \dif{E(\lambda)}\right) \phi}. \]
-
-  A \emph{joint spectral measure} of multiple self-adjoint operators, with \emph{commuting spectral measures} (which then implies that the operators commute) is then simply the product of their respective spectral measures, with a straightforward generalisation from the single-operator case.
-
-  % TODO replace \sigma(A) with \mathcal{X} and explain the use of joint spectral
-  % measures in the paper
-
- \end{document}
+    \end{document}
 
   Compute relative entropy of entanglement and compare to quantum maximal correlation

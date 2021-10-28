@@ -1,5 +1,5 @@
 using Revise
-using Plots, LaTeXStrings, ColorSchemes, Printf; plotlyjs()
+using Plots, LaTeXStrings, ColorSchemes, Printf; # plotlyjs()
 using Mux, Interact, WebIO
 import Contour: contours, levels, level, lines, coordinates
 default(:size, (1200,800))
@@ -125,6 +125,20 @@ function grad_data(is, js, HAB::Function, HAE::Function, corrf::Function, gradf:
   return pts, grads
 end
 
+function appwirf_data(is, js, corrf::Function, krf::Function, wirf::Function;
+    type::Type{T} = Float64) where {T <: Real}
+  il = length(is); jl = length(js)
+  rps = Array{T}(undef, il, jl)
+
+  for ii in eachindex(is), ji in eachindex(js)
+    i = is[ii]; j = js[ji]
+    wircorrs = Correlators(corrf(i, j)...) |> wirf
+    rps[ii, ji] = krf(wircorrs)
+  end
+
+  return rps
+end
+
 function farkas_wiring_data(n, HAE::Function, HAB::Function; c = 2, iterf = nothing, policy = wiring_policy)
   maxrecs = Union{WiringData, Nothing}[]
   for i in 1:n
@@ -149,27 +163,78 @@ function farkas_wiring_data(n, HAE::Function, HAB::Function; c = 2, iterf = noth
   return maxrecs
 end
 
+function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname, corrf::Function; kwargs...) where T <: Real
+  kwargs = Dict(kwargs)
+  tol = get(kwargs, :tol, 1e-2)
+  krf = get(kwargs, :krf, (corrs) -> gchsh(max(2.0, CHSH(corrs...))) - h(QBER(corrs...)))
+  wirings = get(kwargs, :wirings, 
+                [((corrs) -> and_corrs(N, corrs...), "$N-AND") for N in 2:2])
+
+  rs = T[Correlators(corrf(i, j)...) |> krf for i in is, j in js]
+  basezeros = Tuple{T,T}[]
+  for ii in eachindex(is)
+    jis = filter(ji -> abs(rs[ii, ji]) < tol, eachindex(js))
+    if isempty(jis)
+      continue
+    end
+    maxj = map(ji -> js[ji], jis) |> maximum
+    push!(basezeros, (is[ii], maxj))
+  end
+  plt = plot(basezeros, xlabel=iname, ylabel=jname, label="No wiring", xlims=(is[1], is[end]), ylims=(js[1], js[end]))
+
+  for wiring in wirings
+    wirf, wirname = wiring
+    rps = appwirf_data(is, js, corrf, krf, wirf)
+    wirpts = Tuple{T,T}[]
+    for ii in eachindex(is)
+      zero_ji = 0
+      min_deltar = Inf
+      for ji in eachindex(js)
+        if rps[ii, ji] < rs[ii, ji] + tol
+          continue
+        end
+        deltar = abs(rps[ii, ji] - rs[ii, ji])
+        if deltar < min_deltar
+          zero_ji = ji
+          min_deltar = deltar
+        end
+      end
+      if zero_ji == 0
+        continue
+      end
+      push!(wirpts, (is[ii], js[zero_ji]))
+    end
+    plot!(plt, wirpts, label = wirname)
+  end
+
+  return plt
+end
+
 # %%
 # NS polytope slice
 
-function nspoly_plot(QLDsamples = 20, boundsamples = 20)
-  # TODO
-  ps = range(0,1,length=boundsamples) |> collect
-  qs = range(0,1,length=QLDsamples) |> collect
-
-  oA, oB = 2, 2
-  iA = length(Atlds); iB = length(Btlds) 
-
-  for pidx in eachindex(ps), qidx in eachindex(qs)
-    p = ps[pidx]; q = qs[qidx]
-    Eax, Eby, Eabxy = ((p .* ((q .* EaxQ) .+ ((1-q) .* EaxLD))) .+ ((1-p) .* Eaxbound),
-                      (p .* ((q .* EbyQ) .+ ((1-q) .* EbyLD))) .+ ((1-p) .* Ebybound),
-                      (p .* ((q .* EabxyQ) .+ ((1-q) .* EabxyLD))) .+ ((1-p) .* Eabxybound),)
-  end
+function qset_plot(QLDsamples = 20, boundsamples = 20, kwargs...)
+  fIs = range(0,1,length=boundsamples) |> collect
+  fLDs = range(0,1,length=QLDsamples) |> collect
+  corrf = (fI, fLD) -> (((1-fI) .* (((1-fLD) .* EaxQ) .+ (fLD .* EaxLD))) .+ (fI .* Eaxbound),
+                     ((1-fI) .* (((1-fLD) .* EbyQ) .+ (fLD .* EbyLD))) .+ (fI .* Ebybound),
+                     ((1-fI) .* (((1-fLD) .* EabxyQ) .+ (fLD .* EabxyLD))) .+ (fI .* Eabxybound),)
+  return wiring_plot(fIs, fLDs, "Isotropic fraction", "Deterministic fraction", corrf, kwargs)
 end
 
 # %%
 # Quantum plots
+
+function expt_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.925, ncstart=0.8, kwargs...)
+  ncs = range(ncstart, stop=1, length=ncsamples)
+  etas = range(etastart, stop=1, length=etasamples)
+
+  Atlds, Btlds, ABtlds = meas_corrs(theta=theta, mus=mus, nus=nus)
+  tldcorrs = Correlators(Atlds, Btlds, ABtlds)
+  corrf = (nc, eta) -> expt_corrs(nc, eta, tldcorrs...)
+
+  return wiring_plot(ncs, etas, L"n_c", L"\eta", corrf, kwargs=kwargs)
+end
 
 function entropy_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=20, etasamples=5, etastart=0.8, kwargs...)
   ncs = range(0, stop=1, length=ncsamples)
