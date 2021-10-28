@@ -168,7 +168,7 @@ function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname,
   tol = get(kwargs, :tol, 1e-2)
   krf = get(kwargs, :krf, (corrs) -> gchsh(max(2.0, CHSH(corrs...))) - h(QBER(corrs...)))
   wirings = get(kwargs, :wirings, 
-                [((corrs) -> and_corrs(N, corrs...), "$N-AND") for N in 2:2])
+                [((corrs) -> and_corrs(N, corrs...), "$N-AND") for N in 2:6])
 
   rs = T[Correlators(corrf(i, j)...) |> krf for i in is, j in js]
   basezeros = Tuple{T,T}[]
@@ -180,29 +180,19 @@ function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname,
     maxj = map(ji -> js[ji], jis) |> maximum
     push!(basezeros, (is[ii], maxj))
   end
-  plt = plot(basezeros, xlabel=iname, ylabel=jname, label="No wiring", xlims=(is[1], is[end]), ylims=(js[1], js[end]))
+  plt = plot(basezeros, xlabel=iname, ylabel=jname, label="No wiring", xlims=(is[1], is[end]), ylims=(js[1], js[end]), legend=:topleft, size=(800,600))
 
   for wiring in wirings
     wirf, wirname = wiring
     rps = appwirf_data(is, js, corrf, krf, wirf)
     wirpts = Tuple{T,T}[]
     for ii in eachindex(is)
-      zero_ji = 0
-      min_deltar = Inf
-      for ji in eachindex(js)
-        if rps[ii, ji] < rs[ii, ji] + tol
-          continue
-        end
-        deltar = abs(rps[ii, ji] - rs[ii, ji])
-        if deltar < min_deltar
-          zero_ji = ji
-          min_deltar = deltar
-        end
-      end
-      if zero_ji == 0
+      jis = filter(ji -> abs(rps[ii, ji]) < tol, eachindex(js))
+      if isempty(jis)
         continue
       end
-      push!(wirpts, (is[ii], js[zero_ji]))
+      maxj = map(ji -> js[ji], jis) |> maximum
+      push!(wirpts, (is[ii], maxj))
     end
     plot!(plt, wirpts, label = wirname)
   end

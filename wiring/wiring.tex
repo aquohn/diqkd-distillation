@@ -412,7 +412,7 @@
         \diffp{}{S} H_S(A|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right].
       \end{align*}
 
-      Consider the following simple wiring, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs. Clearly, this can only increase the correlations between Alice and Bob, since \(a \neq b\) only if all \(N\) boxes return different outputs to Alice and Bob. However, this means that if Eve knows that any of the boxes produced 0, she can conclude that the overall output is 0, increasing her correlation with Alice. If the increase in \(H(A|B)\) can make up for the decrease in \(H(A|E)\), then this wiring improves the key rate.
+      Consider the following simple wiring, the \emph{N-AND wiring}, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs. Clearly, this can only increase the correlations between Alice and Bob, since \(a \neq b\) only if all \(N\) boxes return different outputs to Alice and Bob. However, this means that if Eve knows that any of the boxes produced 0, she can conclude that the overall output is 0, increasing her correlation with Alice. If the increase in \(H(A|B)\) can make up for the decrease in \(H(A|E)\), then this wiring improves the key rate.
 
       For \(N\) boxes, the correlators and marginals become
       \begin{gather}
@@ -420,7 +420,13 @@
         \angleb{A_x}_{N} = 1 - 2 {\left(\frac{1-\angleb{A_x}}{2}\right)}^N \qquad \angleb{B_y}_{N} = 1 - 2 {\left(\frac{1-\angleb{B_y}}{2}\right)}^N.
       \end{gather}
 
-      Using the Pironio key rate, we are able to find \emph{revival} in certain parameter regimes: behaviours with \(r_P = 0\), but which have \(r_P > 0\) after wiring.
+      Using the Pironio key rate, we are able to find \emph{revival} in certain parameter regimes: behaviours with \(r_P = 0\), but which have \(r_P > 0\) after wiring. In \Cref{fig:exptplt}, the N-AND wiring is able to achieve \(r_P > 0\) in parameter regimes where \(r_P = 0\) before wiring. Our objective, then, is to understand and generalise this phenomenon.
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{exptplt.pdf}
+    \caption{\label{fig:exptplt} Minimum \(\eta\) required for \(r_P > 0\), given \(n_c\).}
+  \end{figure}
 
       \section{The Quantum Key Distribution Setting}\label{sec:qkdset}
 
