@@ -158,7 +158,6 @@
 \newcommand{\Var}{\mathrm{Var}} % variance
 \newcommand{\indep}{\perp \!\!\! \perp} % independence symbol
 \newcommand{\indic}[1]{\mathbbm{1}{\left\{#1\right\}}} % indicator function
-\newcommand{\iid}{i.i.d.\ } % independently and identically distributed
 
 % quantum physics
 \newcommand{\Tr}{\mathrm{Tr}} % enables Trace operator
@@ -259,6 +258,7 @@
   \newcommand{\rob}{\rm rob}
   \newcommand{\cor}{\rm cor}
   \newcommand{\secur}{\rm sec}
+  \newcommand{\erob}[1]{\epsilon_{\rob}^{(#1)}}
 
   \newcommand{\HC}{\mathrm{HC}}
   \newcommand{\MC}{\mathrm{MC}}
@@ -337,11 +337,11 @@
 
   \subsection{Device-independent quantum key distribution}
 
-  At the most general level, a DIQKD protocol \(\mathfrak{P}\) can be defined as finite sequence of \emph{local operations and public communication} operations (LOPC) that distills an \(\epsilon\)-\emph{secure} key of length \(\ell\) from \(n\) rounds of Bell test data~\cite{DIQKD_Limits}. Alice and Bob share a \(\epsilon\)-\emph{secure key} of length \(\ell\) if, after executing the protocol, their joint state with the eavesdropper Eve \(\rho_{ABE}\) satisfies~\cite{SecurityQKD}
+  At the most general level, a DIQKD protocol \(\mathfrak{P}\) can be defined as finite sequence of \emph{local operations and public communication} operations (LOPC) that distills an \(\epsilon\)-\emph{secure} key of length \(\ell\) from \(n\) rounds of Bell test data~\cite{DIQKD_Limits}. Alice and Bob share a \(\epsilon\)-\emph{secure key} of length \(\ell\) if, after executing \(\mathfrak{P}\), their joint state with the eavesdropper Eve \(\rho_{A^n B^n E^n}\) satisfies~\cite{SecurityQKD}
   \begin{equation}
-    (1-\epsilon_{\rob})D(\rho_{ABE}, \chi_{AB}^{\ell}\otimes\rho_E) \leq \epsilon,
+    (1-\erob{n})D(\rho_{A^n B^n E^n}, \chi_{A^n B^n}^{\ell}\otimes\rho_{E^n}) \leq \epsilon,
   \end{equation}
-  where \(\epsilon_{\rob}\) is the probability of the protocol aborting without interference from Eve, and \(D(\rho,\sigma)\) is the \emph{trace distance}
+  where \(\erob{n}\) is the probability of the protocol aborting without interference from Eve, and \(D(\rho,\sigma)\) is the \emph{trace distance}
   \begin{equation}
     D(\rho, \sigma) = \frac{1}{2}\norm{\rho - \sigma},
   \end{equation}
@@ -351,17 +351,20 @@
   \end{equation}
   the \emph{ideal key}
   \begin{equation}
-    \chi_{AB}^{\ell} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{A} \otimes \ket{j}\bra{j}_{B},
+    \chi_{A^n B^n}^{\ell} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{A^n} \otimes \ket{j}\bra{j}_{B^n},
   \end{equation}
-  a uniformly distributed mixture amongst all possible keys of length \(\ell\), and Eve's marginal state \(\rho_E = \Tr_{AB} \rho_{ABE}\). This definition of security is \emph{universally composable} (UC), which is crucial for applications---if two resources are \(\epsilon_1\) and \(\epsilon_2\) secure under a UC definition, then a protocol that uses only these two resources is \(\epsilon\)-secure under the same definition, with \(\epsilon \leq \epsilon_1 + \epsilon_2\).
+  a uniformly distributed mixture amongst all possible keys of length \(\ell\), and Eve's marginal state \(\rho_{E^n} = \Tr_{A^n B^n}\left[ \rho_{A^n B^n E^n} \right]\). This definition of security is \emph{universally composable} (UC), which is crucial for applications---if two resources are \(\epsilon_1\) and \(\epsilon_2\) secure under a UC definition, then a protocol that uses only these two resources is \(\epsilon\)-secure under the same definition, with \(\epsilon \leq \epsilon_1 + \epsilon_2\).
 
   The asymptotic rate \(r\) of the protocol \(\mathfrak{P}\) is~\cite{CQKeyDistill}
   \begin{equation}
-    r = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\epsilon_{\rob}) \frac{\ell_n}{n},
+    r = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\erob{n}) \frac{\ell_n}{n},
   \end{equation}
   where the supremum is over all sequences \(\{\ell_n\}\) such that
-  \[ \lim_{n\to\infty} (1-\epsilon_{\rob})D(\rho_{ABE}, \chi_{AB}^{\ell_n}\otimes\rho_E) = 0. \]
-  If we consider the rounds to be \iid{}, which is justifiable in the asymptotic limit~\cite{DI_Proofs}, we can define the systems \(A\), \(B\) and \(E\) as Alice's, Bob's and Eve's systems after one Bell test round, respectively. Intuitively, the amount of information that Alice has which is secret to Eve is \({H(A|E)}_{\rho}\), where \(H\) is the von Neumann entropy, \({H(A)}_{\rho} = \Tr\left[\rho_{A}\log\rho_{A}\right]\), which reduces to the Shannon entropy for a classical system. On the other hand, \(B\) may not be perfectly correlated with \(A\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve is upper bounded by \({H(A|B)}_{\rho}\). This gives us the \emph{Devetak-Winter key rate}~\cite{DevetakWinter}
+  \[ \lim_{n\to\infty} (1-\erob{n})D(\rho_{A^n B^n E^n}, \chi_{A^n B^n}^{\ell_n}\otimes\rho_{E^n}) = 0. \]
+  If we consider the rounds to be independent and identically distributed (i.i.d.)\footnote{i.i.d.\ attacks, but with Eve storing quantum information, are referred to as \emph{collective attacks} in the literature}, which is justifiable in the asymptotic limit~\cite{DI_Proofs}, we can write
+  \[ \rho_{A^n B^n E^n} = \rho_{ABE}^{\otimes n}. \]
+
+  Then, the systems \(A\), \(B\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. Intuitively, the amount of information that Alice has which is secret to Eve is \({H(A|E)}_{\rho}\), where \(H\) is the von Neumann entropy, \({H(A)}_{\rho} = -\Tr\left[\rho_{A}\log\rho_{A}\right]\), which reduces to the Shannon entropy for a classical system. On the other hand, \(B\) may not be perfectly correlated with \(A\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve is upper bounded by \({H(A|B)}_{\rho}\). This gives us the \emph{Devetak-Winter key rate}~\cite{DevetakWinter}
   \begin{equation}
     r \geq {H(A|E)}_{\rho} - {H(A|B)}_{\rho}.
   \end{equation}
@@ -370,39 +373,52 @@
 
   We will now consider the first DIQKD protocol proved to be secure~\cite{DIQKD_Lower}. This takes place in the \((2,2,3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}, and it uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key. Therefore, we have \({H(A|B)}_{\rho} = Q_{02} = Q\), and it was proved that
   \begin{equation}
-    {H(A|E)}_{\rho} \geq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
+    {H(A|E)}_{\rho} \geq {H_S(A|E)}_{\rho} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
   \end{equation}
   where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, with the logarithm in base 2, and where \(S\) is calculated from \(x,y \in \{0,1\}\). Therefore,
   \begin{equation}
-    r \geq 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right).
+    r \geq 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
   \end{equation}
-   Being the rate for an explicit, achievable protocol, this rate is a lower bound for the total secrecy extractable.
+  which we refer to as the \emph{Pironio key rate}. Being the rate for an explicit, achievable protocol, this is a lower bound for the total secrecy extractable.
 
   \section{Preliminary Results}
 
+  Our preliminary results found a revival of the Pironio key rate for states that are generated according to a simple experimental model. In this model, we denote the density matrix of the state as \(\rho_{AB}\) and observables as \(\tilde{A}_x\) and \(\tilde{B}_y\), for a perfect experimental setup, and let the Hilbert spaces of systems \(A\) and \(B\) be \(d_A\) and \(d_B\) respectively.
+
+  We now model some possible experimental flaws. If our source of quantum states produces one state per time bin, then \(n_c\) is the probability that a state is not produced during a given time bin (where we assume this process to be i.i.d.). Further, Alice and Bob's detectors have efficiencies \(\eta_A\) and \(\eta_B\) respectively, which are the probabilities for them to detect a state given that one is produced. If nothing is detected, either due to no signal being produced or due to detector inefficiency, we assign the \(-1\) outcome. The detector failure events are independent, but if no signal is produced, both Alice and Bob will receive no signal. We can then express the new states and observables as follows:
+  \begin{align*}
+    A_x &= (1-\eta_A)\tilde{A}_x - \eta_A I_A \\
+    B_y &= (1-\eta_B)\tilde{B}_y - \eta_B I_B \\
+    \rho_{AB} &= (1-n_c)\tilde{\rho}_{AB} + \frac{n_c}{d^{(0)}_A d^{(0)}_B} \Pi_A^{(0)} \Pi_B^{(0)},
+  \end{align*}
+  where \(I_A\) is the identity operator on Alice's Hilbert space, and \(d_A^{(0)}\) and \(\Pi_A^{(0)}\) are the dimension of the subspace corresponding to \(a={0}\) and the projector onto that subspace, respectively, with the analogous definitions holding for \(B\).
+
+  The marginals and correlators, then, are as follows
+  \begin{align*}
+    \angleb{A_x} &= -n_c + (1-n_c)(\eta_A\angleb{\tilde{A}_x} - (1-\eta_A)) \\
+    \angleb{B_y} &= -n_c + (1-n_c)(\eta_B\angleb{\tilde{B}_y} - (1-\eta_B)) \\
+    \angleb{A_x B_y} &= \begin{aligned}[c]
+      & (-1\times-1) n_c + (1-n_c)(\eta_A\eta_B\angleb{\tilde{A}_x\tilde{B}_y} - \eta_A(1-\eta_B)\angleb{\tilde{A}_x} \\
+      & -\eta_B(1-\eta_A)\angleb{\tilde{B}_y} + (-1\times-1) (1-\eta_A\eta_B) )
+    \end{aligned}
+    \end{align*}
+
+    For our purposes, we fix \(\eta_A = \eta_B = \eta\). We want to study the variation of the key rate with the variation of these parameters. Since \(S\) is a linear combination of the correlators, we only need to compute the variation of the correlators with \(\eta\) and \(n_c\). We connect this to the key rate by studying the variation of \(H_S(A|E)\) with \(S\).
+    \begin{align*}
+      \diffp{}{{n_c}} \angleb{A_x B_y} &= \eta \left( \left(1-\eta\right) \left(\langle\tilde{A}_x\rangle + \langle\tilde{B}_y\rangle\right) - \eta \langle\tilde{A}_x\tilde{B}_y\rangle + \left(2 - \eta\right) \right) \\
+      \diffp{}{{\eta}} \angleb{A_x B_y} &= \left(1 - n_{c}\right) \left( \left(1-2\eta\right) \left(\langle\tilde{A}_x\rangle+\langle\tilde{B}_y\rangle\right) - 2\eta \langle\tilde{A}_x\tilde{B}_y\rangle + (2-2\eta) \right) \\
+      \diffp{}{S} H_S(A|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right].
+    \end{align*}
+
     Consider the following simple wiring, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs.
 
-    For \(N\) boxes,
+    For \(N\) boxes, the correlators and marginals become
     \begin{gather}
       \angleb{A_x B_y}_{N} = 1 - \frac{{(1-\angleb{B_y})}^N + {(1-\angleb{A_x})}^N}{2^{N-1}} + \frac{1}{4^{N-1}} {(1-\angleb{A_x} - \angleb{B_y} + \angleb{A_x B_y})}^{N} \\
       \angleb{A_x}_{N} = 1 - 2 {\left(\frac{1-\angleb{A_x}}{2}\right)}^N \qquad \angleb{B_y}_{N} = 1 - 2 {\left(\frac{1-\angleb{B_y}}{2}\right)}^N.
     \end{gather}
 
-    Our preliminary results found a revival of the Pironio key rate for states that are generated according to a simple experimental model. In this model, we denote the behaviour given by the states and measurements, assuming a perfect experimental setup, by \(\tilde{p}\), while the observed probability distribution is denoted by \(p\). The probability of no signal being produced is \(n_c\), and the efficiencies of Alice and Bob's detectors are \(\eta_A\) and \(\eta_B\) respectively. When nothing is detected, either due to no signal being produced or due to detector inefficiency, we assign the \(-1\) outcome. Therefore, the observed probabilities are
-    \begin{align*}
-      p(a|x) &= \delta_{a,-1}(n_c + 1 - \eta_A) + (\eta_A - n_c)\tilde{p}(a|x) \\
-      p(b|y) &= \delta_{b,-1}(n_c + 1 - \eta_B) + (\eta_B - n_c)\tilde{p}(b|y) \\
-      p(ab|xy) &= \begin{aligned}[c] \delta_{a,-1}\delta_{b,-1}n_c + (1-n_c) [ \delta_{a,-1} \delta_{b,-1}(1-\eta_A\eta_B) + \eta_A\eta_B \tilde{p}(ab|xy) \\
-        + \delta_{b,-1}\eta_A(1-\eta_B)\tilde{p}(a|x) + \delta_{a,-1}\eta_B(1-\eta_A)\tilde{p}(b|y) ] 
-      \end{aligned}
-    \end{align*}
-
-    For our purposes, we fix \(\eta_A = \eta_B = \eta\). Then, we have
-    \begin{align*}
-      \diffp{}{{n_c}} \angleb{A_x B_y} &= \eta \left( \left(1-\eta\right) \left(\langle\tilde{A}_x\rangle + \langle\tilde{B}_y\rangle\right) - \eta \langle\tilde{A}_x\tilde{B}_y\rangle + \left(2 - \eta\right) \right) \\
-      \diffp{}{{\eta}} \angleb{A_x B_y} &= \left(1 - n_{c}\right) \left( \left(1-2\eta\right) \left(\langle\tilde{A}_x\rangle+\langle\tilde{B}_y\rangle\right) - 2\eta \langle\tilde{A}_x\tilde{B}_y\rangle + (2-2\eta) \right) \\
-      \diffp{}{S} H^S(A|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right]
-    \end{align*}
+    Using the Pironio key rate, we are able to find \emph{revival} in certain parameter regimes.
 
     \section{Local Wirings}
 
