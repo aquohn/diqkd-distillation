@@ -5,13 +5,17 @@ using LazySets, Polyhedra, Symbolics, CDDLib, LRSLib
 # TODO: optimise for cache efficiency - iterate from last to first indices
 
 includet("helpers.jl")
+includet("nonlocality.jl")
 includet("maxcorr.jl")
-includet("keyrates.jl")
+
+const chshset = (2,2,2,2)
+const qkdset = (2,2,3,2)
 
 cg_length(iA, oA, iB, oB) = oA*(iA-1)*oB*(iB-1) + oA*(iA-1) + oB*(iB-1)
 ld_length(iA, oA, iB, oB) = oA^iA * oB^iB
 positivities(iA, oA, iB, oB) = oA * oB * iA * iB
 
+# generating 
 function full_polytope(iA, oA, iB, oB, ::Type{T} = Float64) where T <: Real
   vars = Symbolics.@variables pax[1:oA, 1:iA], pby[1:oB, 1:iB], pabxy[1:oA, 1:oB, 1:iA, 1:iB]
   allvars = vcat([vec(ps) for ps in vars]...)
@@ -71,6 +75,7 @@ function ld_polytope(iA, oA, iB, oB, ::Type{T} = Float64) where T <: Real
   return VPolytope(ld_pts)
 end
 
+# converting
 function cg_to_full(v, iA, oA, iB, oB)
   pabxy = fill(NaN, oA, oB, iA, iB)
   pax = fill(NaN, oA, iA)
@@ -112,6 +117,7 @@ function full_to_cg(pax, pby, pabxy)
   return vcat(pax_vec, pby_vec, pabxy_vec)
 end
 
+# printing
 function print_full(pax, pby, pabxy)
   oA, oB, iA, iB = size(pabxy)
   w = maximum([ceil(log10(d)) for d in [oA, oB, iA, iB]]) |> Int64
@@ -136,11 +142,12 @@ function print_full(pax, pby, pabxy)
   end
 end
 
-function print_cg_constr(v, c, iA, oA, iB, oB)
+function print_cg_constr(constr, iA, oA, iB, oB)
   pabxy = fill(NaN, oA, oB, iA, iB)
   pax = fill(NaN, oA, iA)
   pby = fill(NaN, oB, iB)
 
+  v = constr.a, c = constr.b
   @sliceup(v, pax_vec, (oA-1) * iA, pby_vec, (oB-1) * iB, pabxy_vec, ((oA-1) * (oB-1) * iA * iB))
 
   pax[1:oA-1, 1:iA] = reshape(pax_vec, oA-1, iA)
@@ -165,36 +172,49 @@ function print_cg_constr(v, c, iA, oA, iB, oB)
   println(@sprintf "<= %.3f" c)
 end
 
-function correlator(pab)
-  oA, oB = size(pab)
-  corr = 0
-  for a in 1:oA, b in 1:oB
-    corr += (a == b ? 1 : -1) * pab[a,b]
+# debugging
+function cg_debug(behavs, iA, oA, iB, oB)
+  for behav in behavs
+    fullbehav = cg_to_full(behav, iA, oA, iB, oB)
+    pax, pby, pabxy = fullbehav
+    if !(all([all(ps .>= 0) && all(ps .<= 1) for ps in fullbehav])
+         && all([sum(pabxy[:, b, x, y]) == pby[b, y] for b in 1:oB for x in 1:iA for y in 1:iB])
+         && all([sum(pabxy[a, :, x, y]) == pax[a, x] for a in 1:oA for x in 1:iA for y in 1:iB])
+         && all([sum(pabxy[:, :, x, y]) == 1 for x in 1:iA for y in 1:iB]))
+      println(behav); println(fullbehav); println()
+    end
   end
-  return corr
 end
 
-function cg_chsh(v)
-  iA, oA, iB, oB = 2, 2, 2, 2
-  pax, pby, pabxy = cg_to_full(v, iA, oA, iB, oB)
-
-  sum([correlator(pabxy[:,:,x,y]) for x in 1:iA for y in 1:iB] .* [1, 1, 1, -1])
+# analysis
+function find_overlapping_constrs(poly1, poly2)
+  constrs1 = constraints(poly1), constrs2 = constraints(poly2)
+  T1, T2 = eltype(constrs1), eltype(constrs2)
+  overlaps, rem1 = T2[], T1[]
+  for constr in constrs1
+    matchconstr = nothing
+    for constr2 in constrs2
+      if issubset(constr1, constr2) || issubset(constr2, constr1)
+        matchconstr = constr2
+        break
+      end
+    end;
+    if !isnothing(matchconstr)
+      push!(overlaps, matchconstr)
+    else
+      push!(rem1, constr1)
+    end
+  end
+  rem2 = [constr in filter(c -> !(c in overlap), constrs2)]
+  return overlaps
 end
 
-function cg_QSrho(v, iA, oA, iB, oB)
-  pax, pby, pabxy = cg_to_full(v, iA, oA, iB, oB)
-  Eabxy = [correlator(pabxy[:,:,x,y]) for x in 1:iA, y in 1:iB]
-  Q = (1 - Eabxy[1,3]) / 2 # QBER H(A|B)
-  S = Eabxy[1,1] + Eabxy[1,2] + Eabxy[2,1] - Eabxy[2,2]
-  rhos = maxcorrs(pax, pby, pabxy)
-  return Q, S, rhos
-end
-
-function qkd_analysis(vs)
-  iA, oA, iB, oB = 2, 2, 3, 2
+function qkd_analysis(vs, testf = (Q, S, rho) -> abs(S) == 4)
   for v in vs
-    Q, S, rhos = cg_QSrho(v, iA, oA, iB, oB)
-    if (abs(0.5 - Q) == 0.5 && abs(S) == 4)
+    probs = Behaviour(cg_to_full(v, qkdset...)...)
+    corrs = Correlators(corrs_from_probs(pax, pby, pabxy)...)
+    Q, S, rhos = QBER(corrs...), CHSH(corrs...), maxcorr(probs...)
+    if testf(Q, S, rho)
       println(v)
       print(@sprintf "Q = %.3f, S = %.3f, " Q S)
       println(@sprintf "rho = %.3f" maximum(rhos))
@@ -202,11 +222,39 @@ function qkd_analysis(vs)
   end
 end
 
+function qkd_find_prs(::Type{T} = Float64) where T <: Real
+  qkd_v_maxmix = T[1//2, 1//2, 1//2, 1//2, 1//2, 1//4, 1//4, 1//4, 1//4, 1//4, 1//4]
+  qkd_ldpoly = ld_polytope(qkdset..., T)
+  qkd_ldconstr = constraints_list(qkd_ldpoly)
+  qkd_poly = cg_polytope(qkdset..., T)
+  qkd_v = vertices_list(qkd_poly)
+  CT, VT = eltype(qkd_ldconstr), eltype(qkd_v)
+  # constrs_to_extrv = Vector{Tuple{CT, Vector{Tuple{VT, VT}}}}()
+  constrs_to_extrv = Dict{CT, Vector{Tuple{VT, VT}}}()
+
+  ns_extremal = filter(v -> !(v in qkd_ldpoly), qkd_v)
+  for constr in qkd_ldconstr
+    matches = Tuple{VT, VT}[]
+    for v in ns_extremal
+      Symbolics.@variables q
+      vb = q .* v + q .* qkd_v_maxmix
+      boundval = dot(constr.a, vb)
+      qval = T(Symbolics.solve_for(boundval ~ constr.b, q))
+      if 0 <= qval <= 1
+        vbval = qval .* v + qval .* qkd_v_maxmix
+        push!(matches, (v, vbval))
+      end
+    end
+    constrs_to_extrv[constr] = matches
+  end
+
+  return constrs_to_extrv
+end
+
 function qkd_iso(::Type{T} = Float64) where T <: Real
-  qkdset = (2,2,3,2)
+  cg_maxmix_qkd = T[1//2, 1//2, 1//2, 1//2, 1//2, 1//4, 1//4, 1//4, 1//4, 1//4, 1//4]
 
   cg_best_qkd = T[1//2, 1//2, 1//2, 1//2, 1//2, 1//2, 1//2, 1//2, 0//1, 1//2, 1//2]
-  cg_maxmix_qkd = T[1//2, 1//2, 1//2, 1//2, 1//2, 1//4, 1//4, 1//4, 1//4, 1//4, 1//4]
   cg_boundary_qkd = 1//2 .* cg_best_qkd + 1//2 .* cg_maxmix_qkd
   best_qkd = cg_to_full(cg_best_qkd, qkdset...)
   maxmix_qkd = cg_to_full(cg_maxmix_qkd, qkdset...)
@@ -225,13 +273,13 @@ function qkd_iso(::Type{T} = Float64) where T <: Real
   for constr in qkd_ldconstr
     boundval = dot(constr.a, cg_boundary_qkd)
     if boundval > constr.b
-      print_cg_constr(constr.a, constr.b, qkdset...)
+      print_cg_constr(constr, qkdset...)
       boundconstr = constr
       println("Boundary value achieves $boundval)")
     end
     bestval = dot(constr.a, cg_best_qkd)
     if bestval > constr.b
-      print_cg_constr(constr.a, constr.b, qkdset...)
+      print_cg_constr(constr, qkdset...)
       bestconstr = constr
       println("Best value achieves $bestval)")
     end
@@ -239,7 +287,9 @@ function qkd_iso(::Type{T} = Float64) where T <: Real
 
   for frac in 0.5:0.05:1
     v = frac .* cg_best_qkd + (1-frac) .* cg_maxmix_qkd
-    Q, S, rhos = cg_QSrho(v, qkdset...)
+    probs = Behaviour(cg_to_full(v, qkdset...)...)
+    corrs = Correlators(corrs_from_probs(pax, pby, pabxy)...)
+    Q, S, rhos = QBER(corrs...), CHSH(corrs...), maxcorr(probs...)
     print(@sprintf "Q = %.3f, S = %.3f, " Q S)
     println(@sprintf "rho = %.3f" maximum(rhos))
   end
@@ -252,19 +302,7 @@ function qkd_iso(::Type{T} = Float64) where T <: Real
   # TODO find intersection numerically
 end
 
-function cg_debug(behavs, iA, oA, iB, oB)
-  for behav in behavs
-    fullbehav = cg_to_full(behav, iA, oA, iB, oB)
-    pax, pby, pabxy = fullbehav
-    if !(all([all(ps .>= 0) && all(ps .<= 1) for ps in fullbehav])
-         && all([sum(pabxy[:, b, x, y]) == pby[b, y] for b in 1:oB for x in 1:iA for y in 1:iB])
-         && all([sum(pabxy[a, :, x, y]) == pax[a, x] for a in 1:oA for x in 1:iA for y in 1:iB])
-         && all([sum(pabxy[:, :, x, y]) == 1 for x in 1:iA for y in 1:iB]))
-      println(behav); println(fullbehav); println()
-    end
-  end
-end
-
+# Couplers
 function find_couplers(iA, oA, iB, oB, n)
   poly = cg_polytope(iA, oA, iB, oB)
   vs = vertices_list(poly)
@@ -346,12 +384,12 @@ function test_couplers()
   end
 end
 
-const chshset = (2,2,2,2)
 const chsh_poly = cg_polytope(chshset...)
 const chsh_v = vertices_list(chsh_poly)
+const chsh_ldpoly = cg_polytope(chshset...)
+const chsh_ldconstr = vertices_list(chsh_poly)
 
-const qkdset = (2,2,3,2)
 const qkd_poly = cg_polytope(qkdset...)
 const qkd_v = vertices_list(qkd_poly)
 const qkd_ldpoly = ld_polytope(qkdset...)
-const qkd_ldconstr = constraints(qkd_ldpoly)
+const qkd_ldconstr = constraints_list(qkd_ldpoly)

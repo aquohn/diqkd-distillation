@@ -61,12 +61,14 @@
 
 \numberwithin{equation}{section} % eqn counter rolls over at each section
 \newcounter{stmt} % definitions, theorems and lemmas share this counter
+\newcounter{qn}
+
 \theoremstyle{definition}
 \newtheorem{defn}[stmt]{Definition}
 \theoremstyle{plain}
-\newtheorem{theorem}[stmt]{Theorem}
-\theoremstyle{plain}
-\newtheorem{lemma}[stmt]{Lemma}
+\newtheorem{qn}[qn]{Question}
+\newtheorem{thm}[stmt]{Theorem}
+\newtheorem{lem}[stmt]{Lemma}
 
 % Custom lengths
 \addtolength{\jot}{0.5em} % gives spacing between align* rows
@@ -98,156 +100,153 @@
     }%
 \item[]}{\end{list}}
 
-% Graphics
-\usepackage[justification=centering]{caption} % centres captions
-\usepackage{float} % stop LaTeX from making stuff float everywhere with H
-\usepackage{graphicx} % allows figures to be inserted and scaled
-\usepackage{tikz} % programmatically draw stuff
-\usepackage{tikzscale} % include .tikz files with includegraphics and scale them
-\usetikzlibrary{shapes, shapes.geometric, automata, positioning, arrows}
+  % Graphics
+  \usepackage[justification=centering]{caption} % centres captions
+  \usepackage{float} % stop LaTeX from making stuff float everywhere with H
+  \usepackage{graphicx} % allows figures to be inserted and scaled
+  \usepackage{tikz} % programmatically draw stuff
+  \usepackage{tikzscale} % include .tikz files with includegraphics and scale them
+  \usetikzlibrary{shapes, shapes.geometric, automata, positioning, arrows}
 
-\RequirePackage{luatex85}
-% Default preamble
-\usepackage{pgfplots}
-\pgfplotsset{compat=newest}
-\usepgfplotslibrary{groupplots}
-\usepgfplotslibrary{polar}
-\usepgfplotslibrary{smithchart}
-\usepgfplotslibrary{statistics}
-\usepgfplotslibrary{dateplot}
-\usepgfplotslibrary{ternary}
-\usetikzlibrary{arrows.meta}
-\usetikzlibrary{backgrounds}
-\usepgfplotslibrary{patchplots}
-\usepgfplotslibrary{fillbetween}
-\pgfplotsset{%
-  layers/standard/.define layer set={%
-    background,axis background,axis grid,axis ticks,axis lines,axis tick labels,pre main,main,axis descriptions,axis foreground%
-    }{grid style= {/pgfplots/on layer=axis grid},%
-    tick style= {/pgfplots/on layer=axis ticks},%
-    axis line style= {/pgfplots/on layer=axis lines},%
-    label style= {/pgfplots/on layer=axis descriptions},%
-    legend style= {/pgfplots/on layer=axis descriptions},%
-    title style= {/pgfplots/on layer=axis descriptions},%
-    colorbar style= {/pgfplots/on layer=axis descriptions},%
-    ticklabel style= {/pgfplots/on layer=axis tick labels},%
-    axis background@ style={/pgfplots/on layer=axis background},%
-    3d box foreground style={/pgfplots/on layer=axis foreground},%
-  },
-}
+  \RequirePackage{luatex85}
+  % Default preamble
+  \usepackage{pgfplots}
+  \pgfplotsset{compat=newest}
+  \usepgfplotslibrary{groupplots}
+  \usepgfplotslibrary{polar}
+  \usepgfplotslibrary{smithchart}
+  \usepgfplotslibrary{statistics}
+  \usepgfplotslibrary{dateplot}
+  \usepgfplotslibrary{ternary}
+  \usetikzlibrary{arrows.meta}
+  \usetikzlibrary{backgrounds}
+  \usepgfplotslibrary{patchplots}
+  \usepgfplotslibrary{fillbetween}
+  \pgfplotsset{%
+    layers/standard/.define layer set={%
+      background,axis background,axis grid,axis ticks,axis lines,axis tick labels,pre main,main,axis descriptions,axis foreground%
+      }{grid style= {/pgfplots/on layer=axis grid},%
+      tick style= {/pgfplots/on layer=axis ticks},%
+      axis line style= {/pgfplots/on layer=axis lines},%
+      label style= {/pgfplots/on layer=axis descriptions},%
+      legend style= {/pgfplots/on layer=axis descriptions},%
+      title style= {/pgfplots/on layer=axis descriptions},%
+      colorbar style= {/pgfplots/on layer=axis descriptions},%
+      ticklabel style= {/pgfplots/on layer=axis tick labels},%
+      axis background@ style={/pgfplots/on layer=axis background},%
+      3d box foreground style={/pgfplots/on layer=axis foreground},%
+    },
+  }
 
-\tikzset{%
-  ->, % makes the edges directed
-  >=stealth, % makes the arrow heads bold
-  node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
-  every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
-  initial text=$ $, % sets the text that appears on the start arrow
-}
+  \tikzset{%
+    ->, % makes the edges directed
+    >=stealth, % makes the arrow heads bold
+    node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
+    every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
+    initial text=$ $, % sets the text that appears on the start arrow
+  }
 
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{codered}{rgb}{0.6,0,0}
-\definecolor{codeblue}{rgb}{0,0,0.6}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.95,0.95,0.95}
+  \definecolor{codegreen}{rgb}{0,0.6,0}
+  \definecolor{codered}{rgb}{0.6,0,0}
+  \definecolor{codeblue}{rgb}{0,0,0.6}
+  \definecolor{codepurple}{rgb}{0.58,0,0.82}
+  \definecolor{backcolour}{rgb}{0.95,0.95,0.95}
 
-\lstset{%
-  numbers=left,                   % where to put the line-numbers
-  stepnumber=1,                   % the step between two line-numbers.        
-  numbersep=5pt,                  % how far the line-numbers are from the code
-  backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
-  showspaces=false,               % show spaces adding particular underscores
-  showstringspaces=false,         % underline spaces within strings
-  showtabs=false,                 % show tabs within strings adding particular underscores
-  tabsize=2,                      % sets default tabsize to 2 spaces
-  captionpos=b,                   % sets the caption-position to bottom
-  breaklines=true,                % sets automatic line breaking
-  % breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
-  upquote=true, 			% set all single quotes to straight quotes
-  basicstyle={\ttfamily\small},           % hackerman teletype font
-  keywordstyle={\color{codegreen}\bfseries\ttfamily}, % hackerman teletype font
-  commentstyle={\color{codeblue}\textit},           % fancy italic comments
-  stringstyle={\color{codered}},           % string literal highlighting
-  identifierstyle={}, 
-  %title=\lstname,                % show the filename of files included with \lstinputlisting;
-  frame=single,			% put a frame around the source code
-  aboveskip=2em, % add space before code
-  inputpath={./code/}
-}
+  \lstset{%
+    numbers=left,                   % where to put the line-numbers
+    stepnumber=1,                   % the step between two line-numbers.        
+    numbersep=5pt,                  % how far the line-numbers are from the code
+    backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+    showspaces=false,               % show spaces adding particular underscores
+    showstringspaces=false,         % underline spaces within strings
+    showtabs=false,                 % show tabs within strings adding particular underscores
+    tabsize=2,                      % sets default tabsize to 2 spaces
+    captionpos=b,                   % sets the caption-position to bottom
+    breaklines=true,                % sets automatic line breaking
+    % breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
+    upquote=true, 			% set all single quotes to straight quotes
+    basicstyle={\ttfamily\small},           % hackerman teletype font
+    keywordstyle={\color{codegreen}\bfseries\ttfamily}, % hackerman teletype font
+    commentstyle={\color{codeblue}\textit},           % fancy italic comments
+    stringstyle={\color{codered}},           % string literal highlighting
+    identifierstyle={}, 
+    %title=\lstname,                % show the filename of files included with \lstinputlisting;
+    frame=single,			% put a frame around the source code
+    aboveskip=2em, % add space before code
+    inputpath={./code/}
+  }
 
-% analysis and calculus
-\DeclareMathOperator*{\argmin}{argmin}
-\DeclareMathOperator*{\argmax}{argmax}
-\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
-\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
-\newcommand{\indif}{{\mathop{}\!\mkern3mu\mathchar'26\mkern-12mu \mathrm{d}}}
-\newcommand{\Dif}{\mathop{}\!\mathrm{D}} % Difference operator
-\newcommand{\dif}{\mathop{}\!\mathrm{d}} % differential d
+  % analysis and calculus
+  \DeclareMathOperator*{\argmin}{argmin}
+  \DeclareMathOperator*{\argmax}{argmax}
+  \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+  \newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+  \newcommand{\indif}{{\mathop{}\!\mkern3mu\mathchar'26\mkern-12mu \mathrm{d}}}
+  \newcommand{\Dif}{\mathop{}\!\mathrm{D}} % Difference operator
+  \newcommand{\dif}{\mathop{}\!\mathrm{d}} % differential d
+  \newcommand{\dintv}[2]{\left\{#1,\ldots,#2\right\}}
+  \newcommand{\ocintv}[2]{\left(#1,#2\right]}
+  \newcommand{\cointv}[2]{\left[#1,#2\right)}
+  \newcommand{\ccintv}[2]{\left[#1,#2\right]}
+  \newcommand{\oointv}[2]{\left(#1,#2\right)}
 
-% CS, discrete maths, algebra
-\DeclareMathSymbol{\lneg}{\mathord}{symbols}{"18} % tildes for negation
-\newcommand{\st}{\mathrel{:}} % 'such that'
-\newcommand{\?}{\mathrel{?}} % ternary operator
-\newcommand{\concat}{\mathbin{\Vert}} % string concatenation operator
-\newcommand{\Mod}{~\mathbf{mod}~} % for mod operator
-\newcommand{\Div}{~\mathbf{div}~} % for div operator
-\newcommand{\Rem}{~\mathbf{rem}~} % for rem operator
-\newcommand{\Z}{\mathbb{Z}} % for integers
-\newcommand{\R}{\mathbb{R}} % for reals
-\newcommand{\C}{\mathbb{C}} % for complex
-\newcommand{\ceil}[1]{\left\lceil#1\right\rceil} % enables \ceil{} for ceil delimiter
-\newcommand{\floor}[1]{\left\lfloor#1\right\rfloor} % enables \floor{} for floor delimiter
+  % CS, discrete maths, algebra
+  \DeclareMathSymbol{\lneg}{\mathord}{symbols}{"18} % tildes for negation
+  \newcommand{\st}{\mathrel{:}} % 'such that'
+  \newcommand{\?}{\mathrel{?}} % ternary operator
+  \newcommand{\concat}{\mathbin{\Vert}} % string concatenation operator
+  \newcommand{\Mod}{~\mathbf{mod}~} % for mod operator
+  \newcommand{\Div}{~\mathbf{div}~} % for div operator
+  \newcommand{\Rem}{~\mathbf{rem}~} % for rem operator
+  \newcommand{\Z}{\mathbb{Z}} % for integers
+  \newcommand{\R}{\mathbb{R}} % for reals
+  \newcommand{\C}{\mathbb{C}} % for complex
+  \newcommand{\ceil}[1]{\left\lceil#1\right\rceil} % enables \ceil{} for ceil delimiter
+  \newcommand{\floor}[1]{\left\lfloor#1\right\rfloor} % enables \floor{} for floor delimiter
 
-% linear algebra
-\newcommand{\cvec}[1]{\boldsymbol{\mathbf{#1}}}    % column vectors
-\newcommand{\rvec}[1]{\boldsymbol{\mathbf{#1}}^{\mathrm{T}}} % row vectors (transposed from column vectors)
-\newcommand{\bvec}[1]{\hat{\boldsymbol{\mathbf{#1}}}} % basis vectors
-\newcommand{\matr}[1]{\left[\mathbf{#1}\right]} % matrices
-\newcommand{\matrp}[2]{\left[\mathbf{#1}#2\right]} % matrices with subscripts/superscripts
-\newcommand{\inner}[2]{\left\langle#1,#2\right\rangle} % inner product
-% \newcommand{\dim}{\rm dim} % dimension
+  % linear algebra
+  \newcommand{\cvec}[1]{\boldsymbol{\mathbf{#1}}}    % column vectors
+  \newcommand{\rvec}[1]{\boldsymbol{\mathbf{#1}}^{\mathrm{T}}} % row vectors (transposed from column vectors)
+  \newcommand{\bvec}[1]{\hat{\boldsymbol{\mathbf{#1}}}} % basis vectors
+  \newcommand{\matr}[1]{\left[\mathbf{#1}\right]} % matrices
+  \newcommand{\matrp}[2]{\left[\mathbf{#1}#2\right]} % matrices with subscripts/superscripts
+  \newcommand{\inner}[2]{\left\langle#1,#2\right\rangle} % inner product
+  % \newcommand{\dim}{\rm dim} % dimension
 
-% probability and statistics
-\newcommand{\rv}[1]{\boldsymbol{\mathbf{#1}}} % random variable
-\newcommand{\E}{\mathbb{E}} % expectation
-\newcommand{\angleb}[1]{\left\langle #1 \right\rangle} % physicist's notation for mean
-\newcommand{\Var}{\mathrm{Var}} % variance
-\newcommand{\indep}{\perp \!\!\! \perp} % independence symbol
-\newcommand{\indic}[1]{\mathbbm{1}{\left\{#1\right\}}} % indicator function
+  % probability and statistics
+  \newcommand{\rv}[1]{\boldsymbol{\mathbf{#1}}} % random variable
+  \newcommand{\E}{\mathbb{E}} % expectation
+  \newcommand{\angleb}[1]{\left\langle #1 \right\rangle} % physicist's notation for mean
+  \newcommand{\Var}{\mathrm{Var}} % variance
+  \newcommand{\indep}{\perp \!\!\! \perp} % independence symbol
+  \newcommand{\indic}[1]{\delta{\left\{#1\right\}}} % indicator function
 
-% quantum physics
-\newcommand{\Tr}{\mathrm{Tr}} % enables Trace operator
-\newcommand{\Hs}{\mathcal{H}} % enables H for Hilbert space
+  % quantum physics
+  \newcommand{\Tr}{\mathrm{Tr}} % enables Trace operator
+  \newcommand{\Hs}{\mathcal{H}} % enables H for Hilbert space
 
-% category theory
-% \newcommand{\hom}{\mathrm{hom}} % collection of morphisms in a category
-\newcommand{\Hom}{\mathrm{Hom}} % collection of between two objects
-\newcommand{\ob}{\mathrm{ob}} % collection of objects
-\newcommand{\id}{\mathrm{id}} % identity morphism
+  % category theory
+  % \newcommand{\hom}{\mathrm{hom}} % collection of morphisms in a category
+  \newcommand{\Hom}{\mathrm{Hom}} % collection of between two objects
+  \newcommand{\ob}{\mathrm{ob}} % collection of objects
+  \newcommand{\id}{\mathrm{id}} % identity morphism
 
   \newcommand{\sM}{\mathcal{M}}
   \newcommand{\sS}{\mathcal{S}}
   \newcommand{\sK}{\mathcal{K}}
   \newcommand{\sT}{\mathcal{T}}
-  \newcommand{\sH}{\mathcal{H}}
+
+  \newcommand{\sA}{\mathcal{A}}
+  \newcommand{\sB}{\mathcal{B}}
+  \newcommand{\sC}{\mathcal{C}}
+  \newcommand{\sD}{\mathcal{D}}
   \newcommand{\sV}{\mathcal{V}}
+  \newcommand{\sW}{\mathcal{W}}
   \newcommand{\sX}{\mathcal{X}}
+  \newcommand{\sY}{\mathcal{Y}}
   \newcommand{\sZ}{\mathcal{Z}}
-  \newcommand{\cF}{\mathcal{F}}
-
-  \newcommand{\AU}{\mathrm{AU}_{2}}
-  \newcommand{\AXU}{\mathrm{AXU}_{2}}
-  \newcommand{\ASU}{\mathrm{ASU}_{2}}
-  \newcommand{\eAU}{\epsilon\text{-}\AU}
-  \newcommand{\eAXU}{\epsilon\text{-}\AXU}
-  \newcommand{\eASU}{\epsilon\text{-}\ASU}
-
-  \newcommand{\frI}{\mathfrak{I}}
-  \newcommand{\frX}{\mathfrak{X}}
-  \newcommand{\frA}{\mathfrak{A}}
-  \newcommand{\frC}{\mathfrak{C}}
-  \newcommand{\frR}{\mathfrak{R}}
-
   \newcommand{\cE}{\mathcal{E}}
+  \newcommand{\cF}{\mathcal{F}}
 
   \newcommand{\meas}{\rm meas}
   \newcommand{\perm}{\rm perm}
@@ -290,7 +289,9 @@
 
   \subsection{Structure}
 
-  As this is still an interim report, we do not have many concrete results, although we have investigated and tried to understand a variety of techniques for approaching this problem. We first review the basic, relevant notions of nonlocality and DIQKD in \Cref{sec:pre}, then proceed to review some preliminary results in \Cref{sec:preres}. Next, we examine the space of possible behaviours relevant to our problem in \Cref{sec:qkdset}, and we discuss how we can perform an exhaustive search through the space of possible wirings in \Cref{sec:locwir}. We then review and compare the techniques we have studied for attacking this problem, namely upper bounds (\Cref{sec:ubound}) and lower bounds (\Cref{sec:lbound}) for DIQKD key rates, and functions that are monotones under local wiring in \Cref{sec:nlmono}
+  As this is still an interim report, we do not have many concrete results, although we have investigated and tried to understand a variety of techniques for approaching this problem. We first review the basic, relevant notions of nonlocality and DIQKD in \Cref{sec:pre}, then proceed to review some preliminary results in \Cref{sec:preres}. Next, we examine the space of possible behaviours relevant to our problem in \Cref{sec:qkdset}, in order to identify the behaviours we wish to focus on, and techniuqes for computing upper bounds (\Cref{sec:ubound}) and lower bounds (\Cref{sec:lbound}) for DIQKD key rates. We then study the set of possible wirings (\Cref{sec:locwir}),  and understand and parametrise the space of behaviours that can be achieved through them (\Cref{sec:nlmono}).
+
+  The following notations are used throughout this report: \(\log x\) for the base-2 logarithm of \(x\), and \(\exp_b(x)\) for \(b^x\).
 
   \section{Preliminaries}\label{sec:pre}
 
@@ -303,10 +304,10 @@
   \end{gather}
 
   A device must have a concrete number of possible inputs and outputs. We refer to the choice of the number of inputs and outputs as the \emph{setting} \((i_A, o_A, i_B, o_B)\)\footnote{To be more general, we could let each input have its own number of outputs. In Alice's case (Bob's case being analogous), we would have a function \(o_A'(x)\) to determine the number of outputs from \(x\). However, these behaviours would be a subset of the behaviour with a constant \(o_A = \max_x o_A'(x)\), which can reproduce those behaviours by setting \(p(ab|xy) = 0\) for \(a > o_A'(x)\). There is hence no loss of generality in setting \(o_A\) to be a constant.}, where
-  \[ x \in \{1, \ldots, i_A\} \qquad a \in \{1, \ldots, o_A\} \qquad y \in \{1, \ldots, i_B\} \qquad b \in \{1, \ldots, o_B\}. \]
-  Naively, it would seem that we need \(o_A o_B i_A i_B\) values of the distribution \(p(ab|xy)\), one for each tuple \((a, b, x, y)\), to describe a no-signalling behaviour (that is, a behaviour that fulfills the no-signalling conditions). However, the \emph{Collins-Gisin representation} takes advantage of the no-signalling conditions to reduce this. For each \(x\), \(p(a|x)\) must be normalised, and so the value of \(p(o_A|x)\) for each \(x\) is no longer independent. The same applies to \(p(b|y)\), yielding \((o_A-1)i_A + (o_B-1)i_B\) marginals in total. Similarly, \(p(o_A o_B|xy)\) is fixed by normalisation for a given \((x,y)\).
+  \[ x \in \dintv{1}{i_A} \qquad a \in \dintv{1}{o_A} \qquad y \in \dintv{1}{i_B} \qquad b \in \dintv{1}{o_B}. \]
+  Naively, it would seem that we need \(o_A o_B i_A i_B\) values of the distribution \(p(ab|xy)\), one for each tuple \((a, b, x, y)\), to describe a no-signalling behaviour (that is, a behaviour that fulfills the no-signalling conditions). However, the \emph{Collins-Gisin (CG) representation} takes advantage of the no-signalling conditions to reduce this. For each \(x\), \(p(a|x)\) must be normalised, and so the value of \(p(o_A|x)\) for each \(x\) is no longer independent. The same applies to \(p(b|y)\), yielding \((o_A-1)i_A + (o_B-1)i_B\) marginals in total. Similarly, \(p(o_A o_B|xy)\) is fixed by normalisation for a given \((x,y)\).
 
-  Further, the no-signalling condition allows us to recover \emph{any} probability that involves either \(o_A\) or \(o_B\) as
+  Further, the no-signalling conditions allow us to recover \emph{any} probability that involves either \(o_A\) or \(o_B\) as
   \begin{gather*}
     p(o_A b|xy) = p(b|y) - \sum_{a < o_A} p(ab|xy)\;\forall b,x,y \\
     p(ao_B|xy) = p(a|x) - \sum_{b < o_B} p(ab|xy)\;\forall a,x,y.
@@ -315,9 +316,16 @@
   \[ d_{NS}(i_A, o_A, i_B, o_B) = (o_A-1)(o_B-1){i_A}{i_B} + (o_A-1)i_A + (o_B-1)i_B, \]
   and behaviours can be seen as vectors in \(\R^{d_{NS}}\), with all entries positive and normalised (that the remaining probabilities do not sum to more than 1 must still be enforced).
 
-  The space of no-signalling behaviours is the \emph{no-signalling polytope} \(\NSs \in \R^{d_{NS}}\). \(\NSs\) contains the \emph{local polytope} \(\Ls\), which consists of the behaviours that could be produced from pre-shared (and therefore insecure) data. The behaviours we are interested in are those in the \emph{quantum set} \(\Qs\), where \(\Ls \subsetneq \Qs \subsetneq \NSs\), which is the set of behaviours achievable according to quantum theory. This is important because, until quantum theory is superseded, the devices we engineer can only achieve behaviours within \(\Qs\). We will also need quantum theory to characterise the possible attacks against our DIQKD system, and therefore to define our key rates.
+  The subset of \(\R^d\), \(d \in \Z^+\) that obeys an \emph{affine constraint} of the form \(\matr{A}\cvec{x} - \cvec{b} \leq 0\) is called a \emph{half-space}, and the intersection of finitely many half-spaces is called a \emph{convex polytope}. We will refer to convex polytopes simply as polytopes, and assume that they are bounded. Polytopes can either be defined by the inequalities corresponding to half-spaces, or by the vertices of the polytope.
 
-  We focus primarily on \emph{binary-output} settings, that is, settings where \(o_A = o_B = 2\), which are simpler to analyse and more helpful for applications. In this case, we can express many statistics of interest in language reminiscent of quantum theory. We define the \emph{observables} \(A_x\) and \(B_y\) for each value of \(x\) and \(y\), respectively, acting on Alice and Bob's respective Hilbert spaces\footnote{More formally, then, the observables are \(A_x \otimes I_B\) and \(I_A \otimes B_y\)}. These Hermitian operators have eigenvalues \(-1\) and \(+1\), corresponding to the measurement outcomes \(0\) and \(1\) respectively.\footnote{Another convention has \(0 \mapsto 1\) and \(1 \mapsto 2\), which is typically followed in code in languages with 1-based array indexing, such as MATLAB and Julia. We will clarify which convention we are using and try to avoid switching between conventions unnecessarily, but we will hold \(\{0,1\}\) as the ``actual'' measurement outcomes.} Each round can then be considered a measurement of the observables corresponding to the chosen measurement setting on an unknown quantum state prepared by the DIQKD system.
+  The set of no-signalling behaviours is the \emph{no-signalling polytope} \(\NSs \in \R^{d_{NS}}\), which is defined by the aforementioned no-signalling, positivity, and normalisation constraints. \(\NSs\) contains the \emph{local polytope} \(\Ls\), which consists of the behaviours that could be produced from pre-shared (and therefore insecure) data. Formally, the local set consists of all behaviours that can be written as 
+  \begin{equation}\label{eqn:localdef}
+    p(ab|xy) = p(a|x)p(b|y).
+  \end{equation}
+
+  The behaviours we are most interested in are those in the \emph{quantum set} \(\Qs\), where \(\Ls \subsetneq \Qs \subsetneq \NSs\), which is the set of behaviours achievable according to quantum theory. This is important because, until quantum theory is superseded, the devices we engineer can only achieve behaviours within \(\Qs\). Notably, the quantum set is \emph{not} a polytope, with boundaries that are curved rather than defined by linear inequalities. This contributes very significantly to the difficulty of analysing DIQKD.\@
+
+  We focus primarily on \emph{binary-output} settings, that is, settings where \(o_A = o_B = 2\), which are simpler to analyse and more helpful for applications. In this case, we can express many statistics of interest in language reminiscent of quantum theory. We define the \emph{observables} \(A_x\) and \(B_y\) for each value of \(x\) and \(y\), respectively, acting on Alice and Bob's respective Hilbert spaces\footnote{More formally, then, the observables are \(A_x \otimes I_B\) and \(I_A \otimes B_y\)}. These Hermitian operators have eigenvalues \(-1\) and \(+1\), corresponding to the measurement outcomes \(0\) and \(1\) respectively.\footnote{This can be considered the ``physicist's convention'' for labelling the outputs. Another convention has \(0 \mapsto 1\) and \(1 \mapsto 2\), which is typically followed in code in languages with 1-based array indexing, such as MATLAB and Julia. We will clarify which convention we are using and try to avoid switching between conventions unnecessarily, but we will hold \(\{0,1\}\) to be the ``actual'' measurement outcomes.} Each round can then be considered a measurement of the observables corresponding to the chosen measurement setting on an unknown quantum state prepared by the DIQKD system.
 
   The \emph{expectation values} of the individual observables on the state are the \emph{marginals} \(\angleb{A_x}\) and \(\angleb{B_y}\). We are also interested in the \emph{correlators} \(\angleb{A_x B_y}\). These can be computed as
   \begin{align}
@@ -330,6 +338,8 @@
       \angleb{B_y} &= p(b=1|y) - p(b=0|y).
     \end{align}
 
+    Note that, with \(o_A = o_B = 2\), we have \(d_{NS} = {i_A}{i_B} + i_A + i_B\), which is precisely the number of correlators and marginals. Since these are linear functions of the probabilities, a binary-output behaviour can be fully specified by giving its correlators and behaviours.
+
     In \((2,2,2,2)\), the simplest nontrivial setting, some important statistics are the quantum bit error rate (QBER) \(Q_{xy}\) and the Clauser-Horne-Shimony-Holt (CHSH) value \(S\):
     \begin{gather}
       Q_{xy} \coloneqq p(a \neq b|xy) = \frac{1-\angleb{A_x B_y}}{2} \\
@@ -339,53 +349,66 @@
 
     \subsection{Device-independent quantum key distribution}\label{sec:pre_diqkd}
 
-    At the most general level, a DIQKD protocol \(\mathfrak{P}\) can be defined as finite sequence of \emph{local operations and public communication} operations (LOPC) that distills an \(\epsilon\)-\emph{secure} key of length \(\ell\) from \(n\) rounds of Bell test data~\cite{DIQKD_Limits}. Alice and Bob share a \(\epsilon\)-\emph{secure key} of length \(\ell\) if, after executing \(\mathfrak{P}\), their joint state with the eavesdropper Eve \(\rho_{A^n B^n E^n}\) satisfies~\cite{SecurityQKD}
+    A typical Bell test setup is as follows. Alice and Bob have measurement devices that can be arbitrarily \emph{flawed}, but not actively malicious (if they were actively malicious, they could simply leak the measurement results to Eve after the protocol is completed). The devices receive quantum signals (in essentially all practical cases, entangled photons) from a source that we pessimistically assume to be fully controlled by Eve, and input settings chosen independently and randomly by Alice and Bob. The devices then perform the quantum measurements corresponding to the input settings on the received signals, and output the measurement results as Bell test data. The settings are selected based on randomness private to Alice and Bob, and unknown to Eve, and to Bob and Alice respectively, at the time of measurement.
+
+    The behaviour, averaged over all Bell test rounds, is sufficient to prove the security of the protocol, hence the initial description of the measurement devices as black boxes characterised only by input--output statistics. Intuitively, if Eve chooses the behaviour for each round randomly, we can model this as her having a source of randomness that produces a value \(e\) with probability \(p_E(e)\) each round. She then selects the corresponding behaviour \(p_e(ab|xy)\), and the overall behaviour would then be
+    \begin{equation}\label{eqn:finethm}
+      p(ab|xy) = \sum_e p_E(e) p_e(ab|xy)
+    \end{equation}
+    If Eve wants to know the output of every round, each \(p_e\) must be deterministic, i.e.\ \(p_e(ab|xy) \in \{0, 1\}\;\forall a,b,x,y,e\). Then, knowing the behaviour, based on \(e\), and the input settings \((x,y)\),which Alice and Bob typically announce in the course of a DIQKD protocol, Eve can deduce the outputs \((a,b)\).
+
+    These behaviours, therefore, are the ones which fall within \(\Ls\). If, for a given \(e = e'\), \(p_{e'}(ab|xy)\) is random even for Eve, then she cannot know the outputs \((a,b)\) with certainty when \(e=e'\). Since quantum phenomena are capable of producing truly random outputs, such that it is impossible even in principle to predict those outcomes, they must be the source for such true randomness if we wish to pessimistically grant Eve full control of the environment outside of Alice and Bob's detectors and information-processing devices. Note that, while Eve cannot have full control over the measurement devices, they can be arbitrarily flawed---nonlocal statistics will be detected \emph{only if} they are generated from a quantum measurement that extracts randomness, so nonlocal statistics are sufficient to guarantee secrecy. This is why it is called \emph{device-independent}: the devices can be almost arbitrarily faulty, and the reported statistics will reveal a fault if it exists.
+
+    In order to quantify the amount of shared secrecy that can be extracted from this certified randomness, given a specific behaviour, we must define and mathematically model a DIQKD protocol. At the most general level, a DIQKD protocol \(\mathfrak{P}\) can be defined as finite sequence of \emph{local operations and public communication} operations (LOPC) that distills a key of length \(\ell\) from the data from \(n\) rounds of Bell tests~\cite{DIQKD_Limits}. Let \(A^n\), \(B^n\) and \(E^n\) be the systems of Alice, Bob, and Eve respectively after executing \(n\) rounds of Bell tests, and let their joint state be \(\rho_{A^n B^n E^n}\). Then, protoocol \(\mathfrak{P}\) maps \(\rho_{A^n B^n E^n} \mapsto \omega_{K_A K_B E^n U}\), where \(K_A\) and \(K_B\) are Alice and Bob's keys, respectively, while \(U\) is the public data that is communicated during the protocol. Alice and Bob's key is \(\epsilon\)-\emph{secure} if \(\omega_{K_A K_B E^n U}\) satisfies~\cite{SecurityQKD}
     \begin{equation}
-      (1-\erob{n})D(\rho_{A^n B^n E^n}, \chi_{A^n B^n}^{\ell}\otimes\rho_{E^n}) \leq \epsilon,
+      (1-\erob{n})D(\omega_{K_A K_B E^n U}, \tau_{K_A K_B}^{\ell}\otimes\omega_{E^n U}) \leq \epsilon,
     \end{equation}
     where \(\erob{n}\) is the probability of the protocol aborting without interference from Eve, and \(D(\rho,\sigma)\) is the \emph{trace distance}
     \begin{equation}
-      D(\rho, \sigma) = \frac{1}{2}\norm{\rho - \sigma},
+      D(\rho, \sigma) = \frac{1}{2}\norm{\rho - \sigma}_1,
     \end{equation}
-    which generalises the classical total variational distance. We also have the \emph{trace norm}
-    \begin{equation}
-      \norm{\rho}_1 = \Tr\left[ \sqrt{\rho^{\dagger}\rho} \right] = \Tr\abs{\rho},
-    \end{equation}
+    which generalises the classical total variational distance
+    \[ D(p(x),q(x)) = \frac{1}{2} \sum_{x} \abs{p(x)-q(x)}, \]
     the \emph{ideal key}
     \begin{equation}
-      \chi_{A^n B^n}^{\ell} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{A^n} \otimes \ket{j}\bra{j}_{B^n},
+      \tau_{K_A K_B}^{\ell} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{K_A} \otimes \ket{j}\bra{j}_{K_B},
     \end{equation}
-    a uniformly distributed mixture amongst all possible keys of length \(\ell\), and Eve's marginal state \(\rho_{E^n} = \Tr_{A^n B^n}\left[ \rho_{A^n B^n E^n} \right]\). This definition of security is \emph{universally composable} (UC), which is crucial for applications---if two resources are \(\epsilon_1\) and \(\epsilon_2\) secure under a UC definition, then a protocol that uses only these two resources is \(\epsilon\)-secure under the same definition, with \(\epsilon \leq \epsilon_1 + \epsilon_2\).
+    a uniformly distributed mixture amongst all possible keys of length \(\ell\), and Eve's marginal state \(\omega_{E^n} = \Tr_{K_A K_B}\left[ \omega_{K_A K_B E^n U} \right]\). The trace distance is written in terms of the \emph{trace norm}
+    \begin{equation}
+      \norm{\rho}_1 = \Tr\left[ \sqrt{\rho^{\dagger}\rho} \right] = \Tr\abs{\rho}.
+    \end{equation}
+    This definition of security is \emph{universally composable} (UC), which is crucial for applications---if two resources are \(\epsilon_1\) and \(\epsilon_2\) secure under a UC definition, then a protocol that uses only these two resources is \(\epsilon\)-secure under the same definition, with \(\epsilon \leq \epsilon_1 + \epsilon_2\).
 
     The asymptotic rate \(r\) of the protocol \(\mathfrak{P}\) is~\cite{CQKeyDistill}
     \begin{equation}
       r = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\erob{n}) \frac{\ell_n}{n},
     \end{equation}
     where the supremum is over all sequences \(\{\ell_n\}\) such that
-    \[ \lim_{n\to\infty} (1-\erob{n})D(\rho_{A^n B^n E^n}, \chi_{A^n B^n}^{\ell_n}\otimes\rho_{E^n}) = 0. \]
-    If we consider the rounds to be independent and identically distributed (i.i.d.)\footnote{i.i.d.\ attacks, but with Eve storing quantum information, are referred to as \emph{collective attacks} in the literature}, which is justifiable in the asymptotic limit~\cite{DI_Proofs}, we can write
-    \[ \rho_{A^n B^n E^n} = \rho_{ABE}^{\otimes n}. \]
+    \[ \lim_{n\to\infty} (1-\erob{n})D(\omega_{K_A K_B E^n U}, \tau_{K_A K_B}^{\ell}\otimes\omega_{E^n U}) = 0. \]
+    In the limit of asymptotically many rounds, we can consider each round to be independent and identically distributed (i.i.d.)~\cite{DI_Proofs}. I.i.d.\ attacks where Eve stores quantum information are referred to as \emph{collective attacks} in the literature, as opposed to \emph{individual attacks}, like the one characterised in \Cref{eqn:finethm}, where Eve's information is purely classical. We need the machinery of quantum theory to prove that Eve storing quantum information does not compromise the security of the generated key.
 
-    Then, the systems \(A\), \(B\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. Intuitively, the amount of information that Alice has which is secret to Eve is \({H(A|E)}_{\rho}\), where \(H\) is the von Neumann entropy, \({H(A)}_{\rho} = -\Tr\left[\rho_{A}\log\rho_{A}\right]\), which reduces to the Shannon entropy for a classical system. On the other hand, \(B\) may not be perfectly correlated with \(A\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve is upper bounded by \({H(A|B)}_{\rho}\). This gives us the \emph{Devetak-Winter key rate}~\cite{DevetakWinter}
+    Therefore, we can write Alice, Bob and Eve's state before distillation as
+    \[ \rho_{A^n B^n E^n} = \rho_{ABE}^{\otimes n}, \]
+    where the systems \(A\), \(B\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. Intuitively, the amount of information that Alice has which is secret to Eve is \({H(A|E)}_{\rho}\), where \(H\) is the von Neumann entropy, \({H(A)}_{\rho} = -\Tr\left[\rho_{A}\log\rho_{A}\right]\), which reduces to the Shannon entropy for a classical system. On the other hand, \(B\) may not be perfectly correlated with \(A\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve is upper bounded by \({H(A|B)}_{\rho}\). This gives us the \emph{Devetak-Winter key rate}~\cite{DevetakWinter}
     \begin{equation}
       r \geq r_{DW} = {H(A|E)}_{\rho} - {H(A|B)}_{\rho}.
     \end{equation}
 
-    Much of the effort in bounding the DIQKD key rate has focused on this definition, and this is the setting we will work in. While \({H(A|B)}_{\rho}\) can be computed directly as the QBER, upper and lower bounds for \({H(A|E)}_{\rho}\) are much harder to find.
+    Much of the effort in bounding the DIQKD key rate has focused on this definition, because two-way information reconciliation is much more poorly understood (although it can give an advantage in certain scenarios, see~\cite{AdvantageDistill}) and this is the figure of merit we will work with.  While \({H(A|B)}_{\rho}\) can be computed directly as the QBER, upper and lower bounds for \({H(A|E)}_{\rho}\) are much harder to find.
 
-    We will now consider the first DIQKD protocol proved to be secure~\cite{DIQKD_Lower}. This takes place in the \((2,2,3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}, and it uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key. Therefore, we have \({H(A|B)}_{\rho} = Q_{02} = Q\), and it was proved that
+    We will now consider what we refer to as the \emph{standard protocol} in~\cite{DIQKD_Lower}, which is the first DIQKD protocol proven to be secure against attackers who can store quantum information. This takes place in the \((2,2,3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}, and it uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key, while bounding Eve's information with a CHSH value. Therefore, we have \({H(A|B)}_{\rho} = Q_{02} = Q\), and it was proved that
     \begin{equation}
       {H(A|E)}_{\rho} \geq {H_S(A|E)}_{\rho} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
     \end{equation}
-    where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, with the logarithm in base 2, and where \(S\) is calculated from \(x,y \in \{0,1\}\). Therefore,
+    where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, and where \(S\) is calculated from \(x,y \in \{0,1\}\). Therefore,
     \begin{equation}
-      r_{DW} \geq r_{P} = \max \left\{ 0, 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right) \right\},
+      r_{DW} \geq r_{S} = \max \left\{ 0, 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right) \right\},
     \end{equation}
-    where we refer to \(r_P\) as the \emph{Pironio key rate}. Being the rate for an explicit, achievable protocol, this is a lower bound for the total secrecy extractable. However, because the proof of the bound involves explicitly constructing the states and measurements that gives the greatest advantage to Eve while still producing the observed value of \(S\), it is also an upper bound for key rates based only on \(S\), since any observed \(S\) could have been produced by those states.
+    where we refer to \(r_S\) as the \emph{CHSH key rate}. Being the rate for an explicit, achievable protocol, this is a lower bound for the total secrecy extractable. However, because the proof of the bound involves explicitly constructing the states and measurements that gives the greatest advantage to Eve while still producing the observed value of \(S\), it is also an upper bound for key rates based only on \(S\), since any observed \(S\) could have been produced by those states.
 
     \section{Preliminary Results}\label{sec:preres}
 
-    Our preliminary results found a revival of the Pironio key rate for states that are generated according to a simple experimental model. We will be using it to illustrate the relevant issues and directions we wish to pursue in our analysis. In this model, we denote the density matrix of the state as \(\rho_{AB}\) and observables as \(\tilde{A}_x\) and \(\tilde{B}_y\), for a perfect experimental setup, and let the Hilbert spaces of systems \(A\) and \(B\) be \(d_A\) and \(d_B\) respectively.
+    Our preliminary results found a revival of the CHSH key rate for states that are generated according to a simple experimental model. We will be using it to illustrate the relevant issues and directions we wish to pursue in our analysis. In this model, we denote the density matrix of the state as \(\rho_{AB}\) and observables as \(\tilde{A}_x\) and \(\tilde{B}_y\), for a perfect experimental setup, and let the Hilbert spaces of systems \(A\) and \(B\) be \(d_A\) and \(d_B\) respectively.
 
     We now model some possible experimental flaws. If our source of quantum states produces one state per time bin, then \(n_c\) is the probability that a state is not produced during a given time bin (where we assume this process to be i.i.d.). Further, Alice and Bob's detectors have efficiencies \(\eta_A\) and \(\eta_B\) respectively, which are the probabilities for them to detect a state given that one is produced. If nothing is detected, either due to no signal being produced or due to detector inefficiency, we assign the \(-1\) outcome. The detector failure events are independent, but if no signal is produced, both Alice and Bob will receive no signal. We can then express the new states and observables as follows:
     \begin{align*}
@@ -420,19 +443,64 @@
         \angleb{A_x}_{N} = 1 - 2 {\left(\frac{1-\angleb{A_x}}{2}\right)}^N \qquad \angleb{B_y}_{N} = 1 - 2 {\left(\frac{1-\angleb{B_y}}{2}\right)}^N.
       \end{gather}
 
-      Using the Pironio key rate, we are able to find \emph{revival} in certain parameter regimes: behaviours with \(r_P = 0\), but which have \(r_P > 0\) after wiring. In \Cref{fig:exptplt}, the N-AND wiring is able to achieve \(r_P > 0\) in parameter regimes where \(r_P = 0\) before wiring. Our objective, then, is to understand and generalise this phenomenon.
+      Using the CHSH key rate, we are able to find \emph{revival} in certain parameter regimes: behaviours with \(r_S = 0\), but which have \(r_S > 0\) after wiring. In \Cref{fig:exptplt}, the N-AND wiring is able to achieve \(r_S > 0\) in parameter regimes where \(r_S = 0\) before wiring. Our objective, then, is to understand and generalise this phenomenon.
 
-  \begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{exptplt.pdf}
-    \caption{\label{fig:exptplt} Minimum \(\eta\) required for \(r_P > 0\), given \(n_c\).}
-  \end{figure}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\linewidth]{exptplt.pdf}
+        \caption{\label{fig:exptplt} Minimum \(\eta\) required for \(r_S > 0\), given \(n_c\).}
+      \end{figure}
 
       \section{The Quantum Key Distribution Setting}\label{sec:qkdset}
 
-      We have 24 positivity facets of the local polytope, and 24 liftings of CHSH\@.
+      In order to study the effects of wirings on arbitrary behaviours, we wish to characterise the space of possible behaviours in the QKD setting (that is, \((i_A=2,o_A=2,i_B=3,o_B=2)\)) so as to identify the notable behaviours we may wish to investigate further.
+
+      We begin by characterising the facets of \(\Ls\), each of which corresponds to an inequality. If any inequality is violated by a behaviour, that behaviour lies outside \(\Ls\). As mentioned above, all inequalities \(p(ab|xy) \geq 0\) are constraints on the possible behaviours, and each of these inequalities corresponds to a facet. We therefore have \(i_A o_A i_B o_B = 24\) \emph{positivity facets}, one for each inequality.
+
+      As mentioned in \Cref{sec:pre_nl}, behaviours In the \((2,2,2,2)\) setting with \(S > 2\) are not contained in \(\Ls\). This is because \(S \leq 2\) defines a facet for \(\Ls\) in this setting. However, there are actually multiple versions of the CHSH inequality
+      \[ \angleb{A_0 B_0} + \angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1} \leq 2. \]
+      We can choose any one of the correlators to be negative in the expression, with the rest being positive, generating 4 variants, and the inequality can be either \(\leq 2\) or \(\geq -2\), generating 2 further variants of each. All of these can be obtained by permuting the labels for the inputs (\(i_A!i_B!\) possible permutations), and the outputs for each input (\(o_A!\) for each \(x\) and \(o_B\) for each \(y\)). Lastly, since \((i_A, o_A) = (i_B, o_B)\), we can permute the players' names as well, giving 2 versions of each permutation. Since each of these permutations can be applied independently, the total number of overall permutations possible is \(2i_A!i_B!(o_A!)^{i_A}(o_B!)^{i_B} = 128\). However, the symmetry of the CHSH expression yields only \(2 \times 4 = 8\) variants in total.
+
+      Now, moving to the QKD setting, if we pick two out of three values for \(y\), we can still calculate the CHSH value for those two settings, and Alice's two values of \(x\). Or, more operationally, we can delete the data for the rounds where Bob chooses \(y=2\), and the Bell test data will then be that for a \((2,2,2,2)\) test. However we compute it, the CHSH value still should not violate the inequality for a behaviour in \(\Ls\). Since \(\binom{3}{2} = 3\), there are 3 \emph{liftings} of each CHSH facet in the QKD setting, and therefore we have 24 liftings of CHSH in total. This gives us 48 facets for \(\Ls\) in the QKD setting.
+
+      Unlike \(\NSs\), \(\Ls\) is defined by its vertices. As discussed in \Cref{sec:pre_diqkd}, local behaviours can be considered as probabilistic mixtures of deterministic behaviours according to \Cref{eqn:finethm}. There, it was explained that this is necessary for Eve if she wants to eavesdrop on the generated key; from a different perspective, if the correlations between Alice and Bob arise from some preshared data, the data can have been generated in the same manner, with \(p_E(e)\) being the distribution of the process which selects the behaviour to encode in each round. If the devices use local randomness to generate their behaviour in each round, the effect on the overall distribution can be absorbed into \(p_E(e)\), so that a system without local randomness and with a different \(p_E(e)\) can reproduce the same statistics. This result is known as \emph{Fine's theorem}~\cite{FineThm}, and is discussed more rigorously in~\cite{BellNonlocality}.
+
+      Using the \verb`LazySets.jl` package for the Julia programming language, we specified the deterministic behaviours as vertices of \(\Ls\), since all other local behaviours can be specified as probabilistic mixtures, that is, convex combinations, of the deterministic behaviours. For each \(x \in \dintv{1}{i_A}\), we have \(i_A\) choices for the output \(a\) to assign, with the analogous scenario for Bob. Therefore, there are \(i_A^{o_A}i_B^{o_B} = 32\) vertices.
+
+      The GLPK solver was then used to identify the facets and their corresponding inequalities, and yielding 48 facets for our polytope. Therefore, all facets in the QKD setting are either liftings of CHSH or positivity facets, which is expected, since the next unique Bell inequality is \(I_{3322}\), in the \((3,2,3,2)\) setting.
+
+      To generate \(\NSs\), we provided the aforementioned positivity, normalisation, and no-signalling constraints, which are also solved using GLPK to eliminate redundant constraints, and to find the vertices of the polytope. This yields 24 constraints (namely, the positivity constraints in the CG representation) and 128 vertices.
+
+      In the \((2,2,2,2)\) setting, each CHSH facet contains 8 deterministic points with \(S = 2\).
+
+      % TODO identifying PR analogue
 
       \section{Local Wirings}\label{sec:locwir}
+
+      Before proceeding with our analysis, we must define what we mean by ``wirings''. In other words, we must define our \emph{resource theory}. Taking inspiration from entanglement theory, a resource theory defines a set of \emph{free resources} and a set of \emph{free actions}, and studies how the resources in the theory can be converted between each other using only those free actions and free resources~\cite{BellResourceTheory}. If it is possible to convert a resource \(R\) into a resource \(R_2\), we write \(R_1 \leadsto R_2\), and we write \(R \not\leadsto S\) otherwise. This relation defines a \emph{pre-order} for the resource theory: given any two resources \(R_1\) and \(R_2\), one of the following statements must hold
+      \begin{itemize}
+        \item \(R_1\) is \emph{strictly below} \(R_2\): \(R_1 \not\leadsto R_2\) and \(R_2 \leadsto R_1\)
+        \item \(R_1\) is \emph{strictly above} \(R_2\): \(R_1 \leadsto R_2\) and \(R_2 \not\leadsto R_1\)
+        \item \(R_1\) is \emph{incomparable to} \(R_2\): \(R_1 \not\leadsto R_2\) and \(R_2 \not\leadsto R_1\)
+        \item \(R_1\) is \emph{equivalent to} \(R_2\): \(R_1 \leadsto R_2\) and \(R_2 \leadsto R_1\)
+      \end{itemize}
+
+      While there has been a recent resurgence of interest in developing resource theories of nonlocality and other unusual quantum phenomena, much of the recent work is too abstract and general to be directly applied by us~\cite{Monotones, TypeIndepLOSR}, or focuses only on \emph{single-copy conversions} using \emph{local operations and shared randomness} (LOSR) as the set of free actions~\cite{BellResourceTheory, TraceDistNL, NLMeas}, instead of the multiple-copy conversions that wirings perform (with a notable exception discussed in \Cref{sec:nlmono_maxcorr}).
+
+      LOSR actions transforms \(p(ab|xy) \mapsto p(a'b'|x'y')\) using a conditional distribution \(\chi\):
+      \begin{equation}
+        p(a'b'|x'y') = \sum_{abxy} \chi(a'b'xy|abx'y') p(ab|xy)
+      \end{equation}
+      that satisfies
+      \begin{equation}
+        \chi(a'b'xy|abx'y') = \sum_{r_A r_B} \chi(a'xr_A|ax') \chi(b'yr_B|by') p_r(r_A r_B),
+      \end{equation}
+      where \(p_r\) is the distribution of the shared randomness \(r_A\) and \(r_B\). However, since our wirings combine multiple boxes, their effect cannot be expressed in this form. This automatically makes many of the specific results in LOSR resource theories of nonlocality inapplicable to our case, while significantly complicating the possible set of operations. Fortunately, there are also simplifying factors: since communication in our key distillation protocol must be public, there is no advantage to be gained from using public shared randomness, since it would be accessible to Eve as well and she can undo the effect of the shared randomness. If Alice and Bob have private, preshared randomness, this is already a shared key, and it would not make sense to use the shared randomness to enhance DIQKD instead of using it directly as a key. In any given round, at the very most, one bit can be produced, but if randomness is consumed, at least one bit must be used. Even if the one bit can increase the entropy of the round from zero bits to one bit, that would not be more helpful than using the one bit directly as a key.
+
+      Firstly
+
+      % TODO LOPC cannot use shared randomness for key distillation, since Eve
+      % can use the public randomness to reverse it
 
       \subsection{Classifying Wirings}
 
@@ -476,10 +544,10 @@
 
       Identifying the extremal points of such a polytope, if it even exists, would also not be helpful, since there is no \emph{a priori} reason why the extremal points should produce the behaviour with the highest key rate. As neither the linear structure of the polytope or its extremal points would be helpful for us, we will not pursue this line of investigation.
 
-      Instead, we will characterise each wiring in the following way. Let each player have \(c\) boxes, and let subscripts denote the order in which the boxes are used. Then, Alice's wiring can be represented by a sequence of \(c\) functions with range \(\{1..i_A\}\)
+      Instead, we will characterise each wiring in the following way. Let each player have \(c\) boxes, and let subscripts denote the order in which the boxes are used. Then, Alice's wiring can be represented by a sequence of \(c\) functions with range \(\dintv{1}{i_A}\)
       \begin{equation} x_1 = x \end{equation}
-      \begin{equation} x_j = C^{(j)}_A(x_1, \ldots, x_{j-1}, a_1, \ldots, a_{j-1}),\,j \in \{2..c\} \end{equation}
-      and a final output function with range \(\{1..o_A\}\)
+      \begin{equation} x_j = C^{(j)}_A(x_1, \ldots, x_{j-1}, a_1, \ldots, a_{j-1}),\,j \in \dintv{2}{c} \end{equation}
+      and a final output function with range \(\dintv{1}{o_A}\)
       \begin{equation} a = C_A(x_1, \ldots, x_{c}, a_1, \ldots, a_{c}). \end{equation}
       Alice and Bob interact with their boxes in increasing order of the index \(j\). The condition that the input to box \(j\) can only depend on the inputs and outputs of boxes with index \(< j\) is equivalent to enforcing that Alice and Bob do not have quantum memories: both players must provide an input to a given box before it can produce an output.
 
@@ -501,11 +569,23 @@
 
       Unfortunately, with just two boxes, there are 4096 wirings for Alice, and \(\approx \num{2.48e10}\) for Bob. Fixing the AND gating as discussed above gives us 1024 wirings for Alice and \(\approx \num{3.10e9}\) for Bob. Since the choice of wirings for Alice and Bob are independent, we must multiply the figures for Alice and Bob together, which would make this analysis very inefficient.
 
-      This enumeration of the possible wirings is naive, and does not attempt to use symmetry arguments to remove degeneracy. This is one possible direction for us to investigate, in order to develop a tool to efficiently find the optimal wiring for a given behaviour. However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a figure of merit (either an upper bound or lower bound), it is possible to exhaustively search for the wiring for each particular behaviour that produces the largest increase in the figure of merit. However, since there is no convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Attempting to develop such a classification scheme for wirings in order to enable this analysis is another possible direction for this project, which would subsume the symmetry analysis discussed above.
+      This enumeration of the possible wirings is naive, and does not attempt to use symmetry arguments to remove degeneracy or wirings that will not be helpful. This is one possible direction for us to investigate, in order to develop a tool to efficiently find the optimal wiring for a given behaviour.
+
+      Another approach that might simplify this analysis is that of~\cite{DistillationBounds}, where a computable upper bound is found for the CHSH value that can be \emph{distilled} from wiring together multiple copies of an isotropic box, which is computable in time exponential in \(c\) using a dynamic programming algorithm, instead of doubly exponential time if we were to compute all the boxes by brute force. We write \(S(p)\) for the CHSH value of a behaviour \(p\) and \(S^*_c(p)\) for the maximum CHSH value achievable by wiring \(c\) copies of \(p\) together.
+
+      This bound can then be applied to a general nonlocal box with behaviour \(p\), by decomposing it as a convex combination of an isotropic box and a local box. Let
+      \[ p_I' = \argmin_{p_I} S(p_I), \]
+      where the optimisation is taken over all isotropic behaviours \(p_I\) that fulfill
+      \[ p = (1-q)p_I + qp_L \]
+      for some local behaviour \(p_L\) and scalar \(q \in\ccintv{0}{1}\). This optimisation can be done efficiently with a linear program~\cite{LocalPartLP}. Now, since we can mix \(p_I'\) with the corresponding local behaviour \(p_L'\) to obtain \(p\), we have \(S^*_c(p) \leq S^*(p_I')\), otherwise we could perform this mixing and distill the resultant \(p\), contradicting the assumption that \(S^*(p_I')\) is optimal.
+
+      This is an important result, because later work has shown that the CHSH values of isotropic boxes are not distillable without shared randomness~\cite{NLMonotones}, and we discuss the possibility of proving this even with shared randomness in \Cref{sec:nlmono_isodist}, giving hope that we can close a decade-old open problem~\cite{NLLimits, DistillationBounds}. Therefore, we can skip the optimisation for isotropic boxes and directly bound the maximal CHSH value that can be obtained from a given behaviour. We might also adapt this methodology to come up with a dynamic programming approach to simplify the optimisation over the possible wirings, using key rates as a figure of merit instead of CHSH values.
+
+      However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a figure of merit (either an upper bound or lower bound), it is possible to use these methods to search for the wiring for each particular behaviour that produces the largest increase in the figure of merit. However, since there is no convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Attempting to develop such a classification scheme for wirings in order to enable this analysis is another possible direction for this project, which would subsume the symmetry analysis discussed above.
 
       \section{Upper Bounds}\label{sec:ubound}
 
-      There are a number of upper bounds for key rates in the literature, computed using a large variety of techniques. These bounds can be for the key rate achievable from a specific state, or from a specific behaivour. An important property of an upper bound is whether it is \emph{faithful}: faithful upper bounds are those that have non-zero key rates for all entangled states or all nonlocal behaviours. For our purposes, a non-faithful upper bound is much more helpful---if local wirings between multiple copies of the same device are able to \emph{revive} the key rate, that would be very interesting from both theoretical and practical standpoints. Theoretically, it would develop our currently limited understanding of the nature of the \emph{secrecy capacity} of no-signalling behaviours, and practically, it would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system.
+      We are interested in evaluating. An important property of an upper bound is whether it is \emph{faithful}: faithful upper bounds are those that have non-zero key rates for all entangled states or all nonlocal behaviours. For our purposes, a non-faithful upper bound is much more helpful---if local wirings between multiple copies of the same device are able to \emph{revive} the key rate, that would be very interesting from both theoretical and practical standpoints. Theoretically, it would develop our currently limited understanding of the nature of the \emph{secrecy capacity} of no-signalling behaviours, and practically, it would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system.
 
       A notable non-faithful upper bound is given in~\cite{NotSufficient}, where Eve, who controls the source that provides quantum states for the devices to measure, can sometimes choose to distribute \emph{local correlations}, which she has full information on, while distributing nonlocal correlations at all other times. This \emph{convex combination} attack, so called because the resultant behaviour is a convex combination of the local and nonlocal behaviours, can simulate the correlations that are generated by inefficient projective measurements on Werner states. These behaviours are nonlocal, that is, they have \(S > 2\), but the fact that they were generated in this manner can be used to prove that standard protocols, where both Alice and Bob announce their measurement settings, cannot generate secret keys from them.
 
@@ -557,7 +637,17 @@
 
     \section{Nonlocality Monotones}\label{sec:nlmono}
 
-    The maximal correlation between two rvs \(A,B\) is denoted as \(\rho(A,B)\) and defined as
+    Instead of enumerating all wirings by brute force at points of interest, we can try to approach the problem from the opposite direction, by establishing fundamental limits on what behaviours can be achieved from wiring. To this end, we wish to find \emph{monotone measures under wiring}, which are functions of a behaviour that change monotonically when wiring is applied to them. Maximising the key rate over the set of behaviours with the same monotone would then provide an upper bound, and may help give insight into the fundamental limits of wiring.
+
+    In the language of resource theories, monotones are functions that preserve the pre-order of a resource theory~\cite{BellResourceTheory}. That is, for resource \(R_1\) and \(R_2\) in a theory, a monotone \(\mu\) satisfies
+    \begin{equation}
+      R_1 \leadsto R_2 \Rightarrow \mu(R_1) \geq \mu(R_2).
+    \end{equation}
+    As mentioned in \Cref{sec:locwir}, wirings are \emph{multiple-copy conversions}~\cite{BellResourceTheory}. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under a set of free actions that is a strict superset \(\sW\) defined in \Cref{sec:locwir}. These wirings additionally allow the order in which the boxes are used to be permuted and for non-deterministic wirings. Any monotone under this set of free actions would be a monotone under \(\sW\) too. We will therefore focus on this set of monotones.
+
+    \subsection{Maximal Correlation and Related Measures}\label{sec:nlmono_maxcorr}
+
+    The maximal correlation between two random variables (rvs) \(A,B\) is denoted as \(\rho(A,B)\) and defined as~\cite{NLMonotones}
     \begin{equation}
       \rho(A,B) = \max_{f,g} \frac{\E[(f(A)-\E[f(A)])(g(B)-\E[g(B)])]}{\sqrt{\Var[f(A)]\Var[g(B)]}}
     \end{equation}
@@ -565,10 +655,22 @@
     \begin{Array}{rcl}
       \rho(A,B) = & \max_{f,g}  & \E[f(A)g(B)] \\
                   & \text{s.t.} & \E[f(A)] = \E[g(B)] = 0 \\
-                  &             & \E[f(A)^2] = \E[g(B)^2] = 1.
+                  &             & \E[f(A)^2] = \E[g(B)^2] = 1,
     \end{Array}
+    where the equivalent description essentially enforces normalisation on the functions to simplify the expression.
 
-    For the maximal correlation \(\rho(A,B|X=x,Y=y)\), where we simply use the conditional distributions in place of the unconditioned distributions, we define the matrices
+    The maximal correlation is a nonlocality monotone because it possesses the \emph{tensorisation} property: if rvs \((A_1, B_1)\) are statistically independent of \((A_2,B_2)\), that is, their pmfs obey \(P_{A_1A_2B_1B_2} = P_{A_1B_1}P_{A_2B_2}\), then
+    \begin{equation}
+      \rho(A_1A_2,B_1B_2) = \max\{ \rho(A_1,B_1), \rho(A_2,B_2) \}.
+    \end{equation}
+    In particular, this means that the maximal correlation of \(n\) i.i.d.\ copies of the pair \((A,B)\) is \(\rho(A,B)\), even though the functions \(f\) and \(g\) can operate on all copies at once. This seems to imply that wiring cannot increase the maximal correlation between \(A\) and \(B\).
+
+    To apply it more formally to wirings, we define \(\rho(A,B|X=x,Y=y)\) as the maximal correlation computed using the distribution \(P_{AB}(a,b) = p(ab|xy)\). If we wire the bxoes that Alice used in over several rounds together, and did likewise with Bob, the boxes in each round can be seen as having a joint distribution determined by \((x,y)\). Although the choice of \((x,y)\) in each round is no longer independent of the previous rounds, the distributions conditioned on \((x,y)\) are still independent. Therefore, the maximal correlation of the boxes that are wired together cannot exceed
+    \[ \max_{x,y} \rho(A,B|X=x,Y=y). \]
+    Since the output rvs \(A', B'\) after wiring are themselves functions of the rvs corresponding to the individual rounds, this can only restrict the possible range of \(f\) and \(g\) when computing their maximal correlation, as compared to the maximal correlation of the individual rounds. Therefore
+    \[ \rho(A',B'|X=x,Y=y) \leq \max_{x,y} \rho(A,B|X=x,Y=y). \]
+
+    The maximal correlation is particularly important because it can be efficiently computed given a distribution, despite its generality. We define the matrices
     \begin{align}
       \matrp{P}{_{AB|xy}}_{ab} &= \Pr(A = a, B = b|X = x, Y = y) \\
       \matrp{P}{_{A|x}}_{ab} &= \delta_{ab} \Pr(A = a|X = x) \\
@@ -578,9 +680,9 @@
     \end{align}
     where \(\matrp{P}{_{A|x}}_{ab}\), \(\matrp{P}{_{B|y}}_{ab}\), \(\matrp{P}{_{AB|xy}}_{ab}\) and \(\matrp{\tilde{P}}{_{AB|xy}}\) have dimensions \(o_A \times o_A\), \(o_B \times o_B\), \(o_A \times o_B\), \(o_A \times o_B\) respectively. We use the Moore-Penrose inverse for this inversion, which, since \(\matrp{P}{_{A|x}}_{ab}\) and \(\matrp{P}{_{B|y}}_{ab}\) are diagonal, involves inverting their non-zero diagonal entries and leaving the zero entries in place.
 
-    Let the singular values of \(\matrp{\tilde{P}}{_{AB|xy}}\) be \(\lambda_i\) for \(i \in [1, \min\{o_A, o_B\}] \cap \Z\) such that \(\lambda_{i} \geq \lambda_{i+1}\),
+    Let the singular values of \(\matrp{\tilde{P}}{_{AB|xy}}\) be \(\sigma_i\) for \(i \in \dintv{1}{\min\{o_A, o_B\}}\) such that \(\sigma_{i} \geq \sigma_{i+1}\),
     \begin{equation}
-      \rho(A,B|X=x,Y=y) = \lambda_2\left( \matrp{\tilde{P}}{_{AB|xy}} \right).
+      \rho(A,B|X=x,Y=y) = \sigma_2\left( \matrp{\tilde{P}}{_{AB|xy}} \right).
     \end{equation}
 
     Working with the normalised form of the maximum correlation function, and so considering only normalised functions, we have
@@ -593,17 +695,17 @@
     \begin{equation}
       \cvec{f} = {[\sqrt{p(a|x)} f(a)]}^T_a \qquad \cvec{g} = {[\sqrt{p(b|y)} g(b)]}^T_b.
     \end{equation}
-    The technicalities arising from cases where \(p(a|x)\) or \(p(b|y)\) are zero, and therefore \(p(a,b|x,y) = 0\), are handled by the Moore-Penrose inverse, which maps those entries of \(\matrp{\tilde{P}}{_{AB|xy}}\) to zero.
+    The technicalities arising from cases where \(p(a|x)\) or \(p(b|y)\) are zero, which result in \(p(a,b|x,y)\) being divided by zero, are handled by the Moore-Penrose inverse, which maps those entries of \(\matrp{\tilde{P}}{_{AB|xy}}\) to zero.
 
     We also represent \(\matrp{\tilde{P}}{_{AB|xy}}\) in its compact singular value decomposition as
     \begin{equation}
-      \matrp{\tilde{P}}{_{AB|xy}} = \sum_i \lambda_i \cvec{u}_i \rvec{v}_i,
+      \matrp{\tilde{P}}{_{AB|xy}} = \sum_i \sigma_i \cvec{u}_i \rvec{v}_i,
     \end{equation}
     where \(\{\cvec{u}_i\}\) and \(\{\cvec{v}_i\}\) are sets of orthonormal vectors in \(\R^{o_A}\) and \(\R^{o_B}\) respectively.
 
-    It is known that~\cite[Thm 1]{ComputingMaxCorr} \(\lambda_i \in [0, 1]\), and
+    It is known that~\cite[Thm 1]{ComputingMaxCorr} \(\sigma_i \in [0, 1]\), and
     \begin{equation}
-      \lambda_1 = 1 \qquad \cvec{u}_1 = {[\sqrt{p(a|x)}]}_a^T \qquad \cvec{v}_1 = {[\sqrt{p(b|y)}]}_b^T.
+      \sigma_1 = 1 \qquad \cvec{u}_1 = {[\sqrt{p(a|x)}]}_a^T \qquad \cvec{v}_1 = {[\sqrt{p(b|y)}]}_b^T.
     \end{equation}
     This gives us that
     \begin{align}
@@ -615,44 +717,77 @@
 
     The singular value decomposition can be characterised variationally by
     \begin{Array}{rcl}
-      \lambda_1(\matr{M}) = & \max_{\cvec{f},\cvec{g}} & \rvec{f} \matr{M} \cvec{g} \\
+      \sigma_1(\matr{M}) = & \max_{\cvec{f},\cvec{g}} & \rvec{f} \matr{M} \cvec{g} \\
                             & \text{s.t.} & \norm{\cvec{f}}_2 = \norm{\cvec{g}}_2 = 1, \\
     \end{Array}
-    for an arbitrary matrix \(\matr{M}\) by using Lagrange multipliers to constrain \(\cvec{f}\) and \(\cvec{g}\). This maximum is achieved by \(\cvec{f} = \cvec{u}_1\), \(\cvec{g} = \cvec{v}_1\). With the additional constraint of \(\rvec{f} \cvec{u}_1 = \rvec{v}_1 \cvec{g} = 0\), the maximum is \(\lambda_2(\matr{M})\), achieved by \(\cvec{f} = \cvec{u}_2\), \(\cvec{g} = \cvec{v}_2\). We can apply this property directly to find the maximal correlation, and the functions which achieve it, from the singular value and corresponding singular vectors for \(i = 2\).
+    for an arbitrary matrix \(\matr{M}\) by using Lagrange multipliers to constrain \(\cvec{f}\) and \(\cvec{g}\). This maximum is achieved by \(\cvec{f} = \cvec{u}_1\), \(\cvec{g} = \cvec{v}_1\). With the additional constraint of \(\rvec{f} \cvec{u}_1 = \rvec{v}_1 \cvec{g} = 0\), the maximum is \(\sigma_2(\matr{M})\), achieved by \(\cvec{f} = \cvec{u}_2\), \(\cvec{g} = \cvec{v}_2\). We can apply this property directly to find the maximal correlation, and the functions which achieve it, from the singular value and corresponding singular vectors for \(i = 2\).
 
-    Observe that, for \(K_A\) and \(K_B\), two perfectly correlated and uniformly distributed secret keys, we have \(\rho(K_A, K_B) = 1\), with the maximum achieved by mapping half of the keys to \(1\) and half to \(-1\) for both \(f\) and \(g\). However, if the two keys are independent, then \(\rho(K_A,K_B) = \E[f(K_A)g(K_B)] = \E[f(K_A)]\E[g(K_B)] = 0\). Likewise, if the two keys are deterministic (not secret), then \(f(K_A) = g(K_B) = 0\) and so \(\rho(K_A, K_B) = 0\). However, this poses an issue for longer keys. Even if there are only two possible values for the key, as long as they are uniformly distributed, \(\rho(K_A, K_B) = 1\), even though Alice and Bob effectively share only one bit of secrecy! Therefore, we need to find a bound that looks something like
+    In~\cite{NLMonotones}, these properties of the maximal correlation are proved using the properties of various related measures, that typically take the form of \emph{ribbons}: subsets of \({[0,1]}^2\). These include the hypercontractivity (HC) ribbon:
     \begin{equation}
-      \max_{E|AB} \frac{H(A|E) - H(A|B)}{H(A)} \leq f(\rho(A,B)).
-    \end{equation}
-
-    Some other related measures are the hypercontractivity (HC) ribbon:
-    \begin{equation}
-      \HC(A,B) = \{(\lambda_A, \lambda_B) \in {[0,1]}^2 \st \forall U, \lambda_A I(U;A) + \lambda_B I(U;B) \leq I(U;AB)\},
+      \HC(A,B) = \{(\nu_A, \nu_B) \in {[0,1]}^2 \st \forall U, \nu_A I(U;A) + \nu_B I(U;B) \leq I(U;AB)\},
     \end{equation}
     or equivalently,
     \begin{equation}
-      \HC(A,B) = \{(\lambda_A, \lambda_B) \in {[0,1]}^2 \st \forall f,g; \E[f(A)g(B)] \leq {\E[\abs{f(A)}^{1/\lambda_A}]}^{\lambda_A} {\E[\abs{g(B)}^{1/\lambda_B}]}^{\lambda_B} \},
+      \HC(A,B) = \{(\nu_A, \nu_B) \in {[0,1]}^2 \st \forall f,g; \E[f(A)g(B)] \leq {\E[\abs{f(A)}^{1/\nu_A}]}^{\nu_A} {\E[\abs{g(B)}^{1/\nu_B}]}^{\nu_B} \},
     \end{equation}
-    or, with \(\Upsilon_{AB}(\lambda_A, \lambda_B) = \lambda_A H(A) + \lambda_B H(B) - H(AB)\) and \(\tilde{\Upsilon}_{AB}\) its lower convex envelope (pointwise largest convex function that fulfills \(\tilde{\Upsilon}_{AB}(\lambda_A, \lambda_B) \leq \Upsilon_{AB}(\lambda_A, \lambda_B)\) for all \(\lambda_A, \lambda_B\)):
+    or, with \(\Upsilon_{AB}(\nu_A, \nu_B) = \nu_A H(A) + \nu_B H(B) - H(AB)\) and \(\tilde{\Upsilon}_{AB}\) its lower convex envelope (pointwise largest convex function that fulfills \(\tilde{\Upsilon}_{AB}(\nu_A, \nu_B) \leq \Upsilon_{AB}(\nu_A, \nu_B)\) for all \(\nu_A, \nu_B\)):
     \begin{equation}
-      \HC(A,B) = \{(\lambda_A, \lambda_B) \in {[0,1]}^2 \st \Upsilon_{AB}(\lambda_A, \lambda_B) = \tilde{\Upsilon}_{AB}(\lambda_A, \lambda_B) \};
+      \HC(A,B) = \{(\nu_A, \nu_B) \in {[0,1]}^2 \st \Upsilon_{AB}(\nu_A, \nu_B) = \tilde{\Upsilon}_{AB}(\nu_A, \nu_B) \};
     \end{equation}
     and the maximal correlation (MC) ribbon:
     \begin{equation}
-      \MC(A,B) = \{(\lambda_A, \lambda_B) \in {[0,1]}^2 \st \forall f; \Var[f(A,B)] \geq \lambda_A \Var_A[\E_{B|A}[f(A,B)]] + \lambda_B \Var_B[\E_{A|B}[f(A,B)]] \},
+      \MC(A,B) = \left\{ 
+        (\nu_A, \nu_B) \in {[0,1]}^2 \st \forall f; \Var[f(A,B)] \geq 
+        \begin{aligned}[c]
+          & \nu_A \Var_A[\E_{B|A}[f(A,B)]] \\
+          + & \nu_B \Var_B[\E_{A|B}[f(A,B)]] \\
+        \end{aligned}
+      \right\},
     \end{equation}
     which can be normalised by restricting to \(\E[f(A,B)] = 0\), giving
     \begin{equation}
-      \MC(A,B) = \{(\lambda_A, \lambda_B) \in {[0,1]}^2 \st \forall f; \E[{f(A,B)}^2] \geq \lambda_A \E_A[{(\E_{B|A}[f(A,B)])}^2] + \lambda_B \E_B[{(\E_{A|B}[f(A,B)])}^2] \}.
+      \MC(A,B) = \left\{(\nu_A, \nu_B) \in {[0,1]}^2 \st \forall f; \E[{f(A,B)}^2] \geq 
+        \begin{aligned}[c]
+          & \nu_A \E_A[{(\E_{B|A}[f(A,B)])}^2] \\ + & \nu_B \E_B[{(\E_{A|B}[f(A,B)])}^2] \\
+        \end{aligned}
+      \right\}.
     \end{equation}
-    These ribbons can be defined as the union of the ribbons for the conditional distributions for the boxes, and are notable because they expand under wirings and occupy the whole of \({[0,1]}^2\) for independent variables.
 
-    The relations between them are
+    The ribbon for a behaviour can be defined as the intersection of the ribbons for the individual conditional distributions. The ribbons have the tensorisation property, the ribbon of a post-wiring behaviour is a superset of the intersection of the ribbon of pre-wiring behaviours (that is, it expands under wirings), and the ribbons occupy the whole of \({[0,1]}^2\) for independent variables, while being restricted to \(\{(\nu_A, \nu_B) \st \nu_A + \nu_B \leq 1\}\) for perfectly correlated boxes. This makes them nonlocality monotones in the sense of monotonically changing under wirings, despite not fulfilling the resource-theoretic definition since they are not scalars.
+
+    The relations between the measures discussed are
     \begin{gather}
-      {\rho(A,B)}^2 = \inf_{\substack{(\lambda_A, \lambda_B) \in \MC(A,B) \\ \lambda_B \neq 0}} \frac{1 - \lambda_A}{\lambda_B} \\
+      {\rho(A,B)}^2 = \inf_{\substack{(\nu_A, \nu_B) \in \MC(A,B) \\ \nu_B \neq 0}} \frac{1 - \nu_A}{\nu_B} \\
       \HC(A,B) \subseteq \MC(A,B) \\
-      s^*(A,B) \coloneqq \inf_{\substack{(\lambda_A, \lambda_B) \in \HC(A,B) \\ \lambda_B \neq 0}} \frac{1 - \lambda_A}{\lambda_B} \geq {\rho(A,B)}^2
+      s^*(A,B) \coloneqq \inf_{\substack{(\nu_A, \nu_B) \in \HC(A,B) \\ \nu_B \neq 0}} \frac{1 - \nu_A}{\nu_B} \geq {\rho(A,B)}^2
     \end{gather}
+
+    \subsection{Isotropic Boxes are Not Distillable}\label{sec:nlmono_isodist}
+
+    Although only tangentially related to our project, we believe that there is a significant result about maximal correlation that has been overlooked.
+
+    % TODO Gohari proved the case without shared randomness, with shared
+    % randomness we can depolarise any behaviour to obtain the isotropic 
+    % behaviour with a given S, so it has the lowest maxcorr IF shared
+    % randomness does not increase maxcorr
+
+    \subsection{Evaluation}
+
+    The ideal nonlocality monotone \(\mu\) would have the following desiderata:
+    \begin{enumerate}
+      \item Given a behaviour \(p\), it is easy to compute \(\mu(p)\)
+      \item Given a value \(\mu'\), the set \(\{ p \st \mu(p) = \mu' \}\), the set can be efficiently optimised over
+      \item It is tight in the sense that if \(\mu(p) = \mu(p')\) for behaviours \(p\) and \(p'\), there exists a wiring that will transform \(p \mapsto p'\)
+      \item Given \(p\) and \(p'\), if \(\mu(p) = \mu(p')\), we can expicitly construct the wiring that transforms \(p\) into \(p'\)
+    \end{enumerate}
+
+    Another caveat arises when attempting to explicitly compute bounds on the key rate from the maximal correlation. Observe that, for \(K_A\) and \(K_B\), two perfectly correlated and uniformly distributed secret keys, we have \(\rho(K_A, K_B) = 1\), with the maximum achieved by mapping half of the keys to \(1\) and half to \(-1\) for both \(f\) and \(g\). However, if the two keys are independent, then \(\rho(K_A,K_B) = \E[f(K_A)g(K_B)] = \E[f(K_A)]\E[g(K_B)] = 0\). Likewise, if the two keys are deterministic (not secret), then \(f(K_A) = g(K_B) = 0\) and so \(\rho(K_A, K_B) = 0\). However, this poses an issue for longer keys. As long as \(K_A\) and \(K_B\) are uniformly distributed over \(N > 1\) values, \(\rho(K_A, K_B) = 1\), regardless of whether \(N = 2\) or (say) \(N = 10^{12}\). Therefore, we need to find a bound that looks something like
+    \begin{equation}
+      \max_{E|AB} \frac{H(A|E) - H(A|B)}{H(A)} \leq f(\rho(A,B))
+    \end{equation}
+    in order to achieve the correct scaling for an estimate of the key rate.
+
+    \section{Summary and Outlook}
 
     \printbibliography{}
 
@@ -699,4 +834,4 @@
 
     \end{document}
 
-  Compute relative entropy of entanglement and compare to quantum maximal correlation
+    Compute relative entropy of entanglement and compare to quantum maximal correlation

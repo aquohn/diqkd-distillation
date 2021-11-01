@@ -6,6 +6,13 @@ using NaNMath
 import MathOptInterface as MOI
 import Juniper, NLopt, Ipopt, Cbc
 
+includet("helpers.jl")
+includet("nonlocality.jl")
+
+using PyCall
+pushfirst!(PyVector(pyimport("sys")."path"), @__DIR__)
+const qre = pyimport("qre")
+
 h(x) = (x == 0 || x == 1) ? 0 : -x*log2(x) - (1-x)*log2(1-x)
 r(Q,S) = 1-h((1+sqrt((S/2)^2 - 1))/2)-h(Q)
 

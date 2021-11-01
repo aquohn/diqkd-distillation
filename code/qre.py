@@ -20,9 +20,9 @@ from math import log2, log, pi, cos, sin
 import ncpol2sdpa as ncp
 from scipy.optimize import minimize
 from sympy.physics.quantum.dagger import Dagger
+import chaospy
 
 # import mosek
-# import chaospy
 
 
 M = 6  # Number of nodes / 2 in gaussian quadrature
@@ -39,44 +39,9 @@ def generate_quadrature(m):
 
          m    --    number of nodes in quadrature / 2
     """
-    if m == 6:
-        return np.array(
-            [
-                0.01001828,
-                0.05203545,
-                0.12461923,
-                0.22284061,
-                0.34000816,
-                0.46813761,
-                0.59849728,
-                0.72220328,
-                0.8308249,
-                0.91695839,
-                0.97472638,
-                1.0,
-            ]
-        ), np.array(
-            [
-                0.02562405,
-                0.05795374,
-                0.08638532,
-                0.10893444,
-                0.12406078,
-                0.13073283,
-                0.12849567,
-                0.11750156,
-                0.09849927,
-                0.07278183,
-                0.04208607,
-                0.00694444,
-            ]
-        )
-    else:
-        raise NotImplementedError("Sorry broskis")
-
-    """t, w = chaospy.quad_gauss_radau(m, chaospy.Uniform(0, 1), 1)
+    t, w = chaospy.quad_gauss_radau(m, chaospy.Uniform(0, 1), 1)
     t = t[0]
-    return t, w"""
+    return t, w
 
 
 def cond_ent(joint, marg):

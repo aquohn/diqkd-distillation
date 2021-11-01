@@ -5,6 +5,7 @@ import Contour: contours, levels, level, lines, coordinates
 default(:size, (1200,800))
 
 includet("helpers.jl")
+includet("nonlocality.jl")
 includet("keyrates.jl")
 includet("wiring.jl")
 includet("maxcorr.jl")
@@ -91,6 +92,8 @@ function maxcorrval_from_probs(pabxy, pax, pby, xysel, modesel)
     end
 end
 
+# TODO unify data functions
+
 function maxcorr_data(is, js, HAB::Function, HAE::Function, corrf::Function;
     xysel=(0,0), modesel=:reg, type::Type{T} = Float64) where {T <: Real}
   il = length(is); jl = length(js)
@@ -163,6 +166,9 @@ function farkas_wiring_data(n, HAE::Function, HAB::Function; c = 2, iterf = noth
   return maxrecs
 end
 
+# %%
+# Compute values given behaviour params
+
 function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname, corrf::Function; kwargs...) where T <: Real
   kwargs = Dict(kwargs)
   tol = get(kwargs, :tol, 1e-2)
@@ -201,19 +207,16 @@ function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname,
 end
 
 # %%
-# NS polytope slice
+# Generate points in a space of behaviours
 
-function qset_plot(QLDsamples = 20, boundsamples = 20, kwargs...)
+function qset_plot(QLDsamples = 100, boundsamples = 100, kwargs...)
   fIs = range(0,1,length=boundsamples) |> collect
   fLDs = range(0,1,length=QLDsamples) |> collect
   corrf = (fI, fLD) -> (((1-fI) .* (((1-fLD) .* EaxQ) .+ (fLD .* EaxLD))) .+ (fI .* Eaxbound),
                      ((1-fI) .* (((1-fLD) .* EbyQ) .+ (fLD .* EbyLD))) .+ (fI .* Ebybound),
                      ((1-fI) .* (((1-fLD) .* EabxyQ) .+ (fLD .* EabxyLD))) .+ (fI .* Eabxybound),)
-  return wiring_plot(fIs, fLDs, "Isotropic fraction", "Deterministic fraction", corrf, kwargs)
+  return wiring_plot(fIs, fLDs, "Isotropic fraction", "Deterministic fraction", corrf, kwargs=kwargs)
 end
-
-# %%
-# Quantum plots
 
 function expt_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.925, ncstart=0.8, kwargs...)
   ncs = range(ncstart, stop=1, length=ncsamples)
@@ -225,6 +228,9 @@ function expt_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi]
 
   return wiring_plot(ncs, etas, L"n_c", L"\eta", corrf, kwargs=kwargs)
 end
+
+# %%
+# Compute values given behaviour params TODO make generic
 
 function entropy_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=20, etasamples=5, etastart=0.8, kwargs...)
   ncs = range(0, stop=1, length=ncsamples)

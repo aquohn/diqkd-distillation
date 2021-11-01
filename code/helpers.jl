@@ -45,7 +45,3 @@ function sliceup(seq, steps...)
   end
   return sliced
 end
-
-kd(i,j) = (i == j) ? 1 : 0
-E(M, rho) = tr(M * rho)
-sigmas = [[kd(j, 3) kd(j,1)-im*kd(j,2); kd(j,1)+im*kd(j,2) -kd(j,3)] for j in 1:3]

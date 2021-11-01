@@ -2,6 +2,7 @@ using Revise
 using Symbolics, LinearAlgebra, QuantumInformation
 
 includet("helpers.jl")
+includet("nonlocality.jl")
 
 function pauli_to_reg(v)
   Mv = [1 0 0 1; 0 1 -im 0; 0 1 im 0; 1 0 0 -1] * v

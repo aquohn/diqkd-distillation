@@ -21,6 +21,7 @@ using Revise
 using QuantumInformation, LinearAlgebra
 
 includet("helpers.jl")
+includet("nonlocality.jl")
 
 # %%
 # Wirings
@@ -41,56 +42,6 @@ struct BoxSequence{T <: Integer}
     end
   end
 end
-
-struct Setting{T}
-  oA::T
-  oB::T
-  iA::T
-  iB::T
-end
-Base.iterate(s::Setting) = s.oA, reverse([s.oB, s.iA, s.iB])
-Base.iterate(s::Setting, state) = isempty(state) ? nothing : (pop!(state), state)
-
-struct Correlators
-  Eax
-  Eby
-  Eabxy
-end
-Base.iterate(C::Correlators) = C.Eax, reverse([C.Eby, C.Eabxy])
-Base.iterate(C::Correlators, state) = isempty(state) ? nothing : (pop!(state), state)
-
-struct Behaviour
-  pax
-  pby
-  pabxy
-end
-Base.iterate(P::Behaviour) = P.pax, reverse([P.pby, P.pabxy])
-Base.iterate(P::Behaviour, state) = isempty(state) ? nothing : (pop!(state), state)
-
-struct Wiring
-  CA
-  CAj
-  CB
-  CBj
-end
-Base.iterate(W::Wiring) = W.CA, reverse([W.CAj, W.CB, W.CBj])
-Base.iterate(W::Wiring, state) = isempty(state) ? nothing : (pop!(state), state)
-
-struct EntropyData
-  HAE
-  HAB
-  HAEp
-  HABp
-end
-
-struct WiringData
-  wiring::Wiring
-  r
-  rp
-  Hdata::EntropyData
-end
-
-# TODO rewrite functions to take structs as args
 
 num_wirings(c, o, i) = o^(i * o^c) * prod([i^(i * o^(j-1)) for j in 2:c])
 num_wirings_fix(c, o, i, f) = o^((i-f)*i * o^c) * prod([i^((i-f) * o^(j-1)) for j in 2:c])
@@ -138,50 +89,6 @@ end
 psi(theta) = cos(theta) * kron(ket(1,2), ket(1,2)) + sin(theta) * kron(ket(2,2), ket(2,2))
 rho(theta) = proj(psi(theta))
 Mtld(mu) = cos(mu) * sigmas[3] + sin(mu) * sigmas[1]
-
-# let outcome 1 be associated with eigenvalue -1 or logical 0
-function probs_from_corrs(Eax, Eby, Eabxy)
-  invcorr = 0.25 * [-1.0 -1.0 1.0 1.0; -1.0 1.0 -1.0 1.0; 1.0 -1.0 -1.0 1.0; 1.0 1.0 1.0 1.0]
-
-  oA, oB = 2, 2
-  iA, iB = [length(Eax), length(Eby)]
-  pax = Array{Float64}(undef, oA, iA)
-  pby = Array{Float64}(undef, oB, iB)
-  pabxy = Array{Float64}(undef, oA, oB, iA, iB)
-
-  for x in 1:iA, y in 1:iB
-    pabxy[:, :, x, y] = invcorr * [Eax[x]; Eby[y]; Eabxy[x,y]; 1]
-  end
-  for a in 1:oA, x in 1:iA
-    pax[a, x] = sum(pabxy[a, :, x, 1])
-  end
-  for b in 1:oB, y in 1:iB
-    pby[b, y] = sum(pabxy[:, b, 1, y])
-  end
-
-  return pax, pby, pabxy
-end
-
-function margps_from_jointp(pax, pby, pabxy)
-  oA, oB, iA, iB = size(pabxy)
-  if isnothing(pax)
-    pax = [sum(pabxy[a,:,x,1]) for a in 1:oA, x in 1:iA]
-  end
-  if isnothing(pby)
-    pby = [sum(pabxy[:,b,1,y]) for b in 1:oB, y in 1:iB]
-  end
-  return pax, pby, pabxy
-end
-
-function corrs_from_probs(pax, pby, pabxy)
-  oA, oB, iA, iB = size(pabxy)
-  pax, pby, pabxy = margps_from_jointp(pax, pby, pabxy)
-  Eax = [pax[2,x] - pax[1,x] for x in 1:iA]
-  Eby = [pby[2,y] - pby[1,y] for y in 1:iB]
-  Eabxy = [sum([pabxy[a,b,x,y] * ((a == b) ? 1 : -1) for a in 1:oA, b in 1:iA]) for x in 1:iA, y in 1:iB]
-
-  return Eax, Eby, Eabxy
-end
 
 function meas_corrs(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi])
   rhov = rho(theta)
