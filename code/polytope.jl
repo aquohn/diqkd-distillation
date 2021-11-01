@@ -6,6 +6,7 @@ using LazySets, Polyhedra, Symbolics, CDDLib, LRSLib
 
 includet("helpers.jl")
 includet("nonlocality.jl")
+includet("keyrates.jl")
 includet("maxcorr.jl")
 
 const chshset = (2,2,2,2)
@@ -147,7 +148,7 @@ function print_cg_constr(constr, iA, oA, iB, oB)
   pax = fill(NaN, oA, iA)
   pby = fill(NaN, oB, iB)
 
-  v = constr.a, c = constr.b
+  v, c = constr.a, constr.b
   @sliceup(v, pax_vec, (oA-1) * iA, pby_vec, (oB-1) * iB, pabxy_vec, ((oA-1) * (oB-1) * iA * iB))
 
   pax[1:oA-1, 1:iA] = reshape(pax_vec, oA-1, iA)
@@ -187,11 +188,10 @@ function cg_debug(behavs, iA, oA, iB, oB)
 end
 
 # analysis
-function find_overlapping_constrs(poly1, poly2)
-  constrs1 = constraints(poly1), constrs2 = constraints(poly2)
+function find_overlapping_constrs(constrs1, constrs2)
   T1, T2 = eltype(constrs1), eltype(constrs2)
   overlaps, rem1 = T2[], T1[]
-  for constr in constrs1
+  for constr1 in constrs1
     matchconstr = nothing
     for constr2 in constrs2
       if issubset(constr1, constr2) || issubset(constr2, constr1)
@@ -205,16 +205,16 @@ function find_overlapping_constrs(poly1, poly2)
       push!(rem1, constr1)
     end
   end
-  rem2 = [constr in filter(c -> !(c in overlap), constrs2)]
-  return overlaps
+  rem2 = [constr for constr in filter(c -> !(c in overlaps), constrs2)]
+  return overlaps, rem1, rem2
 end
 
 function qkd_analysis(vs, testf = (Q, S, rho) -> abs(S) == 4)
   for v in vs
     probs = Behaviour(cg_to_full(v, qkdset...)...)
-    corrs = Correlators(corrs_from_probs(pax, pby, pabxy)...)
-    Q, S, rhos = QBER(corrs...), CHSH(corrs...), maxcorr(probs...)
-    if testf(Q, S, rho)
+    corrs = Correlators(corrs_from_probs(probs...)...)
+    Q, S, rhos = QBER(corrs...), CHSH(corrs...), maxcorrs(probs...)
+    if testf(Q, S, rhos)
       println(v)
       print(@sprintf "Q = %.3f, S = %.3f, " Q S)
       println(@sprintf "rho = %.3f" maximum(rhos))
@@ -222,33 +222,44 @@ function qkd_analysis(vs, testf = (Q, S, rho) -> abs(S) == 4)
   end
 end
 
-function qkd_find_prs(::Type{T} = Float64) where T <: Real
+function qkd_find_lintersections(::Type{T} = Float64) where T <: Real
   qkd_v_maxmix = T[1//2, 1//2, 1//2, 1//2, 1//2, 1//4, 1//4, 1//4, 1//4, 1//4, 1//4]
   qkd_ldpoly = ld_polytope(qkdset..., T)
   qkd_ldconstr = constraints_list(qkd_ldpoly)
   qkd_poly = cg_polytope(qkdset..., T)
   qkd_v = vertices_list(qkd_poly)
   CT, VT = eltype(qkd_ldconstr), eltype(qkd_v)
-  # constrs_to_extrv = Vector{Tuple{CT, Vector{Tuple{VT, VT}}}}()
-  constrs_to_extrv = Dict{CT, Vector{Tuple{VT, VT}}}()
+  constrs_to_extrv = Dict{CT, Vector{Tuple{VT, T}}}()
 
   ns_extremal = filter(v -> !(v in qkd_ldpoly), qkd_v)
   for constr in qkd_ldconstr
-    matches = Tuple{VT, VT}[]
+    matches = Tuple{VT, T}[]
     for v in ns_extremal
       Symbolics.@variables q
-      vb = q .* v + q .* qkd_v_maxmix
+      vb = q .* v + (1-q) .* qkd_v_maxmix
       boundval = dot(constr.a, vb)
       qval = T(Symbolics.solve_for(boundval ~ constr.b, q))
       if 0 <= qval <= 1
         vbval = qval .* v + qval .* qkd_v_maxmix
-        push!(matches, (v, vbval))
+        push!(matches, (v, qval))
       end
     end
     constrs_to_extrv[constr] = matches
   end
 
   return constrs_to_extrv
+end
+
+function qkd_find_prs(::Type{T} = Float64) where T <: Real
+  linters = qkd_find_lintersections(T)
+  nlinters = typeof(linters)()
+  for (facet, boundvs) in linters
+    nlboundvs = filter(v -> !(v[1] in qkd_ldpoly) && isapprox(0.5, v[2]), boundvs)
+    if !isempty(nlboundvs)
+      nlinters[facet] = nlboundvs
+    end
+  end
+  return nlinters
 end
 
 function qkd_iso(::Type{T} = Float64) where T <: Real
@@ -393,3 +404,83 @@ const qkd_poly = cg_polytope(qkdset...)
 const qkd_v = vertices_list(qkd_poly)
 const qkd_ldpoly = ld_polytope(qkdset...)
 const qkd_ldconstr = constraints_list(qkd_ldpoly)
+
+#=
+-0.200 P(a = 1|x = 1) -0.200 P(b = 1|y = 1) +0.200 P(1,1|1,1) +0.200 P(1,1|1,2) +0.200 P(1,1|2,1) -0.200 P(1,1|2,2) <= 0.000
+[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0, 0.0, 0.0]
+Q = 1.000, S = 4.000, rho = 1.000
+----------------------------------------
+1, 1     | 0.5| 0.5| 0.0| 0.5| 0.0| 0.0|
+----------------------------------------
+1, 2     | 0.0| 0.0| 0.5| 0.0| 0.5| 0.5|
+----------------------------------------
+2, 1     | 0.0| 0.0| 0.5| 0.0| 0.5| 0.5|
+----------------------------------------
+2, 2     | 0.5| 0.5| 0.0| 0.5| 0.0| 0.0|
+----------------------------------------
+
+[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0, 0.0, 0.5]
+Q = 1.000, S = 4.000, rho = 1.000
+a, b/x, y|1, 1|1, 2|1, 3|2, 1|2, 2|2, 3|
+----------------------------------------
+1, 1     | 0.5| 0.5| 0.0| 0.5| 0.0| 0.5|
+----------------------------------------
+1, 2     | 0.0| 0.0| 0.5| 0.0| 0.5| 0.0|
+----------------------------------------
+2, 1     | 0.0| 0.0| 0.5| 0.0| 0.5| 0.0|
+----------------------------------------
+2, 2     | 0.5| 0.5| 0.0| 0.5| 0.0| 0.5|
+----------------------------------------
+
+[0.5, 0.5, 0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 0.0, 0.5, 0.5]
+Q = 0.500, S = 4.000, rho = 1.000
+a, b/x, y|1, 1|1, 2|1, 3|2, 1|2, 2|2, 3|
+----------------------------------------
+1, 1     | 0.5| 0.5| 0.5| 0.5| 0.0| 0.5|
+----------------------------------------
+1, 2     | 0.0| 0.0| 0.0| 0.0| 0.5| 0.0|
+----------------------------------------
+2, 1     | 0.0| 0.0| 0.5| 0.0| 0.5| 0.5|
+----------------------------------------
+2, 2     | 0.5| 0.5| 0.0| 0.5| 0.0| 0.0|
+----------------------------------------
+
+[0.5, 0.5, 0.5, 0.5, 0.0, 0.5, 0.5, 0.5, 0.0, 0.0, 0.0]
+Q = 0.500, S = 4.000, rho = 1.000
+a, b/x, y|1, 1|1, 2|1, 3|2, 1|2, 2|2, 3|
+----------------------------------------
+1, 1     | 0.5| 0.5| 0.0| 0.5| 0.0| 0.0|
+----------------------------------------
+1, 2     | 0.0| 0.0| 0.5| 0.0| 0.5| 0.5|
+----------------------------------------
+2, 1     | 0.0| 0.0| 0.0| 0.0| 0.5| 0.0|
+----------------------------------------
+2, 2     | 0.5| 0.5| 0.5| 0.5| 0.0| 0.5|
+----------------------------------------
+
+[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0, 0.5, 0.0]
+Q = 0.000, S = 4.000, rho = 1.000
+a, b/x, y|1, 1|1, 2|1, 3|2, 1|2, 2|2, 3|
+----------------------------------------
+1, 1     | 0.5| 0.5| 0.5| 0.5| 0.0| 0.0|
+----------------------------------------
+1, 2     | 0.0| 0.0| 0.0| 0.0| 0.5| 0.5|
+----------------------------------------
+2, 1     | 0.0| 0.0| 0.0| 0.0| 0.5| 0.5|
+----------------------------------------
+2, 2     | 0.5| 0.5| 0.5| 0.5| 0.0| 0.0|
+----------------------------------------
+
+[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0, 0.5, 0.5]
+Q = 0.000, S = 4.000, rho = 1.000
+a, b/x, y|1, 1|1, 2|1, 3|2, 1|2, 2|2, 3|
+----------------------------------------
+1, 1     | 0.5| 0.5| 0.5| 0.5| 0.0| 0.5|
+----------------------------------------
+1, 2     | 0.0| 0.0| 0.0| 0.0| 0.5| 0.0|
+----------------------------------------
+2, 1     | 0.0| 0.0| 0.0| 0.0| 0.5| 0.0|
+----------------------------------------
+2, 2     | 0.5| 0.5| 0.5| 0.5| 0.0| 0.5|
+----------------------------------------
+=#

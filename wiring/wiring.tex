@@ -61,12 +61,11 @@
 
 \numberwithin{equation}{section} % eqn counter rolls over at each section
 \newcounter{stmt} % definitions, theorems and lemmas share this counter
-\newcounter{qn}
 
 \theoremstyle{definition}
 \newtheorem{defn}[stmt]{Definition}
 \theoremstyle{plain}
-\newtheorem{qn}[qn]{Question}
+\newtheorem{question}{Question}
 \newtheorem{thm}[stmt]{Theorem}
 \newtheorem{lem}[stmt]{Lemma}
 
@@ -267,6 +266,7 @@
   \newcommand{\Ls}{\mathcal{L}}
   \newcommand{\Qs}{\mathcal{Q}}
   \newcommand{\NSs}{\mathcal{NS}}
+  \newcommand{\PR}{\mathrm{PR}}
 
   \title{Device-independent quantum key distribution with local wiring}
   \author{John Khoo\\ \href{mailto:john_khoo@u.nus.edu}{\texttt{john\_khoo@u.nus.edu}} \\\\ AD MAIOREM DEI GLORIAM} 
@@ -465,15 +465,100 @@
 
       Unlike \(\NSs\), \(\Ls\) is defined by its vertices. As discussed in \Cref{sec:pre_diqkd}, local behaviours can be considered as probabilistic mixtures of deterministic behaviours according to \Cref{eqn:finethm}. There, it was explained that this is necessary for Eve if she wants to eavesdrop on the generated key; from a different perspective, if the correlations between Alice and Bob arise from some preshared data, the data can have been generated in the same manner, with \(p_E(e)\) being the distribution of the process which selects the behaviour to encode in each round. If the devices use local randomness to generate their behaviour in each round, the effect on the overall distribution can be absorbed into \(p_E(e)\), so that a system without local randomness and with a different \(p_E(e)\) can reproduce the same statistics. This result is known as \emph{Fine's theorem}~\cite{FineThm}, and is discussed more rigorously in~\cite{BellNonlocality}.
 
-      Using the \verb`LazySets.jl` package for the Julia programming language, we specified the deterministic behaviours as vertices of \(\Ls\), since all other local behaviours can be specified as probabilistic mixtures, that is, convex combinations, of the deterministic behaviours. For each \(x \in \dintv{1}{i_A}\), we have \(i_A\) choices for the output \(a\) to assign, with the analogous scenario for Bob. Therefore, there are \(i_A^{o_A}i_B^{o_B} = 32\) vertices.
-
-      The GLPK solver was then used to identify the facets and their corresponding inequalities, and yielding 48 facets for our polytope. Therefore, all facets in the QKD setting are either liftings of CHSH or positivity facets, which is expected, since the next unique Bell inequality is \(I_{3322}\), in the \((3,2,3,2)\) setting.
+      Using the \verb`LazySets.jl` package for the Julia programming language, we specified the deterministic behaviours as vertices of \(\Ls\), since all other local behaviours can be specified as probabilistic mixtures, that is, convex combinations, of the deterministic behaviours. For each \(x \in \dintv{1}{i_A}\), we have \(i_A\) choices for the output \(a\) to assign, with the analogous scenario for Bob. Therefore, there are \(i_A^{o_A}i_B^{o_B} = 32\) vertices. The GLPK solver was then used to identify the facets and their corresponding inequalities, and yielding 48 facets for our polytope. Therefore, all facets in the QKD setting are either liftings of CHSH or positivity facets, which is expected, since the next unique Bell inequality is \(I_{3322}\), in the \((3,2,3,2)\) setting.
 
       To generate \(\NSs\), we provided the aforementioned positivity, normalisation, and no-signalling constraints, which are also solved using GLPK to eliminate redundant constraints, and to find the vertices of the polytope. This yields 24 constraints (namely, the positivity constraints in the CG representation) and 128 vertices.
 
-      In the \((2,2,2,2)\) setting, each CHSH facet contains 8 deterministic points with \(S = 2\).
+      In the \((2,2,2,2)\) setting, each of the 8 CHSH facets contains 8 deterministic points with \(S = 2\), and is violated to the algebraic maximum of \(S = 4\) by a \emph{Popescu–Rohrlich} (PR) box, whose outputs are always anti-correlated for one pair of inputs and always correlated otherwise. This behaviour is not within \(\Qs\), and so is not physically realisable as far as we know, but it still plays a crucial role in understanding nonlocality, and the geometry of \(\NSs\). For example, being the only extremal point of \(\NSs\) to have \(S > 2\), all behaviours that violate the corresponding CHSH inequality can be decomposed as a mixture of the PR box and a local box on the CHSH facet~\cite{GeomDecomp}. The line between the \emph{maximally mixed behaviour} \(p_{\emptyset}\), which has all correlators and marginals 0 and \(p_{\emptyset}(ab|xy) = 1/o_A o_B \forall a,b,x,y\), and a PR box is called the \emph{isotropic line}, and behaviours on the line are convex combinations of the two. Notably, the quantum maximum of \(S = 2\sqrt{2}\) is achieved by a behaviour that is on this line.
 
-      % TODO identifying PR analogue
+      Most importantly, since the dfferent versions of the CHSH inequality can be obtained simply by permuting labels, the PR boxes are effectively all equivalent up to relabelling. In this sense, we need only study one CHSH inequality and its corresponding PR box, since all other behaviours can be mapped into the corresponding part of \(\NSs\) by symmetry options. We would like to see if this nice symmetry holds in the QKD setting as well, which we would expect since the only facets aside from positivity facets are liftings of CHSH.
+
+      \begin{table}
+        \begin{minipage}{0.5\linewidth}
+          \begin{center}
+            \begin{tabular}{|r|cccccc|} \hline
+              \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
+              00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\
+              01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
+              10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
+              11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\ \hline
+            \end{tabular}
+            \[Q_{02} = 1, S = 4\]
+          \end{center}
+        \end{minipage}
+        \begin{minipage}{0.5\linewidth}
+          \begin{center}
+            \begin{tabular}{|r|cccccc|} \hline
+              \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
+              00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.5 \\
+              01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.0 \\
+              10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.0 \\
+              11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.5 \\ \hline
+            \end{tabular}
+            \[Q_{02} = 1, S = 4\]
+          \end{center}
+        \end{minipage}
+        \vspace{1em}
+
+        \begin{minipage}{0.5\linewidth}
+          \begin{center}
+            \begin{tabular}{|r|cccccc|} \hline
+              \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
+              00 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.5 \\
+              01 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.0 \\
+              10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
+              11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\ \hline
+            \end{tabular}
+            \[Q_{02} = 0.5, S = 4\]
+          \end{center}
+        \end{minipage}
+        \begin{minipage}{0.5\linewidth}
+          \begin{center}
+            \begin{tabular}{|r|cccccc|} \hline
+              \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
+              00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\
+              01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
+              10 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.0 \\
+              11 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.5 \\ \hline
+            \end{tabular}
+            \[Q_{02} = 0.5, S = 4\]
+          \end{center}
+        \end{minipage}
+        \vspace{1em}
+
+        \begin{minipage}{0.5\linewidth}
+          \begin{center}
+            \begin{tabular}{|r|cccccc|} \hline
+              \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
+              00 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.0 \\
+              01 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.5 \\
+              10 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.5 \\
+              11 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.0 \\ \hline
+            \end{tabular}
+            \[Q_{02} = 0, S = 4\]
+          \end{center}
+        \end{minipage}
+        \begin{minipage}{0.5\linewidth}
+          \begin{center}
+            \begin{tabular}{|r|cccccc|} \hline
+              \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
+              00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\
+              01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
+              10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
+              11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\ \hline
+            \end{tabular}
+            \[Q_{02} = 0, S = 4\]
+          \end{center}
+        \end{minipage}
+        \caption{\(p(ab|xy)\) for PR-box analogues in the QKD setting.}\label{tab:qkd_iso}
+      \end{table}
+
+      Indeed, we can identify an analogue for the PR box and an analogous structure for \(\NSs\) in the QKD setting. There are \(128 - 32 = 96\) extremal points of \(\NSs\) that are outside \(\Ls\). By checking if their isotropic lines intersect the facet corresponding to CHSH on \(x, y \in \{0,1\}\), we have found 6 extremal points violating it, as shown in \Cref{tab:qkd_iso}. Unlike the \((2,2,2,2)\) setting, we do not have one extremal point per CHSH facet, and the extremal points violate more than one facet. As can be seen from these behaviours, their distributions for \(x, y \in \{0,1\}\) are identical, and it is only the correlations when \(y = 2\) that distinguish the six PR analogues. However, this implies that there is information in these correlations that we are not using. In particular, other liftings of CHSH might be violated by a given behaviour. Could quantifying this improve our key rates?
+
+      We have merely scratched the surface thus far in our analysis of \(\NSs\) in the QKD setting. Fortunately, it seems to just be slightly more complicated than the well-studied \((2,2,2,2)\) setting. We summarise our hope for investigations in this direction as follows:
+      \begin{question}
+        What other insights can be obtained from studying the structure and symmetry of \(\NSs\)? Can all behaviours be mapped into a region where the only nonlocal contributions are from a PR-analogue box? Can we improve our key rates if we consider other CHSH violations, or other aspects of the correlation when \(y=2\)?
+      \end{question}
 
       \section{Local Wirings}\label{sec:locwir}
 
@@ -487,20 +572,25 @@
 
       While there has been a recent resurgence of interest in developing resource theories of nonlocality and other unusual quantum phenomena, much of the recent work is too abstract and general to be directly applied by us~\cite{Monotones, TypeIndepLOSR}, or focuses only on \emph{single-copy conversions} using \emph{local operations and shared randomness} (LOSR) as the set of free actions~\cite{BellResourceTheory, TraceDistNL, NLMeas}, instead of the multiple-copy conversions that wirings perform (with a notable exception discussed in \Cref{sec:nlmono_maxcorr}).
 
-      LOSR actions transforms \(p(ab|xy) \mapsto p(a'b'|x'y')\) using a conditional distribution \(\chi\):
+      LOSR actions transforms \(p(a_0 b_0|x_0 y_0) \mapsto p(ab|xy)\) using a conditional distribution \(\chi\):
       \begin{equation}
-        p(a'b'|x'y') = \sum_{abxy} \chi(a'b'xy|abx'y') p(ab|xy)
+        p(ab|xy) = \sum_{abxy} \chi(abx_0y_0|a_0b_0xy) p(a_0b_0|x_0y_0)
       \end{equation}
       that satisfies
       \begin{equation}
-        \chi(a'b'xy|abx'y') = \sum_{r_A r_B} \chi(a'xr_A|ax') \chi(b'yr_B|by') p_r(r_A r_B),
+        \chi(abx_0y_0|a_0b_0xy) = \sum_{r_A r_B} \chi(ax_0r_A|a_0x) \chi(by_0r_B|b_0y) p_r(r_A r_B),
       \end{equation}
-      where \(p_r\) is the distribution of the shared randomness \(r_A\) and \(r_B\). However, since our wirings combine multiple boxes, their effect cannot be expressed in this form. This automatically makes many of the specific results in LOSR resource theories of nonlocality inapplicable to our case, while significantly complicating the possible set of operations. Fortunately, there are also simplifying factors: since communication in our key distillation protocol must be public, there is no advantage to be gained from using public shared randomness, since it would be accessible to Eve as well and she can undo the effect of the shared randomness. If Alice and Bob have private, preshared randomness, this is already a shared key, and it would not make sense to use the shared randomness to enhance DIQKD instead of using it directly as a key. In any given round, at the very most, one bit can be produced, but if randomness is consumed, at least one bit must be used. Even if the one bit can increase the entropy of the round from zero bits to one bit, that would not be more helpful than using the one bit directly as a key.
+      where \(p_r\) is the distribution of the shared randomness \(r_A\) and \(r_B\). However, since our wirings combine multiple boxes, their effect cannot be expressed in this form. This automatically makes many of the specific results in LOSR resource theories of nonlocality inapplicable to our case, while significantly complicating the possible set of operations. 
 
-      Firstly
+      Fortunately, there are also simplifying factors: since communication in our key distillation protocol must be public, there is no advantage to be gained from using public shared randomness, since it would be accessible to Eve as well and she can undo the effect of the shared randomness. If Alice and Bob have private, preshared randomness, this is already a shared key, and it would not make sense to use the shared randomness to enhance DIQKD instead of using it directly as a key. In any given round, at the very most, one bit can be produced, but if randomness is consumed, at least one bit must be used. Even if the one bit can increase the entropy of the round from zero bits to one bit, that would not be more helpful than using the one bit directly as a key.
 
-      % TODO LOPC cannot use shared randomness for key distillation, since Eve
-      % can use the public randomness to reverse it
+      Additionally, Alice and Bob using private randomness to determine their wirings would not help. In the similar technique of \emph{noisy preprocessing}, Alice flips her bits based on her local randomness with a probability \(q\), which has been shown to improve key rates~\cite{AsymmetricCHSH}, essentially by decreasing \(H(A|E)\) more than it decreases \(H(A|B)\). Now, if Alice and Bob use a non-deterministic wiring, and the probability of them selecting wirings that give different results, averaged over all rounds, is \(w\), the resultant behaviour would be identical to the behaviour from noisy preprocessing with \(w = q\). However, in the noisy preprocessing analysis, the noise is \emph{trusted}, and not part of the black-box behaviour of the DIQKD device, where the noise could be the result of Eve tampering with the system. Therefore, there is no need to consider non-deterministic wirings at all, since a noisy preprocessing analysis would be able to do at least as well.
+
+      Therefore, for our purposes, we can focus on the set of deterministic wirings \(\sW\). This means that the set of free actions we are interested in is no longer a continuous convex set, but a \emph{discrete} set of transformations, characterised by conditional distributions \(\chi\) satisfying
+      \begin{equation}\label{eq:wiringdef}
+        \chi(ab\cvec{x}\cvec{y}|\cvec{a}\cvec{b}xy) = \chi(a\cvec{x}|\cvec{a}x) \chi(b\cvec{y}|\cvec{b}y), \chi \in \{0,1\}\; \forall a,\cvec{x},\cvec{a},x,b,\cvec{y},\cvec{b},y
+      \end{equation}
+      where \(\cvec{a}\) is the vector of all the outputs from Alice's boxes that are wired together, analogously for \(\cvec{b}\), \(\cvec{x}\) and \(\cvec{y}\), and the condition that \(\chi \in \{0,1\}\) enforces that the wirings are deterministic. In fact, we can restrict the possible wirings even further with causality constraints.
 
       \subsection{Classifying Wirings}
 
@@ -538,9 +628,9 @@
 
       Let us see why this is the case. The classification of Short et al.\ attempts to find a parametrisation of \emph{couplers}, which are a specific type of transformation which ``collapses'' multiple boxes of one party, replacing their inputs and outputs with a single output, whose probability distribution depends on the behaviours of the individual boxes that are collapsed. Importantly, this \emph{does not} replace the collapsed boxes with a larger box with one input and one output, which is what we are attempting to do through wirings, but rather simply generates one output. Although couplers can be characterised by a vector of parameters, and the possible vectors form a polytope that has these specific wirings as its extremal points, this is not the type of operation we are looking for.
 
-      Nonetheless, finding an analogous linear structure for the space of possible wirings might be helpful. However, there are serious difficulties with this idea. The strength of this linear characterisation of the possible couplers was that any coupler inside the polytope could be expressed as a convex combination of the extremal points, that is, a probabilistic mixture of the deterministic wirings corresponding to those points. Therefore, it is possible to continuously transform the resultant behaviour from that produced by one coupler to another.
+      % TODO reorganise
 
-      Since the wirings are done locally by Alice and Bob, the choice of wiring in each round will be determined by local randomness. In the similar technique of \emph{noisy preprocessing}, Alice flips her bits based on her local randomness with a probability \(q\), which has been shown to improve key rates~\cite{AsymmetricCHSH}. Now, if Alice and Bob use a non-deterministic wiring, and the probability of them selecting wirings that give different results, averaged over all rounds, is \(w\), the resultant behaviour would be identical to the behaviour from noisy preprocessing with \(w = q\). Therefore, there is no need to model non-deterministic wirings, since the same effect can be achieved by the established technique of noisy preprocessing.
+      Nonetheless, finding an analogous linear structure for the space of possible wirings might be helpful. However, there are serious difficulties with this idea. The strength of this linear characterisation of the possible couplers was that any coupler inside the polytope could be expressed as a convex combination of the extremal points, that is, a probabilistic mixture of the deterministic wirings corresponding to those points. Therefore, it is possible to continuously transform the resultant behaviour from that produced by one coupler to another.
 
       Identifying the extremal points of such a polytope, if it even exists, would also not be helpful, since there is no \emph{a priori} reason why the extremal points should produce the behaviour with the highest key rate. As neither the linear structure of the polytope or its extremal points would be helpful for us, we will not pursue this line of investigation.
 
