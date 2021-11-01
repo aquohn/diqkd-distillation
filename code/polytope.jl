@@ -30,7 +30,7 @@ function full_polytope(iA, oA, iB, oB, ::Type{T} = Float64) where T <: Real
                      [sum(pabxy[:, :, x, y] |> collect) <= 1 for x in 1:iA for y in 1:iB])
 
   allconstrs = vcat(atob_nsconstr, btoa_nsconstr, unormconstr, lnormconstr)
-  return HPolytope(allconstrs, allvars) |> remove_redundant_constraints
+  return HPolytope(allconstrs, allvars, N=T) |> remove_redundant_constraints
 end
 
 function cg_polytope(iA, oA, iB, oB, ::Type{T} = Float64) where T <: Real
@@ -40,23 +40,23 @@ function cg_polytope(iA, oA, iB, oB, ::Type{T} = Float64) where T <: Real
   atob_nsconstr = [sum(pabxy[:, b, x, y] |> collect) <= pby[b, y] for b in 1:oB-1 for x in 1:iA for y in 1:iB]
   btoa_nsconstr = [sum(pabxy[a, :, x, y] |> collect) <= pax[a, x] for a in 1:oA-1 for x in 1:iA for y in 1:iB]
 
-  lnormconstr = vcat([0 <= v for v in allvars],
-                     [0 <= 1 - sum(pax[:, x] |> collect) - sum(pby[:, y] |> collect) + sum(pabxy[:, :, x, y] |> collect) for x in 1:iA for y in 1:iB]) 
-  unormconstr = vcat([sum(pax[:, x] |> collect) <= 1 for x in 1:iA],
-                     [sum(pby[:, y] |> collect) <= 1 for y in 1:iB],
-                     [sum(pabxy[:, :, x, y] |> collect) <= 1 for x in 1:iA for y in 1:iB])
+  lnormconstr = vcat([T(0) <= v for v in allvars],
+                     [T(0) <= T(1) - sum(pax[:, x] |> collect) - sum(pby[:, y] |> collect) + sum(pabxy[:, :, x, y] |> collect) for x in 1:iA for y in 1:iB]) 
+  unormconstr = vcat([sum(pax[:, x] |> collect) <= T(1) for x in 1:iA],
+                     [sum(pby[:, y] |> collect) <= T(1) for y in 1:iB],
+                     [sum(pabxy[:, :, x, y] |> collect) <= T(1) for x in 1:iA for y in 1:iB])
 
   allconstrs = vcat(atob_nsconstr, btoa_nsconstr, unormconstr, lnormconstr)
-  return HPolytope(allconstrs, allvars) |> remove_redundant_constraints
+  return HPolytope(allconstrs, allvars, N=T) |> remove_redundant_constraints
 end
 
 # TODO inefficient but simple
 function ld_polytope(iA, oA, iB, oB, ::Type{T} = Float64) where T <: Real
   ld_pts = Vector{Vector{T}}()
   for params in Iterators.product((1:oA for x in 1:iA)..., (1:oB for y in 1:iB)...)
-    pabxy = zeros(oA, oB, iA, iB)
-    pax = zeros(oA, iA)
-    pby = zeros(oB, iB)
+    pabxy = zeros(T, oA, oB, iA, iB)
+    pax = zeros(T, oA, iA)
+    pby = zeros(T, oB, iB)
 
     @sliceup(params, as, iA, bs, iB)
     for x in eachindex(as)
@@ -409,78 +409,19 @@ const qkd_ldconstr = constraints_list(qkd_ldpoly)
 -0.200 P(a = 1|x = 1) -0.200 P(b = 1|y = 1) +0.200 P(1,1|1,1) +0.200 P(1,1|1,2) +0.200 P(1,1|2,1) -0.200 P(1,1|2,2) <= 0.000
 [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0, 0.0, 0.0]
 Q = 1.000, S = 4.000, rho = 1.000
-----------------------------------------
-1, 1     | 0.5| 0.5| 0.0| 0.5| 0.0| 0.0|
-----------------------------------------
-1, 2     | 0.0| 0.0| 0.5| 0.0| 0.5| 0.5|
-----------------------------------------
-2, 1     | 0.0| 0.0| 0.5| 0.0| 0.5| 0.5|
-----------------------------------------
-2, 2     | 0.5| 0.5| 0.0| 0.5| 0.0| 0.0|
-----------------------------------------
-
 [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0, 0.0, 0.5]
 Q = 1.000, S = 4.000, rho = 1.000
 a, b/x, y|1, 1|1, 2|1, 3|2, 1|2, 2|2, 3|
-----------------------------------------
-1, 1     | 0.5| 0.5| 0.0| 0.5| 0.0| 0.5|
-----------------------------------------
-1, 2     | 0.0| 0.0| 0.5| 0.0| 0.5| 0.0|
-----------------------------------------
-2, 1     | 0.0| 0.0| 0.5| 0.0| 0.5| 0.0|
-----------------------------------------
-2, 2     | 0.5| 0.5| 0.0| 0.5| 0.0| 0.5|
-----------------------------------------
-
 [0.5, 0.5, 0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 0.0, 0.5, 0.5]
 Q = 0.500, S = 4.000, rho = 1.000
 a, b/x, y|1, 1|1, 2|1, 3|2, 1|2, 2|2, 3|
-----------------------------------------
-1, 1     | 0.5| 0.5| 0.5| 0.5| 0.0| 0.5|
-----------------------------------------
-1, 2     | 0.0| 0.0| 0.0| 0.0| 0.5| 0.0|
-----------------------------------------
-2, 1     | 0.0| 0.0| 0.5| 0.0| 0.5| 0.5|
-----------------------------------------
-2, 2     | 0.5| 0.5| 0.0| 0.5| 0.0| 0.0|
-----------------------------------------
-
 [0.5, 0.5, 0.5, 0.5, 0.0, 0.5, 0.5, 0.5, 0.0, 0.0, 0.0]
 Q = 0.500, S = 4.000, rho = 1.000
 a, b/x, y|1, 1|1, 2|1, 3|2, 1|2, 2|2, 3|
-----------------------------------------
-1, 1     | 0.5| 0.5| 0.0| 0.5| 0.0| 0.0|
-----------------------------------------
-1, 2     | 0.0| 0.0| 0.5| 0.0| 0.5| 0.5|
-----------------------------------------
-2, 1     | 0.0| 0.0| 0.0| 0.0| 0.5| 0.0|
-----------------------------------------
-2, 2     | 0.5| 0.5| 0.5| 0.5| 0.0| 0.5|
-----------------------------------------
-
 [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0, 0.5, 0.0]
 Q = 0.000, S = 4.000, rho = 1.000
 a, b/x, y|1, 1|1, 2|1, 3|2, 1|2, 2|2, 3|
-----------------------------------------
-1, 1     | 0.5| 0.5| 0.5| 0.5| 0.0| 0.0|
-----------------------------------------
-1, 2     | 0.0| 0.0| 0.0| 0.0| 0.5| 0.5|
-----------------------------------------
-2, 1     | 0.0| 0.0| 0.0| 0.0| 0.5| 0.5|
-----------------------------------------
-2, 2     | 0.5| 0.5| 0.5| 0.5| 0.0| 0.0|
-----------------------------------------
-
 [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0, 0.5, 0.5]
 Q = 0.000, S = 4.000, rho = 1.000
 a, b/x, y|1, 1|1, 2|1, 3|2, 1|2, 2|2, 3|
-----------------------------------------
-1, 1     | 0.5| 0.5| 0.5| 0.5| 0.0| 0.5|
-----------------------------------------
-1, 2     | 0.0| 0.0| 0.0| 0.0| 0.5| 0.0|
-----------------------------------------
-2, 1     | 0.0| 0.0| 0.0| 0.0| 0.5| 0.0|
-----------------------------------------
-2, 2     | 0.5| 0.5| 0.5| 0.5| 0.0| 0.5|
-----------------------------------------
 =#
