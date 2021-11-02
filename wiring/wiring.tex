@@ -66,8 +66,9 @@
 \newtheorem{defn}[stmt]{Definition}
 \theoremstyle{plain}
 \newtheorem{question}{Question}
-\newtheorem{thm}[stmt]{Theorem}
-\newtheorem{lem}[stmt]{Lemma}
+\newtheorem{funqn}{Fundamental Question}
+\newtheorem{theorem}[stmt]{Theorem}
+\newtheorem{lemma}[stmt]{Lemma}
 
 % Custom lengths
 \addtolength{\jot}{0.5em} % gives spacing between align* rows
@@ -247,6 +248,11 @@
   \newcommand{\cE}{\mathcal{E}}
   \newcommand{\cF}{\mathcal{F}}
 
+  \newcommand{\rA}{\mathrm{A}}
+  \newcommand{\rB}{\mathrm{B}}
+  \newcommand{\rX}{\mathrm{X}}
+  \newcommand{\rY}{\mathrm{Y}}
+
   \newcommand{\meas}{\rm meas}
   \newcommand{\perm}{\rm perm}
   \newcommand{\pe}{\rm pe}
@@ -258,6 +264,8 @@
   \newcommand{\rob}{\rm rob}
   \newcommand{\cor}{\rm cor}
   \newcommand{\secur}{\rm sec}
+  \newcommand{\sk}{\rm sk}
+  \newcommand{\DW}{\rm DW}
   \newcommand{\erob}[1]{\epsilon_{\rob}^{(#1)}}
 
   \newcommand{\HC}{\mathrm{HC}}
@@ -284,6 +292,8 @@
   \subsection{Objectives}
 
   Our ideal outcome from this project is to find an efficient algorithm that, given a behaviour, can specify the wiring that produces the behaviour with the largest possible key rate. A trivial, inefficient algorithm would be to simply compute all possible wirings by brute force, although this will necessarily restrict our search to a limited subset of the possible wirings, since we can wire together arbitrarily many boxes. If no such algorithm exists, we would want to understand why. Is it that wiring multiple boxes together cannot give an advantage over post-processing a single box? Is the structure of achievable boxes simply too complex to navigate efficiently?
+
+  While this definition is still rather vague, we will specify the fundamental questions that our research must confront, as well as more specific questions that pertain to particular approaches, as we define and develop the relevant concepts throughout this report.
 
   While this task is daunting, we hope that, even if we fall far short of this ideal outcome, this project can contribute to a better understanding of the mysterious phenomenon of nonlocality, and to the work of harnessing it for human benefit.
 
@@ -359,52 +369,84 @@
 
     These behaviours, therefore, are the ones which fall within \(\Ls\). If, for a given \(e = e'\), \(p_{e'}(ab|xy)\) is random even for Eve, then she cannot know the outputs \((a,b)\) with certainty when \(e=e'\). Since quantum phenomena are capable of producing truly random outputs, such that it is impossible even in principle to predict those outcomes, they must be the source for such true randomness if we wish to pessimistically grant Eve full control of the environment outside of Alice and Bob's detectors and information-processing devices. Note that, while Eve cannot have full control over the measurement devices, they can be arbitrarily flawed---nonlocal statistics will be detected \emph{only if} they are generated from a quantum measurement that extracts randomness, so nonlocal statistics are sufficient to guarantee secrecy. This is why it is called \emph{device-independent}: the devices can be almost arbitrarily faulty, and the reported statistics will reveal a fault if it exists.
 
-    In order to quantify the amount of shared secrecy that can be extracted from this certified randomness, given a specific behaviour, we must define and mathematically model a DIQKD protocol. At the most general level, a DIQKD protocol \(\mathfrak{P}\) can be defined as finite sequence of \emph{local operations and public communication} operations (LOPC) that distills a key of length \(\ell\) from the data from \(n\) rounds of Bell tests~\cite{DIQKD_Limits}. Let \(A^n\), \(B^n\) and \(E^n\) be the systems of Alice, Bob, and Eve respectively after executing \(n\) rounds of Bell tests, and let their joint state be \(\rho_{A^n B^n E^n}\). Then, protoocol \(\mathfrak{P}\) maps \(\rho_{A^n B^n E^n} \mapsto \omega_{K_A K_B E^n U}\), where \(K_A\) and \(K_B\) are Alice and Bob's keys, respectively, while \(U\) is the public data that is communicated during the protocol. Alice and Bob's key is \(\epsilon\)-\emph{secure} if \(\omega_{K_A K_B E^n U}\) satisfies~\cite{SecurityQKD}
+    In order to quantify the amount of shared secrecy that can be extracted from this certified randomness, given a specific behaviour, we must define and mathematically model a DIQKD protocol. At the most general level, a DIQKD protocol can be defined as finite sequence of \emph{local operations and public communication} operations (LOPC) that distills a key of length \(\ell\) from the data from \(n\) rounds of Bell tests~\cite{DIQKD_Limits}.
+
+    Let \(A^n\), \(B^n\) and \(E^n\) be the systems of Alice, Bob, and Eve respectively after executing \(n\) rounds of Bell tests, and let their joint \emph{ccq} (classical-classical-quantum) state be \(\rho_{A^n B^n E^n}\), so called because \(A^n\) and \(B^n\) store classical Bell test data, while Eve's system is quantum.
+
+    A DIQKD protocol \(\mathfrak{P}_{\omega}\) maps \(\rho_{A^n B^n E^n} \mapsto \omega_{K_A K_B E^n D}\), where \(K_A\) and \(K_B\) are Alice and Bob's keys, respectively, while \(D\) is the public data that is communicated during the protocol. Alice and Bob's key is \(\epsilon\)-\emph{secure} if \(\omega_{K_A K_B E^n D}\) satisfies~\cite{SecurityQKD}
     \begin{equation}
-      (1-\erob{n})D(\omega_{K_A K_B E^n U}, \tau_{K_A K_B}^{\ell}\otimes\omega_{E^n U}) \leq \epsilon,
+      (1-\erob{n})\Delta_{\Tr}(\omega_{K_A K_B E^n D}, \tau_{K_A K_B}^{\ell} \otimes \rho_{E^n} \otimes \omega_D) \leq \epsilon,
     \end{equation}
-    where \(\erob{n}\) is the probability of the protocol aborting without interference from Eve, and \(D(\rho,\sigma)\) is the \emph{trace distance}
+    where \(\erob{n}\) is the probability of the protocol aborting without interference from Eve, \(\Delta_{\Tr}(\rho,\sigma)\) is the \emph{trace distance}
     \begin{equation}
-      D(\rho, \sigma) = \frac{1}{2}\norm{\rho - \sigma}_1,
+      \Delta_{\Tr}(\rho, \sigma) = \frac{1}{2}\norm{\rho - \sigma}_1,
     \end{equation}
     which generalises the classical total variational distance
-    \[ D(p(x),q(x)) = \frac{1}{2} \sum_{x} \abs{p(x)-q(x)}, \]
-    the \emph{ideal key}
+    \[ \Delta_{\Tr}(p(x),q(x)) = \frac{1}{2} \sum_{x} \abs{p(x)-q(x)}. \]
+    The states in the equation are the \emph{ideal key}
     \begin{equation}
       \tau_{K_A K_B}^{\ell} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{K_A} \otimes \ket{j}\bra{j}_{K_B},
     \end{equation}
-    a uniformly distributed mixture amongst all possible keys of length \(\ell\), and Eve's marginal state \(\omega_{E^n} = \Tr_{K_A K_B}\left[ \omega_{K_A K_B E^n U} \right]\). The trace distance is written in terms of the \emph{trace norm}
+    a uniformly distributed mixture amongst all possible keys of length \(\ell\), Eve's marginal state
+    \begin{equation}
+      \rho_{E^n} = \Tr_{A^n B^n}\left[ \rho_{A^n B^n E^n} \right],
+    \end{equation}
+    and the publicly exchanged data
+    \begin{equation}
+      \omega_D = \Tr_{K_A K_B E^n}\left[ \omega_{K_A K_B E^n D} \right],
+    \end{equation} 
+    which is to say that Alice and Bob's keys should ideally be uniformly distributed and independent of Eve's quantum side information and the publicly exchanged data. Eve's marginal state is left unchanged because the protocol is executed only by Alice and Bob. The trace distance is written in terms of the \emph{trace norm}
     \begin{equation}
       \norm{\rho}_1 = \Tr\left[ \sqrt{\rho^{\dagger}\rho} \right] = \Tr\abs{\rho}.
     \end{equation}
     This definition of security is \emph{universally composable} (UC), which is crucial for applications---if two resources are \(\epsilon_1\) and \(\epsilon_2\) secure under a UC definition, then a protocol that uses only these two resources is \(\epsilon\)-secure under the same definition, with \(\epsilon \leq \epsilon_1 + \epsilon_2\).
 
-    The asymptotic rate \(r\) of the protocol \(\mathfrak{P}\) is~\cite{CQKeyDistill}
+    The asymptotic rate \(r\) of the protocol \(\mathfrak{P}_{\omega}\) is~\cite{CQKeyDistill}
     \begin{equation}
-      r = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\erob{n}) \frac{\ell_n}{n},
+      r(\mathfrak{P}_{\omega}, \rho) = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\erob{n}) \frac{\ell_n}{n},
     \end{equation}
     where the supremum is over all sequences \(\{\ell_n\}\) such that
-    \[ \lim_{n\to\infty} (1-\erob{n})D(\omega_{K_A K_B E^n U}, \tau_{K_A K_B}^{\ell}\otimes\omega_{E^n U}) = 0. \]
-    In the limit of asymptotically many rounds, we can consider each round to be independent and identically distributed (i.i.d.)~\cite{DI_Proofs}. I.i.d.\ attacks where Eve stores quantum information are referred to as \emph{collective attacks} in the literature, as opposed to \emph{individual attacks}, like the one characterised in \Cref{eqn:finethm}, where Eve's information is purely classical. We need the machinery of quantum theory to prove that Eve storing quantum information does not compromise the security of the generated key.
+    \[ \lim_{n\to\infty} (1-\erob{n})\Delta_{\Tr}(\omega_{K_A K_B E^n D}, \tau_{K_A K_B}^{\ell_n} \otimes \rho_{E^n} \otimes \omega_{D}) = 0. \]
+
+    In the limit of asymptotically many rounds, we can consider each round to be independent and identically distributed (i.i.d.). I.i.d.\ attacks where Eve stores quantum information are referred to as \emph{collective attacks} in the literature, as opposed to \emph{individual attacks}, like the one characterised in \Cref{eqn:finethm}, where Eve's information is purely classical. We need the machinery of quantum theory to prove that Eve storing quantum information does not compromise the security of the generated key. Remarkably, however, security against collective attacks can be extended to general, non-i.i.d.\ attacks, and in finite-key settings the decrease in the key rate from the collective case is \(O(1/\sqrt{n})\)~\cite{DI_Proofs, DIQKD_PracticalEAT}.
 
     Therefore, we can write Alice, Bob and Eve's state before distillation as
     \[ \rho_{A^n B^n E^n} = \rho_{ABE}^{\otimes n}, \]
-    where the systems \(A\), \(B\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. Intuitively, the amount of information that Alice has which is secret to Eve is \({H(A|E)}_{\rho}\), where \(H\) is the von Neumann entropy, \({H(A)}_{\rho} = -\Tr\left[\rho_{A}\log\rho_{A}\right]\), which reduces to the Shannon entropy for a classical system. On the other hand, \(B\) may not be perfectly correlated with \(A\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve is upper bounded by \({H(A|B)}_{\rho}\). This gives us the \emph{Devetak-Winter key rate}~\cite{DevetakWinter}
+    where the systems \(A\), \(B\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. This data is derived from measurements on a \emph{qqq} state \(\rho_{Q_A Q_B E}\). The measurements on \(Q_A\) and \(Q_B\) are characterised by the POVMs  \({\{M_{a|x}\}}_{a}\) and \({\{N_{b|y}\}}_{b}\) respectively, \({\{M_{a|x}\}}_{a}\) corresponding to output \(a\) and \({\{N_{b|y}\}}_{b}\) corresponding to output \(b\). The behaviour is then given by
+    \begin{equation}\label{eqn:probmeas}
+      p(ab|xy) = \Tr\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right],
+    \end{equation}
+    where the tensor product structure represents the fact that there is no signalling between Alice, Bob and Eve at the point of measurement.
+
+    We are interested in what we will call the \emph{secret key capacity} \(C_{\sk}\) of a given behaviour. That is, we want to find 
+    \begin{equation}\label{eqn:seckeycap}
+      C_{\sk}(p) = \sup_{\mathfrak{P}_{\omega}} \inf_{ \substack{
+          \rho_{Q_A Q_B E}, \\
+          {\{M_{a|x}\}}_x, {\{N_{b|y}\}}_y
+        }
+      } r(\mathfrak{P}_{\omega}, \rho_{ABE}),
+    \end{equation}
+    where \(\rho_{Q_A Q_B E}\), \({\{M_{a|x}\}}_x\), and \({\{N_{b|y}\}}_y\) satisfy \Cref{eqn:probmeas}, and we minimise over these parameters in order to give as much of an advantage as possible to Eve, since we cannot rule anything else out based on the behaviour. Computing the secret key capacity is the fundamental question that DIQKD research is trying to answer:
+    \begin{funqn}\label{fqn:cap}
+      Can we design an algorithm to compute the secret key capacity of an arbitrary behaviour?
+    \end{funqn}
+
+    While we do not have such an algorithm in general, we do have techniques for finding upper and lower bounds. One such lower bound is the the \emph{Devetak-Winter key rate}~\cite{DevetakWinter} \(r_{\DW}\). Intuitively, the amount of information that Alice has in each round which is secret to Eve is \({H(A|E)}_{\rho}\), where \(H\) is the von Neumann entropy, \({H(A)}_{\rho} = -\Tr\left[\rho_{A}\log\rho_{A}\right]\), which reduces to the Shannon entropy for a classical system. On the other hand, \(B\) may not be perfectly correlated with \(A\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve during reconciliation is upper bounded by \({H(A|B)}_{\rho}\). This gives us
     \begin{equation}
-      r \geq r_{DW} = {H(A|E)}_{\rho} - {H(A|B)}_{\rho}.
+      r_{\DW}(p) \coloneqq {H(A|E)}_{\rho} - {H(A|B)}_{\rho} \leq C_{\sk}(p).
     \end{equation}
 
-    Much of the effort in bounding the DIQKD key rate has focused on this definition, because two-way information reconciliation is much more poorly understood (although it can give an advantage in certain scenarios, see~\cite{AdvantageDistill}) and this is the figure of merit we will work with.  While \({H(A|B)}_{\rho}\) can be computed directly as the QBER, upper and lower bounds for \({H(A|E)}_{\rho}\) are much harder to find.
+    Much of the effort in bounding \(C_{\sk}\) has focused on this definition, because two-way information reconciliation is much more poorly understood (although it can provide an advantage, see~\cite{AdvantageDistill}) and this is the figure of merit we will work with.  While \({H(A|B)}_{\rho}\) can be computed directly as the QBER, upper and lower bounds for \({H(A|E)}_{\rho}\) are much harder to find.
 
-    We will now consider what we refer to as the \emph{standard protocol} in~\cite{DIQKD_Lower}, which is the first DIQKD protocol proven to be secure against attackers who can store quantum information. This takes place in the \((2,2,3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}, and it uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key, while bounding Eve's information with a CHSH value. Therefore, we have \({H(A|B)}_{\rho} = Q_{02} = Q\), and it was proved that
+    We will now consider what we refer to as the \emph{standard protocol}, proposed and proved secure in~\cite{DIQKD_Lower}. It was based on the first DIQKD protocol, E91~\cite{E91}, and is the first DIQKD protocol proven to be secure against collective attacks. This takes place in the \((2,2,3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}. The protocol uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key, while bounding Eve's information with the CHSH value for \(x,y \in \{0,1\}\) after symmetrising the marginals \(\angleb{A_x}\) and \(\angleb{B_y}\) for those values of \(x\) and \(y\). This was done by randomly choosing to flip the outcomes of half of the rounds, and publicly communicating this choice. Therefore, we have \({H(A|B)}_{\rho} = Q_{02} = Q\), and it was proved that
     \begin{equation}
       {H(A|E)}_{\rho} \geq {H_S(A|E)}_{\rho} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
     \end{equation}
     where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, and where \(S\) is calculated from \(x,y \in \{0,1\}\). Therefore,
     \begin{equation}
-      r_{DW} \geq r_{S} = \max \left\{ 0, 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right) \right\},
+      r_{\DW} \geq r_{S} = \max \left\{ 0, 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right) \right\},
     \end{equation}
-    where we refer to \(r_S\) as the \emph{CHSH key rate}. Being the rate for an explicit, achievable protocol, this is a lower bound for the total secrecy extractable. However, because the proof of the bound involves explicitly constructing the states and measurements that gives the greatest advantage to Eve while still producing the observed value of \(S\), it is also an upper bound for key rates based only on \(S\), since any observed \(S\) could have been produced by those states.
+    where we refer to \(r_S\) as the \emph{CHSH key rate}. Being the rate for an explicit, achievable protocol, this is a lower bound for the total secrecy extractable. However, because the proof of the bound involves explicitly constructing the states and measurements that gives the greatest advantage to Eve while still producing the observed value of \(S\), it is also an upper bound for any method for computing key rates based only on \(S\), since any observed \(S\) could have been produced by those states.
 
     \section{Preliminary Results}\label{sec:preres}
 
@@ -440,16 +482,22 @@
       For \(N\) boxes, the correlators and marginals become
       \begin{gather}
         \angleb{A_x B_y}_{N} = 1 - \frac{{(1-\angleb{B_y})}^N + {(1-\angleb{A_x})}^N}{2^{N-1}} + \frac{1}{4^{N-1}} {(1-\angleb{A_x} - \angleb{B_y} + \angleb{A_x B_y})}^{N} \\
-        \angleb{A_x}_{N} = 1 - 2 {\left(\frac{1-\angleb{A_x}}{2}\right)}^N \qquad \angleb{B_y}_{N} = 1 - 2 {\left(\frac{1-\angleb{B_y}}{2}\right)}^N.
+        \angleb{A_x}_{N} = 1 - 2 {\left(\frac{1-\angleb{A_x}}{2}\right)}^N \qquad \angleb{B_y}_{N} = 1 - 2 {\left(\frac{1-\angleb{B_y}}{2}\right)}^N,
       \end{gather}
-
-      Using the CHSH key rate, we are able to find \emph{revival} in certain parameter regimes: behaviours with \(r_S = 0\), but which have \(r_S > 0\) after wiring. In \Cref{fig:exptplt}, the N-AND wiring is able to achieve \(r_S > 0\) in parameter regimes where \(r_S = 0\) before wiring. Our objective, then, is to understand and generalise this phenomenon.
+      and we denote the resultant behaviour as \(p_N\).
 
       \begin{figure}
         \centering
         \includegraphics[width=\linewidth]{exptplt.pdf}
         \caption{\label{fig:exptplt} Minimum \(\eta\) required for \(r_S > 0\), given \(n_c\).}
       \end{figure}
+
+      Using the CHSH key rate, we are able to find \emph{revival} in certain parameter regimes: behaviours with \(r_S(p) = 0\), but which have \(r_S(p_N) > 0\), as shown in \Cref{fig:exptplt}. However, since wiring no longer treats the individual rounds as i.i.d., it should not be used as part of a protocol for the purpose of computing \(C_{\sk}\). Therefore, it is possible that \(C_{\sk}(p_N) > C_{\sk}(p)\). However, it might just be that \(r_S(p) < C_{\sk}(p)\), and that the wiring does not improve the secret key capacity. We can now state one of the aims of our research more precisely:
+      \begin{funqn}\label{fqn:wircap}
+        Can wiring increase the secret key capacity of a behaviour?
+      \end{funqn}
+
+      From a theoretical standpoint, answering this question would develop our currently limited understanding of the nature of the secret key capacity, and practically, the use of such wirings would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system. ``Super-activation'' of nonlocality is known to exist for joint quantum operations (e.g.\ two quantum states that do not exhibit nonlocality individually can jointly exhibit it), so there is some hope that similar behaviour might be observed here.
 
       \section{The Quantum Key Distribution Setting}\label{sec:qkdset}
 
@@ -468,10 +516,6 @@
       Using the \verb`LazySets.jl` package for the Julia programming language, we specified the deterministic behaviours as vertices of \(\Ls\), since all other local behaviours can be specified as probabilistic mixtures, that is, convex combinations, of the deterministic behaviours. For each \(x \in \dintv{1}{i_A}\), we have \(i_A\) choices for the output \(a\) to assign, with the analogous scenario for Bob. Therefore, there are \(i_A^{o_A}i_B^{o_B} = 32\) vertices. The GLPK solver was then used to identify the facets and their corresponding inequalities, and yielding 48 facets for our polytope. Therefore, all facets in the QKD setting are either liftings of CHSH or positivity facets, which is expected, since the next unique Bell inequality is \(I_{3322}\), in the \((3,2,3,2)\) setting.
 
       To generate \(\NSs\), we provided the aforementioned positivity, normalisation, and no-signalling constraints, which are also solved using GLPK to eliminate redundant constraints, and to find the vertices of the polytope. This yields 24 constraints (namely, the positivity constraints in the CG representation) and 128 vertices.
-
-      In the \((2,2,2,2)\) setting, each of the 8 CHSH facets contains 8 deterministic points with \(S = 2\), and is violated to the algebraic maximum of \(S = 4\) by a \emph{Popescu–Rohrlich} (PR) box, whose outputs are always anti-correlated for one pair of inputs and always correlated otherwise. This behaviour is not within \(\Qs\), and so is not physically realisable as far as we know, but it still plays a crucial role in understanding nonlocality, and the geometry of \(\NSs\). For example, being the only extremal point of \(\NSs\) to have \(S > 2\), all behaviours that violate the corresponding CHSH inequality can be decomposed as a mixture of the PR box and a local box on the CHSH facet~\cite{GeomDecomp}. The line between the \emph{maximally mixed behaviour} \(p_{\varnothing}\), which has all correlators and marginals 0 and \(p_{\varnothing}(ab|xy) = 1/o_A o_B \forall a,b,x,y\), and a PR box is called the \emph{isotropic line}, and behaviours on the line are convex combinations of the two. Notably, the quantum maximum of \(S = 2\sqrt{2}\) is achieved by a behaviour that is on this line.
-
-      Most importantly, since the dfferent versions of the CHSH inequality can be obtained simply by permuting labels, the PR boxes are effectively all equivalent up to relabelling. In this sense, we need only study one CHSH inequality and its corresponding PR box, since all other behaviours can be mapped into the corresponding part of \(\NSs\) by symmetry options. We would like to see if this nice symmetry holds in the QKD setting as well, which we would expect since the only facets aside from positivity facets are liftings of CHSH.
 
       \begin{table}
         \begin{minipage}{0.5\linewidth}
@@ -553,6 +597,11 @@
         \caption{\(p(ab|xy)\) for PR-box analogues in the QKD setting.}\label{tab:qkd_iso}
       \end{table}
 
+
+      In the \((2,2,2,2)\) setting, each of the 8 CHSH facets contains 8 deterministic points with \(S = 2\), and is violated to the algebraic maximum of \(S = 4\) by a \emph{Popescu–Rohrlich} (PR) box, whose outputs are always anti-correlated for one pair of inputs and always correlated otherwise. This behaviour is not within \(\Qs\), and so is not physically realisable as far as we know, but it still plays a crucial role in understanding nonlocality, and the geometry of \(\NSs\). For example, being the only extremal point of \(\NSs\) to have \(S > 2\), all behaviours that violate the corresponding CHSH inequality can be decomposed as a mixture of the PR box and a local box on the CHSH facet~\cite{GeomDecomp}. The line between the \emph{maximally mixed behaviour} \(p_{\varnothing}\), which has all correlators and marginals 0 and \(p_{\varnothing}(ab|xy) = 1/o_A o_B\; \forall a,b,x,y\), and a PR box is called the \emph{isotropic line}, and behaviours on the line are convex combinations of the two. Notably, the quantum maximum of \(S = 2\sqrt{2}\) is achieved by a behaviour that is on this line.
+
+      Most importantly, since the dfferent versions of the CHSH inequality can be obtained simply by permuting labels, the PR boxes are effectively all equivalent up to relabelling. In this sense, we need only study one CHSH inequality and its corresponding PR box, since all other behaviours can be mapped into the corresponding part of \(\NSs\) by symmetry options. We would like to see if this nice symmetry holds in the QKD setting as well, which we would expect since the only facets aside from positivity facets are liftings of CHSH.
+
       Indeed, we can identify an analogue for the PR box and an analogous structure for \(\NSs\) in the QKD setting. There are \(128 - 32 = 96\) extremal points of \(\NSs\) that are outside \(\Ls\). By checking if their isotropic lines intersect the facet corresponding to CHSH on \(x, y \in \{0,1\}\), we have found 6 extremal points violating it, as shown in \Cref{tab:qkd_iso}. Unlike the \((2,2,2,2)\) setting, we do not have one extremal point per CHSH facet, and the extremal points violate more than one facet. As can be seen from these behaviours, their distributions for \(x, y \in \{0,1\}\) are identical, and it is only the correlations when \(y = 2\) that distinguish the six PR analogues. However, this implies that there is information in these correlations that we are not using. In particular, other liftings of CHSH might be violated by a given behaviour. Could quantifying this improve our key rates?
 
       We have merely scratched the surface thus far in our analysis of \(\NSs\) in the QKD setting. Fortunately, it seems to just be slightly more complicated than the well-studied \((2,2,2,2)\) setting. We summarise our hope for investigations in this direction as follows:
@@ -578,30 +627,33 @@
       \end{equation}
       that satisfies
       \begin{equation}
-        \chi(abx_0y_0|a_0b_0xy) = \sum_{r_A r_B} \chi(ax_0r_A|a_0x) \chi(by_0r_B|b_0y) p_r(r_A r_B),
+        \chi(abx_0y_0|a_0b_0xy) = \sum_{r_A r_B} \chi_A(ax_0r_A|a_0x) \chi_B(by_0r_B|b_0y) p_r(r_A r_B),
       \end{equation}
-      where \(p_r\) is the distribution of the shared randomness \(r_A\) and \(r_B\). However, since our wirings combine multiple boxes, their effect cannot be expressed in this form. This automatically makes many of the specific results in LOSR resource theories of nonlocality inapplicable to our case, while significantly complicating the possible set of operations. 
+      where \(p_r\) is the distribution of the shared randomness \(r_A\) and \(r_B\). However, since our wirings combine multiple boxes, their effect cannot be expressed in this form. This automatically makes many of the specific results in LOSR resource theories of nonlocality inapplicable to our case, while increasing the dimension of the space of possible wirings significantly.
 
       Fortunately, there are also simplifying factors: since communication in our key distillation protocol must be public, there is no advantage to be gained from using public shared randomness, since it would be accessible to Eve as well and she can undo the effect of the shared randomness. If Alice and Bob have private, preshared randomness, this is already a shared key, and it would not make sense to use the shared randomness to enhance DIQKD instead of using it directly as a key. In any given round, at the very most, one bit can be produced, but if randomness is consumed, at least one bit must be used. Even if the one bit can increase the entropy of the round from zero bits to one bit, that would not be more helpful than using the one bit directly as a key.
+
+      % TODO something fishy here: all wirings can actually be reversed, so
+      % maybe shared randomness should be allowed?
 
       Additionally, Alice and Bob using private randomness to determine their wirings would not help. In the similar technique of \emph{noisy preprocessing}, Alice flips her bits based on her local randomness with a probability \(q\), which has been shown to improve key rates~\cite{AsymmetricCHSH}, essentially by decreasing \(H(A|E)\) more than it decreases \(H(A|B)\). Now, if Alice and Bob use a non-deterministic wiring, and the probability of them selecting wirings that give different results, averaged over all rounds, is \(w\), the resultant behaviour would be identical to the behaviour from noisy preprocessing with \(w = q\). However, in the noisy preprocessing analysis, the noise is \emph{trusted}, and not part of the black-box behaviour of the DIQKD device, where the noise could be the result of Eve tampering with the system. Therefore, there is no need to consider non-deterministic wirings at all, since a noisy preprocessing analysis would be able to do at least as well.
 
       Therefore, for our purposes, we can focus on the set of deterministic wirings. This means that the set of free actions we are interested in is no longer a continuous convex set, but a \emph{discrete} set of transformations, characterised by conditional distributions \(\chi\) satisfying
       \begin{equation}\label{eq:wiringdef}
-        \chi(ab\cvec{x}\cvec{y}|\cvec{a}\cvec{b}xy) = \chi(a\cvec{x}|\cvec{a}x) \chi(b\cvec{y}|\cvec{b}y), \chi \in \{0,1\}\; \forall a,\cvec{x},\cvec{a},x,b,\cvec{y},\cvec{b},y
+        \chi(ab\cvec{x}\cvec{y}|\cvec{a}\cvec{b}xy) = \chi_A(a\cvec{x}|\cvec{a}x) \chi_B(b\cvec{y}|\cvec{b}y), \chi_A, \chi_B \in \{0,1\}\; \forall a,\cvec{x},\cvec{a},x,b,\cvec{y},\cvec{b},y
       \end{equation}
-      where \(\cvec{a}\) is the vector of all the outputs from Alice's boxes that are wired together, analogously for \(\cvec{b}\), \(\cvec{x}\) and \(\cvec{y}\), and the condition that \(\chi \in \{0,1\}\) enforces that the wirings are deterministic. That this set is discrete opens the possibility of a brute-force exhaustive search through all possible wirings in order to find the one which optimises the key rate.
+      where \(\cvec{a}\) is the vector of all the outputs from Alice's boxes that are wired together, analogously for \(\cvec{b}\), \(\cvec{x}\) and \(\cvec{y}\), and the condition that \(\chi_A, \chi_B \in \{0,1\}\) enforces that the wirings are deterministic. That this set is discrete opens the possibility of a brute-force exhaustive search through all possible wirings in order to find the one which optimises the key rate.
 
-      In fact, we can restrict the set of possible wirings even further with causality constraints. Let each player have \(c\) boxes, and let subscripts denote the order in which the boxes are used. Then, Alice's wiring can be represented by a sequence of \(c\) functions with range \(\dintv{1}{i_A}\)
+    In fact, we can restrict the set of possible wirings even further with causality constraints. Let each player have \(c\) boxes, and let subscripts denote the order in which the boxes are used. Then, Alice's inputs \({\{x_i\}}_{i=1}^c\) are computed by a sequence of \(c\) functions with range \(\dintv{1}{i_A}\):
       \begin{equation} x_1 = x \end{equation}
       \begin{equation} x_j = C^{(j)}_A(x_1, \ldots, x_{j-1}, a_1, \ldots, a_{j-1}),\,j \in \dintv{2}{c} \end{equation}
-      and a final output function with range \(\dintv{1}{o_A}\)
+      and a final output function with range \(\dintv{1}{o_A}\):
       \begin{equation} a = C_A(x_1, \ldots, x_{c}, a_1, \ldots, a_{c}). \end{equation}
       Alice and Bob interact with their boxes in increasing order of the index \(j\). The condition that the input to box \(j\) can only depend on the inputs and outputs of boxes with index \(< j\) is equivalent to enforcing that Alice and Bob do not have quantum memories: both players must provide an input to a given box before it can produce an output. We refer to this set of wirings as \(\sW\).
 
       Nonetheless, there is a role for randomness in our analysis. Although Alice and Bob cannot use shared randomness, Eve can use randomness to prepare behaviours. This means that if a behaviour can be decomposed as the convex combination of multiple behaviours known to be insecure, a possible attack would be for Eve to send precisely that convex combination. Therefore, while randomness cannot be used in our wirings, it can be used to demonstrate upper bounds.
 
-      \subsection{Classifying Wirings}
+      \subsection{Classifying Wirings}\label{sec:locwir_class}
 
       The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short, Popescu and Gisin~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. Their work attempts to generalise joint measurements to the no-signalling setting and finds a polytope of possible operations which happens to have local wirings at its extremal points. For the  \((2,2,2,2)\) setting, there are 82 extremal points, grouped into 5 possible types of wirings: deterministic output, where the input is precisely the output; one-sided, where only one box is used; sequential, where the output of the first box is used as input for the second box, and AND and XOR gated, where the respective gates are used to combine the output of the two boxes.
 
@@ -626,7 +678,7 @@
             \end{tabular}
           \end{center}
         \end{minipage}
-        \caption{Left: Lookup table for \(C_A^{(2)}\), giving \(x_2\). Right: Lookup table for \(C_A\), giving overall output \(a\). Entries forbidden by \(C_A^{(2)}\) are marked with X (don't care). Both are written as Karnaugh maps.}\label{tab:wiring_lut}
+        \caption{Left: Lookup table for \(C_A^{(2)}\), giving \(x_2\). Right: Lookup table for \(C_A\), giving overall output \(a\). Entries forbidden by \(C_A^{(2)}\) are marked with X (don't care). Both are written as Karnaugh maps, with the row and column labels in Gray code order.}\label{tab:wiring_lut}
       \end{table}
 
       However, a wiring corresponding to the lookup tables in~\Cref{tab:wiring_lut} would have
@@ -639,14 +691,13 @@
 
       One might ask if an analogous polytope structure might help us to explore the space of possible wirings more efficiently. To answer this question, we must emphasise the distinction between~\cite{ShortEntangleSwap} and what we are attempting here: Short, Popescu and Gisin used this parametrisation in order to prove that all of their couplers could be implemented as convex combinations of classical wirings, while in our case, we want to parametrise the space of behaviours achievable from a given initial behaviour by wirings, so that we can find the maximal key rate in that space. In other words, instead of a space of transformations, we want the space of behaviours generated by a set of transformations.
 
-      Given that our set of transformations is discrete, however, this space would also be discrete. Using a continuous relaxation for the binary variables \(\chi\), which would represent the use of shared randomness, it might be possible to find the convex hull of the achievable behaviours. Then, if we have a bound on the key rate which is convex on the parameters of that space of behaviours, it might be possible to optimise it efficiently over that space, instead of performing a brute-force search. Even if the optimum can only be achieved by a convex combination of wirings, this might still give an idea of which wirings to use and what can be achieved.
+      Given that our set of transformations is discrete, however, this space would also be discrete. Using a continuous relaxation for the binary variables \(\chi_A\) and \(\chi_B\), which would represent the use of non-deterministic wirings, it might be possible to find the convex hull of the achievable behaviours. Then, if we have a bound on the key rate which is convex on the parameters of that space of behaviours, it might be possible to optimise it efficiently over that space, instead of performing a brute-force search. Even if the optimum can only be achieved by a convex combination of wirings, this would still be a bound on the achievable key rates. Alternatively, we could keep the restriction to binary variables and use techniques for binary optimisation, but it is unclear if this can be done efficiently.
 
-      \begin{question}
-        Are there bounds on the key rate that can be efficiently optimised over this space? What impact will the continuous relaxation have?
+      \begin{question}\label{qn:wirspace}
+        Are there functions that can be efficiently optimised over this space which provide bounds on the key rate, either with binary variables or with a continuous relaxation? Will an optimum found in the continuous relaxation be close to an actual optimum?
       \end{question}
 
-      % TODO unfiy discussion of brute forcing
-      \subsection{Number of Distinct Wirings}
+      \subsection{Brute Force Enumeration}
 
       Using our classification for \(\sW\), simple combinatorics gives us \(i_A^{j-1} o_A^{j-1}\) possible inputs for \(C_j^A\). However, since \(x_j\) is completely fixed by \({(x_k)}_{k=1}^{j-1}\) and \({(a_k)}_{k=1}^{j-1}\), there are only \(i_A o_A^{j-1}\) valid inputs, with the rest corresponding to don't-cares. Therefore, the number of possible \(C^{(j)}_A\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(C_A\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
       \begin{equation}
@@ -660,31 +711,58 @@
       \end{equation}
       for Alice, with the analogous relabelling for Bob.
 
-      \subsection{Evaluation}
-
       Unfortunately, with just two boxes, there are 4096 wirings for Alice, and \(\approx \num{2.48e10}\) for Bob. Fixing the AND gating as discussed above gives us 1024 wirings for Alice and \(\approx \num{3.10e9}\) for Bob. Since the choice of wirings for Alice and Bob are independent, we must multiply the figures for Alice and Bob together, which would make this analysis very inefficient.
 
-      This enumeration of the possible wirings is naive, and does not attempt to use symmetry arguments to remove degeneracy or wirings that will not be helpful. This is one possible direction for us to investigate, in order to develop a tool to efficiently find the optimal wiring for a given behaviour.
+      This enumeration of the possible wirings is naive, and does not attempt to use symmetry arguments to remove degeneracy or wirings that will not be helpful. Based on the symmetry considerations in \Cref{sec:qkdset}, it might be possible to prune the search space of wirings that take us out of the region where our chosen version of the CHSH inequality is violated.
 
-      Another approach that might simplify this analysis is that of~\cite{DistillationBounds}, where a computable upper bound is found for the CHSH value that can be \emph{distilled} from wiring together multiple copies of an isotropic box, which is computable in time exponential in \(c\) using a dynamic programming algorithm, instead of doubly exponential time if we were to compute all the boxes by brute force. We write \(S(p)\) for the CHSH value of a behaviour \(p\) and \(S^*_c(p)\) for the maximum CHSH value achievable by wiring \(c\) copies of \(p\) together.
+      \begin{question}
+        Is there a simple way to identify and eliminate wirings that will not be helpful based on symmetry considerations?
+      \end{question}
+
+      However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a bounding function, it is possible to search for the wiring for each particular behaviour that produces the largest increase in the bound. However, without a convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Indeed, the underlying problem in our study of the space of wirings is summed up in the following question:
+      \begin{funqn}\label{fqn:wir}
+        What is the structure of the space of wirings? How does it interact with the structure of the space of behaviours? How does the secret key capacity vary over these structures?
+      \end{funqn}
+
+      Nonetheless, a brute force enumeration can answer \Cref{fqn:wircap} in the affirmative, if we find a behaviour with \(C_{\sk} = 0\) but which exhibits \(C_{\sk} \geq 0\), that is, with an upper bound of 0 on the key rate before wiring, and a lower bound \(\geq 0\). Finding a concrete example of this phenomenon will motivate a deeper analysis of the underlying structures.
+
+      \subsection{Dynamic Programming}
+
+      Another approach that might simplify a brute-force search is that of~\cite{DistillationBounds}, where a computable upper bound is found for the CHSH value that can be \emph{distilled} using LOSR on multiple copies of an isotropic box. This bound is computable in time exponential in \(c\) using a dynamic programming algorithm, instead of doubly exponential time if we were to compute all the boxes by brute force. We write \(S(p)\) for the CHSH value of a behaviour \(p\) and \(S^*_c(p)\) for the maximum CHSH value achievable by wiring \(c\) copies of \(p\) together.
 
       This bound can then be applied to a general nonlocal box with behaviour \(p\), by decomposing it as a convex combination of an isotropic box and a local box. Let
       \[ p_I' = \argmin_{p_I} S(p_I), \]
       where the optimisation is taken over all isotropic behaviours \(p_I\) that fulfill
       \[ p = (1-q)p_I + qp_L \]
-      for some local behaviour \(p_L\) and scalar \(q \in\ccintv{0}{1}\). This optimisation can be done efficiently with a linear program~\cite{LocalPartLP}. Now, since we can mix \(p_I'\) with the corresponding local behaviour \(p_L'\) to obtain \(p\), we have \(S^*_c(p) \leq S^*(p_I')\), otherwise we could perform this mixing and distill the resultant \(p\), contradicting the assumption that \(S^*(p_I')\) is optimal.
+      for some local behaviour \(p_L\) and scalar \(q \in\ccintv{0}{1}\). This optimisation can be done efficiently with a linear program~\cite{LocalPartLP}. Now, since we can mix \(p_I'\) with the corresponding local behaviour \(p_L'\) to obtain \(p\), we must have \(S^*_c(p) \leq S^*_c(p_I')\), otherwise we could perform this mixing and distill the resultant \(p\), which would contradict the assumption that \(S^*_c(p_I')\) is the maximum CHSH value obtainable.
 
-      This is an important result, because later work has shown that the CHSH values of isotropic boxes are not distillable without shared randomness~\cite{NLMonotones}, and we discuss the possibility of proving this even with shared randomness in \Cref{sec:nlmono_isodist}, giving hope that we can close a decade-old open problem~\cite{NLLimits, DistillationBounds}. Therefore, we can skip the optimisation for isotropic boxes and directly bound the maximal CHSH value that can be obtained from a given behaviour. We might also adapt this methodology to come up with a dynamic programming approach to simplify the optimisation over the possible wirings, using key rates as a figure of merit instead of CHSH values.
+      This is an important result, because later work has shown that the CHSH values of isotropic boxes are not distillable without shared randomness~\cite{NLMonotones}, and we discuss the possibility of proving this even with shared randomness in \Cref{sec:nlmono_isodist}, giving hope that we can close a problem that has been open for over a decade~\cite{NLLimits, DistillationBounds}.
 
-      However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a figure of merit (either an upper bound or lower bound), it is possible to use these methods to search for the wiring for each particular behaviour that produces the largest increase in the figure of merit. However, since there is no convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Attempting to develop such a classification scheme for wirings in order to enable this analysis is another possible direction for this project, which would subsume the symmetry analysis discussed above.
+      More directly, we can adapt this methodology to come up with a dynamic programming approach to simplify the exhaustive search over the possible wirings, using bounds on key rates as a figure of merit instead of CHSH values.
+
+      \begin{question}
+        Does there exist a dynamic programming formulation for bounding the key rates achievable from a given behaviour?
+      \end{question}
 
       \section{Upper Bounds}\label{sec:ubound}
 
-      We are interested in evaluating. An important property of an upper bound is whether it is \emph{faithful}: faithful upper bounds are those that have non-zero key rates for all entangled states or all nonlocal behaviours. For our purposes, a non-faithful upper bound is much more helpful---if local wirings between multiple copies of the same device are able to \emph{revive} the key rate, that would be very interesting from both theoretical and practical standpoints. Theoretically, it would develop our currently limited understanding of the nature of the \emph{secrecy capacity} of no-signalling behaviours, and practically, it would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system.
+      In this section, we study functions of \(p\) that are \emph{upper bounds} for the secret key capacity. As mentioned in the discussion of \Cref{fqn:wircap}, an upper bound of 0 would imply that the behaviour has \(C_{\sk} = 0\), and demonstrating revival on this behaviour would answer \Cref{fqn:wircap}.
 
-      A notable non-faithful upper bound is given in~\cite{NotSufficient}, where Eve, who controls the source that provides quantum states for the devices to measure, can sometimes choose to distribute \emph{local correlations}, which she has full information on, while distributing nonlocal correlations at all other times. This \emph{convex combination} attack, so called because the resultant behaviour is a convex combination of the local and nonlocal behaviours, can simulate the correlations that are generated by inefficient projective measurements on Werner states. These behaviours are nonlocal, that is, they have \(S > 2\), but the fact that they were generated in this manner can be used to prove that standard protocols, where both Alice and Bob announce their measurement settings, cannot generate secret keys from them.
+      One recipe for constructing upper bounds is to optimise an upper bound for the secret key capacity of quantum strategies (that is, for states and measurements) over the set of strategies that are consistent with the observed behaviour, which would be a direct application of the definition of \(C_{\sk}\) in \Cref{eqn:seckeycap}. Even if this recipe is not followed precisely, most upper bounds depend intimately on upper bounds for strategies. Therefore, we will first review the upper bounds for quantum strategies, before summarising the upper bounds for behaviours.
 
-      TODO:\ More information on other upper bounds to come.
+      An important property of an upper bound is whether it is \emph{faithful}: faithful upper bounds are those that are non-zero for all entangled states or all nonlocal behaviours. Since a local behaviour or product state would have zero secret key capacity, and cannot be revived by wiring, faithful upper bounds are not helpful for us. We will therefore be particularly interested in non-faithful upper bounds.
+
+      \subsection{Upper Bounds for Strategies}
+
+      \subsection{Upper Bounds for Behaviours}
+
+      There has been a recent flurry of research related to upper bounds on behaviours~\cite{NotSufficient, RevisedPeres, DIQKD_QKD_Gap, CCSquashedEntangle, DIQKD_Limits}. Fortunately,~\cite{CCSquashedEntangle} 
+
+      A notable non-faithful upper bound is given in~\cite{NotSufficient}, where it is shown that \emph{Werner states}
+      \begin{equation}
+        \rho_{AB}^v = v{\ket{\psi_-}\bra{\psi_-}}_{AB} + \frac{1-v}{4}I_{AB},
+      \end{equation}
+      with \(\ket{\psi_-} = (\ket{01} - \ket{10})/\sqrt{2}\)
 
       \section{Lower Bounds}\label{sec:lbound}
 
@@ -730,9 +808,11 @@
 
     The essential idea behind the use of quasi-relative entropies is very straightforward---in order to efficiently minimise the von Neumann entropy \(H(A|E, X = x^*)\), we upper-bound the relative entropy between the variable system and the perfectly mixed (secret) key. However, as the authors wanted to develop highly general tools that can be used to calculate a variety of quantities and work even for infinite-dimensional cases, they made use of the operator algebra approach to quantum mechanics and spectral theory, which are generally not covered in undergraduate treatments of quantum mechanics and quantum information. Some of these technicalities have been reviewed in \Cref{sec:qretech}, but for our purposes, we can simply consider the application of these techniques to DIQKD specifically.
 
+    % TODO quasi-relative entropies for REE?
+
     \section{Nonlocality Monotones}\label{sec:nlmono}
 
-    Instead of enumerating all wirings by brute force at points of interest, we can try to approach the problem from the opposite direction, by establishing fundamental limits on what behaviours can be achieved from wiring. To this end, we wish to find \emph{monotone measures under wiring}, which are functions of a behaviour that change monotonically when wiring is applied to them. Maximising the key rate over the set of behaviours with the same monotone would then provide an upper bound, and may help give insight into the fundamental limits of wiring.
+    Instead of trying to find achievable behaviours from a given one, we can try to approach the problem from the opposite direction, by establishing fundamental limits on the achievable behaviours, as was suggessted in \Cref{qn:wirspace}. To this end, we wish to find \emph{monotone measures under wiring}, which are functions of a behaviour that change monotonically when wiring is applied to them. Maximising the key rate over the set of behaviours with the same monotone would then provide an upper bound, and may help give insight into the fundamental limits of wiring.
 
     In the language of resource theories, monotones are functions that preserve the pre-order of a resource theory~\cite{BellResourceTheory}. That is, for resource \(R_1\) and \(R_2\) in a theory, a monotone \(\mu\) satisfies
     \begin{equation}
