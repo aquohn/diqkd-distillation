@@ -62,6 +62,20 @@ function HAE_CHSH(pax, pby, pabxy)
   S = CHSH(Eax, Eby, Eabxy)
   return gchsh(max(S, 2.0)), nothing
 end
+function HAE_CHSHa(pax, pby, pabxy)
+  Eax, Eby, Eabxy = corrs_from_probs(pax, pby, pabxy)
+  corrp = Eabxy[1,1] + Eabxy[1,2]
+  corrm = Eabxy[2,1] + Eabxy[2,2]
+
+  star_mdl = asym_chsh_star_model(corrp, corrm)
+  nostar_mdl = asym_chsh_nostar_model(corrp, corrm)
+  bigalpha_mdl = asym_chsh_bigalpha_model(corrp, corrm)
+  mdls = [star_mdl, nostar_mdl, bigalpha_mdl]
+
+  optimize!.(mdls)
+  haes = [objective_value(mdl) for mdl in mdls]
+  return maximum(haes)
+end
 
 nl_solver = optimizer_with_attributes(Ipopt.Optimizer)
 mip_solver = optimizer_with_attributes(Cbc.Optimizer)

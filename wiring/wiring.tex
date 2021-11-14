@@ -232,6 +232,7 @@
   \newcommand{\id}{\mathrm{id}} % identity morphism
 
   \newcommand{\sM}{\mathcal{M}}
+  \newcommand{\sN}{\mathcal{N}}
   \newcommand{\sS}{\mathcal{S}}
   \newcommand{\sK}{\mathcal{K}}
   \newcommand{\sT}{\mathcal{T}}
@@ -247,6 +248,7 @@
   \newcommand{\sZ}{\mathcal{Z}}
   \newcommand{\cE}{\mathcal{E}}
   \newcommand{\cF}{\mathcal{F}}
+  \newcommand{\cP}{\mathcal{P}}
 
   \newcommand{\rA}{\mathrm{A}}
   \newcommand{\rB}{\mathrm{B}}
@@ -264,8 +266,6 @@
   \newcommand{\rob}{\rm rob}
   \newcommand{\cor}{\rm cor}
   \newcommand{\secur}{\rm sec}
-  \newcommand{\sk}{\rm sk}
-  \newcommand{\DW}{\rm DW}
   \newcommand{\erob}[1]{\epsilon_{\rob}^{(#1)}}
 
   \newcommand{\HC}{\mathrm{HC}}
@@ -275,6 +275,11 @@
   \newcommand{\Qs}{\mathcal{Q}}
   \newcommand{\NSs}{\mathcal{NS}}
   \newcommand{\PR}{\mathrm{PR}}
+  \newcommand{\sWB}{\mathcal{WB}}
+  \newcommand{\sk}{\rm sk}
+  \newcommand{\DW}{\rm DW}
+  \newcommand{\std}{\rm std}
+  \newcommand{\crit}{\rm crit}
 
   \title{Device-independent quantum key distribution with local wiring}
   \author{John Khoo\\ \href{mailto:john_khoo@u.nus.edu}{\texttt{john\_khoo@u.nus.edu}} \\\\ AD MAIOREM DEI GLORIAM} 
@@ -412,7 +417,9 @@
 
     Therefore, we can write Alice, Bob and Eve's state before distillation as
     \[ \rho_{A^n B^n E^n} = \rho_{ABE}^{\otimes n}, \]
-    where the systems \(A\), \(B\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. This data is derived from measurements on a \emph{qqq} state \(\rho_{Q_A Q_B E}\). The measurements on \(Q_A\) and \(Q_B\) are characterised by the POVMs  \({\{M_{a|x}\}}_{a}\) and \({\{N_{b|y}\}}_{b}\) respectively, \({\{M_{a|x}\}}_{a}\) corresponding to output \(a\) and \({\{N_{b|y}\}}_{b}\) corresponding to output \(b\). The behaviour is then given by
+    where the systems \(A\), \(B\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. This data is derived from measurements on a \emph{qqq} state \(\rho_{Q_A Q_B E}\). The measurements on \(Q_A\) and \(Q_B\) are characterised by the \emph{positive operator-valued measures} (POVMs)  \({\{M_{a|x}\}}_{a}\) and \({\{N_{b|y}\}}_{b}\) respectively, \({\{M_{a|x}\}}_{a}\) corresponding to output \(a\) and \({\{N_{b|y}\}}_{b}\) corresponding to output \(b\). The operators in a POVM are constrained to have
+    \[ \sum_{a} M_{a|x} = I_{Q_A}\;\forall x \qquad M_{a|x} \geq 0\;\forall a, x \qquad \sum_{b} N_{b|y} = I_{Q_B}\;\forall y \qquad N_{b|y} \geq 0\;\forall b, y, \]
+    where \(M \geq 0\) means that the operator is positive-semidefinite, and \(\Tr\left[\rho M\right]\) gives the probability of obtaining the measurement outcome associated with \(M\) when measured on a state \(\rho\). The behaviour is then given by
     \begin{equation}\label{eqn:probmeas}
       p(ab|xy) = \Tr\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right],
     \end{equation}
@@ -431,12 +438,14 @@
       Can we design an algorithm to compute the secret key capacity of an arbitrary behaviour?
     \end{funqn}
 
-    While we do not have such an algorithm in general, we do have techniques for finding upper and lower bounds. One such lower bound is the the \emph{Devetak-Winter key rate}~\cite{DevetakWinter} \(r_{\DW}\). Intuitively, the amount of information that Alice has in each round which is secret to Eve is \({H(A|E)}_{\rho}\), where \(H\) is the von Neumann entropy, \({H(A)}_{\rho} = -\Tr\left[\rho_{A}\log\rho_{A}\right]\), which reduces to the Shannon entropy for a classical system. On the other hand, \(B\) may not be perfectly correlated with \(A\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve during reconciliation is upper bounded by \({H(A|B)}_{\rho}\). This gives us
+    While we do not have such an algorithm in general, we do have techniques for finding upper and lower bounds. One such lower bound is the the \emph{Devetak-Winter key rate}~\cite{DevetakWinter} \(r_{\DW}\). Intuitively, the amount of information that Alice has in each round which is secret to Eve is \({H(A|E)}_{\rho}\), where \(H\) is the von Neumann entropy, \({H(A)}_{\rho} = -\Tr\left[\rho_{A}\log\rho_{A}\right]\), which reduces to the Shannon entropy for a classical system. A classical system can be represented as a density matrix, with the probabilities of the individual outcomes on the diagonal, and all other entries 0.
+
+    On the other hand, \(B\) may not be perfectly correlated with \(A\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve during reconciliation is upper bounded by \({H(A|B)}_{\rho}\). This gives us
     \begin{equation}
       r_{\DW}(p) \coloneqq {H(A|E)}_{\rho} - {H(A|B)}_{\rho} \leq C_{\sk}(p).
     \end{equation}
 
-    Much of the effort in bounding \(C_{\sk}\) has focused on this definition, because two-way information reconciliation is much more poorly understood (although it can provide an advantage, see~\cite{AdvantageDistill}) and this is the figure of merit we will work with.  While \({H(A|B)}_{\rho}\) can be computed directly as the QBER, upper and lower bounds for \({H(A|E)}_{\rho}\) are much harder to find.
+    Much of the effort in bounding \(C_{\sk}\) has focused on this definition, because two-way information reconciliation is much more poorly understood (although it can provide an advantage, see~\cite{AdvantageDistill}).  While \({H(A|B)}_{\rho}\) can be computed directly as the QBER, upper and lower bounds for \({H(A|E)}_{\rho}\) are much harder to find.
 
     We will now consider what we refer to as the \emph{standard protocol}, proposed and proved secure in~\cite{DIQKD_Lower}. It was based on the first DIQKD protocol, E91~\cite{E91}, and is the first DIQKD protocol proven to be secure against collective attacks. This takes place in the \((2,2,3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}. The protocol uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key, while bounding Eve's information with the CHSH value for \(x,y \in \{0,1\}\) after symmetrising the marginals \(\angleb{A_x}\) and \(\angleb{B_y}\) for those values of \(x\) and \(y\). This was done by randomly choosing to flip the outcomes of half of the rounds, and publicly communicating this choice. Therefore, we have \({H(A|B)}_{\rho} = Q_{02} = Q\), and it was proved that
     \begin{equation}
@@ -446,11 +455,11 @@
     \begin{equation}
       r_{\DW} \geq r_{S} = \max \left\{ 0, 1 - h_2(Q) - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right) \right\},
     \end{equation}
-    where we refer to \(r_S\) as the \emph{CHSH key rate}. Being the rate for an explicit, achievable protocol, this is a lower bound for the total secrecy extractable. However, because the proof of the bound involves explicitly constructing the states and measurements that gives the greatest advantage to Eve while still producing the observed value of \(S\), it is also an upper bound for any method for computing key rates based only on \(S\), since any observed \(S\) could have been produced by those states.
+    where we refer to \(r_{\std}\) as the \emph{standard protocol key rate}. Being the rate for an explicit, achievable protocol, this is a lower bound for the total secrecy extractable. However, because the proof of the bound involves explicitly constructing the states and measurements that gives the greatest advantage to Eve while still producing the observed value of \(S\), it is also an upper bound for any method for computing key rates for this protocol based only on \(S\), since the observed \(S\) could have been produced by those states.
 
     \section{Preliminary Results}\label{sec:preres}
 
-    Our preliminary results found a revival of the CHSH key rate for states that are generated according to a simple experimental model. We will be using it to illustrate the relevant issues and directions we wish to pursue in our analysis. In this model, we denote the density matrix of the state as \(\rho_{AB}\) and observables as \(\tilde{A}_x\) and \(\tilde{B}_y\), for a perfect experimental setup, and let the Hilbert spaces of systems \(A\) and \(B\) be \(d_A\) and \(d_B\) respectively.
+    Our preliminary results found a revival of the standard protocol key rate for states that are generated according to a simple experimental model. We will be using it to illustrate the relevant issues and directions we wish to pursue in our analysis. In this model, we denote the density matrix of the state as \(\rho_{AB}\) and observables as \(\tilde{A}_x\) and \(\tilde{B}_y\), for a perfect experimental setup, and let the Hilbert spaces of systems \(A\) and \(B\) be \(d_A\) and \(d_B\) respectively.
 
     We now model some possible experimental flaws. If our source of quantum states produces one state per time bin, then \(n_c\) is the probability that a state is not produced during a given time bin (where we assume this process to be i.i.d.). Further, Alice and Bob's detectors have efficiencies \(\eta_A\) and \(\eta_B\) respectively, which are the probabilities for them to detect a state given that one is produced. If nothing is detected, either due to no signal being produced or due to detector inefficiency, we assign the \(-1\) outcome. The detector failure events are independent, but if no signal is produced, both Alice and Bob will receive no signal. We can then express the new states and observables as follows:
     \begin{align*}
@@ -489,10 +498,10 @@
       \begin{figure}
         \centering
         \includegraphics[width=\linewidth]{exptplt.pdf}
-        \caption{\label{fig:exptplt} Minimum \(\eta\) required for \(r_S > 0\), given \(n_c\).}
+        \caption{\label{fig:exptplt} Minimum \(\eta\) required for \(r_{\std} > 0\), given \(n_c\).}
       \end{figure}
 
-      Using the CHSH key rate, we are able to find \emph{revival} in certain parameter regimes: behaviours with \(r_S(p) = 0\), but which have \(r_S(p_N) > 0\), as shown in \Cref{fig:exptplt}. However, since wiring no longer treats the individual rounds as i.i.d., it should not be used as part of a protocol for the purpose of computing \(C_{\sk}\). Therefore, it is possible that \(C_{\sk}(p_N) > C_{\sk}(p)\). However, it might just be that \(r_S(p) < C_{\sk}(p)\), and that the wiring does not improve the secret key capacity. We can now state one of the aims of our research more precisely:
+      Using the standard protocol key rate, we are able to find \emph{revival} in certain parameter regimes: behaviours with \(r_{\std}(p) = 0\), but which have \(r_{\std}(p_N) > 0\), as shown in \Cref{fig:exptplt}. However, since wiring no longer treats the individual rounds as i.i.d., it should not be used as part of a protocol for the purpose of computing \(C_{\sk}\). Therefore, it is possible that \(C_{\sk}(p_N) > C_{\sk}(p)\). However, it might just be that \(r_{\std}(p) < C_{\sk}(p)\), and that the wiring does not improve the secret key capacity. We can now state one of the aims of our research more precisely:
       \begin{funqn}\label{fqn:wircap}
         Can wiring increase the secret key capacity of a behaviour?
       \end{funqn}
@@ -598,7 +607,7 @@
       \end{table}
 
 
-      In the \((2,2,2,2)\) setting, each of the 8 CHSH facets contains 8 deterministic points with \(S = 2\), and is violated to the algebraic maximum of \(S = 4\) by a \emph{Popescu–Rohrlich} (PR) box, whose outputs are always anti-correlated for one pair of inputs and always correlated otherwise. This behaviour is not within \(\Qs\), and so is not physically realisable as far as we know, but it still plays a crucial role in understanding nonlocality, and the geometry of \(\NSs\). For example, being the only extremal point of \(\NSs\) to have \(S > 2\), all behaviours that violate the corresponding CHSH inequality can be decomposed as a mixture of the PR box and a local box on the CHSH facet~\cite{GeomDecomp}. The line between the \emph{maximally mixed behaviour} \(p_{\varnothing}\), which has all correlators and marginals 0 and \(p_{\varnothing}(ab|xy) = 1/o_A o_B\; \forall a,b,x,y\), and a PR box is called the \emph{isotropic line}, and behaviours on the line are convex combinations of the two. Notably, the quantum maximum of \(S = 2\sqrt{2}\) is achieved by a behaviour that is on this line.
+      In the \((2,2,2,2)\) setting, each of the 8 CHSH facets contains 8 deterministic points with \(S = 2\), and is violated to the algebraic maximum of \(S = 4\) by a \emph{Popescu–Rohrlich} (PR) box, whose outputs are always anti-correlated for one pair of inputs and always correlated otherwise. This behaviour is not within \(\Qs\), and so is not physically realisable as far as we know, but it still plays a crucial role in understanding nonlocality, and the geometry of \(\NSs\). For example, being the only extremal point of \(\NSs\) to have \(S > 2\), all behaviours that violate the corresponding CHSH inequality can be decomposed as a mixture of the PR box and a local box on the CHSH facet~\cite{GeomDecomp}. The line between the \emph{maximally mixed behaviour} \(p_{\varnothing}\), which has all correlators and marginals 0 and \(p_{\varnothing}(ab|xy) = 1/o_A o_B\; \forall a,b,x,y\), and a PR box is called the \emph{isotropic line}, and behaviours on the line (so-called \emph{isotropic boxes}) are convex combinations of the two. Notably, the quantum maximum of \(S = 2\sqrt{2}\) is achieved by a behaviour that is on this line.
 
       Most importantly, since the dfferent versions of the CHSH inequality can be obtained simply by permuting labels, the PR boxes are effectively all equivalent up to relabelling. In this sense, we need only study one CHSH inequality and its corresponding PR box, since all other behaviours can be mapped into the corresponding part of \(\NSs\) by symmetry options. We would like to see if this nice symmetry holds in the QKD setting as well, which we would expect since the only facets aside from positivity facets are liftings of CHSH.
 
@@ -621,7 +630,7 @@
 
       While there has been a recent resurgence of interest in developing resource theories of nonlocality and other unusual quantum phenomena, much of the recent work is too abstract and general to be directly applied by us~\cite{Monotones, TypeIndepLOSR}, or focuses only on \emph{single-copy conversions} using \emph{local operations and shared randomness} (LOSR) as the set of free actions~\cite{BellResourceTheory, TraceDistNL, NLMeas}, instead of the multiple-copy conversions that wirings perform (with a notable exception discussed in \Cref{sec:nlmono_maxcorr}).
 
-      LOSR actions transforms \(p(a_0 b_0|x_0 y_0) \mapsto p(ab|xy)\) using a conditional distribution \(\chi\):
+      LOSR actions transform \(p(a_0 b_0|x_0 y_0) \mapsto p(ab|xy)\) using a conditional distribution \(\chi\):
       \begin{equation}
         p(ab|xy) = \sum_{abxy} \chi(abx_0y_0|a_0b_0xy) p(a_0b_0|x_0y_0)
       \end{equation}
@@ -631,29 +640,34 @@
       \end{equation}
       where \(p_r\) is the distribution of the shared randomness \(r_A\) and \(r_B\). However, since our wirings combine multiple boxes, their effect cannot be expressed in this form. This automatically makes many of the specific results in LOSR resource theories of nonlocality inapplicable to our case, while increasing the dimension of the space of possible wirings significantly.
 
-      Fortunately, there are also simplifying factors: since communication in our key distillation protocol must be public, there is no advantage to be gained from using public shared randomness, since it would be accessible to Eve as well and she can undo the effect of the shared randomness. If Alice and Bob have private, preshared randomness, this is already a shared key, and it would not make sense to use the shared randomness to enhance DIQKD instead of using it directly as a key. In any given round, at the very most, one bit can be produced, but if randomness is consumed, at least one bit must be used. Even if the one bit can increase the entropy of the round from zero bits to one bit, that would not be more helpful than using the one bit directly as a key.
+      In this cryptographic scenario, it might be interesting to ask if there is any benefit to be gained from using \emph{private} shared randomness, unknwon to Eve. However, if Alice and Bob have private, preshared randomness, this is already a shared key, and it would not make sense to use the shared randomness to enhance DIQKD instead of using it directly as a key. In any given round, at the very most, one bit can be produced, but if randomness is consumed, at least one bit must be used. Even if the one bit can increase the entropy of the round from zero bits to one bit, that would not be more helpful than using the one bit directly as a key.
 
-      % TODO something fishy here: all wirings can actually be reversed, so
-      % maybe shared randomness should be allowed?
+      Since every transformation must be implemented as a convex combination of deterministic wirings, we can impose, without loss of generality, that \(\chi_A\) and \(\chi_B\) have an image of \(\{0,1\}\). Mathematically, if we have, say, \(\chi_A(ax_0r_A'|a_0x) = q \in \ccintv{0}{1}\) for some \(r_A = r_A'\), we can simply redefine
+      \[ \chi_A(ax_0r_A'|a_0x) \gets 1 \qquad p_r(r_A', r_B) \gets qp_r(r_A', r_B) \]
+      to obtain the desired behaviour.
 
-      Additionally, Alice and Bob using private randomness to determine their wirings would not help. In the similar technique of \emph{noisy preprocessing}, Alice flips her bits based on her local randomness with a probability \(q\), which has been shown to improve key rates~\cite{AsymmetricCHSH}, essentially by decreasing \(H(A|E)\) more than it decreases \(H(A|B)\). Now, if Alice and Bob use a non-deterministic wiring, and the probability of them selecting wirings that give different results, averaged over all rounds, is \(w\), the resultant behaviour would be identical to the behaviour from noisy preprocessing with \(w = q\). However, in the noisy preprocessing analysis, the noise is \emph{trusted}, and not part of the black-box behaviour of the DIQKD device, where the noise could be the result of Eve tampering with the system. Therefore, there is no need to consider non-deterministic wirings at all, since a noisy preprocessing analysis would be able to do at least as well.
-
-      Therefore, for our purposes, we can focus on the set of deterministic wirings. This means that the set of free actions we are interested in is no longer a continuous convex set, but a \emph{discrete} set of transformations, characterised by conditional distributions \(\chi\) satisfying
-      \begin{equation}\label{eq:wiringdef}
-        \chi(ab\cvec{x}\cvec{y}|\cvec{a}\cvec{b}xy) = \chi_A(a\cvec{x}|\cvec{a}x) \chi_B(b\cvec{y}|\cvec{b}y), \chi_A, \chi_B \in \{0,1\}\; \forall a,\cvec{x},\cvec{a},x,b,\cvec{y},\cvec{b},y
+      Therefore, for our purposes, we can straightforwardly generalise the expression for LOSR operations to the following form, for \(c\) boxes wired together:
+      \begin{equation}\label{eqn:wiringdef}
+        \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{r_A r_B} \chi_A(a\cvec{x}^c r_A|\cvec{a}^cx) \chi_B(b\cvec{y}^c r_B|\cvec{b}^cy) p_r(r_A r_B)
       \end{equation}
-      where \(\cvec{a}\) is the vector of all the outputs from Alice's boxes that are wired together, analogously for \(\cvec{b}\), \(\cvec{x}\) and \(\cvec{y}\), and the condition that \(\chi_A, \chi_B \in \{0,1\}\) enforces that the wirings are deterministic. That this set is discrete opens the possibility of a brute-force exhaustive search through all possible wirings in order to find the one which optimises the key rate.
+      where \(\cvec{a}^c = (a_1, a_2, \ldots, a_c)\) is the vector of all the outputs from Alice's boxes that are wired together, with analogous definitions for \(\cvec{b}^c\), \(\cvec{x}^c\) and \(\cvec{y}^c\), and with \(\chi_A\) and \(\chi_B\) restricted to \(\{0,1\}\).
 
-    In fact, we can restrict the set of possible wirings even further with causality constraints. Let each player have \(c\) boxes, and let subscripts denote the order in which the boxes are used. Then, Alice's inputs \({\{x_i\}}_{i=1}^c\) are computed by a sequence of \(c\) functions with range \(\dintv{1}{i_A}\):
+      The possible functions \(\chi_A, \chi_B\) for fixed values of \(r_A\) and \(r_B\) can be restricted with causality constraints. Let \(x_1\) and \(a_1\) be the input and output, respectively, of the first box Alice uses, \(x_2\) and \(a_2\) that of the second, and so forth. Then, Alice's inputs \(\cvec{x}^c\) are computed by a sequence of \(c\) functions with range \(\dintv{1}{i_A}\):
       \begin{equation} x_1 = x \end{equation}
-      \begin{equation} x_j = C^{(j)}_A(x_1, \ldots, x_{j-1}, a_1, \ldots, a_{j-1}),\,j \in \dintv{2}{c} \end{equation}
+      \begin{equation} x_j = W^{(j)}_A(\cvec{x}^{j-1}, \cvec{a}^{j-1}),\,j \in \dintv{2}{c} \end{equation}
       and a final output function with range \(\dintv{1}{o_A}\):
-      \begin{equation} a = C_A(x_1, \ldots, x_{c}, a_1, \ldots, a_{c}). \end{equation}
-      Alice and Bob interact with their boxes in increasing order of the index \(j\). The condition that the input to box \(j\) can only depend on the inputs and outputs of boxes with index \(< j\) is equivalent to enforcing that Alice and Bob do not have quantum memories: both players must provide an input to a given box before it can produce an output. We refer to this set of wirings as \(\sW\).
+      \begin{equation} a = W_A(\cvec{x}^{c}, \cvec{a}^{c}). \end{equation}
+      Then, if \(\chi_A\) for a given value of \(r_A\) is specified by these functions, \(\chi_A(a\cvec{x}^c r_A|\cvec{a}^cx) = 1\) if the above equations are satisfied. The analogous definitions for Bob hold with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). 
 
-      Nonetheless, there is a role for randomness in our analysis. Although Alice and Bob cannot use shared randomness, Eve can use randomness to prepare behaviours. This means that if a behaviour can be decomposed as the convex combination of multiple behaviours known to be insecure, a possible attack would be for Eve to send precisely that convex combination. Therefore, while randomness cannot be used in our wirings, it can be used to demonstrate upper bounds.
+      Alice and Bob interact with their boxes in increasing order of the index \(j\). The condition that the input to box \(j\) can only depend on the inputs and outputs of boxes with index \(< j\) is equivalent to enforcing that Alice and Bob do not have quantum memories: both players must provide an input to a given box before it can produce an output. We refer to this discrete set of deterministic wirings as \(\sW_D\). We can apply pairs of wirings to behaviours, so the set of wirings that can be applied is actually the convex hull of \(\sW_D \times \sW_D\), which we call \(\sW\), and we call the set of behaviours generated via applying \(\sW\) to a given behaviour \(p\) using \Cref{eqn:wiringdef} as \(\sWB(p)\).
 
-      \subsection{Classifying Wirings}\label{sec:locwir_class}
+      Having thus characterised the set of wirings, our next task is to optimise our key rate over it. However, despite this simple description of the space of achievable behaviours, it is unclear if there are bounds that can be optimised efficiently over it.
+      \begin{question}\label{qn:wirbehavkeyrate}
+        Are there functions which provide bounds on the key rate that can be efficiently optimised over \(\sWB(p)\)?
+      \end{question}
+
+
+      \subsection{The Short, Popescu and Gisin Classification}\label{sec:locwir_class}
 
       The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short, Popescu and Gisin~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. Their work attempts to generalise joint measurements to the no-signalling setting and finds a polytope of possible operations which happens to have local wirings at its extremal points. For the  \((2,2,2,2)\) setting, there are 82 extremal points, grouped into 5 possible types of wirings: deterministic output, where the input is precisely the output; one-sided, where only one box is used; sequential, where the output of the first box is used as input for the second box, and AND and XOR gated, where the respective gates are used to combine the output of the two boxes.
 
@@ -678,7 +692,7 @@
             \end{tabular}
           \end{center}
         \end{minipage}
-        \caption{Left: Lookup table for \(C_A^{(2)}\), giving \(x_2\). Right: Lookup table for \(C_A\), giving overall output \(a\). Entries forbidden by \(C_A^{(2)}\) are marked with X (don't care). Both are written as Karnaugh maps, with the row and column labels in Gray code order.}\label{tab:wiring_lut}
+        \caption{Left: Lookup table for \(W_A^{(2)}\), giving \(x_2\). Right: Lookup table for \(W_A\), giving overall output \(a\). Entries forbidden by \(W_A^{(2)}\) are marked with X (don't care). Both are written as Karnaugh maps, with the row and column labels in Gray code order.}\label{tab:wiring_lut}
       \end{table}
 
       However, a wiring corresponding to the lookup tables in~\Cref{tab:wiring_lut} would have
@@ -689,17 +703,14 @@
 
       Let us see why this is the case. The classification of~\cite{ShortEntangleSwap} attempts to find a parametrisation of \emph{couplers}, which are a specific type of transformation which ``collapses'' multiple boxes of one party, replacing their inputs and outputs with a single output, whose probability distribution depends on the behaviours of the individual boxes that are collapsed. Importantly, this \emph{does not} replace the collapsed boxes with a larger box with one input and one output, which is what we are attempting to do through wirings, but rather simply generates one output. Although couplers can be characterised by a vector of parameters, and the possible vectors form a polytope that has these specific wirings as its extremal points, this is not the type of operation we are looking for.
 
-      One might ask if an analogous polytope structure might help us to explore the space of possible wirings more efficiently. To answer this question, we must emphasise the distinction between~\cite{ShortEntangleSwap} and what we are attempting here: Short, Popescu and Gisin used this parametrisation in order to prove that all of their couplers could be implemented as convex combinations of classical wirings, while in our case, we want to parametrise the space of behaviours achievable from a given initial behaviour by wirings, so that we can find the maximal key rate in that space. In other words, instead of a space of transformations, we want the space of behaviours generated by a set of transformations.
-
-      Given that our set of transformations is discrete, however, this space would also be discrete. Using a continuous relaxation for the binary variables \(\chi_A\) and \(\chi_B\), which would represent the use of non-deterministic wirings, it might be possible to find the convex hull of the achievable behaviours. Then, if we have a bound on the key rate which is convex on the parameters of that space of behaviours, it might be possible to optimise it efficiently over that space, instead of performing a brute-force search. Even if the optimum can only be achieved by a convex combination of wirings, this would still be a bound on the achievable key rates. Alternatively, we could keep the restriction to binary variables and use techniques for binary optimisation, but it is unclear if this can be done efficiently.
-
+      One might ask if an analogous polytope structure might help us to explore the space of generated behaviours more efficiently. Indeed, it is conceivable that \(\sW\) could have some redundancies, so we would like to ask:
       \begin{question}\label{qn:wirspace}
-        Are there functions that can be efficiently optimised over this space which provide bounds on the key rate, either with binary variables or with a continuous relaxation? Will an optimum found in the continuous relaxation be close to an actual optimum?
+        Can we decrease the number of degrees of freedom in \(\sWB(p)\)? 
       \end{question}
 
-      \subsection{Brute Force Enumeration}
+      \subsection{Number of Distinct Wirings}
 
-      Using our classification for \(\sW\), simple combinatorics gives us \(i_A^{j-1} o_A^{j-1}\) possible inputs for \(C_j^A\). However, since \(x_j\) is completely fixed by \({(x_k)}_{k=1}^{j-1}\) and \({(a_k)}_{k=1}^{j-1}\), there are only \(i_A o_A^{j-1}\) valid inputs, with the rest corresponding to don't-cares. Therefore, the number of possible \(C^{(j)}_A\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(C_A\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
+      Using our classification for \(\sW_D\), simple combinatorics gives us \(i_A^{j-1} o_A^{j-1}\) possible inputs for \(W_j^A\). However, since \(x_j\) is completely fixed by \({(x_k)}_{k=1}^{j-1}\) and \({(a_k)}_{k=1}^{j-1}\), there are only \(i_A o_A^{j-1}\) valid inputs, with the rest corresponding to don't-cares. Therefore, the number of possible \(W^{(j)}_A\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(W_A\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
       \begin{equation}
         \exp_{o_A}(i_A o_A^c) \prod_{j=2}^c \exp_{i_A}(i_A o_A^{j-1}),
       \end{equation}
@@ -711,7 +722,7 @@
       \end{equation}
       for Alice, with the analogous relabelling for Bob.
 
-      Unfortunately, with just two boxes, there are 4096 wirings for Alice, and \(\approx \num{2.48e10}\) for Bob. Fixing the AND gating as discussed above gives us 1024 wirings for Alice and \(\approx \num{3.10e9}\) for Bob. Since the choice of wirings for Alice and Bob are independent, we must multiply the figures for Alice and Bob together, which would make this analysis very inefficient.
+      Unfortunately, with just two boxes, there are 4096 wirings for Alice, and \(\approx \num{2.48e10}\) for Bob. Fixing the AND gating as discussed above gives us 1024 wirings for Alice and \(\approx \num{3.10e9}\) for Bob. Since \(\sW\) contains pairs of wirings from \(\sW_D\), we must multiply the figures for Alice and Bob together, which would make even a brute force evaluation of deterministic wirings very inefficient, to say nothing of a linear optimisation.
 
       This enumeration of the possible wirings is naive, and does not attempt to use symmetry arguments to remove degeneracy or wirings that will not be helpful. Based on the symmetry considerations in \Cref{sec:qkdset}, it might be possible to prune the search space of wirings that take us out of the region where our chosen version of the CHSH inequality is violated.
 
@@ -724,11 +735,11 @@
         What is the structure of the space of wirings? How does it interact with the structure of the space of behaviours? How does the secret key capacity vary over these structures?
       \end{funqn}
 
-      Nonetheless, a brute force enumeration can answer \Cref{fqn:wircap} in the affirmative, if we find a behaviour with \(C_{\sk} = 0\) but which exhibits \(C_{\sk} \geq 0\), that is, with an upper bound of 0 on the key rate before wiring, and a lower bound \(\geq 0\). Finding a concrete example of this phenomenon will motivate a deeper analysis of the underlying structures.
+      Nonetheless, a brute force enumeration can answer \Cref{fqn:wircap} in the affirmative, if we find a behaviour with \(C_{\sk} = 0\) but which exhibits \(C_{\sk} \geq 0\), that is, with an upper bound of 0 on the key rate before wiring, and a lower bound \(\geq 0\).
 
       \subsection{Dynamic Programming}
 
-      Another approach that might simplify a brute-force search is that of~\cite{DistillationBounds}, where a computable upper bound is found for the CHSH value that can be \emph{distilled} using LOSR on multiple copies of an isotropic box. This bound is computable in time exponential in \(c\) using a dynamic programming algorithm, instead of doubly exponential time if we were to compute all the boxes by brute force. We write \(S(p)\) for the CHSH value of a behaviour \(p\) and \(S^*_c(p)\) for the maximum CHSH value achievable by wiring \(c\) copies of \(p\) together.
+      Another approach that might simplify a brute force search is that of~\cite{DistillationBounds}, where a computable upper bound is found for the CHSH value that can be \emph{distilled} using LOSR on multiple copies of an isotropic box. This bound is computable in time exponential in \(c\) using a dynamic programming algorithm, instead of doubly exponential time if we were to compute all the boxes by brute force. We write \(S(p)\) for the CHSH value of a behaviour \(p\) and \(S^*_c(p)\) for the maximum CHSH value achievable by wiring \(c\) copies of \(p\) together.
 
       This bound can then be applied to a general nonlocal box with behaviour \(p\), by decomposing it as a convex combination of an isotropic box and a local box. Let
       \[ p_I' = \argmin_{p_I} S(p_I), \]
@@ -748,47 +759,173 @@
 
       In this section, we study functions of \(p\) that are \emph{upper bounds} for the secret key capacity. As mentioned in the discussion of \Cref{fqn:wircap}, an upper bound of 0 would imply that the behaviour has \(C_{\sk} = 0\), and demonstrating revival on this behaviour would answer \Cref{fqn:wircap}.
 
-      One recipe for constructing upper bounds is to optimise an upper bound for the secret key capacity of quantum strategies (that is, for states and measurements) over the set of strategies that are consistent with the observed behaviour, which would be a direct application of the definition of \(C_{\sk}\) in \Cref{eqn:seckeycap}. Even if this recipe is not followed precisely, most upper bounds depend intimately on upper bounds for strategies. Therefore, we will first review the upper bounds for quantum strategies, before summarising the upper bounds for behaviours.
+      One recipe for constructing upper bounds for behaviours is to optimise an upper bound for the secret key capacity of a quantum state over the set of strategies (that is, for states and measurements) that are consistent with the observed behaviour, which would be a direct application of the definition of \(C_{\sk}\) in \Cref{eqn:seckeycap}. Even if this recipe is not followed precisely, most upper bounds depend intimately on upper bounds for states. Therefore, we will first review these upper bounds, before summarising the upper bounds for behaviours.
 
       An important property of an upper bound is whether it is \emph{faithful}: faithful upper bounds are those that are non-zero for all entangled states or all nonlocal behaviours. Since a local behaviour or product state would have zero secret key capacity, and cannot be revived by wiring, faithful upper bounds are not helpful for us. We will therefore be particularly interested in non-faithful upper bounds.
 
-      \subsection{Upper Bounds for Strategies}
+      \subsection{Upper Bounds for States}
+
+      The definitions are taken from the summary in~\cite{CQKeyDistill}. We define the secret key capacity of a qqq state \(\rho_{Q_AQ_BE}\):
+      \begin{equation}
+      C_{\sk}(\rho_{Q_A Q_B E}) = \sup_{\mathfrak{P}_{\omega}} 
+      r(\mathfrak{P}_{\omega}, \rho_{ABE}),
+      \end{equation}
+      where the choice of the measurement POVMs is now absorbed into \(\mathfrak{P}_{\omega}\).
+
+      These upper bounds are generally divided into two kinds: those based on intrinsic information, and those based on entanglement. We first define the \emph{conditional mutual information}, in multiple equivalent expressions
+      \begin{align}
+        I{(A:B|E)}_{\rho} &= H{(AE)}_{\rho} + H{(BE)}_{\rho} - H{(ABE)}_{\rho} + H{(E)}_{\rho} \\
+                          &= H{(A|E)}_{\rho} + H{(B|E)}_{\rho} - H{(AB|E)}_{\rho} \\
+                          &= H{(A|E)}_{\rho} - H{(A|BE)}_{\rho} \\
+                          &= H{(B|E)}_{\rho} - H{(B|AE)}_{\rho}
+      \end{align}
+      where \(A\), \(B\) and \(E\) may be either classical or quantum, and their joint state is \(\rho_{ABE}\). The \emph{intrinsic information} of a tripartite quantum state \(\rho_{Q_A Q_B E}\) is
+      \begin{equation}
+        I{(Q_A : Q_B \downarrow E)}_{\rho} = \inf_{\cE} I{(Q_A : Q_B|E')}_{\cE(\rho)},
+      \end{equation}
+      where the infimum is taken over \emph{completely positive trace-preserving} (CPTP) maps \(\cE : \rho_{Q_A Q_B E} \mapsto \rho_{Q_A Q_B E'} = \left(I_{Q_A Q_B} \otimes \Lambda_{E \to E'}\right) \rho_{Q_A Q_B E}\), for some operator \(\Lambda_{E \to E'}\). Intuitively, this measures how much private information Alice and Bob have, assuming Eve performs the optimal postprocessing on her state. This gives
+      \begin{equation}
+        C_{\sk}(\rho_{Q_A Q_B E}) \leq I{(Q_A : Q_B \downarrow E)}_{\rho}.
+      \end{equation}
+
+      However, this bound is not tight, because the classical intrinsic information is \(E\)-lockable: it can increase by arbitrarily much if Eve loses a single bit, while the secret key capacity is not \(E\)-lockable. This motivates the definition of the \emph{reduced intrinsic information}
+      \begin{equation}
+        I{(Q_A : Q_B \downarrow\downarrow E)}_{\rho} = \inf_{%
+        \substack{\rho_{Q_A Q_B EE'} : \\ 
+        \Tr_{E'} \rho_{Q_A Q_B EE'} = \rho_{Q_A Q_B E}}}
+        I{(Q_A : Q_B \downarrow EE')}_{\rho} + (1+\delta\{E' \text{ classical}\})H(E'),
+      \end{equation}
+      The increase in the reduced intrinsic information from Eve's loss of \(E'\) is bounded by \((1+\delta\{E' \text{ classical}\})H(E')\), where \(\delta\{\angleb{proposition}\}\) is the \emph{indicator function} that is 1 when the proposition is true, and 0 otherwise.
+
+      Entanglement measures include the \emph{squashed entanglement}
+      \begin{equation}
+        E_{sq}(\rho_{Q_A Q_B}) = \frac{1}{2} \inf_{\substack{\rho_{Q_A Q_BE} : \\ \rho_{Q_A Q_B} = \Tr_E \rho_{Q_A Q_BE}}} I(Q_A:Q_B|E)_{\rho},
+      \end{equation}
+      which can be seen as the minimisation of the conditional mutual information on all possible states for Eve, and gives
+      \begin{equation}
+        C_{\sk}(\rho_{Q_A Q_B E}) \leq E_{sq}(\rho_{Q_A Q_A' Q_B Q_B'}),
+      \end{equation}
+      where \(Q_A'\) and \(Q_B'\) hold the purifications of the state on \(Q_A\) and \(Q_B\) respectively.
+
+      However, the squashed entanglement is also subject to locking. There is, however, a non-lockable entanglement measure: the \emph{relative entropy of entanglement},  
+      \begin{equation}
+        E_R\left({\rho_{Q_AQ_B}}\right) = \inf_{\sigma_{Q_AQ_B}} D(\rho_{Q_AQ_B}||\sigma_{Q_AQ_B})
+      \end{equation}
+      defined in terms of the \emph{relative entropy}
+      \begin{equation}
+        D(\rho||\sigma) = \Tr\left[ \rho (\log \rho - \log \sigma) \right],
+      \end{equation}
+      and where the infimum is over all separable states
+      \begin{equation}
+        \sigma_{Q_AQ_B} = \sum_i p_i \sigma_{Q_A}^i \otimes \sigma_{Q_B}^i.
+      \end{equation}
+      This gives the upper bound
+      \begin{equation}
+        C_{\sk}(\rho_{Q_A Q_B E}) \leq E_{R}^{\infty}(\rho_{Q_A Q_A' Q_B Q_B'}) \leq E_{R}(\rho_{Q_A Q_A' Q_B Q_B'}),
+      \end{equation}
+      where \(Q_A'\) and \(Q_B'\) hold the purifications of the state, and \(E_{R}^{\infty}\) is the \emph{regularised} version of the relative entropy of entanglement
+      \begin{equation}
+        E_{R}^{\infty}(\rho) = \limsup_{n\to\infty} \frac{E_R(\rho^{\otimes n})}{n}.
+      \end{equation}
 
       \subsection{Upper Bounds for Behaviours}
 
-      There has been a recent flurry of research related to upper bounds on behaviours~\cite{NotSufficient, RevisedPeres, DIQKD_QKD_Gap, CCSquashedEntangle, DIQKD_Limits}. Fortunately,~\cite{CCSquashedEntangle} 
+      There has been a recent flurry of research related to upper bounds on behaviours~\cite{NotSufficient, RevisedPeres, DIQKD_QKD_Gap, CCSquashedEntangle, DIQKD_Limits}. Fortunately,~\cite{CCSquashedEntangle} unifies most of these results to produce state-of-the-art upper bounds. We modify their notation in order to align it better with the work that has been done.
 
-      A notable non-faithful upper bound is given in~\cite{NotSufficient}, where it is shown that \emph{Werner states}
-      \begin{equation}
-        \rho_{AB}^v = v{\ket{\psi_-}\bra{\psi_-}}_{AB} + \frac{1-v}{4}I_{AB},
+      % TODO clarify that iid restriction is unimportant for computing key
+      % rates, but wiring might break it
+
+      \begin{figure}
+        \centering
+        \includegraphics[width=\linewidth]{new_plot.pdf}
+        \caption{\label{fig:genubound} Upper bounds based on \Cref{eqn:genubound} for a specific CHSH-based implementation, with either Bell-diagonal states or isotropic states used in the decomposition. The bounds from quantum intrinsic nonlocality~\cite{DIQKD_Limits}, and a bound for the intrinsic nonlocality based on intrinsic information~\cite[Appendix B]{RevisedPeres}, are plotted for comparison. (Source:~\cite{CCSquashedEntangle})}
+      \end{figure}
+
+      Let \(\sM\) be a set of POVMs \(\{{\{M_{a|x}\}}_{a}\), \({\{N_{b|y}\}}_{b}\}_{x,y}\), and let \(\cP(\rho, \sM)\) be the behaviour when the state \(\rho = \rho_{Q_A Q_B}\) is measured according to \(\sM\), where we drop the subscripts in this definition. Then, for an arbitrary LOPC protocol, even with two-way information reconciliation, we have~\cite[Thm. 3]{CCSquashedEntangle}
+      \begin{equation}\label{eqn:genubound}
+        C_{\sk}(p) \leq \inf_{\substack{\rho, \sM : \\ p = \cP(\rho, \sM) }} \inf_{\substack{q : \\ \rho = (1-q)\rho^{NL} + q\rho^L}} (1-q) E_R(\rho^{NL}) + q E_R(\rho^L),
       \end{equation}
-      with \(\ket{\psi_-} = (\ket{01} - \ket{10})/\sqrt{2}\)
+      where \(\cP(\rho^L, \sM) \in \Ls\) and \(\cP(\rho^{NL}, \sM) \not\in \Ls\). Essentially, we first select a state and measurement strategy consistent with the observed behaviour, decompose the state into local and nonlocal parts (where states are classified as local or nonlocal based on the chosen measurement strategy), and compute the relative entropy of entanglement for each part.
+
+      While highly general, this bound is extremely difficult to compute, since there are three levels of optimisation that need to be done, including the optimisation for the relative entropy of entanglement. The authors themselves computed this bound only for a specific implementation of the measurements, and specific decompositions of specific states parametrised by CHSH values, as shown in \Cref{fig:genubound}. These are \emph{isotropic states} with
+      \begin{equation}
+        \rho^{I,v} = (1-v)\ket{\Psi_+}\bra{\Psi_+} + \frac{v}{4}I
+      \end{equation}
+      and \(S = 2\sqrt{2}(1-v)\), and \emph{Bell diagonal states} with
+      \begin{equation}
+        \rho^{\Psi,C} = \frac{1+C}{2}\ket{\Psi_+}\bra{\Psi_+} + \frac{1-C}{2}\ket{\Psi_-}\bra{\Psi_-}
+      \end{equation}
+      and \(S = 2\sqrt{C^2+1}\), where the \emph{Bell states} are
+      \begin{equation}
+        \ket{\Phi_{\pm}} = \frac{1}{\sqrt{2}}\left( \ket{00} \pm \ket{11} \right) \qquad \ket{\Psi_{\pm}} = \frac{1}{\sqrt{2}}\left( \ket{01} \pm \ket{10} \right).
+      \end{equation}
+      Fortunately, since all the optimisations are infima, any choice for the parameters is by definition an upper bound, and this bound can be used to evaluate the performance of a protocol on a given implementation.
+
+      The \emph{quantum intrinsic nonlocality} is~\cite{DIQKD_Limits}
+      \begin{equation}
+        N^Q{(A:B)}_p = \sup_{p(x,y)} \inf_{\rho_{ABXYE}} I{(A:B|XYE)}_{\rho},
+      \end{equation}
+      where
+      \begin{align}
+        \rho_{ABXYE} = \sum_{abxy} p(x,y) p(ab|xy) \ket{abxy}\bra{abxy}_{ABXY} \otimes \rho_{E|abxy},
+      \end{align}
+      with
+      \begin{equation}
+        p(ab|xy) \rho_{E|abxy} \coloneqq \Tr_{Q_A Q_B}\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right]
+      \end{equation}
+      is Eve's state conditioned on the inputs \(x,y\) and outouts \(a,b\), and \(X\) and \(Y\) being the classical registers holding the values of \(x\) and \(y\). The bound on \(N^Q\) in~\cite{DIQKD_Limits} is outperformed by \Cref{eqn:genubound}, which is in turn outperformed by the bound in~\cite[Appendix B]{RevisedPeres}, but the latter paper restricts itself to protocols that use only one pair of inputs for key generation, and so may not be valid, especially since it is known that using more than one pair of inputs for key generation can improve key rates~\cite{DIQKD_RandomKeyBasis}.
+
+      Unfortunately, all of these bounds are faithful, at least in for the implementations considered. There is thus far only one (possibly) non-faithful upper bound that has been found for quantum adversaries~\cite{NotSufficient}. Interestingly, it uses classical information processing to carry out the attack, by proving the existence of a classical strategy for Eve to reduce the conditional mutual information of Alice and Bob to 0 when certain quantum states are used with any number of measurement settings, if the measurements are projective. However, it applies only to DIQKD protocols where Alice and Bob announce their choice of basis, leaving open the possibility that protocols that do not involve such announcements, such as~\cite{NonstandardProtocol}, may be able to achieve positive key rates, so this is not completely conclusive evidence that \(C_{\sk} = 0\) for these behaviours. However, it seems that this particular protocol has only been proved secure against individual attacks, and it might be interesting to see if it can be proved secure against collective attacks.
+
+      \begin{question}
+        What is the key rate of~\cite{NonstandardProtocol} secure against collective attacks?
+      \end{question}
+
+      Returning to the bound in~\cite{NotSufficient}, it is known that \emph{Werner states} with visibility \(v\)
+      \begin{equation}
+        \rho^{W,v} = v{\ket{\Psi_-}\bra{\Psi_-}} + \frac{1-v}{4}I,
+      \end{equation}
+      cannot exhibit nonlocality for \(v < v_L \approx 0.6829\), but can do so for \(v \geq v_{NL} \approx 0.6964\). However, it is shown that for \(v < v_{\crit} \approx 0.7263 > v_{NL}\), any measurement strategy using projective measurements will produce correlations that can be expressed as a convex combination of behaviours that gives \(I(A:B \downarrow E) = 0\), implying that \(C_{\sk} = 0\) for all such correlations. Since \(v_{NL} < v_{\crit}\), this includes some correlations that exhibit nonlocality. The critical visibility can be increased even further for specific protocols. These behaviours, then, are prospective targets for revival. However, while we are able to specify some behaviours within this set, it is not clear what this set looks like in general. Characterising it might give more insight into how to go about reviving this region.
+
+      \begin{question}
+        Can we characterise the quantumly achievable behaviours from Werner states of a given visibility?
+      \end{question}
+
+      One version of the \emph{classical-classical (cc) squashed entanglement} defined in~\cite{CCSquashedEntangle} is a convex lower bound to the bound established by this result on Werner state visibilities, as well as the bound in~\cite{RevisedPeres}, while being itself an upper bound for the key rate for the intersection of the sets of applicable protocols for these two results (that is, protocols using Werner states, announcement of basis choice, and only one basis being used for key generation). In particular, it is given by
+      \begin{equation}
+        E^{cc}_{sq,dev}(\rho, \sM, p(x,y)) = \inf_{\substack{\sigma, \sN : \cP(\sigma, \sN) = \cP(\rho, \sM)}} \sum_{xy} p(x,y) \inf_{\cE_{x,y}} I{(A : B|E)}_{\cE_{x,y}(\psi^{\sigma})},
+      \end{equation}
+      where \(\cE_{x,y}\) measures \(\psi^\sigma\), the purification of \(\psi^{\sigma}\), using the POVMs in \(\sN\) corresponding to \(x\) and \(y\), while applying an arbitrary CPTP map to Eve's system. Once again, it is fortunate that all optimisations are infima, because this is a difficult optimisation to compute. Although it was applied to bound a specific set of protocols, it might be interesting to see if it could have more general applicability.
+
+      \begin{question}
+        What bounds on general protocols can we achieve using the cc-squashed entanglement?
+      \end{question}
 
       \section{Lower Bounds}\label{sec:lbound}
 
       \subsection{Asymmetric CHSH}
 
-      Better key rates have been obtained from asymmetric versions of the CHSH inequality:
+      Instead of using the CHSH inequality directly, it is possible to compute key rates in the standard protocol using asymmetric versions of the CHSH expression
       \begin{equation}
         S_{\alpha} \coloneqq \alpha\angleb{A_0 B_0} + \alpha\angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1}.
       \end{equation}
-      This technique can then be combined with noisy preprocessing, where Alice replaces each bit of her key with a locally random bit with probability \(q\). The lower bound for \(H(A_0|E)\), with \(s = S_{\alpha}\) from the test statistics, is
-      \[ H(A_0|E) \geq g_{q,\alpha}(s) = \begin{cases}
+      This technique can then be combined with noisy preprocessing, where Alice replaces each bit of her key with a locally random bit with probability \(q\). The lower bound for \(H(A|E)\), with \(s = S_{\alpha}\) from the test statistics, is
+      \begin{equation} H(A|E) \geq g_{q,\alpha}(s) = \begin{cases}
         g(s) & \text{ for } \abs{\alpha} \geq 1 \text{ or } s \geq s^* \\
-        h(q) + g'(s^*)(\abs{s}-2) & \text{ otherwise},
+        h_2(q) + g'(s^*)(\abs{s}-2) & \text{ otherwise},
       \end{cases}
-    \]
+    \end{equation}
     where
     \begin{equation}
       g_{q,\alpha}(s) = 1 + \phi\left(R_1\right) - \phi\left(R_2\right),
     \end{equation}
-    with
+    with \(\phi(x) = h_2(1/2 + x/2)\) and
     \begin{equation} 
       R_1 = \sqrt{{(1-2q)}^2 + 4q(1-q)(s^2/4-\alpha^2)} \qquad R_2 = \sqrt{s^2/4-\alpha^2}
     \end{equation}
     and where \(s^*\) is the solution to
     \begin{equation}\label{eqn:sstar}
-      h(q) + g'(s^*) (s^*-2) = g(s^*).
+      h_2(q) + g'(s^*) (s^*-2) = g(s^*).
     \end{equation}
 
     For a function \(R(s)\) of \(s\), it can easily be verified that
@@ -800,15 +937,89 @@
       R_1'(s) = \frac{qs(1-q)}{R_1} \qquad R_2'(s) = \frac{s}{4R_2},
     \end{equation}
     we have
-    \begin{equation}
+    \begin{equation}\label{eqn:diffg}
       g_{q,\alpha}'(s) = \frac{qs(1-q)}{2R_1} \log\frac{1-R_1}{1+R_1} - \frac{s}{4R_2} \log\frac{1-R_2}{1+R_2}.
     \end{equation}
 
+    The chief difficulty in evaluating this lower bound is optimising the values of \(\alpha\) and \(q\), since the value for \(s^*\) depends on them, but we do not have a closed form expression for it in terms of \(\alpha\) and \(q\). In order to sidestep this issue, we split the problem into three separate optimisations over three parameter regimes, add \(s^*\) as a variable, and enforce \Cref{eqn:diffg} as a constraint where necessary:
+    \begin{enumerate}
+      \item \(\abs{\alpha} \geq 1\): optimise with \(g_{q,\alpha}(s)\); no need for \(s^*\)
+      \item \(\abs{\alpha} \leq 1\) and \(s \leq s^*\): optimise with \(h_2(q) + g'(s^*)(\abs{s}-2)\), constrain \(s^*\) with \Cref{eqn:diffg}
+      \item \(\abs{\alpha} \leq 1\) and \(s \geq s^*\): optimise with \(g_{q,\alpha}(s)\), constrain \(s^*\) with \Cref{eqn:diffg}
+    \end{enumerate}
+
     \subsection{Quasi-Relative Entropies}
 
-    The essential idea behind the use of quasi-relative entropies is very straightforward---in order to efficiently minimise the von Neumann entropy \(H(A|E, X = x^*)\), we upper-bound the relative entropy between the variable system and the perfectly mixed (secret) key. However, as the authors wanted to develop highly general tools that can be used to calculate a variety of quantities and work even for infinite-dimensional cases, they made use of the operator algebra approach to quantum mechanics and spectral theory, which are generally not covered in undergraduate treatments of quantum mechanics and quantum information. Some of these technicalities have been reviewed in \Cref{sec:qretech}, but for our purposes, we can simply consider the application of these techniques to DIQKD specifically.
+    A recent approach to lower bounding the secret key uses semidefinite programming to directly compute lower bounds on \(H(A|E)\), by characterising it as a relative entropy
+    \begin{equation}
+      H{(A|E)}_{\rho} = -D(\rho_{AE}||I_A \otimes \rho_{E}).
+    \end{equation}
+    Although it does not construct an explicit protocol or implmentation, it is still a useful theoretical tool. 
 
-    % TODO quasi-relative entropies for REE?
+    As the authors wanted to develop highly general tools that can be used to calculate a variety of quantities and work even for infinite-dimensional cases, they made use of the operator algebra approach to quantum mechanics and spectral theory, which are generally not covered in undergraduate treatments of quantum mechanics and quantum information. Some of these technicalities have been reviewed in \Cref{sec:qretech}, but for our purposes, we can simply focus on the application of these techniques to DIQKD specifically.
+
+    The set of \emph{bounded operators} \(\mathcal{B}(\Hs)\) on the Hilbert space \(\Hs\) is the subset of \(\mathcal{L}(\Hs)\), the set of all linear operators on \(\Hs\), such that the \emph{operator norm} of \(X \in \mathcal{L}(\Hs)\)
+      \[ \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}} \]
+      is finite. Generically, for trace-class operators \(\rho, \sigma \in \mathcal{L}(\Hs)\), where \(\rho \leq \lambda\sigma\) for \(\lambda \in \R^+\),
+      \begin{equation}
+        D(\rho||\sigma) \leq c_m - \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \inf_{Z \in \sB(\Hs) : \norm{Z} \leq \alpha_i} \Tr\left[\rho\left(Z + Z^{\dagger}\right)\right] + (1-t_i)\Tr\left[\rho\left(Z^{\dagger}Z\right)\right] + t_i\Tr\left[\sigma\left(ZZ^{\dagger}\right)\right],
+      \end{equation}
+      where
+      \begin{equation}
+        c_m = \frac{1}{m^2} \frac{\lambda \Tr[\rho]}{\ln 2} - \sum_{i=1}^m \frac{w_i \Tr[\rho]}{t_i \ln 2} \qquad \alpha_i = \frac{3}{2} \max\left\{\frac{1}{t_i}, \frac{\lambda}{1-t_i}\right\},
+      \end{equation}
+      and where \(w_i > 0\) and \(t_i \in \ocintv{0}{1}\) are the weights and nodes, respectively, of the \(m\)-point \emph{Gauss-Radau quadrature}, such that \(t_m = 1\), \(w_m = 1/m^2\), and
+      \begin{equation}
+        \int_{0}^{1} g(t) \dif{t} \approx \sum_{i=1}^m w_i g(t_i),
+      \end{equation}
+      with equality for all polynomials of degree less than \(2m-2\). Further, the inequality converges to equality as \(m \to \infty\). This quadrature is used to approximate the logarithm, which has the integral representation
+      \begin{equation}
+        \ln(x) = \int_{0}^{1} \frac{x-1}{t(x-1) + 1} \dif{t},
+      \end{equation}
+      yielding an approximation in terms of polynomials of operators.
+
+      With \(r\) arbitary linear constraints on the behaviour, indexed by \(j\)
+      \[ \sum_{abxy} c^{(j)}_{abxy} p(ab|xy) \geq v_j, \]
+      and recalling that
+      \[ p(ab|xy) = \Tr\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right], \]
+      we have the following lower bound on \(H(A|E, X=x^*)\), the conditional entropy for a particular \(x^*\):
+      \begin{equation}
+        H(A|E, X=x^*) \geq c_m + C_m,
+      \end{equation}
+      where \(C_m\) is given by
+      \begin{align}
+        \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \Tr\left[ \rho_{Q_A Q_B E} \left(M_{a|x^*} \otimes I_{Q_B} \otimes \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) \right) + t_i \left( I_{Q_A Q_B} \otimes Z_{a,i}Z_{a,i}^{\dagger}\right)\right] \\
+        \text{s.t.} & \begin{aligned}[t] 
+          & \sum_{abxy} c^{(j)}_{abxy} \Tr\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right] \geq v_j & & \forall 1 \leq j \leq r \\
+          & \sum_{a} M_{a|x} = I_{Q_A}, \sum_{b} N_{b|y} = I_{Q_B} & & \forall x, y \\
+          & M_{a|x} \geq 0, N_{b|y} \geq 0 & & \forall a, b, x, y \\
+          & \norm{Z_{a,i}} \leq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
+          & M_{a|x} \in \sB(Q_A), N_{b|y} \in \sB(Q_B), Z_{a,i} \in \sB(E) & & \forall a, b, x, y, i \\
+          & \rho_{Q_A Q_B E} \text{ is a valid state} & &
+        \end{aligned}
+      \end{align}
+
+      This optimisation can be converted into an efficiently solvable semidefinite program. By assuming the state of the system on \(Q_A \otimes Q_B \otimes E\) is a pure state \(\ket{\psi}\bra{\psi}_{Q_A Q_B E}\), which can only help Eve (due to data-processing), we can replace all instances of \(\Tr\left[\rho Z\right]\) with \(\braket{\psi|Z\psi}\) for all monomials \(Z\) (individual operators and products of operators, with no operator occuring more than once). These can then be seen as elements of a Gram matrix for the vectors \(Z\ket{\psi}\), which must be positive semidefinite, hence enabling the use of semidefinite programming.
+
+      Finally, in order to constrain \(\rho_{Q_A Q_B E}\) to be a state, we can increase the size of our positive semidefinite matrix by replacing the tensor product structure with a commutation relationship and introducing more terms of the form \(\braket{\psi|\prod M|\psi}\), where \(M \in \{M_{a|x}, N_{b|y}\}\). This is the NPA hierarchy, and in order for the computed Gram matrix to represent a valid quantum strategy, it must be positive semidefinite even with all these terms introduced. The final expression for \(C_m\) then becomes
+      \begin{align}
+        \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \bra{\psi} \left(M_{a|x^*} \otimes I_{Q_B} \otimes \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) \right) + t_i \left( I_{Q_A Q_B} \otimes Z_{a,i}Z_{a,i}^{\dagger}\right) \ket{\psi} \\
+        \text{s.t.} & \begin{aligned}[t] 
+          & \sum_{abxy} c^{(j)}_{abxy} \Tr\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right] \geq v_j & & \forall 1 \leq j \leq r \\
+          & \sum_{a} M_{a|x} = I_{Q_A}, \sum_{b} N_{b|y} = I_{Q_B} & & \forall x, y \\
+          & M_{a|x} \geq 0, N_{b|y} \geq 0 & & \forall a, b, x, y \\
+          & Z_{a,i} Z_{a,i}^{\dagger} \leq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
+          & Z_{a,i}^{\dagger} Z_{a,i} \leq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
+          & M_{a|x}, N_{b|y}, Z_{a,i} \in \in \sB(\Hs) & & \forall a, b, x, y, i \\
+          & [M_{a|x}, N_{b|y}] = [M_{a|x}, Z_{b|i}] = [N_{b|y}, Z_{a|i}] = 0 & & \forall a, b, x, y, i \\
+          & [M_{a|x}, Z_{b|i}^{\dagger}] = [N_{b|y}, Z_{a|i}^{\dagger}] = 0 & & \forall a, b, x, y, i \\
+        \end{aligned}
+      \end{align}
+
+      Given the generality of these techniques, one could wonder whether any upper bounds can be computed in this fashion as well. This might help alleviate the optimisation difficulties discussed previously. The quadrature would need to be changed to be an upper bound, rather than a lower bound.
+      \begin{question}
+        Can any known upper bounds be formulated as quasi-relative entropies and approximated with this method?
+      \end{question}
 
     \section{Nonlocality Monotones}\label{sec:nlmono}
 
@@ -818,7 +1029,7 @@
     \begin{equation}
       R_1 \leadsto R_2 \Rightarrow \mu(R_1) \geq \mu(R_2).
     \end{equation}
-    As mentioned in \Cref{sec:locwir}, wirings are \emph{multiple-copy conversions}~\cite{BellResourceTheory}. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under a set of free actions that is a strict superset \(\sW\) defined in \Cref{sec:locwir}. These wirings additionally allow the order in which the boxes are used to be permuted and for non-deterministic wirings. Any monotone under this set of free actions would be a monotone under \(\sW\) too. We will therefore focus on this set of monotones.
+    As mentioned in \Cref{sec:locwir}, wirings are \emph{multiple-copy conversions}~\cite{BellResourceTheory}. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under a set of free actions that is a strict superset of \(\sW_D\) defined in \Cref{sec:locwir}. These wirings additionally allow the order in which the boxes are used to be permuted and for non-deterministic wirings. However, its monotonicity under wirings with shared randomness was not proved. Nonetheless, we will review these results to see how they can help us.
 
     \subsection{Maximal Correlation and Related Measures}\label{sec:nlmono_maxcorr}
 
@@ -899,7 +1110,7 @@
 
     In~\cite{NLMonotones}, these properties of the maximal correlation are proved using the properties of various related measures, that typically take the form of \emph{ribbons}: subsets of \({[0,1]}^2\). These include the hypercontractivity (HC) ribbon:
     \begin{equation}
-      \HC(A,B) = \{(\nu_A, \nu_B) \in {[0,1]}^2 \st \forall U, \nu_A I(U;A) + \nu_B I(U;B) \leq I(U;AB)\},
+      \HC(A,B) = \{(\nu_A, \nu_B) \in {[0,1]}^2 \st \forall U, \nu_A I(U:A) + \nu_B I(U:B) \leq I(U:AB)\},
     \end{equation}
     or equivalently,
     \begin{equation}
@@ -937,14 +1148,15 @@
       s^*(A,B) \coloneqq \inf_{\substack{(\nu_A, \nu_B) \in \HC(A,B) \\ \nu_B \neq 0}} \frac{1 - \nu_A}{\nu_B} \geq {\rho(A,B)}^2
     \end{gather}
 
-    \subsection{Isotropic Boxes are Not Distillable}\label{sec:nlmono_isodist}
+    \subsection{CHSH Distillability of Isotropic Boxes}\label{sec:nlmono_isodist}
 
-    Although only tangentially related to our project, we believe that there is a significant result about maximal correlation that has been overlooked.
+    In this work, it was proved that wirings without shared randomness cannot distill one isotropic box to another with a larger violation of CHSH. The case with shared randomness was proved for boxes with a PR fraction in \([1/\sqrt{2}, 1]\), which is precisely the part of the isotropic line outside of \(\Qs\). A crucial step of the proof was to show that isotropic boxes have the lowest maximal correlation of all boxes with a given CHSH value, the proof of which relied only worked for superquantum values of the PR fraction.
 
-    % TODO Gohari proved the case without shared randomness, with shared
-    % randomness we can depolarise any behaviour to obtain the isotropic 
-    % behaviour with a given S, so it has the lowest maxcorr IF shared
-    % randomness does not increase maxcorr
+    Nonetheless, if we could characterise the impact of shared randomness on the maximal correlation, this part of the proof could be completed, since there does exist a wiring that uses shared randomness to turn any box into an isotropic box with the same CHSH value~\cite{NSTheories}. If we can show that wirings using shared randomness do not increase the maximal correlation, then we will be able to prove that isotropic boxes are not distillable, while also proving that maximal correlation is a monotone under \(\sW\), not just for \(\sW_D\).
+
+    \begin{question}
+      How does the use of shared randomness in wirings affect the maximal correlation and other related measures?
+    \end{question}
 
     \subsection{Evaluation}
 
@@ -956,6 +1168,8 @@
       \item Given \(p\) and \(p'\), if \(\mu(p) = \mu(p')\), we can expicitly construct the wiring that transforms \(p\) into \(p'\)
     \end{enumerate}
 
+    Property 1 is satisfied by the maximal correlation, but the extent to which it satisfies the other desiderata is still unclear. However, given that its monotonicity is derived from that of higher-dimensional monotones, namely the MC and HC ribbons, it is unlikely that the maximal correlation is tight (Property 3), since a transformation could change other regions of the ribbon without affecting the maximal correlation. Nonetheless, it would be helpful to see if these measures can satisfy these demands, or to find out why it might not be possible to meet them.
+
     Another caveat arises when attempting to explicitly compute bounds on the key rate from the maximal correlation. Observe that, for \(K_A\) and \(K_B\), two perfectly correlated and uniformly distributed secret keys, we have \(\rho(K_A, K_B) = 1\), with the maximum achieved by mapping half of the keys to \(1\) and half to \(-1\) for both \(f\) and \(g\). However, if the two keys are independent, then \(\rho(K_A,K_B) = \E[f(K_A)g(K_B)] = \E[f(K_A)]\E[g(K_B)] = 0\). Likewise, if the two keys are deterministic (not secret), then \(f(K_A) = g(K_B) = 0\) and so \(\rho(K_A, K_B) = 0\). However, this poses an issue for longer keys. As long as \(K_A\) and \(K_B\) are uniformly distributed over \(N > 1\) values, \(\rho(K_A, K_B) = 1\), regardless of whether \(N = 2\) or (say) \(N = 10^{12}\). Therefore, we need to find a bound that looks something like
     \begin{equation}
       \max_{E|AB} \frac{H(A|E) - H(A|B)}{H(A)} \leq f(\rho(A,B))
@@ -964,14 +1178,14 @@
 
     \section{Summary and Outlook}
 
+    The study of distillation via wiring multiple boxes together has largely fallen by the wayside, and there has been little attention paid to the idea in DIQKD research. However, this review has uncovered a vast variety of related tools and approaches for tackling this problem, for studying the space of behaviours, the space of wirings, and upper and lower bounds on key rates. Having consolidated these techniques, we are ready to embark on a deeper and more focused attempt to apply them. We hope that we will be able to uncover some interesting insights about the structure of nonlocality by utilising these different approaches and techniques.
+
     \printbibliography{}
 
     \begin{appendices}
       \section{Technicalities for Quasi-Relative Entropies}\label{sec:qretech}
 
-      The set of \emph{bounded operators} \(\mathcal{B}(\Hs)\) on the Hilbert space \(\Hs\) is the set \(\mathcal{L}(\Hs)\) of all linear operators on \(\Hs\) such that the \emph{operator norm} of \(X \in \mathcal{L}(\Hs)\)
-      \[ \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}} \]
-      is finite. For an operator \(A\), its \emph{spectrum} \(\sigma(A)\) is the subset of \(\C\) such that, for all \(\lambda \in \sigma(A)\), \(A - \lambda I\) does not have a \emph{bounded inverse}: there does not exist an operator \(S\) such that \(S\left( A - \lambda I \right) = \left( A - \lambda I \right)S =  I\) and \(S \in \mathcal{B}(\Hs)\).
+      For an operator \(A \in \mathcal{L}(\Hs)\), its \emph{spectrum} \(\sigma(A)\) is the subset of \(\C\) such that, for all \(\lambda \in \sigma(A)\), \(A - \lambda I\) does not have a \emph{bounded inverse}: there does not exist an operator \(S\) such that \(S\left( A - \lambda I \right) = \left( A - \lambda I \right)S =  I\) and \(S \in \mathcal{B}(\Hs)\).
 
       Our objective is to establish a \emph{functional calculus} that will allow us to evaluate a function  \(f\) with scalar output on operators. In the finite-dimensional case this is straightforward for normal operators (obeying \(AA^{\dagger} = A^{\dagger}A\)): for an operator \(A\) with eigenvalues \(\{\lambda_i\}\) and corresponding eigenprojectors \(\{\Pi_i\}\),
       \[ A = \sum_i \lambda_i \Pi_i \Rightarrow f(A) = \sum_i f(\lambda_i) \Pi_i, \]

@@ -69,8 +69,8 @@ end
 
 # %% 3D plot data generators
 
-function maxcorrval_from_probs(pabxy, pax, pby, xysel, modesel)
-    Eax, Eby, Eabxy = corrs_from_probs(pabxy, pax, pby)
+function maxcorrval_from_probs(pax, pby, pabxy, xysel, modesel)
+    Eax, Eby, Eabxy = corrs_from_probs(pax, pby, pabxy)
     maxcorrvals = maxcorrs(pax, pby, pabxy)
     xsel, ysel = xysel
     if modesel == :maxdiff
@@ -294,7 +294,8 @@ function maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Arra
 
   # show Devetak-Winter frontier
   greyscheme = ColorPalette(ColorScheme([colorant"grey", colorant"grey"]))
-  plt = plot([(0, 0, 0), (1, 1, rhomax), (-0.01, 0, rhomax), (1.01, 1, 0)], st=:mesh3d, colorbar_entry=false, seriescolor=greyscheme, alpha=0.5, label="Devetak-Winter bound", xlabel=L"H(A|B)",ylabel=L"H(A|E)",zlabel=L"\max_{x,y} \rho(A,B|x,y)", xlims=Hlims[1], ylims=Hlims[2])
+  # plt = plot([(0, 0, 0), (1, 1, rhomax), (-0.01, 0, rhomax), (1.01, 1, 0)], st=:mesh3d, colorbar_entry=false, seriescolor=greyscheme, alpha=0.5, label="Devetak-Winter bound", xlabel=L"H(A|B)",ylabel=L"H(A|E)",zlabel=L"\max_{x,y} \rho(A,B|x,y)", xlims=Hlims[1], ylims=Hlims[2])
+  plt = plot([(0, 0, 0), (1, 1, rhomax), (-0.01, 0, rhomax), (1.01, 1, 0)], st=:mesh3d, colorbar_entry=false, seriescolor=greyscheme, alpha=0.5, label="Devetak-Winter bound", xlabel="H(A|B)",ylabel="H(A|E)",zlabel="Maximal Correlation", xlims=Hlims[1], ylims=Hlims[2])
 
   # find S region
   xs, ys, zs = [Array{T}(undef, ncsamples, etasamples) for i in 1:3]
