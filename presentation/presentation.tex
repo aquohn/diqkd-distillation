@@ -1,0 +1,889 @@
+% Copyright 2016 by Wang Kunzhen <wangkunzhen1993@gmail.com>.
+%
+% This is a latex template adapted from Till Tantau's Beamer template.
+% It adds theme customizations for the convenience of users from the
+% National University of Singapore. 
+% 
+% In principle, this file can be redistributed and/or modified under
+% the terms of the GNU Public License, version 2.
+%
+% However, this file is supposed to be a template to be modified
+% for your own needs. For this reason, if you use this file as a
+% template and not specifically distribute it as part of a another
+% package/program, I grant the extra permission to freely copy and
+% modify this file as you see fit and even to delete this copyright
+% notice. 
+
+\documentclass[xcolor=dvipsnames]{beamer}
+
+% There are many different themes available for Beamer. A comprehensive
+% list with examples is given here:
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+% You can uncomment the themes below if you would like to use a different
+% one:
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+% \usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+% \usetheme{boxes}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{default}
+\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+% \usetheme{Ilmenau}
+% \usetheme{JuanLesPins}
+% \usetheme{Luebeck}
+% \usetheme{Madrid}
+% \usetheme{Malmoe}
+%\usetheme{Marburg}
+% \usetheme{Montpellier}
+% \usetheme{PaloAlto}
+% \usetheme{Pittsburgh}
+% \usetheme{Rochester}
+% \usetheme{Singapore}
+% \usetheme{Szeged}
+% \usetheme{Warsaw}
+
+\definecolor{nus-orange}{RGB}{239,124,0} 
+\definecolor{nus-white}{RGB}{255,255,255}
+\definecolor{nus-blue}{RGB}{0,61,124}
+\definecolor{nus-black}{RGB}{0,0,0}
+
+% Uncomment this section if you want the title background for each slide to be gradient like decaying from nus-orange to nus-white.
+% \useoutertheme{shadow}
+% \usepackage{tikz}
+% \usetikzlibrary{shadings}
+% \colorlet{titleleft}{nus-orange}
+% \colorlet{titleright}{nus-orange!45!nus-white}
+% \makeatletter
+% \pgfdeclarehorizontalshading[titleleft,titleright]{beamer@frametitleshade}{\paperheight}{%
+%   color(0pt)=(titleleft);
+%   color(\paperwidth)=(titleright)}
+% \makeatother
+% End of gradient slide title effect.
+
+\setbeamercolor{section in head/foot}{bg=nus-blue, fg=nus-white}
+\setbeamercolor{subsection in head/foot}{bg=nus-blue, fg=nus-white}
+\setbeamercolor{frametitle}{bg=nus-orange, fg=nus-white}
+\setbeamercolor{title}{bg=nus-orange, fg=nus-white}
+\setbeamercolor{alerted text}{fg=nus-orange}
+\setbeamercolor{block title}{fg=nus-white}
+\setbeamercolor{block body}{fg=nus-black}
+
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{propositions}[numbered]
+
+\setbeamertemplate{bibliography item}{\insertbiblabel}
+
+\setbeamertemplate{title page}[default][colsep=-4bp,rounded=true, shadow=true]
+
+\usefonttheme[onlymath]{serif}
+\setbeamertemplate{footline}[totalframenumber]
+
+\addtobeamertemplate{navigation symbols}{}{
+  \hspace{1em} \raisebox{1.35pt}{\usebeamerfont{footline}%
+\insertframenumber/\inserttotalframenumber} }
+
+\renewcommand\qedsymbol{$\blacksquare$}
+% \setbeamertemplate{qed symbol}{$\blacksquare$}
+
+\usepackage{braket}
+\usepackage{multirow}
+\usepackage{adjustbox} % allow tables to take up the space they need
+\usepackage{graphicx} % allows figures to be inserted and scaled
+\usepackage{listings} % allows for source code blocks
+\usepackage{fancyvrb} % robust verbatim
+
+\usepackage[backend=biber, style=ieee]{biblatex}  
+\addbibresource{../cg4003.bib}
+% \usepackage{hyperref} % hyperlinks
+% \hypersetup{%
+%   colorlinks=true,
+%   linkcolor=purple,
+%   urlcolor=blue
+% }
+\graphicspath{ {../images/} }
+
+\newcommand{\concat}{\mathbin{\Vert}} % string concatenation operator
+\newcommand{\rep}{\stackrel{r}{=}} % enable stacked r and = for representation
+\newcommand{\?}{\mathrel{?}} % ternary operator
+
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert} % define norm
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert} % define abs
+\newcommand{\Dif}{\mathop{}\!\mathrm{D}} % Difference operator
+\newcommand{\dif}{\mathop{}\!\mathrm{d}} % differential d
+\newcommand{\ceil}[1]{\left\lceil#1\right\rceil} % enables \ceil{} for ceil delimiter
+\newcommand{\floor}[1]{\left\lfloor#1\right\rfloor} % enables \floor{} for floor delimiter
+\newcommand{\cvec}[1]{\boldsymbol{\mathbf{#1}}}    % shortcut for column vectors
+\newcommand{\rvec}[1]{\boldsymbol{\mathbf{#1}}^{T}} % shortcut for transposed row vectors
+\newcommand{\matr}[1]{\left[#1\right]} % shortcut for matrices
+\newcommand{\matrp}[2]{\left[#1#2\right]} % shortcut for matrices with subscripts/superscripts
+\newcommand{\rv}[1]{\boldsymbol{\mathbf{#1}}} % random variable
+\newcommand{\tr}{\mathrm{tr}} % enables Trace operator
+\newcommand{\id}{\mathrm{id}} % enables Trace operator
+\newcommand{\E}{\mathbb{E}} % expectation
+
+\newenvironment{Array}[1] % less cramped display mode arrays
+{\def\arraystretch{1.75}\everymath={\displaystyle}\[\begin{array}{#1}}
+{\end{array}\]}
+
+\usepackage{mathtools}
+\usepackage{tikz}
+\usepackage{tikzscale} % include .tikz files with includegraphics and scale them
+\usetikzlibrary{shapes, shapes.geometric, automata, positioning, arrows.meta, decorations.markings,decorations.pathreplacing, intersections, math}
+
+\tikzset{%
+  >={Stealth}, % makes the arrow heads bold
+  node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
+  every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
+  initial text=$ $, % sets the text that appears on the start arrow
+  % simple black circle at node
+  point/.style={circle,draw,inner sep=0pt,minimum size=3pt,fill=black},
+  % style to apply some styles to each segment of a path
+  on each segment/.style={
+    decorate,
+    decoration={
+      show path construction,
+      moveto code={},
+      lineto code={
+        \path [#1]
+        (\tikzinputsegmentfirst) -- (\tikzinputsegmentlast);
+      },
+      curveto code={
+        \path [#1] (\tikzinputsegmentfirst)
+        .. controls
+        (\tikzinputsegmentsupporta) and (\tikzinputsegmentsupportb)
+        ..
+        (\tikzinputsegmentlast);
+      },
+      closepath code={
+        \path [#1]
+        (\tikzinputsegmentfirst) -- (\tikzinputsegmentlast);
+      },
+    },
+  },
+  % style to add an arrow in the middle of a path
+  mid arrow/.style={postaction={decorate,decoration={
+        markings,
+        mark=at position .5 with {\arrow[#1]{stealth}}
+  }}},
+}
+
+\RequirePackage{luatex85}
+% Default preamble
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{polar}
+\usepgfplotslibrary{smithchart}
+\usepgfplotslibrary{statistics}
+\usepgfplotslibrary{dateplot}
+\usepgfplotslibrary{ternary}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{backgrounds}
+\usepgfplotslibrary{patchplots}
+\usepgfplotslibrary{fillbetween}
+\pgfplotsset{%
+  layers/standard/.define layer set={%
+    background,axis background,axis grid,axis ticks,axis lines,axis tick labels,pre main,main,axis descriptions,axis foreground%
+    }{grid style= {/pgfplots/on layer=axis grid},%
+    tick style= {/pgfplots/on layer=axis ticks},%
+    axis line style= {/pgfplots/on layer=axis lines},%
+    label style= {/pgfplots/on layer=axis descriptions},%
+    legend style= {/pgfplots/on layer=axis descriptions},%
+    title style= {/pgfplots/on layer=axis descriptions},%
+    colorbar style= {/pgfplots/on layer=axis descriptions},%
+    ticklabel style= {/pgfplots/on layer=axis tick labels},%
+    axis background@ style={/pgfplots/on layer=axis background},%
+    3d box foreground style={/pgfplots/on layer=axis foreground},%
+  },
+}
+
+\newcommand{\frI}{\mathfrak{I}}
+\newcommand{\frX}{\mathfrak{X}}
+\newcommand{\rvX}{\rv{X}}
+\newcommand{\frA}{\mathfrak{A}}
+\newcommand{\frC}{\mathfrak{C}}
+\newcommand{\frR}{\mathfrak{R}}
+\newcommand{\Dist}{\mathcal{D}}
+\newcommand{\DistRI}{\Dist(\frR, \frI)}
+\newcommand{\Fail}{\mathcal{F}}
+\newcommand{\IdealObsv}{\mathcal{I}}
+
+\newcommand{\psubs}{p_{\rm subs}}
+\newcommand{\pimpr}{p_{\rm impr}}
+
+\newcommand{\sM}{\mathcal{M}}
+\newcommand{\sS}{\mathcal{S}}
+\newcommand{\sK}{\mathcal{K}}
+\newcommand{\sT}{\mathcal{T}}
+\newcommand{\sH}{\mathcal{H}}
+\newcommand{\sV}{\mathcal{V}}
+\newcommand{\sX}{\mathcal{X}}
+\newcommand{\sZ}{\mathcal{Z}}
+\newcommand{\cE}{\mathcal{E}}
+\newcommand{\cF}{\mathcal{F}}
+
+\newcommand{\AU}{\mathrm{AU}_{2}}
+\newcommand{\AXU}{\mathrm{AXU}_{2}}
+\newcommand{\ASU}{\mathrm{ASU}_{2}}
+\newcommand{\eAU}{\epsilon\text{-}\AU}
+\newcommand{\eAXU}{\epsilon\text{-}\AXU}
+\newcommand{\eASU}{\epsilon\text{-}\ASU}
+
+\newcommand{\meas}{\rm meas}
+\newcommand{\perm}{\rm perm}
+\newcommand{\pe}{\rm pe}
+\newcommand{\pa}{\rm pa}
+\newcommand{\ir}{\rm ir}
+\newcommand{\leakir}{\mathrm{leak}_{\ir}}
+\newcommand{\auth}{\rm auth}
+\newcommand{\key}{\rm key}
+\newcommand{\rob}{\rm rob}
+\newcommand{\cor}{\rm cor}
+\newcommand{\secur}{\rm sec}
+
+\setbeameroption{hide notes} % Only slides
+% \setbeameroption{show only notes} % Only notes
+% \setbeameroption{show notes on second screen=right} % Both
+\setbeamertemplate{note page}[plain]
+
+\title{The Finite-Key Security of Quantum Key Expansion}
+
+\author{John Khoo}
+
+\institute[National University of Singapore] % (optional, but mostly needed)
+{
+  Department of Electrical and Computer Engineering \\ \& Department of Computer Science \\
+  National University of Singapore
+}
+
+\titlegraphic{
+  \includegraphics[width=2cm]{nus-logo}
+}
+
+\date{\today}
+
+% Uncomment this, if you want the table of contents to pop up at
+% the beginning of each subsection:
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+% Epsilons assume security of authentication
+% Info-theoretic authentication => Wegman Carter
+% Universal composability of authentication?
+% 1) Suppose we have a UC secure auth scheme. If QKD depends on this, how does the epsilon of the auth scheme affect the epsilon of the QKD?
+% 2) How does almost-universal (epsilon-universal) hashing affect the security?
+% 3) With a perfect preshared key, we bootstrap QKD comms, and then rekey after each round, encrypting with the QKD key. What is the loss of security in each round? How long can we run before the accumalated epsilon becomes unacceptable?
+% 4) What is an acceptable epsilon?
+% 5*) How does this compare to existing crypto schemes?
+% 6) What is the real key expansion rate, wrt the initial PSK?
+% 7) Start by trying to see the *effect* on the key expansion ratio and epsilons when we turn off authentication for various pieces of the protocol.
+% Concretely, we can stick with BBM92 first.
+
+\section*{Introduction}
+\begin{frame}{The Quantum Advantage}
+  \begin{itemize}[<+->]
+    \item Classically, our actions can only leak information
+    \item \ldots but quantum cryptography can \alert{grow shared secrecy}
+    \item We are ultimately performing \alert{quantum key expansion}
+    \item However, not much attention paid to this perspective
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Focus}
+  \begin{itemize}[<+->]
+    \item Initial secrecy used for authentication
+    \item Information-theoretic authentication \alert{necessarily} consumes shared secrecy
+    \begin{itemize} \item Tradeoffs and constructions \end{itemize}
+    \item Big-picture perspective: \alert{composable security}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Motivation}
+  \begin{itemize}[<+->]
+    \item Theoretical: what are the \alert{fundamental limits} to expanding shared secrecy?
+    \item Practical: what is the impact in a \alert{realistic finite-key regime}, especially as part of a \alert{larger, real-world system}?
+    \begin{itemize} \item Computational security may not be enough \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\note{
+  A hash function that provides computationally secure authentication against polynomial adversaries with \(s \leq \log 1/\epsilon\) is a one-way function, so proving computational security of authentication is harder than proving \({\rm P \neq NP}\).
+}
+
+\section{Security}
+
+\subsection{Composable Security}
+
+\begin{frame}{Building Blocks}
+  \begin{enumerate}[<+->]
+    \item Specify ideal primitives
+    \item Compose ideal primitives into complex system
+    \item Prove that system is secure
+    \item Bound the probability of deviation from specifications
+    \item Security of system follows by union bound
+      \[ \Pr(\Fail(P)) \leq \Pr\left( \bigcup_{i=1}^n \Fail(Q_i) \right) \leq \sum_{i=1}^n \Pr(\Fail(Q_i)) \]
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Real and Ideal Systems}
+
+  \begin{onlyenv}<1>
+    \begin{figure}
+      \centering
+      \begin{tikzpicture}
+        \tikzmath{\resw = 4;\resh = 1.5;\gap = 0.5;}
+        \draw (1,-\resh/2) rectangle ++(\resw, \resh);
+        \draw [->] (0,-\resh/4) node[anchor=east] {Alice} -- ++(0.5,0) node[label=above:\(M\)] {} -- ++(0.5+\resw/6,0) node [name=junction, inner sep=0pt] {} -- ++(0,-2*\resh/3) node[name=msgout, label=below:\(M\)] {};
+        \draw [->] (junction) -- ++(\resw/3, 0) ++(0,\resh/2) node[anchor=east] {\(\bot\)} -- ++(\resw/8, -\resh/8) node[name=control, inner sep=0pt] {} -- ++(\resw/8, -\resh/8) -- ++(\resw/2, 0) node[anchor=west] {Bob};
+        \draw [double] (control) -- (msgout -| control) node[label={below:\(\{0,1\}\)}] {};
+        \node at (1+\resw/2, -1.5*\resh) {Eve};
+      \end{tikzpicture}
+      \caption{Ideal authenticated classical channel}%
+    \end{figure}
+  \end{onlyenv}
+
+  \begin{onlyenv}<2>
+    \begin{figure}
+      \centering
+      \begin{tikzpicture}
+        \tikzmath{\protw = 2; \proth = 3.5;\resw = 3;\resh = 1.5;\gap = 0.5;}
+        \draw [->] (0,1+\proth/2) -- ++(0.5,0) node[label=above:\(M\)] {} -- ++(0.5+0.2*\protw,0);
+        \draw (1,1) rectangle ++(\protw,\proth) node[name=Alice prot top right] {} +(-\protw/2, -\proth/2) node[anchor=center] {\(\begin{aligned} \bar{T} &= \\ &g_{\rv{S}}(M) \end{aligned} \)};
+        \draw (Alice prot top right) +(-\protw/2, \gap) node {Alice} ++(2*\gap + \resw + \protw/2, \gap) node {Bob};
+
+        \draw (Alice prot top right) ++(\gap,0) rectangle ++(\resw, -\resh) +(-\resw/2, \resh/2) node[anchor=center, name=PSK] {PSK};
+        \draw [->] (PSK) ++(-\gap,0) -- ++(-\gap,0) node[label=above:\(\rv{S}\)] {} -- ++(-\resw/2,0);
+        \draw [->] (PSK) ++(\gap,0) -- ++(\gap,0) node[label=above:\(\rv{S}\)] {} -- ++(\resw/2,0);
+
+        \draw (PSK) ++(\resw/2+\gap,\resh/2) rectangle ++(\protw,-\proth) node[name = Bob prot bot right] {} +(-\protw/2, \proth/2) node[anchor=center] {\(\begin{aligned} \bar{T}' &= \\ &g_{\rv{S}}(M') ? \end{aligned} \)};
+        \draw [<-] (2.5 + 2*\gap + 2*\protw + \resw, 1+\proth/2) -- ++(-0.75,0) node[label=above:\(M' : \bot\)] {}  -- ++(-0.5-0.2*\protw,0);
+
+        \draw (PSK) ++(-\resw/2,-\resh/2-\gap) rectangle ++(\resw, -\resh) ++(-\resw/2, \resh/2) node[align=center] {Insecure Classical \\ Channel} ++(0, -1.5*\resh) node {Eve};
+
+        \draw [->] (Alice prot top right) ++(-0.2*\protw, -0.8*\proth) -- ++(0.2*\protw + 2*\gap,0) -- ++(0,-0.75*\resh) node[label={below:\((M,\bar{T})\)}] {};
+        \draw [<-] (Bob prot bot right) ++(-0.8*\protw, 0.2*\proth) -- ++(-0.2*\protw - 2*\gap,0) -- ++(0,-0.75*\resh) node[label={below:\((M',\bar{T}')\)}] {};
+      \end{tikzpicture}
+      \caption{Real classical authentication system}%
+    \end{figure}
+  \end{onlyenv}
+
+  \begin{onlyenv}<3>
+    \begin{figure}
+      \centering
+      \begin{tikzpicture}
+        \tikzmath{\resw = 5;\resh = 1;\gap = 0.5;let \conh = 3*\resh;}
+        \draw (1,-\resh/2) rectangle ++(\resw, \resh);
+        \draw [->] (0,-\resh/4) node[anchor=east] {Alice} -- ++(0.5,0) node[label=above:\(M\)] {} -- ++(0.5+\resw/6,0) node [name=junction, inner sep=0pt] {} -- ++(0,-\resh-\gap/2) node[name=msgout, label=right:\(M\)] {};
+        \draw [->] (junction) -- ++(\resw/3, 0) ++(0,\resh/2) node[anchor=east] {\(\bot\)} -- ++(\resw/8, -\resh/8) node[name=control, inner sep=0pt] {} -- ++(\resw/8, -\resh/8) -- ++(\resw/2, 0) node[anchor=west] {Bob};
+        \draw [double] (control) -- (msgout -| control) node[label={right:\(1:0\)}] {};
+
+        \draw (1,-\resh/2-\gap) rectangle ++(\resw, -\conh) node[name=converter bot right] {} ++(-\resw/4,-\gap) node[label={below:\((M',\bar{T}')\)}, name=evein, inner sep=0pt] {} ++(-\resw/4,-2*\gap) node {Eve} ++(-\resw/4,2*\gap) node[label={below:\((M,\bar{T})\)}, name=eveout, inner sep=0pt] {};
+        \draw [<-] (eveout) -- ++(0,2*\gap);
+        \draw [->] (evein) -- ++(0,2*\gap);
+
+        \draw [dashed] (converter bot right) ++(-\resw/4,\conh/2) node {\( \begin{aligned} (M,&\bar{T}) = \\ &(M',\bar{T}')? \end{aligned} \)} ++(-\resw/4,\conh/2) -- ++(0, -\conh) ++(-\resw/4,\conh/2) node {\(\bar{T} = g_{\rv{S}}(M)\)} ;
+      \end{tikzpicture}
+      \caption{Ideal authenticated classical channel with authentication system converter}%
+    \end{figure}
+  \end{onlyenv}
+
+  \begin{onlyenv}<3>
+    \begin{figure}
+      \centering
+      \begin{tikzpicture}
+        \tikzmath{\resw = 5;\resh = 1;\gap = 0.5;let \conh = 3*\resh;}
+        \draw (1,-\resh/2) rectangle ++(\resw, \resh);
+        \draw [->] (0,0) node[anchor=east] {Alice} -- ++(0.5,0) node[label=above:\(M\)] {} -- ++(0.5+\resw/6,0) node [name=junction, inner sep=0pt] {} -- ++(0,-\resh-\gap) node[name=msgout, label=right:\(M\)] {};
+        \draw [->] (junction) -- ++(\resw/3, 0) ++(0,-\resh/4) node[anchor=east] {\(\bot\)} -- ++(\resw/8, \resh/8) node[name=control, inner sep=0pt] {} -- ++(\resw/8, \resh/8) -- ++(\resw/2, 0) node[anchor=west] {Bob};
+        \draw [double] (control) -- (msgout -| control) node[label={right:\(1 : 0\)}] {};
+
+        \draw (1,-\resh/2-\gap) rectangle ++(\resw, -\conh) node[name=converter bot right] {} ++(-\resw/4,-\gap) node[label={below:\((M',T')\)}, name=evein, inner sep=0pt] {} ++(-\resw/4,-2*\gap) node {Eve} ++(-\resw/4,2*\gap) node[label={below:\((M,T)\)}, name=eveout, inner sep=0pt] {};
+        \draw [<-] (eveout) -- ++(0,2*\gap);
+        \draw [->] (evein) -- ++(0,2*\gap);
+
+        \draw [dashed] (converter bot right) ++(-\resw/4,\conh/2) node {\( \begin{aligned} (M,&T) = \\ &(M',T')? \end{aligned} \)} ++(-\resw/4,\conh/2) -- ++(0, -\conh) ++(-\resw/4,\conh/2) node {\(T = h_{\rv{K}}(M)\)} ;
+      \end{tikzpicture}
+      \caption{Ideal authenticated classical channel with authentication system converter}%
+    \end{figure}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Distinguishing Probabilities}
+  \begin{onlyenv}<1-3>
+    \begin{itemize}[<+->]
+      \item Distinguisher gets all outputs and controls all inputs
+      \item Distinguish real from ideal via \emph{deviations from ideality}
+        \[ D^* = \argmax_D P_D(\DistRI). \]
+      \item Probability of failure directly related to distinguishing probability
+        \[ \Pr(\Fail(\frR)) = 2P_{D^*}(\DistRI) - 1 \]
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<4->
+    \begin{itemize}[<+->]
+      \item Optimal distinguishing probability can be directly calculated
+      \item Classical: total variational distance
+        \[ d(P_{\frR}, P_{\frI}) = \frac{1}{2} \sum_{X \in \sX} \abs{P_{\frR}(X) - P_{\frI}(X)} \]
+      \item Quantum: trace distance
+        \[ \norm{\rho_{\frR} - \rho_{\frI}}_{\tr} = \frac{1}{2} \tr \abs{\rho_{\frR} - \rho_{\frI}} = \max_{0 \leq \Pi \leq \id} \tr\left[ \Pi(\rho_{\frR} - \rho_{\frI}) \right] \]
+    \end{itemize}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Composable Authentication}
+  \begin{onlyenv}<1-4>
+    \begin{itemize}[<+->]
+      \item Only two possible strategies
+      \item Substitution: Send \((M',\bar{T}')\) after receiving \((M,\bar{T})\)
+        \[ \psubs = \max_{M',M,\bar{T}'} \Pr(g_{\rv{S}}(M') = \bar{T}'|g_{\rv{S}}(M) = \bar{T}) \]
+      \item Impersonation: Send \((M',\bar{T}')\) before receiving \((M,\bar{T})\)
+        \[ \pimpr = \max_{M',\bar{T}'} \Pr(g_{\rv{S}}(M') = \bar{T}') \]
+      \item Overall failure probability:
+        \[ \epsilon_{\auth} = \max\{ \pimpr, \psubs \} \]
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<5->
+    \begin{itemize}[<+->]
+      \item Information-theoretic bounds (\(\rv{\bar{T}} = g_{\rv{S}}(M), \rv{\bar{T}}' = g_{\rv{S}}(M')\))
+        \begin{align*}
+          \pimpr &\geq \max_{M'} \exp_2(-I(\rv{S};\rv{\bar{T}}')) = \max_{M'} \exp_2(-H(\rv{S})+H(\rv{S}|\rv{\bar{T}}')) \\
+          \psubs &\geq \max_{M} \exp_2(-H(\rv{S}|\rv{\bar{T}})) \\
+          \epsilon &\geq \exp_2\left( -\frac{H(\rv{S})}{2} \right) \Rightarrow H(\rv{S}) \geq 2 \log \frac{1}{\epsilon}
+        \end{align*}
+    \end{itemize}
+  \end{onlyenv}
+\end{frame}
+
+\section{Authentication}
+
+\subsection{Authenticating Single Messages}
+
+\begin{frame}{Universal Hashing}
+  \begin{itemize}[<+->]
+    \item Hash family:
+      \[ {\{h_K : {\{0,1\}}^m \to {\{0,1\}}^t, h_K(M) = T \}}_{K \in {\{0,1\}}^k} \]
+    \item With \(\rv{K} \in {\{0,1\}}^k\) uniformly, for all \(M, M_1, M_2, T\):
+      \begin{align*}
+        \eAU &: \Pr\left( h_{\rv{K}}(M) = T \right) \leq \epsilon \\
+        \eAXU &: \Pr\left( h_{\rv{K}}(M_1) \oplus h_{\rv{K}}(M_2) = T \right) \leq \epsilon, M_1 \neq M_2
+      \end{align*}
+    \item \(\epsilon \geq 2^{-t}\) by normalisation
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Authentication Codes}
+  \begin{onlyenv}<1-5>
+    \begin{itemize}[<+->]
+      \item Computationally unbounded adversary can invert hash (substitution attack)
+      \item Decrease \(\psubs\) by increasing \( \min_M H(\rv{S}|g_{\rv{S}}(M))\)
+      \item Encrypt tag with OTP (total secret length \(s = k + t\))
+        \[ \rv{S} = \rv{K} \concat \bar{\rv{K}}, g_{\rv{S}}(M) = h_{\rv{K}}(M) \oplus \bar{\rv{K}} \]
+      \item The constructed family is \(\eASU\): \(\forall M_1, M_2, T_1, T_2\),
+        \[ \Pr\left( g_{\rv{S}}(M_1) = \bar{T}_1 \right) = 2^{-t} \Rightarrow \pimpr = 2^{-t} \]
+        \[ \Pr\left( g_{\rv{S}}(M_1) = \bar{T}_1, g_{\rv{S}}(M_2) = \bar{T}_2 \right) \leq \epsilon 2^{-t} \Rightarrow \psubs \leq \epsilon \]
+      \item \(\eASU\) families are authentication codes with failure probability \(\epsilon\)
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<6-8>
+    \begin{itemize}[<+->]
+      \item Exponential scaling of \(m\) with \(s\)
+        \[ s \geq t + \log \frac{1}{\epsilon} + \log \floor{\frac{m}{t}} \]
+        valid when
+        \[ \frac{m}{t} < \sqrt{2^{s-t+1} \left(1-2^{-t}\right)} - \frac{1}{2} \]
+      \item Linear scaling of \(m\) with \(s\)
+        \[
+          s \geq \log \left( 1 + \frac{2^{m}{(2^{t}-1)}^2}{\epsilon2^{t}(2^{m}-1) + 2^{t}-2^{m}} \right)
+        \]
+      \item Exponential scaling dominates when 
+        \[ \epsilon > \left(1 + \frac{t}{m - t}\right) 2^{-t} \]
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<9->
+    \begin{itemize}[<+->]
+      \item Another bound on authentication codes
+        \[ s \geq \log m + 2 \log \frac{1}{\epsilon} - \log \log \frac{1}{\epsilon} \]
+      \item Only shown tight for \(m \lesssim t^2\)
+      \item All of these bounds preclude the information-theoretic limit
+        \[ s \geq 2 \log \frac{1}{\epsilon} \]
+    \end{itemize}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Constructions}
+  \begin{onlyenv}<1-7>
+    \begin{itemize}[<+->]
+      \item Toeplitz matrix \(\matr{H}\)
+        \begin{itemize}
+          \item Generating sequence \({(b_i)}_{i=-(m-1)}^{t-1}\):
+          \item \(\matr{H}_{ij} = b_{i-j}\)
+          \item Hash: \(\matr{H}M = T\)
+        \end{itemize}
+      \item Equivalent to discrete convolution of \({(b_i)}_{i=-(m-1)}^{t-1}\) and \(M\)
+      \item Strongly universal (\(\eASU\) with \(\epsilon = 2^{-t}\))
+      \item \(t+m-1\) bit sequence can be generated from \(k\) secret bits, giving \(\eAXU\) with
+        \[ \epsilon = \frac{1}{2^t} + \frac{t + m - 1}{2^{k/2}} \]
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<8-11>
+    \begin{itemize}[<+->]
+      \item Polynomial hash: interpret message as
+        \[ q = \ceil{\frac{m}{t}}, i \in [1,q], A_i \in {\{0,1\}}^t, M = A_1 \concat \cdots \concat A_q \]
+      \item \(\eAXU, \epsilon = q2^{-t}\)
+        \[ {\left\{ h^*_K : {\{0,1\}}^m \to {\{0,1\}}^t, h^*_K(M) = \bigoplus_{i=1}^q {A_i}K^i \right\}}_{K \in {\{0,1\}}^t} \]
+      \item \(\eAU\), \(\epsilon = 2^{-t}\)
+        \[
+          {\left\{ \bar{h}^*_K : {\{0,1\}}^m \to {\{0,1\}}^t, \bar{h}^*_K(M) = MK \bmod 2^t \right\}}_{K \in {\{0,1\}}^m}
+        \]
+      \item \(\eAU\), \(\epsilon = (q-1)2^{-t}\)
+        \[
+          {\left\{ \tilde{h}^*_K : {\{0,1\}}^m \to {\{0,1\}}^t, \tilde{h}^*_K(M) = \bigoplus_{i=1}^q {A_i}K^{i-1} \right\}}_{K \in {\{0,1\}}^t}
+        \]
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<12-16>
+    \begin{itemize}[<+->]
+      \item Authentication achieves bounds for integer \(m/t\) 
+      \item \(\eAU\) functions are optimal
+      \item Finite field arithmetic with power-of-2 field size is efficient
+        \begin{itemize}
+          \item Require only bit shift, XOR and comparison CPU instructions
+          \item \(O(t)\) operations per multiplication, \(O(m)\) per polynomial evaluation
+        \end{itemize}
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<17->
+    \begin{figure}
+      \includegraphics[width=\linewidth]{ktplot.pdf}
+    \end{figure}
+  \end{onlyenv}
+\end{frame}
+
+\newcommand{\insec}{\frC_{A \leftrightarrow B}}
+\newcommand{\authkt}{\frA^{k+t}_{A \to B}}
+\newcommand{\authm}{\frA^{m}_{A \to B}}
+\newcommand{\Ei}{{\rm Ei}}
+
+\begin{frame}{Interactive Authentication}
+  \begin{onlyenv}<1-4>
+    \begin{itemize}[<+->]
+      \item Ultimate bound of \(H(\rv{S}) = 2 \log 1/\epsilon\) is achievable with interactive authentication
+      \item Unidirectional authenticated channel \(\authkt\), insecure bidirectional channel \(\insec\), \(\eAXU\) family \(\{h_K\}\)
+      \item Choose tag and key uniformly at random and recursively authenticate
+      \item Only base case authentication requires secrecy
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<5>
+
+    \begin{Array}{rcl}
+      \text{\textbf{Alice:}} & & \text{\textbf{Bob:}} \\
+      \rv{T}_A \xleftarrow{\text{Uniform}} {\{0,1\}}^t & & \\
+      (M, \rv{T}_A) & \xrightarrow{\qquad \insec \qquad} & (M', \rv{T}_A') \\
+                    & & \rv{K}_B \xleftarrow{\text{Uniform}} {\{0,1\}}^k \\
+      \rv{K}_B' & \xleftarrow{\qquad \insec \qquad} & \rv{K}_B \\
+      \rv{T}_C \coloneqq h_{\rv{K}_B'}{(M)} \oplus \rv{T}_A & & \\
+      (\rv{K}_B', \rv{T}_C) & \xrightarrow{\qquad \authkt \qquad} & (\rv{K}_B', \rv{T}_C) \\
+    \end{Array}
+    \[ (\rv{K}_B', \rv{T}_C) = (\rv{K}_B, h_{\rv{K}_B}{(M')} \oplus \rv{T}_A') \? M' : \bot \]
+  \end{onlyenv}
+  \begin{onlyenv}<6->
+    \begin{itemize}[<+(1)->]
+      \item Bob accepts if
+        \[ h_{\rv{K}_B}(M') \oplus h_{\rv{K}_B}(M) = \rv{T}_A \oplus \rv{T}_A' \]
+      \item Without \(\authkt\) failure, this occurs in \(i\)th round with probability \(\epsilon_i\) for \(\epsilon_i\)-\({\rm AXU_2}\) hash
+      \item Since \(\authkt\) is recursively constructed, it fails with probability \( \epsilon' = \sum_{j=1}^{i-1} \epsilon_j \)
+      \item Total probability of failure over \(n\) rounds
+        \[ \hat{\epsilon}_n = \epsilon' + \epsilon_n = \sum_{i=1}^n \epsilon_i \]
+    \end{itemize}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Optimal Interactive Authentication}
+  \begin{onlyenv}<1-3>
+    \begin{itemize}[<+->]
+      \item Total error only depends on \(\eAXU\) family
+      \item Polynomial hashing saturates bounds on \(\eAXU\)
+      \item Fix \(q = m/t\) to be constant in each round
+        \[ m_{i+1} = qt_{i+1} = \frac{qm_i}{2} \Rightarrow m_n = \frac{q^n}{2^{n-1}} t_1 \]
+        \[ k_n = t_n = \frac{m_n}{q} = \frac{q^{n-1}}{2^{n-1}} t_1 \]
+        \[ \epsilon_n = q \exp_2 \left( -\frac{q^{n-1}}{2^{n-1}} t_1 \right) \]
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<4-6>
+    \begin{itemize}[<+->]
+      \item For a target \(\hat{\epsilon}\), fix
+        \[ k_1 = t_1 = \log \frac{1}{\hat{\epsilon}} + \mu \Rightarrow \epsilon_1 = q 2^{-\mu} \hat{\epsilon} \]
+      \item Total error is bounded as \(n \to \infty\)
+        \[ \lim_{n \to \infty} \hat{\epsilon}_n \leq  \epsilon_1 - \frac{q\Ei(\ln (\epsilon_1/q) )}{\ln (q/2)} \]
+        for \(\Ei(x) = \int_{-\infty}^{x} \frac{e^{t}}{t} \dif{t}\).
+      \item Explicitly, \(\hat{\epsilon}_n \leq \hat{\epsilon}\) if
+        \[ q \leq \frac{\hat{\epsilon} \ln (3/2)}{2^{-\mu} \hat{\epsilon} \ln (3/2) - \Ei(-\mu \ln 2 + \ln \hat{\epsilon})} \]
+    \end{itemize}
+  \end{onlyenv}
+
+  \begin{onlyenv}<7>
+    \begin{figure}
+      \includegraphics[width=\linewidth]{msplot.pdf}
+    \end{figure}
+  \end{onlyenv}
+
+  \begin{onlyenv}<8->
+    \begin{figure}
+      \includegraphics[width=\linewidth]{mscomp.pdf}
+    \end{figure}
+  \end{onlyenv}
+\end{frame}
+
+\subsection{Authenticating Multiple Messages}
+
+\begin{frame}{Strategies}
+  \begin{itemize}[<+->]
+    \item Multiple messages per QKD round
+    \item Multiple rounds of QKD
+    \item Two possible strategies
+      \begin{itemize}
+        \item Key recycling: reuse \(\rv{K}\) between rounds
+        \item Concatenation: store all classical communications, do not authenticate anything until end of protocol
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\newcommand{\srecyc}{s_{\rm recyc}}
+\newcommand{\sconcat}{s_{\rm concat}}
+
+\begin{frame}{Optimality}
+  \begin{onlyenv}<1-4>
+    \begin{itemize}[<+->]
+      \item \(\sconcat < \srecyc\) for authentication achieving the following bounds
+        \begin{itemize}
+          \item Fundamental lower bound, achievable with interactive authentication
+            \[ s \geq 2 \log \frac{1}{\epsilon} \]
+          \item Non-tight one-way authentication
+            \[ s \geq \log m + 2 \log \frac{1}{\epsilon} - \log \log \frac{1}{\epsilon} \]
+          \item Polynomial hash authentication code
+        \end{itemize}
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<5-6>
+    \begin{itemize}[<+->]
+      \item We must recycle the longest key, so
+        \[ \srecyc = \max_i \{k_i\} + \sum_{i=1}^n t_i \quad \sconcat = k + t \]
+      \item For polynomial hashing, \(k = t\), \(m = qt\), \(\epsilon = q/2^t\):
+        \begin{align*}
+          \epsilon &= \sum_{i=1}^n \epsilon_i = \sum_{i=1}^n \frac{q_i}{2^{t_i}} \Rightarrow q = \sum_{i=1}^n q_i 2^{t-t_i} \\
+          m &= qt = \sum_{i=1}^n m_i = \sum_{i=1}^n q_i t_i \Rightarrow \sum_{i=1}^n q_i 2^{t-t_i} t = \sum_{i=1}^n q_i t_i
+        \end{align*}
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<7->
+    \begin{itemize}[<+->]
+      \item We compare the terms in \[ \sum_{i=1}^n q_i 2^{t-t_i} t = \sum_{i=1}^n q_i t_i \]
+      \item If \(\sum_{i=1}^n q_i t \leq \sum_{i=1}^n q_i t_i\), there must exist \(t_a \geq t\), and so \(\max_i \{t_i\} \geq t_a\)
+        \[ \max_i \{t_i\} + \sum_{i=1}^n t_i \geq t_a + \sum_{i \neq a} t_i + t_a \geq 2t \]
+      \item If \(\sum_{i=1}^n q_i t \geq \sum_{i=1}^n q_i t_i\), there must exist \(2^{t-t_a} < 1 \Rightarrow t_a \geq t\), and the same argument applies
+      % \item Otherwise, \(\forall i,\,2^{t-t_i} \leq 1 \Rightarrow \forall i,\,t_i \geq t\)
+    \end{itemize}
+  \end{onlyenv}
+\end{frame}
+
+\section{Quantum Key Expansion}
+
+\subsection{Proving Security}
+
+\begin{frame}{Overview}
+  \begin{onlyenv}<1-6>
+  \begin{itemize}[<+->]
+    \item Measure \(m\) signals, use \(k\) for parameter estimation, \(n\) for key generation, obtain final keys \(L^A, L^B\) of length \(l\)
+    \item Measurement overlap \(\hat{c} \geq 1/2\), expected channel error \(\delta'\), tolerated error \(\hat{\epsilon}\)
+    \item Ideal behaviour: output \(L^A = L^B\), uniformly distributed
+    \item Correctness
+      \[ \epsilon_{\cor} = \Pr(L^A \neq L^B) \]
+    \item Security
+      \[ \epsilon_{\secur} = \norm{\rho_{LE} - \chi_L \otimes \rho_{E}}_{\tr} \]
+    \item Robustness
+      \[  \epsilon_{\rob} = \Pr(L = \bot | \E[\rv{\delta}] \leq \delta') \]
+  \end{itemize}
+  \end{onlyenv}
+
+  \begin{onlyenv}<7->
+  \begin{itemize}[<+->]
+    \item Overall requirement
+      \[ \epsilon_{\cor} + \epsilon_{\secur} + \epsilon_{\auth} \leq \hat{\epsilon} \]
+    \item Expected key expansion ratio
+      \[ \hat{r} = (1-\epsilon_{\rob}) \frac{l}{s_{\auth}} \]
+    \item Expected key rate
+      \[ \bar{r} = (1-\epsilon_{\rob}) \frac{l - s_{\auth}}{m} \]
+      \[ \lim_{m \to \infty} \bar{r} = \log \frac{1}{\hat{c}} - 2h_2(\delta') \]
+  \end{itemize}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{BBM92 QKD Protocol}
+  \begin{onlyenv}<1>
+    \begin{Array}{rcl}
+      \text{\textbf{Alice:}} & & \text{\textbf{Bob:}} \\
+      X \coloneqq \cE^{\meas}_{N_{\meas}} [\rho_{A}] & \xrightarrow{N_{\meas}, N_{\perm}} & X' \coloneqq \cE^{\meas}_{N_{\meas}} [\rho_{B}] \\
+      (X_{\pe}, X_{\key}) \coloneqq \cE^{\perm}_{N_{\perm}} [X] & & (X'_{\pe}, X'_{\key}) \coloneqq \cE^{\perm}_{N_{\perm}} [X']  \\
+                                                                & \xrightarrow{\qquad X_{\pe} \qquad} & d_H(X_{\pe}, X'_{\pe}) \leq k\delta \? \\
+      Z \coloneqq E^{\ir}(X_{\key}) & \xrightarrow{\qquad Z \qquad} & \hat{X}_{\key} \coloneqq D^{\ir}(X'_{\key}, Z) \\
+      T_{\ir} \coloneqq h^{\ir}_{K_{\ir}}(X_{\key}) & \xrightarrow{\quad K_{\ir}, T_{\ir} \quad} & \hat{T}_{\ir} \coloneqq h^{\ir}_{K_{\ir}}(\hat{X}_{\key}) \\
+                                                    & & T_{\ir} = \hat{T}_{\ir} \? \\
+      L^A \coloneqq h^{\pa}_{K_{\pa}}(X_{\key}) & \xrightarrow{\qquad K_{\pa} \qquad} & L^B \coloneqq h^{\pa}_{K_{\pa}}(\hat{X}_{\key}) \\
+    \end{Array}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+    \begin{Array}{|c|c|c|}
+      \hline
+      m_{\auth}^{(1)} & N_{\meas}, N_{\perm} & m + \log \binom{m}{k} \\
+      m_{\auth}^{(2)} & X_{\pe} & k \\
+      m_{\auth}^{(3)} & Z, K_{\ir}, T_{\ir} & \log \abs{\sZ} + k_{\ir} + t_{\ir} \\
+      m_{\auth}^{(4)} & K_{\pa} & k_{\pa} \\
+      \hline
+    \end{Array}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Security}
+  \begin{onlyenv}<1-3>
+    \begin{itemize}[<+->]
+      \item Quantum LHL
+        \[ \epsilon_{\secur} \leq \frac{1}{2} \sqrt{ \exp_2\left( l - H^{\epsilon}_{\min}(X|E) \right) } + 2\epsilon \]
+      \item Quantum LHL for \(\mu\)-\({\rm AU}_2\) hash functions
+        \[ \epsilon_{\secur} \leq \frac{1}{2} \sqrt{ (2^l\mu-1) + \left(\frac{2}{\eta^2} + \frac{1}{1-\epsilon}\right) 2^{ l - H^{\epsilon}_{\min}(X|E) } } + 2\epsilon + 2\eta \]
+      \item Min-entropy bound
+        \[ H^{\epsilon}_{\min}(X|E) \geq n\left[\log\frac{1}{\hat{c}}-h_2(\delta+\nu)\right] -\leakir -t_{\ir} \]
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<4->
+    \begin{itemize}[<+->]
+      \item Smoothing \(\epsilon\) is bounded by
+        \[ \epsilon \leq \sqrt{ \exp\left( -\frac{2mk\zeta^2}{n+1} \right) + \exp\left( -2\gamma(m,\delta,\zeta) \left[ {(n(\nu-\zeta))}^2 - 1 \right] \right) } \]
+        \[ \gamma(m,\delta,\zeta) = \frac{1}{m(\delta+\zeta)+1} + \frac{1}{m-m(\delta+\zeta)+1} \]
+        for \(\zeta \leq \nu\), \(m(\delta+\zeta) \in \mathbb{Z}^+\) and \((\nu-\zeta) \geq 1/n\)
+    \end{itemize}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Robustness}
+  \begin{itemize}[<+->]
+    \item Robustness
+      \[ \epsilon_{\rob} = \underbrace{\Pr(D^{\ir}(X'_{\key}, Z) \neq X_{\key})}_{\epsilon_{\rob}^{\ir}} + \underbrace{\Pr(d_H(X_{\pe}, X'_{\pe}) > k\delta)}_{\epsilon_{\rob}^{\pe}} \]
+    \item Chernoff-based bound given \(\E[\rv{\delta}] = \delta'\)
+      \[ \epsilon_{\rob}^{\pe} \leq \exp\left[ k\delta\left( 1 - \ln\left( \frac{\delta}{\delta'} \right) \right) - k\delta'  \right] \]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Reconciliation}
+    \begin{itemize}[<+->]
+      \item \(\{h^{\ir}\}\) is \(\epsilon_{\cor}\)-\({\rm AU}_2\)
+      \item Information reconciliation: source coding with side information
+        \[ \leakir \leq \log H(X_{\key}|X'_{\key}) \leq \log \abs{\sZ} \]
+      \item Relatively neglected; we use the following achievability result
+        \[ \log \abs{\sZ} \leq \xi(n, \epsilon_{\rob}^{\ir}; \delta) \times nh_2(\delta) + \frac{1}{2} \log n + O(1) \]
+        \[ \xi(n, \epsilon; \delta) = 1 + \frac{1}{\sqrt{n}} \frac{\sqrt{v_2(\delta)}}{h_2(\delta)} \Phi^{-1}(1 - \epsilon) \]
+        \[ \Phi^{-1}(p) = \Pr(\mathcal{N}(\mu=0,\sigma=1) < p) \]
+        \[ v_2(\delta) = \delta(1-\delta) {\left( \log \frac{\delta}{1-\delta} \right)}^2 \]
+    \end{itemize}
+\end{frame}
+
+
+\subsection{Numerical Results}
+
+\begin{frame}{Scenarios}
+  \begin{enumerate}[<+->]
+    \item ``Toeplitz stack'': use Toeplitz hash for everything, authenticate messages one by one
+    \item Polynomial one-way: use polynomial hash for everything, authenticate messages with concatenation
+    \[ \{\bar{h}^* \circ \tilde{h}^* : {\{0,1\}}^{n} \to {\{0,1\}}^{l}\} \]
+    \item Polynomial universal: polynomial one-way, but use \(\{\bar{h}^*_K\}\) for privacy amplification
+    \item Polynomial interactive: polynomial universal, but use interactive authentication
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Results}
+  \begin{onlyenv}<1>
+      \includegraphics[width=\linewidth]{diffgoodexpr.pdf}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+      \includegraphics[width=\linewidth]{diffgoodkr.pdf}
+  \end{onlyenv}
+  \begin{onlyenv}<3>
+      \includegraphics[width=\linewidth]{diffbadkr.pdf}
+  \end{onlyenv}
+\end{frame}
+
+\section*{Conclusion}
+
+\begin{frame}{Discussion}
+  \begin{onlyenv}<1-6>
+    \begin{itemize}[<+->]
+      \item Information-theoretic perspective: significant difference in key expansion ratio
+        \begin{itemize}
+          \item Limits of authentication achievable, but effect of QKD protocol unclear
+        \end{itemize}
+      \item However, finite-key effects only signficant in low-keyrate regime
+        \begin{itemize}
+          \item Authentication keys are \(\sim 10^2\) bits
+          \item May have applications in resource-constrained scenarios
+          \item Require more detailed analysis and optimisation
+        \end{itemize}
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<7-10>
+    \begin{itemize}[<+->]
+      \item Tradeoff in \(k_{\pa}\) seems worse for polynomial hashing
+        \begin{align*}
+          k_{\pa}^T &= 2l + \ceil{ 4\log n + 2\log \frac{1}{\hat{\epsilon}} } \\
+          k_{\pa}^P &= 2l + 2\floor{ 3 \log n - \log l - 2\log \frac{1}{\hat{\epsilon}} } - 2
+        \end{align*}
+      \item However, a ``polynomial stack'' seems to fare better generally
+        \begin{itemize}
+          \item More efficient authentication makes up for greater hash key length
+        \end{itemize}
+      \item The penalty from almost-universal privacy amplification impacts key length logarithmically in \(\hat{\epsilon}\)
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<11->
+    \begin{itemize}[<+->]
+      \item Information reconciliation schemes must be carefully analysed
+        \begin{itemize}
+          \item \(\xi\) can be punishing for small block sizes
+        \end{itemize}
+      \item Measurement quality has a significant impact on finite-key and asymptotic performance
+    \end{itemize}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}[c]{}
+  \begin{center}
+    \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+      Thank you!
+    \end{beamercolorbox}
+  \end{center}
+\end{frame}
+
+% Placing a * after \section means it will not show in the
+% outline or table of contents.
+
+\end{document}
+
