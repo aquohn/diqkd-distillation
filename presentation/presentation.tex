@@ -100,7 +100,7 @@
 \usepackage{fancyvrb} % robust verbatim
 
 \usepackage[backend=biber, style=ieee]{biblatex}  
-\addbibresource{../cg4003.bib}
+\addbibresource{../wiring.bib}
 % \usepackage{hyperref} % hyperlinks
 % \hypersetup{%
 %   colorlinks=true,
@@ -144,8 +144,6 @@
   node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
   every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
   initial text=$ $, % sets the text that appears on the start arrow
-  % simple black circle at node
-  point/.style={circle,draw,inner sep=0pt,minimum size=3pt,fill=black},
   % style to apply some styles to each segment of a path
   on each segment/.style={
     decorate,
@@ -174,6 +172,24 @@
         markings,
         mark=at position .5 with {\arrow[#1]{stealth}}
   }}},
+}
+
+
+\tikzset{%
+  % simple black circle at node
+  point/.style={circle,draw,inner sep=0pt,minimum size=3pt,fill=black},
+  % coin with label and colours
+  % TODO DOES NOT WORK
+  set coin/.code={\pgfqkeys{/tikz/coin}{#1}},
+  set coin={bg/.initial=black, fg/.initial=white},
+  coin/.style={
+    set coin={#1},
+    postaction={
+      circle,draw=\pgfkeysvalueof{/tikz/coin/fg},
+      text=\pgfkeysvalueof{/tikz/coin/fg},
+      fill=\pgfkeysvalueof{/tikz/coin/bg}
+    }
+  }
 }
 
 \RequirePackage{luatex85}
@@ -255,11 +271,11 @@
 % \setbeameroption{show notes on second screen=right} % Both
 \setbeamertemplate{note page}[plain]
 
-\title{The Finite-Key Security of Quantum Key Expansion}
+\title{Device-independent quantum key distribution with local wiring}
 
 \author{John Khoo}
 
-\institute[National University of Singapore] % (optional, but mostly needed)
+\institute[National University of Singapore]
 {
   Department of Electrical and Computer Engineering \\ \& Department of Computer Science \\
   National University of Singapore
@@ -290,78 +306,86 @@
   \tableofcontents
 \end{frame}
 
-% Epsilons assume security of authentication
-% Info-theoretic authentication => Wegman Carter
-% Universal composability of authentication?
-% 1) Suppose we have a UC secure auth scheme. If QKD depends on this, how does the epsilon of the auth scheme affect the epsilon of the QKD?
-% 2) How does almost-universal (epsilon-universal) hashing affect the security?
-% 3) With a perfect preshared key, we bootstrap QKD comms, and then rekey after each round, encrypting with the QKD key. What is the loss of security in each round? How long can we run before the accumalated epsilon becomes unacceptable?
-% 4) What is an acceptable epsilon?
-% 5*) How does this compare to existing crypto schemes?
-% 6) What is the real key expansion rate, wrt the initial PSK?
-% 7) Start by trying to see the *effect* on the key expansion ratio and epsilons when we turn off authentication for various pieces of the protocol.
-% Concretely, we can stick with BBM92 first.
-
 \section*{Introduction}
-\begin{frame}{The Quantum Advantage}
+\begin{frame}{Quantum Key Distribution (QKD)}
   \begin{itemize}[<+->]
-    \item Classically, our actions can only leak information
-    \item \ldots but quantum cryptography can \alert{grow shared secrecy}
-    \item We are ultimately performing \alert{quantum key expansion}
-    \item However, not much attention paid to this perspective
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Focus}
-  \begin{itemize}[<+->]
-    \item Initial secrecy used for authentication
-    \item Information-theoretic authentication \alert{necessarily} consumes shared secrecy
-    \begin{itemize} \item Tradeoffs and constructions \end{itemize}
-    \item Big-picture perspective: \alert{composable security}
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Motivation}
-  \begin{itemize}[<+->]
-    \item Theoretical: what are the \alert{fundamental limits} to expanding shared secrecy?
-    \item Practical: what is the impact in a \alert{realistic finite-key regime}, especially as part of a \alert{larger, real-world system}?
-    \begin{itemize} \item Computational security may not be enough \end{itemize}
+    \item Quantum processes are \alert{fundamentally indeterministic}
+    \item This can be used for \alert{cryptographic purposes}
+    \item Quantum correlations can be \alert{guaranteed to be private}
+    \item We can \alert{distill secret keys} from them
   \end{itemize}
 \end{frame}
 
 \note{
-  A hash function that provides computationally secure authentication against polynomial adversaries with \(s \leq \log 1/\epsilon\) is a one-way function, so proving computational security of authentication is harder than proving \({\rm P \neq NP}\).
+  Like good engineers, the first thing we try to do is figure out how we can use this.
 }
 
-\section{Security}
-
-\subsection{Composable Security}
-
-\begin{frame}{Building Blocks}
-  \begin{enumerate}[<+->]
-    \item Specify ideal primitives
-    \item Compose ideal primitives into complex system
-    \item Prove that system is secure
-    \item Bound the probability of deviation from specifications
-    \item Security of system follows by union bound
-      \[ \Pr(\Fail(P)) \leq \Pr\left( \bigcup_{i=1}^n \Fail(Q_i) \right) \leq \sum_{i=1}^n \Pr(\Fail(Q_i)) \]
-  \end{enumerate}
+\begin{frame}{Device-Independent Quantum Key Distribution (DIQKD)}
+  \begin{itemize}[<+->]
+    \item Many \alert{assumptions} about devices needed for QKD security
+    \item Impossible to rule out \alert{all possible device flaws}
+    \item DIQKD:\ certify privacy using \alert{device statistics} from \alert{Bell tests}
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Real and Ideal Systems}
+\note{
+  While our protocols may be secure in theory, the devices we choose to implement them may violate the assumptions of our proofs.
 
+  The behaviour is fully parametrised by a small set of easily measurable variables.
+}
+
+\begin{frame}{Wiring}
+  \begin{itemize}[<+->]
+    \item Connect multiple boxes together with wires
+    \item Overall system \alert{can still be used for DIQKD}
+    \item Will have different statistics
+    \item \alert{How can this be helpful for DIQKD?}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Objective}
+  \begin{itemize}[<+->]
+    \item The dream: \alert{efficient algorithm} to find \alert{best wiring}
+    \item If not possible, \alert{find out why}
+    \item Interim presentation: review approaches and techniques tried
+  \end{itemize}
+\end{frame}
+
+\section{Preliminaries}
+
+\subsection{Review}
+
+\begin{frame}{Bell Tests}
   \begin{onlyenv}<1>
     \begin{figure}
       \centering
       \begin{tikzpicture}
-        \tikzmath{\resw = 4;\resh = 1.5;\gap = 0.5;}
-        \draw (1,-\resh/2) rectangle ++(\resw, \resh);
-        \draw [->] (0,-\resh/4) node[anchor=east] {Alice} -- ++(0.5,0) node[label=above:\(M\)] {} -- ++(0.5+\resw/6,0) node [name=junction, inner sep=0pt] {} -- ++(0,-2*\resh/3) node[name=msgout, label=below:\(M\)] {};
-        \draw [->] (junction) -- ++(\resw/3, 0) ++(0,\resh/2) node[anchor=east] {\(\bot\)} -- ++(\resw/8, -\resh/8) node[name=control, inner sep=0pt] {} -- ++(\resw/8, -\resh/8) -- ++(\resw/2, 0) node[anchor=west] {Bob};
-        \draw [double] (control) -- (msgout -| control) node[label={below:\(\{0,1\}\)}] {};
-        \node at (1+\resw/2, -1.5*\resh) {Eve};
+        \tikzmath{\rows = 5; \cols = 3; \intra = 2; \inter = 2; \rheight = 1;
+        \nrowv = \rheight+\rheight; \theight = \rows*\rheight; 
+        \colm = \cols-1; \ncolh = \inter+\intra; \twidth = \colm*\inter+\cols*\intra;}
+        \draw (0,0) node {Alice} ++(\intra,0) node {Bob} ++(\inter,0) node {Alice} ++(\intra,0) node {Bob} ++(\inter,0) node {Alice} ++(\intra,0) node {Bob};
+        \foreach \v in {\rheight,\nrowv,...,\theight} {
+          \foreach \h in {0,\ncolh,...,\twidth} {
+            \tikzmath{int \a, \b, \x, \y;
+              \a = random(0,1); \b = random(0,1); \x = random(0,1); \y = random(0,1);
+              if \a == 1 then { let \aval = H; } else { let \aval = T; };
+              if \b == 1 then { let \bval = H; } else { let \bval = T; };
+              if \x == 1 then { let \afg = black; let \abg = white; } else { let \afg = white; let \abg = black; };
+              if \y == 1 then { let \bfg = black; let \bbg = white; } else { let \bfg = white; let \bbg = black; };
+            }
+
+            % TODO DOES NOT WORK
+            % \draw (\h, \v) node[coin={bg = \abg, fg = \afg}] {\aval} ++(\intra,0) node[coin={bg = \bbg, fg = \bfg}] {\bval};
+            \draw (\h, \v) node[circle,draw=\afg, text=\afg, fill=\abg,] {\aval} ++(\intra,0) node[circle,draw=\bfg, text=\bfg, fill=\bbg, ] {\bval}; 
+          }
+        }
+
+        \tikzmath{\ilineh = \intra+0.5*\inter; \nlineh = \ilineh+\intra+\inter;}
+        \foreach \h in {\ilineh, \nlineh} {
+          \path[draw=black] (\h, -0.5*\rheight) -- (\h, \theight+0.5*\rheight);
+        }
       \end{tikzpicture}
-      \caption{Ideal authenticated classical channel}%
+      \caption{Uncorrelated statistics}%
     \end{figure}
   \end{onlyenv}
 
@@ -369,24 +393,28 @@
     \begin{figure}
       \centering
       \begin{tikzpicture}
-        \tikzmath{\protw = 2; \proth = 3.5;\resw = 3;\resh = 1.5;\gap = 0.5;}
-        \draw [->] (0,1+\proth/2) -- ++(0.5,0) node[label=above:\(M\)] {} -- ++(0.5+0.2*\protw,0);
-        \draw (1,1) rectangle ++(\protw,\proth) node[name=Alice prot top right] {} +(-\protw/2, -\proth/2) node[anchor=center] {\(\begin{aligned} \bar{T} &= \\ &g_{\rv{S}}(M) \end{aligned} \)};
-        \draw (Alice prot top right) +(-\protw/2, \gap) node {Alice} ++(2*\gap + \resw + \protw/2, \gap) node {Bob};
+        \tikzmath{\rows = 5; \cols = 3; \intra = 2; \inter = 2; \rheight = 1;
+        \nrowv = \rheight+\rheight; \theight = \rows*\rheight; 
+        \colm = \cols-1; \ncolh = \inter+\intra; \twidth = \colm*\inter+\cols*\intra;}
+        \draw (0,0) node {Alice} ++(\intra,0) node {Bob} ++(\inter,0) node {Alice} ++(\intra,0) node {Bob} ++(\inter,0) node {Alice} ++(\intra,0) node {Bob};
+        \foreach \v in {\rheight,\nrowv,...,\theight} {
+          \foreach \h in {0,\ncolh,...,\twidth} {
+            \tikzmath{int \a, \b, \x, \y;
+              \x = random(0,1); \y = random(0,1);
+              if \x == 1 then { let \afg = black; let \abg = white; } else { let \afg = white; let \abg = black; };
+              if \y == 1 then { let \bfg = black; let \bbg = white; } else { let \bfg = white; let \bbg = black; };
+            }
 
-        \draw (Alice prot top right) ++(\gap,0) rectangle ++(\resw, -\resh) +(-\resw/2, \resh/2) node[anchor=center, name=PSK] {PSK};
-        \draw [->] (PSK) ++(-\gap,0) -- ++(-\gap,0) node[label=above:\(\rv{S}\)] {} -- ++(-\resw/2,0);
-        \draw [->] (PSK) ++(\gap,0) -- ++(\gap,0) node[label=above:\(\rv{S}\)] {} -- ++(\resw/2,0);
+            \draw (\h, \v) node[circle,draw=\afg, text=\afg, fill=\abg,] {H} ++(\intra,0) node[circle,draw=\bfg, text=\bfg, fill=\bbg, ] {H}; 
+          }
+        }
 
-        \draw (PSK) ++(\resw/2+\gap,\resh/2) rectangle ++(\protw,-\proth) node[name = Bob prot bot right] {} +(-\protw/2, \proth/2) node[anchor=center] {\(\begin{aligned} \bar{T}' &= \\ &g_{\rv{S}}(M') ? \end{aligned} \)};
-        \draw [<-] (2.5 + 2*\gap + 2*\protw + \resw, 1+\proth/2) -- ++(-0.75,0) node[label=above:\(M' : \bot\)] {}  -- ++(-0.5-0.2*\protw,0);
-
-        \draw (PSK) ++(-\resw/2,-\resh/2-\gap) rectangle ++(\resw, -\resh) ++(-\resw/2, \resh/2) node[align=center] {Insecure Classical \\ Channel} ++(0, -1.5*\resh) node {Eve};
-
-        \draw [->] (Alice prot top right) ++(-0.2*\protw, -0.8*\proth) -- ++(0.2*\protw + 2*\gap,0) -- ++(0,-0.75*\resh) node[label={below:\((M,\bar{T})\)}] {};
-        \draw [<-] (Bob prot bot right) ++(-0.8*\protw, 0.2*\proth) -- ++(-0.2*\protw - 2*\gap,0) -- ++(0,-0.75*\resh) node[label={below:\((M',\bar{T}')\)}] {};
+        \tikzmath{\ilineh = \intra+0.5*\inter; \nlineh = \ilineh+\intra+\inter;}
+        \foreach \h in {\ilineh, \nlineh} {
+          \path[draw=black] (\h, -0.5*\rheight) -- (\h, \theight+0.5*\rheight);
+        }
       \end{tikzpicture}
-      \caption{Real classical authentication system}%
+      \caption{Locally correlated statistics}%
     \end{figure}
   \end{onlyenv}
 
@@ -394,87 +422,35 @@
     \begin{figure}
       \centering
       \begin{tikzpicture}
-        \tikzmath{\resw = 5;\resh = 1;\gap = 0.5;let \conh = 3*\resh;}
-        \draw (1,-\resh/2) rectangle ++(\resw, \resh);
-        \draw [->] (0,-\resh/4) node[anchor=east] {Alice} -- ++(0.5,0) node[label=above:\(M\)] {} -- ++(0.5+\resw/6,0) node [name=junction, inner sep=0pt] {} -- ++(0,-\resh-\gap/2) node[name=msgout, label=right:\(M\)] {};
-        \draw [->] (junction) -- ++(\resw/3, 0) ++(0,\resh/2) node[anchor=east] {\(\bot\)} -- ++(\resw/8, -\resh/8) node[name=control, inner sep=0pt] {} -- ++(\resw/8, -\resh/8) -- ++(\resw/2, 0) node[anchor=west] {Bob};
-        \draw [double] (control) -- (msgout -| control) node[label={right:\(1:0\)}] {};
+        \tikzmath{\rows = 5; \cols = 3; \intra = 2; \inter = 2; \rheight = 1;
+        \nrowv = \rheight+\rheight; \theight = \rows*\rheight; 
+        \colm = \cols-1; \ncolh = \inter+\intra; \twidth = \colm*\inter+\cols*\intra;}
+        \draw (0,0) node {Alice} ++(\intra,0) node {Bob} ++(\inter,0) node {Alice} ++(\intra,0) node {Bob} ++(\inter,0) node {Alice} ++(\intra,0) node {Bob};
+        \foreach \v in {\rheight,\nrowv,...,\theight} {
+          \foreach \h in {0,\ncolh,...,\twidth} {
+            \tikzmath{int \a, \b, \x, \y;
+              \x = random(0,1); \y = random(0,1); \o = random(0,1);
+              if \o == 1 then { let \aval = H; let \bval = T; } else { let \aval = T; let \bval = H; };
+              if \x == 1 then { let \afg = black; let \abg = white; } else { let \afg = white; let \abg = black; };
+              if \y == 1 then { let \bfg = black; let \bbg = white; } else { let \bfg = white; let \bbg = black; };
+              if \x * \y != 1 then { let \bval = \aval; };
+            }
 
-        \draw (1,-\resh/2-\gap) rectangle ++(\resw, -\conh) node[name=converter bot right] {} ++(-\resw/4,-\gap) node[label={below:\((M',\bar{T}')\)}, name=evein, inner sep=0pt] {} ++(-\resw/4,-2*\gap) node {Eve} ++(-\resw/4,2*\gap) node[label={below:\((M,\bar{T})\)}, name=eveout, inner sep=0pt] {};
-        \draw [<-] (eveout) -- ++(0,2*\gap);
-        \draw [->] (evein) -- ++(0,2*\gap);
+            \draw (\h, \v) node[circle,draw=\afg, text=\afg, fill=\abg,] {\aval} ++(\intra,0) node[circle,draw=\bfg, text=\bfg, fill=\bbg, ] {\bval}; 
+          }
+        }
 
-        \draw [dashed] (converter bot right) ++(-\resw/4,\conh/2) node {\( \begin{aligned} (M,&\bar{T}) = \\ &(M',\bar{T}')? \end{aligned} \)} ++(-\resw/4,\conh/2) -- ++(0, -\conh) ++(-\resw/4,\conh/2) node {\(\bar{T} = g_{\rv{S}}(M)\)} ;
+        \tikzmath{\ilineh = \intra+0.5*\inter; \nlineh = \ilineh+\intra+\inter;}
+        \foreach \h in {\ilineh, \nlineh} {
+          \path[draw=black] (\h, -0.5*\rheight) -- (\h, \theight+0.5*\rheight);
+        }
       \end{tikzpicture}
-      \caption{Ideal authenticated classical channel with authentication system converter}%
-    \end{figure}
-  \end{onlyenv}
-
-  \begin{onlyenv}<3>
-    \begin{figure}
-      \centering
-      \begin{tikzpicture}
-        \tikzmath{\resw = 5;\resh = 1;\gap = 0.5;let \conh = 3*\resh;}
-        \draw (1,-\resh/2) rectangle ++(\resw, \resh);
-        \draw [->] (0,0) node[anchor=east] {Alice} -- ++(0.5,0) node[label=above:\(M\)] {} -- ++(0.5+\resw/6,0) node [name=junction, inner sep=0pt] {} -- ++(0,-\resh-\gap) node[name=msgout, label=right:\(M\)] {};
-        \draw [->] (junction) -- ++(\resw/3, 0) ++(0,-\resh/4) node[anchor=east] {\(\bot\)} -- ++(\resw/8, \resh/8) node[name=control, inner sep=0pt] {} -- ++(\resw/8, \resh/8) -- ++(\resw/2, 0) node[anchor=west] {Bob};
-        \draw [double] (control) -- (msgout -| control) node[label={right:\(1 : 0\)}] {};
-
-        \draw (1,-\resh/2-\gap) rectangle ++(\resw, -\conh) node[name=converter bot right] {} ++(-\resw/4,-\gap) node[label={below:\((M',T')\)}, name=evein, inner sep=0pt] {} ++(-\resw/4,-2*\gap) node {Eve} ++(-\resw/4,2*\gap) node[label={below:\((M,T)\)}, name=eveout, inner sep=0pt] {};
-        \draw [<-] (eveout) -- ++(0,2*\gap);
-        \draw [->] (evein) -- ++(0,2*\gap);
-
-        \draw [dashed] (converter bot right) ++(-\resw/4,\conh/2) node {\( \begin{aligned} (M,&T) = \\ &(M',T')? \end{aligned} \)} ++(-\resw/4,\conh/2) -- ++(0, -\conh) ++(-\resw/4,\conh/2) node {\(T = h_{\rv{K}}(M)\)} ;
-      \end{tikzpicture}
-      \caption{Ideal authenticated classical channel with authentication system converter}%
+      \caption{Nonlocally correlated statistics}%
     \end{figure}
   \end{onlyenv}
 \end{frame}
 
-\begin{frame}{Distinguishing Probabilities}
-  \begin{onlyenv}<1-3>
-    \begin{itemize}[<+->]
-      \item Distinguisher gets all outputs and controls all inputs
-      \item Distinguish real from ideal via \emph{deviations from ideality}
-        \[ D^* = \argmax_D P_D(\DistRI). \]
-      \item Probability of failure directly related to distinguishing probability
-        \[ \Pr(\Fail(\frR)) = 2P_{D^*}(\DistRI) - 1 \]
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<4->
-    \begin{itemize}[<+->]
-      \item Optimal distinguishing probability can be directly calculated
-      \item Classical: total variational distance
-        \[ d(P_{\frR}, P_{\frI}) = \frac{1}{2} \sum_{X \in \sX} \abs{P_{\frR}(X) - P_{\frI}(X)} \]
-      \item Quantum: trace distance
-        \[ \norm{\rho_{\frR} - \rho_{\frI}}_{\tr} = \frac{1}{2} \tr \abs{\rho_{\frR} - \rho_{\frI}} = \max_{0 \leq \Pi \leq \id} \tr\left[ \Pi(\rho_{\frR} - \rho_{\frI}) \right] \]
-    \end{itemize}
-  \end{onlyenv}
-\end{frame}
-
-\begin{frame}{Composable Authentication}
-  \begin{onlyenv}<1-4>
-    \begin{itemize}[<+->]
-      \item Only two possible strategies
-      \item Substitution: Send \((M',\bar{T}')\) after receiving \((M,\bar{T})\)
-        \[ \psubs = \max_{M',M,\bar{T}'} \Pr(g_{\rv{S}}(M') = \bar{T}'|g_{\rv{S}}(M) = \bar{T}) \]
-      \item Impersonation: Send \((M',\bar{T}')\) before receiving \((M,\bar{T})\)
-        \[ \pimpr = \max_{M',\bar{T}'} \Pr(g_{\rv{S}}(M') = \bar{T}') \]
-      \item Overall failure probability:
-        \[ \epsilon_{\auth} = \max\{ \pimpr, \psubs \} \]
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<5->
-    \begin{itemize}[<+->]
-      \item Information-theoretic bounds (\(\rv{\bar{T}} = g_{\rv{S}}(M), \rv{\bar{T}}' = g_{\rv{S}}(M')\))
-        \begin{align*}
-          \pimpr &\geq \max_{M'} \exp_2(-I(\rv{S};\rv{\bar{T}}')) = \max_{M'} \exp_2(-H(\rv{S})+H(\rv{S}|\rv{\bar{T}}')) \\
-          \psubs &\geq \max_{M} \exp_2(-H(\rv{S}|\rv{\bar{T}})) \\
-          \epsilon &\geq \exp_2\left( -\frac{H(\rv{S})}{2} \right) \Rightarrow H(\rv{S}) \geq 2 \log \frac{1}{\epsilon}
-        \end{align*}
-    \end{itemize}
-  \end{onlyenv}
-\end{frame}
+\subsection{Preliminary Results}
 
 \section{Authentication}
 
@@ -575,7 +551,7 @@
   \end{onlyenv}
   \begin{onlyenv}<17->
     \begin{figure}
-      \includegraphics[width=\linewidth]{ktplot.pdf}
+      % \includegraphics[width=\linewidth]{ktplot.pdf}
     \end{figure}
   \end{onlyenv}
 \end{frame}
@@ -644,13 +620,13 @@
 
   \begin{onlyenv}<7>
     \begin{figure}
-      \includegraphics[width=\linewidth]{msplot.pdf}
+      % \includegraphics[width=\linewidth]{msplot.pdf}
     \end{figure}
   \end{onlyenv}
 
   \begin{onlyenv}<8->
     \begin{figure}
-      \includegraphics[width=\linewidth]{mscomp.pdf}
+      % \includegraphics[width=\linewidth]{mscomp.pdf}
     \end{figure}
   \end{onlyenv}
 \end{frame}
@@ -822,13 +798,13 @@
 
 \begin{frame}{Results}
   \begin{onlyenv}<1>
-      \includegraphics[width=\linewidth]{diffgoodexpr.pdf}
+      % \includegraphics[width=\linewidth]{diffgoodexpr.pdf}
   \end{onlyenv}
   \begin{onlyenv}<2>
-      \includegraphics[width=\linewidth]{diffgoodkr.pdf}
+      % \includegraphics[width=\linewidth]{diffgoodkr.pdf}
   \end{onlyenv}
   \begin{onlyenv}<3>
-      \includegraphics[width=\linewidth]{diffbadkr.pdf}
+      % \includegraphics[width=\linewidth]{diffbadkr.pdf}
   \end{onlyenv}
 \end{frame}
 
