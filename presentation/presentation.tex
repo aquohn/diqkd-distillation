@@ -494,6 +494,8 @@
   \begin{onlyenv}<5->
   \begin{itemize}[<+->]
     \item Focus on \emph{binary-output} settings
+    \item \emph{Marginals}:
+      \[ \angleb{A_x} \coloneqq p(a=1|x) - p(a=0|x) \qquad \angleb{B_y} \coloneqq p(b=1|y) - p(b=0|y) \]
     \item \emph{Correlators}:
       \[ \angleb{A_x B_y} \coloneqq p(a=b|xy) - p(a\neq b|xy) \]
     \item \emph{Quantum bit error rate} (QBER):
@@ -552,6 +554,23 @@
   \end{onlyenv}
 \end{frame}
 
+\begin{frame}{Established Security Results}
+    \begin{itemize}[<+->]
+    \item \emph{Devetak-Winter key rate}
+      \[ r_{\DW}(p) \coloneqq {H(A|E)}_{\rho} - {H(A|B)}_{\rho} \leq C_{\sk}(p) \]
+    \item \emph{Standard protocol} in \((i_A, o_A, i_B, o_B) = (2,2,3,2)\)
+      \begin{itemize}
+        \item Randomly and publicly flip half of the outputs
+        \item CHSH test on \(x, y \in \{0,1\}\)
+        \item Generate key on \(x=0\), \(y=2\)
+      \end{itemize}
+    \item Bound Eve's knowledge using CHSH
+      \[ {H(A|E)}_{\rho} \geq {H_S(A|E)}_{\rho} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right) \]
+    \item Standard protocol key rate
+      \[ r_{\DW} \geq r_{\std} = \max \left\{ 0, {H_S(A|E)}_{\rho} - h_2(Q) \right\} \]
+    \end{itemize}
+\end{frame}
+
 \subsection{Preliminary Results}
 
 \begin{frame}{Experimental Model}
@@ -586,11 +605,11 @@
     \item \emph{Half-space}: subset of \(\R^d\) that obeys \emph{affine constraint} \(\matr{A}\cvec{x} - \cvec{b} \leq 0\)
     \item \emph{Polytopes} are unions of half-spaces
     \item \(\NSs\) and \(\Ls\) are polytopes, \alert{\(\Qs\) is not}
-    \item Polytopes completely specified by either \emph{vertices} or half-space inequalities (constraints)
+    \item Polytopes completely specified by either \emph{vertices} or half-space inequalities (constraints/\emph{facets})
   \end{itemize}
 \end{frame}
 
-\begin{frame}{NS Vertices}
+\begin{frame}{Nonlocal Behaviours}
   \begin{onlyenv}<1>
     \begin{figure}
       \centering
@@ -616,8 +635,13 @@
   \end{onlyenv}
 
   \begin{onlyenv}<2->
-    \begin{itemize}
-      \item 
+    \begin{itemize}[<+->]
+      \item Nonlocal behaviours are \emph{convex combinations} of PR behaviour and some local behaviour
+        \[ p = qp_{\PR} + (1-q)p_{\Ls} \]
+      \item 8 permutations of linear CHSH function
+      \[ \abs{\angleb{A_{x_0} B_{y_0}} + \angleb{A_{x_1} B_{y_0}} + \angleb{A_{x_0} B_{y_1}} - \angleb{A_{x_1} B_{y_1}}} \leq 2 \]
+      \item 8 corresponding PR boxes, each maximally violating 1 facet
+      \item All nonlocal behaviours can be mapped into this region by permuting labels
     \end{itemize}
   \end{onlyenv}
 \end{frame}
@@ -625,10 +649,36 @@
 \begin{frame}{The QKD Setting}
   \begin{itemize}[<+->]
     \item Standard DIQKD setting: \((i_A, o_A, i_B, o_B) = (2,2,3,2)\)
+    \item Can choose 2 of Bob's 3 inputs for CHSH \(\Rightarrow 3 \times 8 = 24\) \emph{liftings} of CHSH
+    \item These are the only nontrivial facets of \(\Ls\)
+    \item \(1 : 1\) ratio between facets and PR boxes is broken
+      \begin{itemize}
+        \item Different PR boxes violating a facet have different statistics for the irrelevant setting
+        \item Each PR box can violate multiple facets
+      \end{itemize}
   \end{itemize}
+  \begin{onlyenv}<+->
+    \begin{block}{Possible Approach}
+      Can all behaviours by mapped into a specific region by symmetry? Can statistics when \(y=2\) improve our estimate of Eve's information?
+    \end{block}
+  \end{onlyenv}
 \end{frame}
 
+\note{
+  In my report there's a bunch of very nicely formatted tables that give us the statistics for these PR analogue behaviours, but if I show this here your eyes are just going to glaze over, so you'll have to take my word for it.
+}
+
 \subsection{Local Wirings}
+
+\begin{frame}{Resource Theory}
+  \begin{itemize}[<+->]
+    \item \emph{Converting} between \emph{nonfree resources} using \emph{free actions} and \emph{free resources}
+    \item \(R_2\) can be converted from \(R_2\): \(R_1 \leadsto R_2\)
+    \item \emph{Multi-copy local operations with shared randomness} for \(c\) copies:
+      \[ p(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \]
+      \[ \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{r_A r_B} \chi_A(a\cvec{x}^c r_A|\cvec{a}^cx) \chi_B(b\cvec{y}^c r_B|\cvec{b}^cy) p_r(r_A r_B) \]
+  \end{itemize}
+\end{frame}
 
 \section{Key Rate Bounds}
 
