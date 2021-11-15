@@ -123,12 +123,21 @@
 \newcommand{\floor}[1]{\left\lfloor#1\right\rfloor} % enables \floor{} for floor delimiter
 \newcommand{\cvec}[1]{\boldsymbol{\mathbf{#1}}}    % shortcut for column vectors
 \newcommand{\rvec}[1]{\boldsymbol{\mathbf{#1}}^{T}} % shortcut for transposed row vectors
-\newcommand{\matr}[1]{\left[#1\right]} % shortcut for matrices
-\newcommand{\matrp}[2]{\left[#1#2\right]} % shortcut for matrices with subscripts/superscripts
+\newcommand{\Z}{\mathbb{Z}} % for integers
+\newcommand{\R}{\mathbb{R}} % for reals
+\newcommand{\C}{\mathbb{C}} % for complex
+\newcommand{\dintv}[2]{\left\{#1,\ldots,#2\right\}}
+\newcommand{\ocintv}[2]{\left(#1,#2\right]}
+\newcommand{\cointv}[2]{\left[#1,#2\right)}
+\newcommand{\ccintv}[2]{\left[#1,#2\right]}
+\newcommand{\oointv}[2]{\left(#1,#2\right)}
+\newcommand{\matr}[1]{\left[\mathbf{#1}\right]} % shortcut for matrices
+\newcommand{\matrp}[2]{\left[\mathbf{#1}#2\right]} % shortcut for matrices with subscripts/superscripts
 \newcommand{\rv}[1]{\boldsymbol{\mathbf{#1}}} % random variable
-\newcommand{\tr}{\mathrm{tr}} % enables Trace operator
-\newcommand{\id}{\mathrm{id}} % enables Trace operator
+\newcommand{\Tr}{\mathrm{Tr}} % enables trace operator
+\newcommand{\id}{\mathrm{id}} % enables id operator
 \newcommand{\E}{\mathbb{E}} % expectation
+\newcommand{\angleb}[1]{\left\langle #1 \right\rangle} % physicist's notation for mean
 
 \newenvironment{Array}[1] % less cramped display mode arrays
 {\def\arraystretch{1.75}\everymath={\displaystyle}\[\begin{array}{#1}}
@@ -137,7 +146,10 @@
 \usepackage{mathtools}
 \usepackage{tikz}
 \usepackage{tikzscale} % include .tikz files with includegraphics and scale them
-\usetikzlibrary{shapes, shapes.geometric, automata, positioning, arrows.meta, decorations.markings,decorations.pathreplacing, intersections, math}
+\usetikzlibrary{shapes, shapes.geometric, automata, positioning, arrows.meta, decorations.markings,decorations.pathreplacing, intersections, math, 3d, backgrounds}
+\newcommand{\expandidx}[2]{%
+  \expandafter#1\expandafter{\the\numexpr#2\relax}%
+}
 
 \tikzset{%
   >={Stealth}, % makes the arrow heads bold
@@ -246,6 +258,7 @@
 \newcommand{\sZ}{\mathcal{Z}}
 \newcommand{\cE}{\mathcal{E}}
 \newcommand{\cF}{\mathcal{F}}
+\newcommand{\cP}{\mathcal{P}}
 
 \newcommand{\AU}{\mathrm{AU}_{2}}
 \newcommand{\AXU}{\mathrm{AXU}_{2}}
@@ -265,6 +278,20 @@
 \newcommand{\rob}{\rm rob}
 \newcommand{\cor}{\rm cor}
 \newcommand{\secur}{\rm sec}
+\newcommand{\erob}[1]{\epsilon_{\rob}^{(#1)}}
+
+\newcommand{\HC}{\mathrm{HC}}
+\newcommand{\MC}{\mathrm{MC}}
+
+\newcommand{\Ls}{\mathcal{L}}
+\newcommand{\Qs}{\mathcal{Q}}
+\newcommand{\NSs}{\mathcal{NS}}
+\newcommand{\PR}{\mathrm{PR}}
+\newcommand{\sWB}{\mathcal{WB}}
+\newcommand{\sk}{\rm sk}
+\newcommand{\DW}{\rm DW}
+\newcommand{\std}{\rm std}
+\newcommand{\crit}{\rm crit}
 
 \setbeameroption{hide notes} % Only slides
 % \setbeameroption{show only notes} % Only notes
@@ -339,7 +366,7 @@
     \item Connect multiple boxes together with wires
     \item Overall system \alert{can still be used for DIQKD}
     \item Will have different statistics
-    \item \alert{How can this be helpful for DIQKD?}
+    \item \alert{Can this be helpful for DIQKD?}
   \end{itemize}
 \end{frame}
 
@@ -450,363 +477,166 @@
   \end{onlyenv}
 \end{frame}
 
+\begin{frame}{Nonlocal Statistics}
+  \begin{onlyenv}<1-4>
+  \begin{itemize}[<+->]
+    \item Alice: input \(x\), output \(a\); Bob: input \(y\), output \(b\)
+    \item Full statistics: \emph{behaviour} \(p(ab|xy)\)
+    \item Must fulfill \emph{no-signalling conditions}
+      \begin{gather*}
+        \sum_b p(ab|xy) = p(a|xy) = p(a|x)\;\forall a,x,y \\
+        \sum_a p(ab|xy) = p(b|xy) = p(b|y)\;\forall b,x,y
+      \end{gather*}
+    \item \emph{Setting}: \((i_A, o_A, i_B, o_B)\)
+    \[ x \in \dintv{1}{i_A}, a \in \dintv{1}{o_A}, y \in \dintv{1}{i_B}, b \in \dintv{1}{o_B} \]
+  \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<5->
+  \begin{itemize}[<+->]
+    \item Focus on \emph{binary-output} settings
+    \item \emph{Correlators}:
+      \[ \angleb{A_x B_y} \coloneqq p(a=b|xy) - p(a\neq b|xy) \]
+    \item \emph{Quantum bit error rate} (QBER):
+      \[ Q_{xy} \coloneqq p(a \neq b|xy) = \frac{1-\angleb{A_x B_y}}{2} \]
+    \item \emph{Clauser-Horne-Shimony-Holt} (CHSH) function in \((2,2,2,2)\):
+      \[ S \coloneqq \angleb{A_0 B_0} + \angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1} \]
+  \end{itemize}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Nonlocal Behaviours}
+  \begin{itemize}[<+->]
+    \item \emph{Local set} \(\Ls\): \(p(ab|xy) = p(a|x)p(b|y)\)
+    \item \emph{Quantum set} \(\Qs\): \(p(ab|xy) = \Tr\left[ \left(M_{a|x} \otimes N_{b|y}\right) \rho_{AB} \right]\)
+    \item \emph{No-signalling set} \(\NSs\) defined by no-signalling conditions
+    \item \(\Ls \subsetneq \Qs \subsetneq \NSs\)
+    \item \(\abs{S(p_{\Ls})} \leq 2\), \(\abs{S(p_{\Qs})} \leq 2\sqrt{2}\), \(\abs{S(p_{\NSs})} \leq 4\)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{DIQKD Security}
+  \begin{itemize}[<+->]
+    \item \(\rho_{A^n B^n E^n}\): Alice--Bob--Eve ccq state after \(n\) Bell tests
+    \item DIQKD protocol \(\mathfrak{P}_{\omega}\) with public data in \(D\) and key of length \(\ell\)
+      \[ \mathfrak{P}_{\omega}\left[\rho_{A^n B^n E^n}\right] \mapsto \omega_{K_A K_B E^n D} \]
+    \item \emph{Universally composable} \(\epsilon\)-security
+      \[ (1-\erob{n})\Delta_{\Tr}(\omega_{K_A K_B E^n D}, \tau_{K_A K_B}^{\ell} \otimes \rho_{E^n} \otimes \omega_D) \leq \epsilon \]
+    \item \emph{Robustness} \(\erob{n}\), \emph{trace distance} \(\Delta_{\Tr}(\rho, \sigma) = \frac{1}{2}\norm{\rho - \sigma}_1\), \emph{ideal key} \(\tau_{K_A K_B}^{\ell}\)
+      \[ \tau_{K_A K_B}^{\ell} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{K_A} \otimes \ket{j}\bra{j}_{K_B} \]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Asymptotic DIQKD Security}
+  \begin{onlyenv}<1-2>
+    \begin{itemize}[<+->]
+    \item \emph{Asymptotic key rate}
+      \[ r(\mathfrak{P}_{\omega}, \rho) = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\erob{n}) \frac{\ell_n}{n} \]
+      over all sequences \(\{\ell_n\}\) with asymptotically vanishing \(\epsilon\)
+    \[ \lim_{n\to\infty} (1-\erob{n})\Delta_{\Tr}(\omega_{K_A K_B E^n D}, \tau_{K_A K_B}^{\ell_n} \otimes \rho_{E^n} \otimes \omega_{D}) = 0 \]
+    \item Rounds are effectively i.i.d.\ in asymptotic limit: \(\rho_{A^n B^n E^n} \approx_{n\to\infty} \rho_{ABE}^{\otimes n}\)
+  \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<3->
+    \begin{itemize}[<+->]
+    \item qqq state \(\rho_{Q_A Q_B E}\) measured using measurement strategy \(\sM\), a set of POVMs \({\{{\{M_{a|x}\}}_{a}, {\{N_{b|y}\}}_{b}\}}_{x,y}\)
+    \[ \sum_{a} M_{a|x} = I_{Q_A}\;\forall x \qquad M_{a|x} \geq 0\;\forall a, x \]
+    \[ \sum_{b} N_{b|y} = I_{Q_B}\;\forall y \qquad N_{b|y} \geq 0\;\forall b, y \]
+  \item Behaviour given by
+      \[ p(ab|xy) = \cP(\rho, \sM) = \Tr\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right] \]
+    \item \emph{Secret key capacity} of a behaviour \(p\)
+      \[ C_{\sk}(p) = \sup_{\mathfrak{P}_{\omega}} \inf_{ \substack{
+            \cP(\rho, \sM) = p
+        }
+      } r(\mathfrak{P}_{\omega}, \rho_{ABE}) \]
+  \end{itemize}
+  \end{onlyenv}
+\end{frame}
+
 \subsection{Preliminary Results}
 
-\section{Authentication}
-
-\subsection{Authenticating Single Messages}
-
-\begin{frame}{Universal Hashing}
+\begin{frame}{Experimental Model}
   \begin{itemize}[<+->]
-    \item Hash family:
-      \[ {\{h_K : {\{0,1\}}^m \to {\{0,1\}}^t, h_K(M) = T \}}_{K \in {\{0,1\}}^k} \]
-    \item With \(\rv{K} \in {\{0,1\}}^k\) uniformly, for all \(M, M_1, M_2, T\):
-      \begin{align*}
-        \eAU &: \Pr\left( h_{\rv{K}}(M) = T \right) \leq \epsilon \\
-        \eAXU &: \Pr\left( h_{\rv{K}}(M_1) \oplus h_{\rv{K}}(M_2) = T \right) \leq \epsilon, M_1 \neq M_2
-      \end{align*}
-    \item \(\epsilon \geq 2^{-t}\) by normalisation
+    \item Probability \(n_c\) for source to not produce anything
+    \item Efficiency \(\eta\): probability that detector will detect signal
+    \item Error conditions assigned to outcome \(0\)
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Authentication Codes}
-  \begin{onlyenv}<1-5>
-    \begin{itemize}[<+->]
-      \item Computationally unbounded adversary can invert hash (substitution attack)
-      \item Decrease \(\psubs\) by increasing \( \min_M H(\rv{S}|g_{\rv{S}}(M))\)
-      \item Encrypt tag with OTP (total secret length \(s = k + t\))
-        \[ \rv{S} = \rv{K} \concat \bar{\rv{K}}, g_{\rv{S}}(M) = h_{\rv{K}}(M) \oplus \bar{\rv{K}} \]
-      \item The constructed family is \(\eASU\): \(\forall M_1, M_2, T_1, T_2\),
-        \[ \Pr\left( g_{\rv{S}}(M_1) = \bar{T}_1 \right) = 2^{-t} \Rightarrow \pimpr = 2^{-t} \]
-        \[ \Pr\left( g_{\rv{S}}(M_1) = \bar{T}_1, g_{\rv{S}}(M_2) = \bar{T}_2 \right) \leq \epsilon 2^{-t} \Rightarrow \psubs \leq \epsilon \]
-      \item \(\eASU\) families are authentication codes with failure probability \(\epsilon\)
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<6-8>
-    \begin{itemize}[<+->]
-      \item Exponential scaling of \(m\) with \(s\)
-        \[ s \geq t + \log \frac{1}{\epsilon} + \log \floor{\frac{m}{t}} \]
-        valid when
-        \[ \frac{m}{t} < \sqrt{2^{s-t+1} \left(1-2^{-t}\right)} - \frac{1}{2} \]
-      \item Linear scaling of \(m\) with \(s\)
-        \[
-          s \geq \log \left( 1 + \frac{2^{m}{(2^{t}-1)}^2}{\epsilon2^{t}(2^{m}-1) + 2^{t}-2^{m}} \right)
-        \]
-      \item Exponential scaling dominates when 
-        \[ \epsilon > \left(1 + \frac{t}{m - t}\right) 2^{-t} \]
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<9->
-    \begin{itemize}[<+->]
-      \item Another bound on authentication codes
-        \[ s \geq \log m + 2 \log \frac{1}{\epsilon} - \log \log \frac{1}{\epsilon} \]
-      \item Only shown tight for \(m \lesssim t^2\)
-      \item All of these bounds preclude the information-theoretic limit
-        \[ s \geq 2 \log \frac{1}{\epsilon} \]
-    \end{itemize}
-  \end{onlyenv}
+\begin{frame}{N-AND Wiring}
+  \begin{itemize}[<+->]
+    \item Overall input \(x\) and overall output \(a\) for \(N\) boxes
+    \item Broadcast input and AND-gate output
+      \[ x_i = x\;\forall i \in \dintv{1}{i} \]
+      \[ a = \prod_{i=1}^N a_i \]
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Constructions}
-  \begin{onlyenv}<1-7>
-    \begin{itemize}[<+->]
-      \item Toeplitz matrix \(\matr{H}\)
-        \begin{itemize}
-          \item Generating sequence \({(b_i)}_{i=-(m-1)}^{t-1}\):
-          \item \(\matr{H}_{ij} = b_{i-j}\)
-          \item Hash: \(\matr{H}M = T\)
-        \end{itemize}
-      \item Equivalent to discrete convolution of \({(b_i)}_{i=-(m-1)}^{t-1}\) and \(M\)
-      \item Strongly universal (\(\eASU\) with \(\epsilon = 2^{-t}\))
-      \item \(t+m-1\) bit sequence can be generated from \(k\) secret bits, giving \(\eAXU\) with
-        \[ \epsilon = \frac{1}{2^t} + \frac{t + m - 1}{2^{k/2}} \]
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<8-11>
-    \begin{itemize}[<+->]
-      \item Polynomial hash: interpret message as
-        \[ q = \ceil{\frac{m}{t}}, i \in [1,q], A_i \in {\{0,1\}}^t, M = A_1 \concat \cdots \concat A_q \]
-      \item \(\eAXU, \epsilon = q2^{-t}\)
-        \[ {\left\{ h^*_K : {\{0,1\}}^m \to {\{0,1\}}^t, h^*_K(M) = \bigoplus_{i=1}^q {A_i}K^i \right\}}_{K \in {\{0,1\}}^t} \]
-      \item \(\eAU\), \(\epsilon = 2^{-t}\)
-        \[
-          {\left\{ \bar{h}^*_K : {\{0,1\}}^m \to {\{0,1\}}^t, \bar{h}^*_K(M) = MK \bmod 2^t \right\}}_{K \in {\{0,1\}}^m}
-        \]
-      \item \(\eAU\), \(\epsilon = (q-1)2^{-t}\)
-        \[
-          {\left\{ \tilde{h}^*_K : {\{0,1\}}^m \to {\{0,1\}}^t, \tilde{h}^*_K(M) = \bigoplus_{i=1}^q {A_i}K^{i-1} \right\}}_{K \in {\{0,1\}}^t}
-        \]
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<12-16>
-    \begin{itemize}[<+->]
-      \item Authentication achieves bounds for integer \(m/t\) 
-      \item \(\eAU\) functions are optimal
-      \item Finite field arithmetic with power-of-2 field size is efficient
-        \begin{itemize}
-          \item Require only bit shift, XOR and comparison CPU instructions
-          \item \(O(t)\) operations per multiplication, \(O(m)\) per polynomial evaluation
-        \end{itemize}
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<17->
+\begin{frame}{Result}
     \begin{figure}
-      % \includegraphics[width=\linewidth]{ktplot.pdf}
+      \includegraphics[width=\linewidth]{exptplt.pdf}
     \end{figure}
-  \end{onlyenv}
 \end{frame}
 
-\newcommand{\insec}{\frC_{A \leftrightarrow B}}
-\newcommand{\authkt}{\frA^{k+t}_{A \to B}}
-\newcommand{\authm}{\frA^{m}_{A \to B}}
-\newcommand{\Ei}{{\rm Ei}}
+\section{Behaviours and Wirings}
 
-\begin{frame}{Interactive Authentication}
-  \begin{onlyenv}<1-4>
-    \begin{itemize}[<+->]
-      \item Ultimate bound of \(H(\rv{S}) = 2 \log 1/\epsilon\) is achievable with interactive authentication
-      \item Unidirectional authenticated channel \(\authkt\), insecure bidirectional channel \(\insec\), \(\eAXU\) family \(\{h_K\}\)
-      \item Choose tag and key uniformly at random and recursively authenticate
-      \item Only base case authentication requires secrecy
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<5>
+\subsection{The QKD Setting}
 
-    \begin{Array}{rcl}
-      \text{\textbf{Alice:}} & & \text{\textbf{Bob:}} \\
-      \rv{T}_A \xleftarrow{\text{Uniform}} {\{0,1\}}^t & & \\
-      (M, \rv{T}_A) & \xrightarrow{\qquad \insec \qquad} & (M', \rv{T}_A') \\
-                    & & \rv{K}_B \xleftarrow{\text{Uniform}} {\{0,1\}}^k \\
-      \rv{K}_B' & \xleftarrow{\qquad \insec \qquad} & \rv{K}_B \\
-      \rv{T}_C \coloneqq h_{\rv{K}_B'}{(M)} \oplus \rv{T}_A & & \\
-      (\rv{K}_B', \rv{T}_C) & \xrightarrow{\qquad \authkt \qquad} & (\rv{K}_B', \rv{T}_C) \\
-    \end{Array}
-    \[ (\rv{K}_B', \rv{T}_C) = (\rv{K}_B, h_{\rv{K}_B}{(M')} \oplus \rv{T}_A') \? M' : \bot \]
-  \end{onlyenv}
-  \begin{onlyenv}<6->
-    \begin{itemize}[<+(1)->]
-      \item Bob accepts if
-        \[ h_{\rv{K}_B}(M') \oplus h_{\rv{K}_B}(M) = \rv{T}_A \oplus \rv{T}_A' \]
-      \item Without \(\authkt\) failure, this occurs in \(i\)th round with probability \(\epsilon_i\) for \(\epsilon_i\)-\({\rm AXU_2}\) hash
-      \item Since \(\authkt\) is recursively constructed, it fails with probability \( \epsilon' = \sum_{j=1}^{i-1} \epsilon_j \)
-      \item Total probability of failure over \(n\) rounds
-        \[ \hat{\epsilon}_n = \epsilon' + \epsilon_n = \sum_{i=1}^n \epsilon_i \]
-    \end{itemize}
-  \end{onlyenv}
-\end{frame}
-
-\begin{frame}{Optimal Interactive Authentication}
-  \begin{onlyenv}<1-3>
-    \begin{itemize}[<+->]
-      \item Total error only depends on \(\eAXU\) family
-      \item Polynomial hashing saturates bounds on \(\eAXU\)
-      \item Fix \(q = m/t\) to be constant in each round
-        \[ m_{i+1} = qt_{i+1} = \frac{qm_i}{2} \Rightarrow m_n = \frac{q^n}{2^{n-1}} t_1 \]
-        \[ k_n = t_n = \frac{m_n}{q} = \frac{q^{n-1}}{2^{n-1}} t_1 \]
-        \[ \epsilon_n = q \exp_2 \left( -\frac{q^{n-1}}{2^{n-1}} t_1 \right) \]
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<4-6>
-    \begin{itemize}[<+->]
-      \item For a target \(\hat{\epsilon}\), fix
-        \[ k_1 = t_1 = \log \frac{1}{\hat{\epsilon}} + \mu \Rightarrow \epsilon_1 = q 2^{-\mu} \hat{\epsilon} \]
-      \item Total error is bounded as \(n \to \infty\)
-        \[ \lim_{n \to \infty} \hat{\epsilon}_n \leq  \epsilon_1 - \frac{q\Ei(\ln (\epsilon_1/q) )}{\ln (q/2)} \]
-        for \(\Ei(x) = \int_{-\infty}^{x} \frac{e^{t}}{t} \dif{t}\).
-      \item Explicitly, \(\hat{\epsilon}_n \leq \hat{\epsilon}\) if
-        \[ q \leq \frac{\hat{\epsilon} \ln (3/2)}{2^{-\mu} \hat{\epsilon} \ln (3/2) - \Ei(-\mu \ln 2 + \ln \hat{\epsilon})} \]
-    \end{itemize}
-  \end{onlyenv}
-
-  \begin{onlyenv}<7>
-    \begin{figure}
-      % \includegraphics[width=\linewidth]{msplot.pdf}
-    \end{figure}
-  \end{onlyenv}
-
-  \begin{onlyenv}<8->
-    \begin{figure}
-      % \includegraphics[width=\linewidth]{mscomp.pdf}
-    \end{figure}
-  \end{onlyenv}
-\end{frame}
-
-\subsection{Authenticating Multiple Messages}
-
-\begin{frame}{Strategies}
+\begin{frame}{Polytopes}
   \begin{itemize}[<+->]
-    \item Multiple messages per QKD round
-    \item Multiple rounds of QKD
-    \item Two possible strategies
-      \begin{itemize}
-        \item Key recycling: reuse \(\rv{K}\) between rounds
-        \item Concatenation: store all classical communications, do not authenticate anything until end of protocol
-      \end{itemize}
+    \item \emph{Half-space}: subset of \(\R^d\) that obeys \emph{affine constraint} \(\matr{A}\cvec{x} - \cvec{b} \leq 0\)
+    \item \emph{Polytopes} are unions of half-spaces
+    \item \(\NSs\) and \(\Ls\) are polytopes, \alert{\(\Qs\) is not}
+    \item Polytopes completely specified by either \emph{vertices} or half-space inequalities (constraints)
   \end{itemize}
 \end{frame}
 
-\newcommand{\srecyc}{s_{\rm recyc}}
-\newcommand{\sconcat}{s_{\rm concat}}
-
-\begin{frame}{Optimality}
-  \begin{onlyenv}<1-4>
-    \begin{itemize}[<+->]
-      \item \(\sconcat < \srecyc\) for authentication achieving the following bounds
-        \begin{itemize}
-          \item Fundamental lower bound, achievable with interactive authentication
-            \[ s \geq 2 \log \frac{1}{\epsilon} \]
-          \item Non-tight one-way authentication
-            \[ s \geq \log m + 2 \log \frac{1}{\epsilon} - \log \log \frac{1}{\epsilon} \]
-          \item Polynomial hash authentication code
-        \end{itemize}
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<5-6>
-    \begin{itemize}[<+->]
-      \item We must recycle the longest key, so
-        \[ \srecyc = \max_i \{k_i\} + \sum_{i=1}^n t_i \quad \sconcat = k + t \]
-      \item For polynomial hashing, \(k = t\), \(m = qt\), \(\epsilon = q/2^t\):
-        \begin{align*}
-          \epsilon &= \sum_{i=1}^n \epsilon_i = \sum_{i=1}^n \frac{q_i}{2^{t_i}} \Rightarrow q = \sum_{i=1}^n q_i 2^{t-t_i} \\
-          m &= qt = \sum_{i=1}^n m_i = \sum_{i=1}^n q_i t_i \Rightarrow \sum_{i=1}^n q_i 2^{t-t_i} t = \sum_{i=1}^n q_i t_i
-        \end{align*}
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<7->
-    \begin{itemize}[<+->]
-      \item We compare the terms in \[ \sum_{i=1}^n q_i 2^{t-t_i} t = \sum_{i=1}^n q_i t_i \]
-      \item If \(\sum_{i=1}^n q_i t \leq \sum_{i=1}^n q_i t_i\), there must exist \(t_a \geq t\), and so \(\max_i \{t_i\} \geq t_a\)
-        \[ \max_i \{t_i\} + \sum_{i=1}^n t_i \geq t_a + \sum_{i \neq a} t_i + t_a \geq 2t \]
-      \item If \(\sum_{i=1}^n q_i t \geq \sum_{i=1}^n q_i t_i\), there must exist \(2^{t-t_a} < 1 \Rightarrow t_a \geq t\), and the same argument applies
-      % \item Otherwise, \(\forall i,\,2^{t-t_i} \leq 1 \Rightarrow \forall i,\,t_i \geq t\)
-    \end{itemize}
-  \end{onlyenv}
-\end{frame}
-
-\section{Quantum Key Expansion}
-
-\subsection{Proving Security}
-
-\begin{frame}{Overview}
-  \begin{onlyenv}<1-6>
-  \begin{itemize}[<+->]
-    \item Measure \(m\) signals, use \(k\) for parameter estimation, \(n\) for key generation, obtain final keys \(L^A, L^B\) of length \(l\)
-    \item Measurement overlap \(\hat{c} \geq 1/2\), expected channel error \(\delta'\), tolerated error \(\hat{\epsilon}\)
-    \item Ideal behaviour: output \(L^A = L^B\), uniformly distributed
-    \item Correctness
-      \[ \epsilon_{\cor} = \Pr(L^A \neq L^B) \]
-    \item Security
-      \[ \epsilon_{\secur} = \norm{\rho_{LE} - \chi_L \otimes \rho_{E}}_{\tr} \]
-    \item Robustness
-      \[  \epsilon_{\rob} = \Pr(L = \bot | \E[\rv{\delta}] \leq \delta') \]
-  \end{itemize}
-  \end{onlyenv}
-
-  \begin{onlyenv}<7->
-  \begin{itemize}[<+->]
-    \item Overall requirement
-      \[ \epsilon_{\cor} + \epsilon_{\secur} + \epsilon_{\auth} \leq \hat{\epsilon} \]
-    \item Expected key expansion ratio
-      \[ \hat{r} = (1-\epsilon_{\rob}) \frac{l}{s_{\auth}} \]
-    \item Expected key rate
-      \[ \bar{r} = (1-\epsilon_{\rob}) \frac{l - s_{\auth}}{m} \]
-      \[ \lim_{m \to \infty} \bar{r} = \log \frac{1}{\hat{c}} - 2h_2(\delta') \]
-  \end{itemize}
-  \end{onlyenv}
-\end{frame}
-
-\begin{frame}{BBM92 QKD Protocol}
+\begin{frame}{NS Vertices}
   \begin{onlyenv}<1>
-    \begin{Array}{rcl}
-      \text{\textbf{Alice:}} & & \text{\textbf{Bob:}} \\
-      X \coloneqq \cE^{\meas}_{N_{\meas}} [\rho_{A}] & \xrightarrow{N_{\meas}, N_{\perm}} & X' \coloneqq \cE^{\meas}_{N_{\meas}} [\rho_{B}] \\
-      (X_{\pe}, X_{\key}) \coloneqq \cE^{\perm}_{N_{\perm}} [X] & & (X'_{\pe}, X'_{\key}) \coloneqq \cE^{\perm}_{N_{\perm}} [X']  \\
-                                                                & \xrightarrow{\qquad X_{\pe} \qquad} & d_H(X_{\pe}, X'_{\pe}) \leq k\delta \? \\
-      Z \coloneqq E^{\ir}(X_{\key}) & \xrightarrow{\qquad Z \qquad} & \hat{X}_{\key} \coloneqq D^{\ir}(X'_{\key}, Z) \\
-      T_{\ir} \coloneqq h^{\ir}_{K_{\ir}}(X_{\key}) & \xrightarrow{\quad K_{\ir}, T_{\ir} \quad} & \hat{T}_{\ir} \coloneqq h^{\ir}_{K_{\ir}}(\hat{X}_{\key}) \\
-                                                    & & T_{\ir} = \hat{T}_{\ir} \? \\
-      L^A \coloneqq h^{\pa}_{K_{\pa}}(X_{\key}) & \xrightarrow{\qquad K_{\pa} \qquad} & L^B \coloneqq h^{\pa}_{K_{\pa}}(\hat{X}_{\key}) \\
-    \end{Array}
+    \begin{figure}
+      \centering
+      \begin{tikzpicture}[z={(0:1)}, x={(-55:0.5)}] % set projection of unit vectors onto screen
+        \tikzmath{ \raylen = 3; }
+        \draw[dotted] (0,0,0) node[name=boundbehav, point, label=\(p_{\Ls}^{(0)}\)] {} -- ++(0,\raylen,0) node[name=prbehav, point, label=\(p_{\PR}\)] {};
+        \begin{scope}[canvas is xz plane at y=0]
+          \tikzmath{
+            coordinate \L;
+            int \i;
+            for \i in {1,2,...,8}{
+              let \lname = lbehav\i;
+              { \draw (22.5+45*\i:\raylen) node[point, name=\lname, label=\(p_{\Ls}^{(\i)}\)] {} -- (prbehav); };
+            };
+          }
+        \begin{pgfonlayer}{background}
+        \fill[draw,fill=blue!20,fill opacity=0.5] (lbehav1.center) -- (lbehav2.center) -- (lbehav3.center) -- (lbehav4.center) -- (lbehav5.center) -- (lbehav6.center) -- (lbehav7.center) -- (lbehav8.center) -- (lbehav1.center);
+        \end{pgfonlayer}
+        \end{scope}
+      \end{tikzpicture}
+      \caption{Representation of behaviours that violate \(S \leq 2\), with CHSH facet in blue}%
+    \end{figure}
   \end{onlyenv}
-  \begin{onlyenv}<2>
-    \begin{Array}{|c|c|c|}
-      \hline
-      m_{\auth}^{(1)} & N_{\meas}, N_{\perm} & m + \log \binom{m}{k} \\
-      m_{\auth}^{(2)} & X_{\pe} & k \\
-      m_{\auth}^{(3)} & Z, K_{\ir}, T_{\ir} & \log \abs{\sZ} + k_{\ir} + t_{\ir} \\
-      m_{\auth}^{(4)} & K_{\pa} & k_{\pa} \\
-      \hline
-    \end{Array}
-  \end{onlyenv}
-\end{frame}
 
-\begin{frame}{Security}
-  \begin{onlyenv}<1-3>
-    \begin{itemize}[<+->]
-      \item Quantum LHL
-        \[ \epsilon_{\secur} \leq \frac{1}{2} \sqrt{ \exp_2\left( l - H^{\epsilon}_{\min}(X|E) \right) } + 2\epsilon \]
-      \item Quantum LHL for \(\mu\)-\({\rm AU}_2\) hash functions
-        \[ \epsilon_{\secur} \leq \frac{1}{2} \sqrt{ (2^l\mu-1) + \left(\frac{2}{\eta^2} + \frac{1}{1-\epsilon}\right) 2^{ l - H^{\epsilon}_{\min}(X|E) } } + 2\epsilon + 2\eta \]
-      \item Min-entropy bound
-        \[ H^{\epsilon}_{\min}(X|E) \geq n\left[\log\frac{1}{\hat{c}}-h_2(\delta+\nu)\right] -\leakir -t_{\ir} \]
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<4->
-    \begin{itemize}[<+->]
-      \item Smoothing \(\epsilon\) is bounded by
-        \[ \epsilon \leq \sqrt{ \exp\left( -\frac{2mk\zeta^2}{n+1} \right) + \exp\left( -2\gamma(m,\delta,\zeta) \left[ {(n(\nu-\zeta))}^2 - 1 \right] \right) } \]
-        \[ \gamma(m,\delta,\zeta) = \frac{1}{m(\delta+\zeta)+1} + \frac{1}{m-m(\delta+\zeta)+1} \]
-        for \(\zeta \leq \nu\), \(m(\delta+\zeta) \in \mathbb{Z}^+\) and \((\nu-\zeta) \geq 1/n\)
+  \begin{onlyenv}<2->
+    \begin{itemize}
+      \item 
     \end{itemize}
   \end{onlyenv}
 \end{frame}
 
-\begin{frame}{Robustness}
+\begin{frame}{The QKD Setting}
   \begin{itemize}[<+->]
-    \item Robustness
-      \[ \epsilon_{\rob} = \underbrace{\Pr(D^{\ir}(X'_{\key}, Z) \neq X_{\key})}_{\epsilon_{\rob}^{\ir}} + \underbrace{\Pr(d_H(X_{\pe}, X'_{\pe}) > k\delta)}_{\epsilon_{\rob}^{\pe}} \]
-    \item Chernoff-based bound given \(\E[\rv{\delta}] = \delta'\)
-      \[ \epsilon_{\rob}^{\pe} \leq \exp\left[ k\delta\left( 1 - \ln\left( \frac{\delta}{\delta'} \right) \right) - k\delta'  \right] \]
+    \item Standard DIQKD setting: \((i_A, o_A, i_B, o_B) = (2,2,3,2)\)
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Reconciliation}
-    \begin{itemize}[<+->]
-      \item \(\{h^{\ir}\}\) is \(\epsilon_{\cor}\)-\({\rm AU}_2\)
-      \item Information reconciliation: source coding with side information
-        \[ \leakir \leq \log H(X_{\key}|X'_{\key}) \leq \log \abs{\sZ} \]
-      \item Relatively neglected; we use the following achievability result
-        \[ \log \abs{\sZ} \leq \xi(n, \epsilon_{\rob}^{\ir}; \delta) \times nh_2(\delta) + \frac{1}{2} \log n + O(1) \]
-        \[ \xi(n, \epsilon; \delta) = 1 + \frac{1}{\sqrt{n}} \frac{\sqrt{v_2(\delta)}}{h_2(\delta)} \Phi^{-1}(1 - \epsilon) \]
-        \[ \Phi^{-1}(p) = \Pr(\mathcal{N}(\mu=0,\sigma=1) < p) \]
-        \[ v_2(\delta) = \delta(1-\delta) {\left( \log \frac{\delta}{1-\delta} \right)}^2 \]
-    \end{itemize}
-\end{frame}
+\subsection{Local Wirings}
 
+\section{Key Rate Bounds}
 
-\subsection{Numerical Results}
+\subsection{Upper Bounds}
 
-\begin{frame}{Scenarios}
-  \begin{enumerate}[<+->]
-    \item ``Toeplitz stack'': use Toeplitz hash for everything, authenticate messages one by one
-    \item Polynomial one-way: use polynomial hash for everything, authenticate messages with concatenation
-    \[ \{\bar{h}^* \circ \tilde{h}^* : {\{0,1\}}^{n} \to {\{0,1\}}^{l}\} \]
-    \item Polynomial universal: polynomial one-way, but use \(\{\bar{h}^*_K\}\) for privacy amplification
-    \item Polynomial interactive: polynomial universal, but use interactive authentication
-  \end{enumerate}
-\end{frame}
+\subsection{Lower Bounds}
 
-\begin{frame}{Results}
-  \begin{onlyenv}<1>
-      % \includegraphics[width=\linewidth]{diffgoodexpr.pdf}
-  \end{onlyenv}
-  \begin{onlyenv}<2>
-      % \includegraphics[width=\linewidth]{diffgoodkr.pdf}
-  \end{onlyenv}
-  \begin{onlyenv}<3>
-      % \includegraphics[width=\linewidth]{diffbadkr.pdf}
-  \end{onlyenv}
-\end{frame}
+\subsection{Nonlocality Monotones}
 
 \section*{Conclusion}
 

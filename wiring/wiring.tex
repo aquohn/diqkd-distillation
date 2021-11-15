@@ -341,7 +341,7 @@
   The behaviours we are most interested in are those in the \emph{quantum set} \(\Qs\), where \(\Ls \subsetneq \Qs \subsetneq \NSs\), which is the set of behaviours achievable according to quantum theory. This is important because, until quantum theory is superseded, the devices we engineer can only achieve behaviours within \(\Qs\). Notably, the quantum set is \emph{not} a polytope, with boundaries that are curved rather than defined by linear inequalities. This contributes very significantly to the difficulty of analysing DIQKD.\@
 
   We focus primarily on \emph{binary-output} settings, that is, settings where \(o_A = o_B = 2\), which are simpler to analyse and more helpful for applications. In this case, we can express many statistics of interest in language reminiscent of quantum theory. We define the \emph{observables} \(A_x\) and \(B_y\) for each value of \(x\) and \(y\), respectively, acting on Alice and Bob's respective Hilbert spaces\footnote{More formally, then, the observables are \(A_x \otimes I_B\) and \(I_A \otimes B_y\)}:
-  \[ A_x = -\Pi_{A_x}^{(0)} + \Pi_{A_x}^{(1)} \qquad B_y = -\Pi_{B_y}^{(0)} + \Pi_{B_y}^{(1)} \]
+  \[ A_x \coloneqq -\Pi_{A_x}^{(0)} + \Pi_{A_x}^{(1)} \qquad B_y \coloneqq -\Pi_{B_y}^{(0)} + \Pi_{B_y}^{(1)} \]
 
   These Hermitian operators have eigenvalues \(-1\) and \(+1\),\footnote{This can be considered the ``physicist's convention'' for labelling the outputs. Another convention to take note of has \(0 \mapsto 1\) and \(1 \mapsto 2\), which is typically followed in code in languages with 1-based array indexing, such as MATLAB and Julia. This convention is used more for the measurement settings. We will clarify which convention we are using and try to avoid switching between conventions unnecessarily, but we will hold \(\{0,1,\ldots\}\) to be the ``actual'' measurement settings and outputs.} corresponding to the projectors \(\Pi_{U_i}^{(o)}\), which project onto the subspace of player \(U\)'s system that corresponds to measurement outcome \(o\) when using setting \(i\). Each round can then be considered a measurement of the observables corresponding to the chosen measurement setting on an unknown quantum state prepared by the DIQKD system.
 
@@ -381,7 +381,7 @@
 
     Let \(A^n\), \(B^n\) and \(E^n\) be the systems of Alice, Bob, and Eve respectively after executing \(n\) rounds of Bell tests, and let their joint \emph{ccq} (classical-classical-quantum) state be \(\rho_{A^n B^n E^n}\), so called because \(A^n\) and \(B^n\) store classical Bell test data, while Eve's system is quantum.
 
-    A DIQKD protocol \(\mathfrak{P}_{\omega}\) maps \(\rho_{A^n B^n E^n} \mapsto \omega_{K_A K_B E^n D}\), where \(K_A\) and \(K_B\) are Alice and Bob's keys, respectively, while \(D\) is the public data that is communicated during the protocol. Alice and Bob's key is \(\epsilon\)-\emph{secure} if \(\omega_{K_A K_B E^n D}\) satisfies~\cite{SecurityQKD}
+    A DIQKD protocol \(\mathfrak{P}_{\omega}\) maps \(\rho_{A^n B^n E^n} \mapsto \omega_{K_A K_B E^n D}\), where \(K_A\) and \(K_B\) are Alice and Bob's keys of length \(\ell\), respectively, while \(D\) is the public data that is communicated during the protocol. Alice and Bob's key is \(\epsilon\)-\emph{secure} if \(\omega_{K_A K_B E^n D}\) satisfies~\cite{SecurityQKD}
     \begin{equation}
       (1-\erob{n})\Delta_{\Tr}(\omega_{K_A K_B E^n D}, \tau_{K_A K_B}^{\ell} \otimes \rho_{E^n} \otimes \omega_D) \leq \epsilon,
     \end{equation}
@@ -420,7 +420,7 @@
 
     Therefore, we can write Alice, Bob and Eve's state before distillation as
     \[ \rho_{A^n B^n E^n} = \rho_{ABE}^{\otimes n}, \]
-    where the systems \(A\), \(B\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. This data is derived from measurements on a \emph{qqq} state \(\rho_{Q_A Q_B E}\). The measurements on \(Q_A\) and \(Q_B\) are characterised by the \emph{positive operator-valued measures} (POVMs)  \({\{M_{a|x}\}}_{a}\) and \({\{N_{b|y}\}}_{b}\) respectively, \({\{M_{a|x}\}}_{a}\) corresponding to output \(a\) and \({\{N_{b|y}\}}_{b}\) corresponding to output \(b\). The operators in a POVM are constrained to have
+    where the systems \(A\), \(B\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. This data is derived from measurements on a \emph{qqq} state \(\rho_{Q_A Q_B E}\). The measurements on \(Q_A\) and \(Q_B\), given the input settings \((x,y)\), are characterised by the \emph{positive operator-valued measures} (POVMs)  \({\{M_{a|x}\}}_{a}\) and \({\{N_{b|y}\}}_{b}\) respectively, \(M_{a|x}\) corresponding to output \(a\) and \(N_{b|y}\) corresponding to output \(b\). The operators in a POVM are constrained to have
     \[ \sum_{a} M_{a|x} = I_{Q_A}\;\forall x \qquad M_{a|x} \geq 0\;\forall a, x \qquad \sum_{b} N_{b|y} = I_{Q_B}\;\forall y \qquad N_{b|y} \geq 0\;\forall b, y, \]
     where \(M \geq 0\) means that the operator is positive-semidefinite, and \(\Tr\left[\rho M\right]\) gives the probability of obtaining the measurement outcome associated with \(M\) when measured on a state \(\rho\). The behaviour is then given by
     \begin{equation}\label{eqn:probmeas}
@@ -432,11 +432,11 @@
     \begin{equation}\label{eqn:seckeycap}
       C_{\sk}(p) = \sup_{\mathfrak{P}_{\omega}} \inf_{ \substack{
           \rho_{Q_A Q_B E}, \\
-          {\{M_{a|x}\}}_x, {\{N_{b|y}\}}_y
+          {\{M_{a|x}\}}_a, {\{N_{b|y}\}}_b
         }
       } r(\mathfrak{P}_{\omega}, \rho_{ABE}),
     \end{equation}
-    where \(\rho_{Q_A Q_B E}\), \({\{M_{a|x}\}}_x\), and \({\{N_{b|y}\}}_y\) satisfy \Cref{eqn:probmeas}, and we minimise over these parameters in order to give as much of an advantage as possible to Eve, since we cannot rule anything else out based on the behaviour. Computing the secret key capacity is the fundamental question that DIQKD research is trying to answer:
+    where \(\rho_{Q_A Q_B E}\), \({\{M_{a|x}\}}_a\), and \({\{N_{b|y}\}}_b\) satisfy \Cref{eqn:probmeas}, and we minimise over these parameters in order to give as much of an advantage as possible to Eve, since we cannot rule anything else out based on the behaviour. Computing the secret key capacity is the fundamental question that DIQKD research is trying to answer:
     \begin{funqn}\label{fqn:cap}
       Can we design an algorithm to compute the secret key capacity of an arbitrary behaviour?
     \end{funqn}
@@ -456,7 +456,7 @@
     \end{equation}
     where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, and where \(S\) is calculated from \(x,y \in \{0,1\}\). Therefore,
     \begin{equation}
-      r_{\DW} \geq r_{S} = \max \left\{ 0, {H_S(A|E)}_{\rho} - h_2(Q) \right\},
+      r_{\DW} \geq r_{\std} = \max \left\{ 0, {H_S(A|E)}_{\rho} - h_2(Q) \right\},
     \end{equation}
     where we refer to \(r_{\std}\) as the \emph{standard protocol key rate}. Being the rate for an explicit, achievable protocol, this is a lower bound for the total secrecy extractable. However, because the proof of the bound involves explicitly constructing the states and measurements that gives the greatest advantage to Eve while still producing the observed value of \(S\), it is also an upper bound for any method for computing key rates for this protocol based only on \(S\), since the observed \(S\) could have been produced by those states.
 
@@ -844,7 +844,7 @@
         \caption{\label{fig:genubound} Upper bounds based on \Cref{eqn:genubound} for a specific CHSH-based implementation, with either Bell-diagonal states or isotropic states used in the decomposition. The bounds from quantum intrinsic nonlocality~\cite{DIQKD_Limits}, and a bound for the intrinsic nonlocality based on intrinsic information~\cite[Appendix B]{RevisedPeres}, are plotted for comparison. (Source:~\cite{CCSquashedEntangle})}
       \end{figure}
 
-      Let \(\sM\) be a set of POVMs \(\{{\{M_{a|x}\}}_{a}\), \({\{N_{b|y}\}}_{b}\}_{x,y}\), and let \(\cP(\rho, \sM)\) be the behaviour when the state \(\rho = \rho_{Q_A Q_B}\) is measured according to \(\sM\), where we drop the subscripts in this definition. Then, for an arbitrary LOPC protocol, even with two-way information reconciliation, we have~\cite[Thm. 3]{CCSquashedEntangle}
+      Let \(\sM\) be a set of POVMs \({\{{\{M_{a|x}\}}_{a}, {\{N_{b|y}\}}_{b}\}}_{x,y}\), and let \(\cP(\rho, \sM)\) be the behaviour when the state \(\rho = \rho_{Q_A Q_B}\) is measured according to \(\sM\), where we drop the subscripts in this definition. Then, for an arbitrary LOPC protocol, even with two-way information reconciliation, we have~\cite[Thm. 3]{CCSquashedEntangle}
       \begin{equation}\label{eqn:genubound}
         C_{\sk}(p) \leq \inf_{\substack{\rho, \sM : \\ p = \cP(\rho, \sM) }} \inf_{\substack{q : \\ \rho = (1-q)\rho^{NL} + q\rho^L}} (1-q) E_R(\rho^{NL}) + q E_R(\rho^L),
       \end{equation}
