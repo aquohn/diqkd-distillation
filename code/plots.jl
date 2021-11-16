@@ -14,30 +14,38 @@ includet("maxcorr.jl")
 # Constants
 
 # Impt states
-EaxQ = [0.0, 0.0]
-EbyQ = [0.0, 0.0, 0.0]
-EabxyQ = [1/sqrt(2) 1/sqrt(2) 1
+const EaxQ = [0.0, 0.0]
+const EbyQ = [0.0, 0.0, 0.0]
+const EabxyQ = [1/sqrt(2) 1/sqrt(2) 1
           1/sqrt(2) -1/sqrt(2) 0]
 
-Eaxbound = [0.0, 0.0]
-Ebybound = [0.0, 0.0, 0.0]
-Eabxybound = [0.5 0.5 0.5
+const Eaxbound = [0.0, 0.0]
+const Ebybound = [0.0, 0.0, 0.0]
+const Eabxybound = [0.5 0.5 0.5
               0.5 -0.5 0.5]
 
-EaxPR = [0.0, 0.0]
-EbyPR = [0.0, 0.0, 0.0]
-EabxyPR = [1.0 1.0 1.0;
+const EaxPR = [0.0, 0.0]
+const EbyPR = [0.0, 0.0, 0.0]
+const EabxyPR = [1.0 1.0 1.0;
            1.0 -1.0 1.0]
 
-Eaxmix = [0.0, 0.0]
-Ebymix = [0.0, 0.0, 0.0]
-Eabxymix = [0.0 0.0 0.0
+const Eaxmix = [0.0, 0.0]
+const Ebymix = [0.0, 0.0, 0.0]
+const Eabxymix = [0.0 0.0 0.0
             0.0 0.0 0.0]
 
-EaxLD = [1.0, 1.0]
-EbyLD = [1.0, 1.0, 1.0]
-EabxyLD = [1.0 1.0 1.0
+const EaxLD = [1.0, 1.0]
+const EbyLD = [1.0, 1.0, 1.0]
+const EabxyLD = [1.0 1.0 1.0
            1.0 1.0 1.0]
+function werner_corrs(v)
+  EaxW = v * EaxQ + (1-v) * Eaxmix
+  EbyW = v * EbyQ + (1-v) * Ebymix
+  EabxyW = v * EabxyQ + (1-v) * Eabxymix
+  return Correlators(Eax, Eby, EabxyW)
+end
+
+v_L = 0.6829; v_NL = 0.6964; v_crit = 0.7263
 
 # %%
 # Pironio rates
@@ -92,7 +100,7 @@ function maxcorrval_from_probs(pax, pby, pabxy, xysel, modesel)
     end
 end
 
-# TODO unify data functions
+# TODO standardise data functions: 3ddata vs data, and all to return aux info
 
 function maxcorr_data(is, js, HAB::Function, HAE::Function, corrf::Function;
     xysel=(0,0), modesel=:reg, type::Type{T} = Float64) where {T <: Real}
@@ -109,6 +117,25 @@ function maxcorr_data(is, js, HAB::Function, HAE::Function, corrf::Function;
   end
 
   return pts, rhos
+end
+
+function maxcorr_data3d(is, js, HAB::Function, HAE::Function, corrf::Function;
+    type::Type{T} = Float64, kwargs...) where {T <: Real}
+  kwd = Dict(kwargs)
+  xysel = get(kwd, :xysel, (0,0))
+  modesel = get(kwd, :modesel, :reg)
+  il = length(is); jl = length(js)
+  pts = Array{Tuple{T, T}}(undef, il, jl)
+  rhos = Array{T}(undef, il, jl)
+
+  for ii in eachindex(is), ji in eachindex(js)
+    i = is[ii]; j = js[ji]
+    Eax, Eby, Eabxy = corrf(i, j)
+    pabxy, pax, pby = probs_from_corrs(Eax, Eby, Eabxy)
+    pts[ii, ji] = (HAB(pabxy, pax, pby)[1], HAE(pabxy, pax, pby)[1], maxcorrval_from_probs(pabxy, pax, pby, xysel, modesel))
+  end
+
+  return pts
 end
 
 function grad_data(is, js, HAB::Function, HAE::Function, corrf::Function, gradf::Function;
@@ -145,9 +172,10 @@ end
 function farkas_wiring_data(n, HAE::Function, HAB::Function; c = 2, iterf = nothing, policy = wiring_policy)
   maxrecs = Union{WiringData, Nothing}[]
   for i in 1:n
-    Eax = EaxLD * (i-1)/n + EaxQ * (n-i+1)/n
-    Eby = EbyLD * (i-1)/n + EbyQ * (n-i+1)/n
-    Eabxy = EabxyLD * (i-1)/n + EabxyQ * (n-i+1)/n
+    EaxW, EbyW, EabxyW = werner_corrs(v_crit)
+    Eax = EaxLD * (i-1)/n + EaxW * (n-i+1)/n
+    Eby = EbyLD * (i-1)/n + EbyW * (n-i+1)/n
+    Eabxy = EabxyLD * (i-1)/n + EabxyW * (n-i+1)/n
     pax, pby, pabxy = probs_from_corrs(Eax, Eby, Eabxy)
 
     recs = diqkd_wiring_eval(pax, pby, pabxy, HAE, HAB, c=c, iterf=iterf, policy=policy)
@@ -167,7 +195,7 @@ function farkas_wiring_data(n, HAE::Function, HAB::Function; c = 2, iterf = noth
 end
 
 # %%
-# Compute values given behaviour params
+# Given i, minimum j reqd for r > 0
 
 function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname, corrf::Function; kwargs...) where T <: Real
   kwargs = Dict(kwargs)
@@ -179,10 +207,12 @@ function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname,
   rs = T[Correlators(corrf(i, j)...) |> krf for i in is, j in js]
   basezeros = Tuple{T,T}[]
   for ii in eachindex(is)
+    # find elements close to 0
     jis = filter(ji -> abs(rs[ii, ji]) < tol, eachindex(js))
     if isempty(jis)
       continue
     end
+    # find maximum of these elements
     maxj = map(ji -> js[ji], jis) |> maximum
     push!(basezeros, (is[ii], maxj))
   end
@@ -207,32 +237,54 @@ function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname,
 end
 
 # %%
-# Generate points in a space of behaviours
+# Correlation functions
 
-function qset_plot(QLDsamples = 100, boundsamples = 100, kwargs...)
-  fIs = range(0,1,length=boundsamples) |> collect
-  fLDs = range(0,1,length=QLDsamples) |> collect
+function qset_corrf()
   corrf = (fI, fLD) -> (((1-fI) .* (((1-fLD) .* EaxQ) .+ (fLD .* EaxLD))) .+ (fI .* Eaxbound),
                      ((1-fI) .* (((1-fLD) .* EbyQ) .+ (fLD .* EbyLD))) .+ (fI .* Ebybound),
                      ((1-fI) .* (((1-fLD) .* EabxyQ) .+ (fLD .* EabxyLD))) .+ (fI .* Eabxybound),)
-  return wiring_plot(fIs, fLDs, "Isotropic fraction", "Deterministic fraction", corrf, kwargs=kwargs)
+  return corrf
 end
 
-function expt_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.925, ncstart=0.8, kwargs...)
-  ncs = range(ncstart, stop=1, length=ncsamples)
-  etas = range(etastart, stop=1, length=etasamples)
+function qset_wiring_plot(QLDsamples = 100, boundsamples = 100, kwargs...)
+  fIs = range(0,1,length=boundsamples) |> collect
+  fLDs = range(0,1,length=QLDsamples) |> collect
+  return wiring_plot(fIs, fLDs, "Isotropic fraction", "Deterministic fraction", qset_corrf(), kwargs=kwargs)
+end
 
+function expt_corrf(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi])
   Atlds, Btlds, ABtlds = meas_corrs(theta=theta, mus=mus, nus=nus)
   tldcorrs = Correlators(Atlds, Btlds, ABtlds)
   corrf = (nc, eta) -> expt_corrs(nc, eta, tldcorrs...)
+  return corrf
+end
 
+function expt_wiring_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.925, ncstart=0.8, kwargs...)
+  ncs = range(ncstart, stop=1, length=ncsamples)
+  etas = range(etastart, stop=1, length=etasamples)
+  corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
   return wiring_plot(ncs, etas, L"n_c", L"\eta", corrf, kwargs=kwargs)
 end
+
+function new_expt_maxcorr_plt(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.925, ncstart=0.8, kwargs...) 
+  names = Dict{Symbol, String}(:x => "H(A|B)", :y => "H(A|E)", :z => "Maximal Correlation",
+                               :i => L"n_c", :j => L"\eta", :set => "Experimental Model"
+                              )
+  ncs = range(ncstart, stop=1, length=ncsamples)
+  etas = range(etastart, stop=1, length=etasamples)
+  corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
+  return ij_xyz_plot(ncs, etas, dataf, names, kwargs=kwargs)
+end
+
+
+
+# %%
+# Plot key rates over points
 
 # %%
 # Compute values given behaviour params TODO make generic
 
-function entropy_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=20, etasamples=5, etastart=0.8, kwargs...)
+function expt_grad_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=20, etasamples=5, etastart=0.8, kwargs...)
   ncs = range(0, stop=1, length=ncsamples)
   etas = range(etastart, stop=1, length=etasamples)
 
@@ -269,7 +321,8 @@ function entropy_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, 
   return plt
 end
 
-function maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Array{T}=[2.8*pi, 1.23*pi, pi], ncsamples=20, etasamples=100, etastart::T=0.65, kwargs...) where T <: Real
+function expt_maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Array{T}=[2.8*pi, 1.23*pi, pi],
+    ncsamples=20, etasamples=100, etastart::T=0.65, kwargs...) where T <: Real
   kwargs = Dict(kwargs)
   ncs = range(0, stop=1, length=ncsamples)
   etas = range(etastart, stop=1, length=etasamples)
@@ -289,12 +342,10 @@ function maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Arra
   rhomax = maximum(x->isnan(x) ? -Inf : x, rhos)
 
   etas_const_nc = range(etastart, stop=1, length=50)
-  corrf = (nc, eta) -> expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
   const_nc, const_nc_rhos = maxcorr_data([0.0], etas_const_nc, HAB_oneway, HAE_CHSH, corrf; xysel=xysel, modesel=modesel)
 
   # show Devetak-Winter frontier
   greyscheme = ColorPalette(ColorScheme([colorant"grey", colorant"grey"]))
-  # plt = plot([(0, 0, 0), (1, 1, rhomax), (-0.01, 0, rhomax), (1.01, 1, 0)], st=:mesh3d, colorbar_entry=false, seriescolor=greyscheme, alpha=0.5, label="Devetak-Winter bound", xlabel=L"H(A|B)",ylabel=L"H(A|E)",zlabel=L"\max_{x,y} \rho(A,B|x,y)", xlims=Hlims[1], ylims=Hlims[2])
   plt = plot([(0, 0, 0), (1, 1, rhomax), (-0.01, 0, rhomax), (1.01, 1, 0)], st=:mesh3d, colorbar_entry=false, seriescolor=greyscheme, alpha=0.5, label="Devetak-Winter bound", xlabel="H(A|B)",ylabel="H(A|E)",zlabel="Maximal Correlation", xlims=Hlims[1], ylims=Hlims[2])
 
   # find S region
@@ -324,6 +375,75 @@ function maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Arra
     for line in lines(cl)
       _xs, _ys = coordinates(line) # coordinates of this line segment
       _zs = 0 .* _xs
+      plot!(plt, _xs, _ys, _zs, linecolor=:black, primary=false, label="$contourlabel = $lvl") # add curve on x-y plane
+    end
+  end
+
+  return plt
+end
+
+function DW_frontier_plot(plt, xs, ys, zs)
+  # show Devetak-Winter frontier
+  uss = [filter(u -> isfinite(u), vec(us)) for us in (xs, ys, zs)]
+  ptmins = [min(us) for us in uss]
+  ptmaxs = [max(us) for us in uss]
+  ptranges = [ptmaxs[i] - ptmins[i] for i in eachindex(uss)]
+  ptlims = [(ptmins[i]-0.1*ptranges[i], ptmaxs[i]+0.1*ptranges[i]) for i in eachindex(uss)]
+
+  greyscheme = ColorPalette(ColorScheme([colorant"grey", colorant"grey"]))
+  DW_corners = [(ptmins[1], ptmins[2], ptmins[3]), 
+                (ptmaxs[1], ptmaxs[2], ptmaxs[3]),
+                (ptmins[1] - 0.01*ptranges[1], ptmins[2], ptmaxs[3]),
+                (ptmaxs[1] + 0.01*ptranges[1], ptmaxs[2], ptmins[3])]
+  plot!(plt, DW_corners, st=:mesh3d, colorbar_entry=false, seriescolor=greyscheme, alpha=0.5, label="Devetak-Winter bound")
+end
+
+function ij_xyz_plot(is, js, dataf, names::Dict{Symbol, S}, kwargs...) where {T <: Real, S <: AbstractString}
+  kwargsd = Dict(kwargs)
+  contoursel = get(kwargsd, :contoursel, :z)
+  ncontours = get(kwargsd, :ncontours, 10)
+  addplotf = get(kwargsd, :addplotf, (plt, xs, ys, zs) -> nothing)
+  contourzf = get(kwargsd, :contourrzf, (lvl, _x, _y) -> lvl)
+  imax, imin, ilen = maximum(is), minimum(is), length(is)
+  jmax, jmin, jlen = maximum(js), minimum(js), length(js)
+
+  pts = dataf(is, js, kwargs=kwargs)
+  xs, ys, zs = [Array{T}(undef, ilen, jlen) for i in 1:3]
+  for ii in 1:ilen, ji in 1:jlen
+    xs[ii, ji], ys[ii, ji], zs[ii, ji] = pts[ii, ji]
+  end
+  plt = plot(xs, ys, zs, xlabel=names[:x], ylabel=names[:y], zlabel=names[:z], label=names[:set], st = :surface)
+
+  # boundary
+  boundvals = [(imin, js), (imax, js), (is, jmin), (is, jmax)]
+  consts = vcat([dataf(b..., kwargs=kwargs) |> vec for b in boundvals]...)
+  plot!(plt, vec([(c[1], c[2], 0) for c in consts]), primary=false, linecolor=:blue, label="Boundary")
+
+  # contours
+  if contoursel == :i
+    izs = Array{T}(undef, ilen, jlen)
+    for ii in 1:ilen, ji in 1:jlen
+      izs[ii, ji] = is[ii]
+    end
+    contourdata = levels(contours(xs, ys, izs, ncontours))
+    contourlabel = names[:i]
+  end
+  if contoursel == :j
+    jzs = Array{T}(undef, ilen, jlen)
+    for ii in 1:ilen, ji in 1:jlen
+      jzs[ii, ji] = js[ji]
+    end
+    contourdata = levels(contours(xs, ys, jzs, ncontours))
+    contourlabel = names[:j]
+  else
+    contourdata = levels(contours(xs, ys, zs, ncontours))
+    contourlabel = names[:z]
+  end
+  for cl in contourdata
+    lvl = level(cl) # the z-value of this contour level
+    for line in lines(cl)
+      _xs, _ys = coordinates(line) # coordinates of this line segment
+      _zs = contourzf(lvl, _x, _y)
       plot!(plt, _xs, _ys, _zs, linecolor=:black, primary=false, label="$contourlabel = $lvl") # add curve on x-y plane
     end
   end

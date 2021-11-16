@@ -655,25 +655,6 @@
       \end{equation}
       where \(\cvec{a}^c = (a_1, a_2, \ldots, a_c)\) is the vector of all the outputs from Alice's boxes that are wired together, with analogous definitions for \(\cvec{b}^c\), \(\cvec{x}^c\) and \(\cvec{y}^c\), and with \(\chi_A\) and \(\chi_B\) restricted to \(\{0,1\}\).
 
-      This precise definition of wiring allows us to state a simple no-go theorem.
-      \begin{theorem}[No Fundamental One-Way Improvement from Wiring]
-        Wiring cannot increase the Devetak-Winter key rate. Therefore, it can only be used to achieve the Devetak-Winter key rate if restricted to one-way settings. However, it may increase the key rate in two-way settings, so it may increase the secret key capacity overall. 
-      \end{theorem}
-      \begin{proof}
-        Consider the Devetak-Winter key rate evaluated using all Bell test data and normalised:
-        \[ r_{\DW} = \frac{H(A^n|E^n) - H(A^n|B^n)}{H(A^n)}. \]
-        Wiring involves the application of a deterministic function, possibly selected over public communication. Deterministic actions cannot change the entropy, and since the shared randomness is given to Eve as well, both conditional entropies decrease by the same amount. Formally, if \(D\) holds the choice of wiring,
-        \begin{align*}
-          r'_{\DW} &= \frac{H(A^n|E^n D) - H(A^n|B^n D)}{H(A^n)} \\
-                   &= \frac{H(A^n D|E^n) - H(D) - H(A^n D|B^n) + H(D) }{H(A^n)} \\
-                   &= \frac{H(A^n D|E^n) - H(A^n D|B^n)}{H(A^n)} \\
-        \end{align*}
-      \end{proof}
-
-        TODO Does quantum conditioning invalidate this? What role does E/AB-lockability play? There is a gap between DIQKD and QKD rates---does this change its lockability?
-
-        TODO two-way comms, improve understanding of protocol design
-
       The possible functions \(\chi_A, \chi_B\) for fixed values of \(r_A\) and \(r_B\) can be restricted with causality constraints. Let \(x_1\) and \(a_1\) be the input and output, respectively, of the first box Alice uses, \(x_2\) and \(a_2\) that of the second, and so forth. Then, Alice's inputs \(\cvec{x}^c\) are computed by a sequence of \(c\) functions with range \(\dintv{1}{i_A}\):
       \begin{equation} x_1 = x \end{equation}
       \begin{equation} x_j = W^{(j)}_A(\cvec{x}^{j-1}, \cvec{a}^{j-1}),\,j \in \dintv{2}{c} \end{equation}
@@ -839,7 +820,7 @@
       \end{equation}
       and where the infimum is over all separable states
       \begin{equation}
-        \sigma_{Q_AQ_B} = \sum_i p_i \sigma_{Q_A}^i \otimes \sigma_{Q_B}^i.
+        \sigma_{Q_AQ_B} = \sum_i p_i \sigma_{Q_A}^{(i)} \otimes \sigma_{Q_B}^{(i)}.
       \end{equation}
       This gives the upper bound
       \begin{equation}
@@ -849,6 +830,8 @@
       \begin{equation}
         E_{R}^{\infty}(\rho) = \limsup_{n\to\infty} \frac{E_R(\rho^{\otimes n})}{n}.
       \end{equation}
+
+        TODO What role does E/AB-lockability play? There is a gap between DIQKD and QKD rates---does this change its lockability?
 
       \subsection{Upper Bounds for Behaviours}
 
@@ -860,7 +843,7 @@
       \begin{figure}
         \centering
         \includegraphics[width=\linewidth]{new_plot.pdf}
-        \caption{\label{fig:genubound} Upper bounds based on \Cref{eqn:genubound} for a specific CHSH-based implementation, with either Bell-diagonal states or isotropic states used in the decomposition. The bounds from quantum intrinsic nonlocality~\cite{DIQKD_Limits}, and a bound for the intrinsic nonlocality based on intrinsic information~\cite[Appendix B]{RevisedPeres}, are plotted for comparison. (Source:~\cite{CCSquashedEntangle})}
+        \caption{\label{fig:genubound} Upper bounds based on \Cref{eqn:genubound} for a specific CHSH-based implementation, with either Bell-diagonal states or isotropic states used in the decomposition. The bounds from quantum intrinsic nonlocality~\cite{DIQKD_Limits}~\cite[Appendix B]{RevisedPeres} are plotted for comparison. (Source:~\cite{CCSquashedEntangle})}
       \end{figure}
 
       Let \(\sM\) be a set of POVMs \({\{{\{M_{a|x}\}}_{a}, {\{N_{b|y}\}}_{b}\}}_{x,y}\), and let \(\cP(\rho, \sM)\) be the behaviour when the state \(\rho = \rho_{Q_A Q_B}\) is measured according to \(\sM\), where we drop the subscripts in this definition. Then, for an arbitrary LOPC protocol, even with two-way information reconciliation, we have~\cite[Thm. 3]{CCSquashedEntangle}
@@ -883,6 +866,8 @@
       \end{equation}
       Fortunately, since all the optimisations are infima, any choice for the parameters is by definition an upper bound, and this bound can be used to evaluate the performance of a protocol on a given implementation.
 
+      % Bell states can be converted between each other with local unitaries
+
       The \emph{quantum intrinsic nonlocality} is~\cite{DIQKD_Limits}
       \begin{equation}
         N^Q{(A:B)}_p = \sup_{p(x,y)} \inf_{\rho_{ABXYE}} I{(A:B|XYE)}_{\rho},
@@ -895,9 +880,9 @@
       \begin{equation}
         p(ab|xy) \rho_{E|abxy} \coloneqq \Tr_{Q_A Q_B}\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right]
       \end{equation}
-      is Eve's state conditioned on the inputs \(x,y\) and outouts \(a,b\), and \(X\) and \(Y\) being the classical registers holding the values of \(x\) and \(y\). The bound on \(N^Q\) in~\cite{DIQKD_Limits} is outperformed by \Cref{eqn:genubound}, which is in turn outperformed by the bound in~\cite[Appendix B]{RevisedPeres}, but the latter paper restricts itself to protocols that use only one pair of inputs for key generation, and so may not be valid, especially since it is known that using more than one pair of inputs for key generation can improve key rates~\cite{DIQKD_RandomKeyBasis}.
+      is Eve's state conditioned on the inputs \(x,y\) and outouts \(a,b\), and \(X\) and \(Y\) being the classical registers holding the values of \(x\) and \(y\). \(N^Q{(A:B)}_p\) is an upper bound on almost all protocols, including those with two-way error correction, but excluding those where the measurement settings are not revealed. \(N^Q\) was proposed and evaluated on isotropic states with fixed measurements in~\cite{DIQKD_Limits}. For evaluating a CHSH-based protocol, where only the CHSH value, and not the full behaviour, is used to decide whether or not to abort, this implementation is outperformed by \Cref{eqn:genubound} using either Bell-diagonal or isotropic decompositions, both of which are in turn outperformed by an estimate of \(N^Q\) using Bell-diagonal states in~\cite[Appendix B]{RevisedPeres} for \(S \gtrsim 2.525\).
 
-      Unfortunately, all of these bounds are faithful, at least in for the implementations considered. There is thus far only one (possibly) non-faithful upper bound that has been found for quantum adversaries~\cite{NotSufficient}. Interestingly, it uses classical information processing to carry out the attack, by proving the existence of a classical strategy for Eve to reduce the conditional mutual information of Alice and Bob to 0 when certain quantum states are used with any number of measurement settings, if the measurements are projective. However, it applies only to DIQKD protocols where Alice and Bob announce their choice of basis, leaving open the possibility that protocols that do not involve such announcements, such as~\cite{NonstandardProtocol}, may be able to achieve positive key rates, so this is not completely conclusive evidence that \(C_{\sk} = 0\) for these behaviours. However, it seems that this particular protocol has only been proved secure against individual attacks, and it might be interesting to see if it can be proved secure against collective attacks.
+      Unfortunately, these bounds are faithful, at least for the implementations considered. There is thus far only one (possibly) non-faithful upper bound that has been found for quantum adversaries~\cite{NotSufficient}. Interestingly, it uses classical information processing to carry out the attack, by proving the existence of a classical strategy for Eve to reduce the conditional mutual information of Alice and Bob to 0 when certain quantum states are used with any number of measurement settings, if the measurements are projective. However, like \(N^Q\), it applies only to DIQKD protocols where Alice and Bob announce their choice of basis, leaving open the possibility that protocols that do not involve such announcements, such as~\cite{NonstandardProtocol}, may be able to achieve positive key rates, so this is not completely conclusive evidence that \(C_{\sk} = 0\) for these behaviours. However, it seems that this particular protocol has only been proved secure against individual attacks, and it might be interesting to see if it can be proved secure against collective attacks.
 
       \begin{question}
         What is the key rate of~\cite{NonstandardProtocol} secure against collective attacks?
@@ -913,11 +898,11 @@
         Can we characterise the quantumly achievable behaviours from Werner states of a given visibility?
       \end{question}
 
-      One version of the \emph{classical-classical (cc) squashed entanglement} defined in~\cite{CCSquashedEntangle} is a convex lower bound to the bound established by this result on Werner state visibilities, as well as the bound in~\cite{RevisedPeres}, while being itself an upper bound for the key rate for the intersection of the sets of applicable protocols for these two results (that is, protocols using Werner states, announcement of basis choice, and only one basis being used for key generation). In particular, it is given by
+      One version of the \emph{classical-classical (cc) squashed entanglement} defined in~\cite{CCSquashedEntangle} is a convex lower bound to the bound established by this result on Werner state visibilities, as well as the bound in~\cite{RevisedPeres}, which applies only to protocols using only one pair of settings for key generation. The cc-squashed entanglement is itself an upper bound for the key rate for the intersection of the sets of applicable protocols for these two results (that is, protocols using Werner states, announcement of basis choice, and only one basis being used for key generation). In particular, it is given by
       \begin{equation}
         E^{cc}_{sq,dev}(\rho, \sM, p(x,y)) = \inf_{\substack{\sigma, \sN : \cP(\sigma, \sN) = \cP(\rho, \sM)}} \sum_{xy} p(x,y) \inf_{\cE_{x,y}} I{(A : B|E)}_{\cE_{x,y}(\psi^{\sigma})},
       \end{equation}
-      where \(\cE_{x,y}\) measures \(\psi^\sigma\), the purification of \(\psi^{\sigma}\), using the POVMs in \(\sN\) corresponding to \(x\) and \(y\), while applying an arbitrary CPTP map to Eve's system. Once again, it is fortunate that all optimisations are infima, because this is a difficult optimisation to compute. Although it was applied to bound a specific set of protocols, it might be interesting to see if it could have more general applicability.
+      where \(\cE_{x,y}\) measures \(\psi^\sigma\), the purification of \({\sigma}\), using the POVMs in \(\sN\) corresponding to \(x\) and \(y\), while applying an arbitrary CPTP map to Eve's system. Once again, it is fortunate that all optimisations are infima, because this is a difficult optimisation to compute. Although it was applied to bound a specific set of protocols, it might be interesting to see if it could have more general applicability.
 
       \begin{question}
         What bounds on general protocols can we achieve using the cc-squashed entanglement?
@@ -996,7 +981,7 @@
       \end{equation}
       with equality for all polynomials of degree less than \(2m-2\). Further, the inequality converges to equality as \(m \to \infty\). This quadrature is used to approximate the logarithm, which has the integral representation
       \begin{equation}
-        \ln(x) = \int_{0}^{1} \frac{x-1}{t(x-1) + 1} \dif{t},
+        \ln\left(\frac{x}{y}\right) = \int_{0}^{1} \frac{x-y}{t(x-y) + y} \dif{t},
       \end{equation}
       yielding an approximation in terms of polynomials of operators.
 
@@ -1049,9 +1034,9 @@
 
     In the language of resource theories, monotones are functions that preserve the pre-order of a resource theory~\cite{BellResourceTheory}. That is, for resource \(R_1\) and \(R_2\) in a theory, a monotone \(\mu\) satisfies
     \begin{equation}
-      R_1 \leadsto R_2 \Rightarrow \mu(R_1) \geq \mu(R_2).
+      R_1 \leadsto R_2 \Rightarrow \mu(R_1) \succeq \mu(R_2)
     \end{equation}
-    As mentioned in \Cref{sec:locwir}, wirings are \emph{multiple-copy conversions}~\cite{BellResourceTheory}. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under a set of free actions that is a strict superset of \(\sW_D\) defined in \Cref{sec:locwir}. These wirings additionally allow the order in which the boxes are used to be permuted and for non-deterministic wirings. However, its monotonicity under wirings with shared randomness was not proved. Nonetheless, we will review these results to see how they can help us.
+    for some pre-order \(\succeq\) defined on the codomain of the monotone. As mentioned in \Cref{sec:locwir}, wirings are \emph{multiple-copy conversions}~\cite{BellResourceTheory}. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under a set of free actions that is a strict superset of \(\sW_D\) defined in \Cref{sec:locwir}. These wirings additionally allow the order in which the boxes are used to be permuted and for non-deterministic wirings. However, its monotonicity under wirings with shared randomness was not proved. Nonetheless, we will review these results to see how they can help us.
 
     \subsection{Maximal Correlation and Related Measures}\label{sec:nlmono_maxcorr}
 
@@ -1217,7 +1202,7 @@
 
       This requires some additional definitions. \emph{Spectral measures}, or \emph{projector-valued measures} (PVMs), map a subset of the spectrum to a projector. More formally, they are functions between the \emph{\(\sigma\)-algebra} \(\Omega(\sigma(A))\) of \(\sigma(A)\) to \(\mathcal{B}(\Hs)\). A \(\sigma\)-algebra contains subsets of its underlying set, and is closed under set complements and unions of countable sequences, so in this case it represents subsets of the spectrum that it would be sensible to attach a projector to.
 
-      In the finite-dimensional case, the projector associated to each eigenvalue \(\lambda\) in the spectrum is the projector onto the associated eigenspace, and the direct sum of the projectors is the projector onto \(\Hs\), that is, \(I\). With a continuous spectrum, we want to divide \(\Hs\) into orthogonal spaces in the same way, providing a systematic way to attach each subspace to each element \(\omega \in \Omega(\sigma(A))\), that is, each reasonable subset of \(\sigma(A)\). Under a given spectral measure \(E : \Omega(\sigma(A)) \to \mathcal{B}(\Hs)\), the subspace \(V_{\omega} \subseteq \Hs\) associated to \(\omega\) is called a \emph{spectral subspace}, and \(E(\omega)\) is the projector onto \(V_{\omega}\). These \(V_{\omega}\) are ``generalised eigenspaces'' in the sense that they are \emph{invariant} under \(A\), that is, \(\psi \in V_{\omega} \Rightarrow A\psi \in V_{\omega}\), and that, for \(\omega \subseteq [\lambda - \epsilon, \lambda + \epsilon]\), we have \(\norm{(A - \lambda I)\psi} \leq \epsilon\norm{\psi}\), from which recover the familiar behaviour when the spectrum is discrete.
+      In the finite-dimensional case, the projector associated to each eigenvalue \(\lambda\) in the spectrum is the projector onto the associated eigenspace, and the direct sum of the projectors is the projector onto \(\Hs\), that is, \(I\). With a continuous spectrum, we want to divide \(\Hs\) into orthogonal spaces in the same way, providing a systematic way to attach a subspace to each element \(\omega \in \Omega(\sigma(A))\), that is, each reasonable subset of \(\sigma(A)\). Under a given spectral measure \(E : \Omega(\sigma(A)) \to \mathcal{B}(\Hs)\), the subspace \(V_{\omega} \subseteq \Hs\) associated to \(\omega\) is called a \emph{spectral subspace}, and \(E(\omega)\) is the projector onto \(V_{\omega}\). These \(V_{\omega}\) are ``generalised eigenspaces'' in the sense that they are \emph{invariant} under \(A\), that is, \(\psi \in V_{\omega} \Rightarrow A\psi \in V_{\omega}\), and that, for \(\omega \subseteq [\lambda - \epsilon, \lambda + \epsilon]\), we have \(\norm{(A - \lambda I)\psi} \leq \epsilon\norm{\psi}\), from which recover the familiar behaviour when the spectrum is discrete.
 
       A function \(f : \sigma(A) \to \C\) can then be applied to an element of \(\mathcal{B}(\Hs)\), by integrating it against this measure
       \[ f(A) = \int_{\lambda \in \sigma(A)} f(\lambda) \dif{E(\lambda)}, \]
@@ -1239,7 +1224,7 @@
       A \emph{joint spectral measure} of multiple self-adjoint operators, with \emph{commuting spectral measures} (which then implies that the operators commute) is then simply the product of their respective spectral measures, with a straightforward generalisation from the single-operator case.
 
       % TODO replace \sigma(A) with \mathcal{X} and explain the use of joint spectral
-      % measures in the paper
+      % measures in the paper, and show reduction to finite-dimensional case
 
     \end{appendices}
 

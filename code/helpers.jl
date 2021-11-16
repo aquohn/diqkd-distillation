@@ -45,3 +45,5 @@ function sliceup(seq, steps...)
   end
   return sliced
 end
+
+unzip(a) = map(x->getfield.(a, x), fieldnames(eltype(a)))

@@ -98,6 +98,7 @@
 \usepackage{graphicx} % allows figures to be inserted and scaled
 \usepackage{listings} % allows for source code blocks
 \usepackage{fancyvrb} % robust verbatim
+\usepackage{siunitx} % allows SI units to be formatted
 
 \usepackage[backend=biber, style=ieee]{biblatex}  
 \addbibresource{../wiring.bib}
@@ -138,10 +139,20 @@
 \newcommand{\id}{\mathrm{id}} % enables id operator
 \newcommand{\E}{\mathbb{E}} % expectation
 \newcommand{\angleb}[1]{\left\langle #1 \right\rangle} % physicist's notation for mean
+\newcommand{\Var}{\mathrm{Var}} % variance
 
-\newenvironment{Array}[1] % less cramped display mode arrays
+\newenvironment{Tabular}[1] % less cramped tables
+{\def\arraystretch{1.75}\begin{tabular}{#1}}
+{\end{tabular}}
+\newenvironment{Array*}[1] % less cramped display mode arrays
 {\def\arraystretch{1.75}\everymath={\displaystyle}\[\begin{array}{#1}}
 {\end{array}\]}
+\newenvironment{Array}[1] % less cramped display mode arrays
+{\def\arraystretch{1.75}\everymath={\displaystyle}\begin{equation}\begin{array}{#1}}
+{\end{array}\end{equation}}
+\newenvironment{displaytable}[1] % environment for a simple inline table to present some information
+{\vspace\abovedisplayskip\begin{center}\begin{tabular}{#1}}
+{\end{tabular}\end{center}\vspace\belowdisplayskip}
 
 \usepackage{mathtools}
 \usepackage{tikz}
@@ -249,12 +260,15 @@
 \newcommand{\pimpr}{p_{\rm impr}}
 
 \newcommand{\sM}{\mathcal{M}}
+\newcommand{\sN}{\mathcal{N}}
 \newcommand{\sS}{\mathcal{S}}
 \newcommand{\sK}{\mathcal{K}}
 \newcommand{\sT}{\mathcal{T}}
 \newcommand{\sH}{\mathcal{H}}
 \newcommand{\sV}{\mathcal{V}}
+\newcommand{\sW}{\mathcal{W}}
 \newcommand{\sX}{\mathcal{X}}
+\newcommand{\sY}{\mathcal{Y}}
 \newcommand{\sZ}{\mathcal{Z}}
 \newcommand{\cE}{\mathcal{E}}
 \newcommand{\cF}{\mathcal{F}}
@@ -481,7 +495,7 @@
   \begin{onlyenv}<1-4>
   \begin{itemize}[<+->]
     \item Alice: input \(x\), output \(a\); Bob: input \(y\), output \(b\)
-    \item Full statistics: \emph{behaviour} \(p(ab|xy)\)
+    \item Full statistics: \emph{behaviour} \(p(ab|xy)\) (aka \emph{state}/\emph{box})
     \item Must fulfill \emph{no-signalling conditions}
       \begin{gather*}
         \sum_b p(ab|xy) = p(a|xy) = p(a|x)\;\forall a,x,y \\
@@ -495,7 +509,7 @@
   \begin{itemize}[<+->]
     \item Focus on \emph{binary-output} settings
     \item \emph{Marginals}:
-      \[ \angleb{A_x} \coloneqq p(a=1|x) - p(a=0|x) \qquad \angleb{B_y} \coloneqq p(b=1|y) - p(b=0|y) \]
+      \[ \angleb{A_x} \coloneqq p(a=1|x) - p(a=0|x), \angleb{B_y} \coloneqq p(b=1|y) - p(b=0|y) \]
     \item \emph{Correlators}:
       \[ \angleb{A_x B_y} \coloneqq p(a=b|xy) - p(a\neq b|xy) \]
     \item \emph{Quantum bit error rate} (QBER):
@@ -519,7 +533,7 @@
 \begin{frame}{DIQKD Security}
   \begin{itemize}[<+->]
     \item \(\rho_{A^n B^n E^n}\): Alice--Bob--Eve ccq state after \(n\) Bell tests
-    \item DIQKD protocol \(\mathfrak{P}_{\omega}\) with public data in \(D\) and key of length \(\ell\)
+    \item \emph{Local operations and public communication} (LOPC) protocol \(\mathfrak{P}_{\omega}\) with public data in \(D\) and key of length \(\ell\)
       \[ \mathfrak{P}_{\omega}\left[\rho_{A^n B^n E^n}\right] \mapsto \omega_{K_A K_B E^n D} \]
     \item \emph{Universally composable} \(\epsilon\)-security
       \[ (1-\erob{n})\Delta_{\Tr}(\omega_{K_A K_B E^n D}, \tau_{K_A K_B}^{\ell} \otimes \rho_{E^n} \otimes \omega_D) \leq \epsilon \]
@@ -529,16 +543,17 @@
 \end{frame}
 
 \begin{frame}{Asymptotic DIQKD Security}
-  \begin{onlyenv}<1-2>
+  \begin{onlyenv}<1-3>
     \begin{itemize}[<+->]
     \item \emph{Asymptotic key rate}
       \[ r(\mathfrak{P}_{\omega}, \rho) = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\erob{n}) \frac{\ell_n}{n} \]
       over all sequences \(\{\ell_n\}\) with asymptotically vanishing \(\epsilon\)
     \[ \lim_{n\to\infty} (1-\erob{n})\Delta_{\Tr}(\omega_{K_A K_B E^n D}, \tau_{K_A K_B}^{\ell_n} \otimes \rho_{E^n} \otimes \omega_{D}) = 0 \]
     \item Rounds are effectively i.i.d.\ in asymptotic limit: \(\rho_{A^n B^n E^n} \approx_{n\to\infty} \rho_{ABE}^{\otimes n}\)
+    \item \alert{Wiring breaks i.i.d.\ assumption!}
   \end{itemize}
   \end{onlyenv}
-  \begin{onlyenv}<3->
+  \begin{onlyenv}<4->
     \begin{itemize}[<+->]
     \item qqq state \(\rho_{Q_A Q_B E}\) measured using measurement strategy \(\sM\), a set of POVMs \({\{{\{M_{a|x}\}}_{a}, {\{N_{b|y}\}}_{b}\}}_{x,y}\)
     \[ \sum_{a} M_{a|x} = I_{Q_A}\;\forall x \qquad M_{a|x} \geq 0\;\forall a, x \]
@@ -567,7 +582,7 @@
     \item Bound Eve's knowledge using CHSH
       \[ {H(A|E)}_{\rho} \geq {H_S(A|E)}_{\rho} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right) \]
     \item Standard protocol key rate
-      \[ r_{\DW} \geq r_{\std} = \max \left\{ 0, {H_S(A|E)}_{\rho} - h_2(Q) \right\} \]
+      \[ r_{\DW} \geq r_{\std} \coloneqq \max \left\{ 0, {H_S(A|E)}_{\rho} - h_2(Q) \right\} \]
     \end{itemize}
 \end{frame}
 
@@ -635,7 +650,7 @@
   \end{onlyenv}
 
   \begin{onlyenv}<2->
-    \begin{itemize}[<+->]
+    \begin{itemize}[<+(1)->]
       \item Nonlocal behaviours are \emph{convex combinations} of PR behaviour and some local behaviour
         \[ p = qp_{\PR} + (1-q)p_{\Ls} \]
       \item 8 permutations of linear CHSH function
@@ -657,11 +672,9 @@
         \item Each PR box can violate multiple facets
       \end{itemize}
   \end{itemize}
-  \begin{onlyenv}<+->
-    \begin{block}{Possible Approach}
-      Can all behaviours by mapped into a specific region by symmetry? Can statistics when \(y=2\) improve our estimate of Eve's information?
-    \end{block}
-  \end{onlyenv}
+  \begin{block}{Possible Approach}<+->
+    Can all behaviours by mapped into a specific region by symmetry? Can statistics when \(y=2\) improve our estimate of Eve's information?
+  \end{block}
 \end{frame}
 
 \note{
@@ -675,60 +688,319 @@
     \item \emph{Converting} between \emph{nonfree resources} using \emph{free actions} and \emph{free resources}
     \item \(R_2\) can be converted from \(R_2\): \(R_1 \leadsto R_2\)
     \item \emph{Multi-copy local operations with shared randomness} for \(c\) copies:
-      \[ p(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \]
+      \[ p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \]
       \[ \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{r_A r_B} \chi_A(a\cvec{x}^c r_A|\cvec{a}^cx) \chi_B(b\cvec{y}^c r_B|\cvec{b}^cy) p_r(r_A r_B) \]
+    \item Proceed with DIQKD protocol using \(p'\)
   \end{itemize}
+\end{frame}
+
+\begin{frame}{Randomness in Wirings}
+  \begin{itemize}[<+->]
+    \item \emph{Private randomness} does not help
+    \item WLOG, image of \(\chi_A\) and \(\chi_B\) is \(\{0,1\}\)
+    \item All randomness can be moved into \(p_r\)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Possible Wirings}
+  \begin{itemize}[<+->]
+    \item \(j\)th box can only depend on previous \(j-1\) boxes
+    \[ x_1 = x \qquad x_j = W^{(j)}_A(\cvec{x}^{j-1}, \cvec{a}^{j-1}) \qquad
+      a = W_A(\cvec{x}^{c}, \cvec{a}^{c}) \]
+    \item \(\chi_A = 1\) for sequences obeying these constraints, \(0\) otherwise
+    \item Deterministic wirings \(\sW_D\), wiring choice for a given round from \(\sW \times \sW\), generated behaviours \(\sWB(p)\)
+  \end{itemize}
+
+  \begin{block}{Possible Approach}<+->
+    Can we optimise efficiently over \(\sWB(p)\)?
+  \end{block}
+\end{frame}
+
+\begin{frame}{A Proposed Classification}
+  \begin{onlyenv}<1-7>
+    \begin{itemize}[<+->]
+      \item Deterministic: \(a = 0\)
+      \item One-sided: \(a = a_1\)
+      \item Sequential: \(x_2 = a_1, a = a_2\)
+      \item AND-gated: \(x_1 = x_2 = x, a = a_1a_2\)
+      \item XOR-gated: \(x_1 = x_2 = x, a = a_1 + a_2 \bmod 2\)
+      \item 82 wirings of this form are vertices of a polytope
+      \item This classification is \alert{wrong}!
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<8->
+    \begin{itemize}[<+->]
+      \item Explicit counterexample:
+        \[ x_2 = \bar{a}_1x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2 \]
+      \item Work where this scheme was derived was not looking for wirings, but ``joint measurements''
+      \item However, polytope structure might still be useful
+    \end{itemize}
+  \end{onlyenv}
+  \begin{block}{Possible Approach}<+->
+    Can we reduce the degrees of freedom in \(\sW\) or \(\sWB(p)\)?
+  \end{block}
+\end{frame}
+
+\begin{frame}{Number of Distinct Wirings}
+  \begin{itemize}[<+->]
+    \item With \(c=2\), \(4096\) wirings for Alice, and \(\approx 2.48 \times 10^{10}\) for Bob, under a naive enumeration
+    \item Fixing key-generating settings to AND gates gives \(1024\) wirings for Alice and \(\approx 3.10 \times 10^{9}\) for Bob
+    \item Without parametrising behaviours or wirings, brute force will be uninsightful
+    \item However, may answer fundamdental question of whether revival is possible
+  \end{itemize}
+  \begin{block}{Possible Approach}<+->
+    Is there a simple way to identify unhelpful or redundant wirings?
+  \end{block}
+\end{frame}
+
+\begin{frame}{Dynamic Programming}
+  \begin{itemize}[<+->]
+    \item Upper bound for achievable CHSH value can be formulated as dynamic programming problem
+    \item Upper bounds for \emph{isotropic} states can be generalised to all states
+      \[ p_I = qp_{\PR} + (1-q)p_{\Ls}^{(0)} \]
+  \end{itemize}
+  \begin{block}{Possible Approach}<+->
+    Does there exist a dynamic programming formulation for bounding the key rates achievable from a given behaviour?
+  \end{block}
 \end{frame}
 
 \section{Key Rate Bounds}
 
 \subsection{Upper Bounds}
 
+\begin{frame}{Concepts for Upper Bounds}
+  \begin{itemize}[<+->]
+    \item \emph{Faithful} bounds \(> 0\) for all nonlocal behaviours/entangled states
+    \item Secret key capacity of a quantum state
+      \[ C_{\sk}(\rho_{Q_A Q_B E}) = \sup_{\mathfrak{P}_{\omega}} 
+      r(\mathfrak{P}_{\omega}, \rho_{ABE}) \]
+    \item \emph{Conditional mutual information}: how much information do \(A\) and \(B\) share that \(E\) does not have?
+        \[ I{(A:B|E)}_{\rho} = H{(A|E)}_{\rho} + H{(B|E)}_{\rho} - H{(AB|E)}_{\rho} \]
+    \item \emph{Locking}: removing a single bit/qubit of information from a party changes a measure arbitrarily much
+      \begin{itemize}
+        \item \(E\)-locking: removing information from Eve
+        \item \(AB\)-locking: removing information from Alice and/or Bob, possibly giving it to Eve
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\note{
+  The choice of the measurement strategy has been absorbed into \(\mathfrak{P}_{\omega}\)
+}
+
+\begin{frame}{Upper Bounds for States}
+  \begin{itemize}[<+->]
+    \item Intrinsic information: conditional mutual information with optimal post-processing by Eve
+      \[ I{(Q_A : Q_B \downarrow E)}_{\rho} = \inf_{\cE} I{(Q_A : Q_B|E')}_{\cE(\rho)} \]
+    \item Reduced intrinsic information: non-\(E\)-lockable intrinsic information; \(a = 1 + \delta\{E' \text{ classical}\}\)
+      \[ 
+        I{(Q_A : Q_B \downarrow\downarrow E)}_{\rho} = \inf_{\rho_{Q_A Q_B EE'}}
+        I{(Q_A : Q_B \downarrow EE')}_{\rho} + aH(E')
+ \]
+    \item Squashed entanglement: conditional mutual information with best quantum state for Eve
+      \[ E_{sq}(\rho_{Q_A Q_B}) = \frac{1}{2} \inf_{\rho_{Q_A Q_B E}} I{(Q_A:Q_B|E)}_{\rho} \]
+    \item Relative entropy of entanglement; \(\sigma_{Q_AQ_A'Q_BQ_B'}\) separable
+      \[ E_R\left({\rho_{Q_AQ_A'Q_BQ_B'}}\right) = \inf_{\sigma_{Q_AQ_A'Q_BQ_B'}} D(\rho_{Q_AQ_A'Q_BQ_B'}||\sigma_{Q_AQ_A'Q_BQ_B'}) \]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Upper Bounds for Behaviours}
+  \begin{onlyenv}<1-2>
+    \begin{itemize}[<+->]
+      \item Local--nonlocal decomposition (general protocols)
+        \[ C_{\sk}(p) \leq \inf_{\substack{\rho, \sM : \\ p = \cP(\rho, \sM) }} \inf_{\substack{q : \\ \rho = (1-q)\rho^{NL} + q\rho^L}} (1-q) E_R(\rho^{NL}) + q E_R(\rho^L) \]
+      \item Quantum intrinsic nonlocality (setting-broadcast protocols)
+        \begin{gather*}
+          N^Q{(A:B)}_p = \sup_{p(x,y)} \inf_{\rho_{ABXYE}} I{(A:B|XYE)}_{\rho} \\
+          \rho_{ABXYE} = \sum_{abxy} p(x,y) p(ab|xy) \ket{abxy}\bra{abxy}_{ABXY} \otimes \rho_{E|abxy} \\
+          p(ab|xy) \rho_{E|abxy} = \Tr_{Q_A Q_B}\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right]
+        \end{gather*}
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<3->
+      \begin{figure}
+        \centering
+        \includegraphics[height=0.7\textheight]{new_plot.pdf}
+        \caption{Comparison of upper bounds for CHSH-based protocols}
+      \end{figure}
+  \end{onlyenv}
+\end{frame}
+
+\note{ Unfortunately, all of these are faithful. }
+
+\begin{frame}{A Non-Faithful Upper Bound}
+  \begin{itemize}[<+->]
+    \item Werner states
+      \[ \rho^{W,v} = v{\ket{\Psi_-}\bra{\Psi_-}} + \frac{1-v}{4}I \]
+    \item No nonlocality for \(v < v_L \approx 0.6829\), nonlocality known for \(v \geq v_{NL} \approx 0.6964\)
+    \item \(I(A:B \downarrow E) = 0\) for \(v < v_{\crit} \approx 0.7263 > v_{NL}\) via \emph{convex combination attack}, which requires measurement settings to be broadcast
+  \end{itemize}
+
+  \begin{onlyenv}<+->
+    \begin{block}{Possible Approach}
+      Can we prove the security of a non-broadcast protocol against quantum adversaries?
+    \end{block}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{A Convex Hull of Bounds}
+  \begin{itemize}[<+->]
+    \item \emph{Classical-classical (cc) squashed entanglement} \(E^{cc}_{sq,dev}(\rho, \sM, p(x,y))\)
+      \[ \inf_{\substack{\sigma, \sN : \cP(\sigma, \sN) = \cP(\rho, \sM)}} \sum_{xy} p(x,y) \inf_{\cE_{x,y}} I{(A : B|E)}_{\cE_{x,y}(\psi^{\sigma})} \]
+    \item Convex lower bound for convex combination attack and Bell-diagonal intrinsic information
+    \item Upper bound for protocols with broadcast settings, Werner states, and only one basis
+  \end{itemize}
+
+  \begin{block}{Possible Approach}<+->
+      What bounds on general protocols can we achieve using the cc-squashed entanglement?
+  \end{block}
+\end{frame}
+
+\begin{frame}{Evaluation}
+  \begin{itemize}[<+->]
+    \item Most of these bounds are very difficult to compute
+    \item If all optimisations are infima, any fixed choice provides an upper bound
+    \item Many bounds are restricted to certain settings
+  \end{itemize}
+
+  \begin{block}{Possible Approach}<+->
+      Are there any choices of states/measurements that will give greater insights? Can we simplify the optimisations? Can the restricted-setting bounds be generalised?
+  \end{block}
+\end{frame}
+
 \subsection{Lower Bounds}
+
+\begin{frame}{Asymmetric CHSH}
+  \begin{itemize}[<+->]
+    \item Asymmetric CHSH function
+      \[ S_{\alpha} \coloneqq \alpha\angleb{A_0 B_0} + \alpha\angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1} \]
+    \item Able to incorporate noisy preprocesing with probability \(q\)
+    \item Requires three separate optimisations over different parameter regimes
+    \item Minor improvement to key rate, but proof covers useful techniques that might be generalisable
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Quasi-Relative Entropy}
+  \begin{onlyenv}<1-3>
+  \begin{itemize}[<+->]
+    \item Main idea: bound the conditional entropy directly
+    \item Express conditional entropy in terms of relative entropy
+      \[ H{(A|E)}_{\rho} = -D(\rho_{AE}||I_A \otimes \rho_{E}) \]
+    \item Use integral representation of logarithm
+      \[ \ln\left(\frac{x}{y}\right) = \int_{0}^{1} \frac{x-y}{t(x-y) + y} \dif{t} \]
+      in spectral integral representation of relative entropy
+      \[ D(\rho||\sigma) = -\frac{1}{\ln 2} \int_{\R^{2}_{+}} \underbrace{\int_{0}^{1} \frac{y(x-y)}{t(x-y)+y} \dif{t}}_{y\ln(x/y)} \dif{\nu_{\rho,\sigma}(x,y)} \]
+  \end{itemize}
+  \end{onlyenv}
+
+  \begin{onlyenv}<4->
+  \begin{itemize}[<+->]
+    \item Discretise integral representation of logarithm using \emph{Gauss-Radau quadrature} and commute the discrete sum with the spectral integral
+      \[ D(\rho||\sigma) \leq \sum_{i=1}^m -\frac{w_i}{\ln 2} \underbrace{\int_{\R^{2}_{+}} \frac{y(x-y)}{t_i(x-y)+y} \dif{\nu_{\rho,\sigma}(x,y)}}_{D_{F_{t_i}}} \]
+    \item Spectral integral of integral representation has a nice variational representation
+      \[ D_{F_{t_i}} = \frac{1}{t}  \inf_Z \Tr\left[ \rho + \rho(Z + Z^{\dagger}) + (1-t)\rho{}Z^{\dagger}Z + t\sigma{}ZZ^{\dagger} \right]\]
+  \end{itemize}
+  \end{onlyenv}
+\end{frame}
+
+\note{
+  If the phrase ``spectral integral'' scares you, just pretend that it's a normal evaluation of the expectation value of a function of two states, with \(x\) and \(y\) ranging over the eigenvalues, except it works for infinite-dimensional systems.
+}
+
+\begin{frame}{Calculating Conditional Entropy}
+  \begin{itemize}[<+->]
+    \item Need conditional entropy of classical Bell test data
+    \item Must introduce Alice's measurement operators \(M_{a|x}\)
+    \item Can impose additional constraints with Bob's measurement operators \(N_{b|y}\)
+    \item Lower bound is always valid and converges for \(m\to\infty\)
+    \item However, not possible to optimise efficiently
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The NPA Hierarchy}
+  \begin{itemize}[<+->]
+    \item Assume states are pure, and replace operator Hilbert space requirement with commutation requirement
+    \item Each sequence \(F\) of \(M_{a|x}\)'s and \(N_{b|y}\)'s is a \emph{monomial}, and \(F\ket{\psi}\) is a vector in the Hilbert space
+    \item Higher levels of hierarchy \(\Rightarrow\) more monomials
+    \item \emph{Gram matrix} with entries \(\braket{\psi|F_1^{\dagger}F_2|\psi}\) is \emph{positive semidefinite}
+    \item Such matrices \alert{can be efficiently optimised over!}
+    \item Some entries constrained by known statistics: \(\braket{\psi|M_{a|x}N_{b|y}|\psi} = p(ab|xy)\)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Evaluation}
+  \begin{itemize}[<+->]
+    \item QRE method is general, powerful, and reasonably fast
+    \item Could possibly be adapted to compute upper bounds more efficiently
+    \item These are just \emph{tools}: search space is unbelievably vast
+    \item Closer analysis required to find structures
+  \end{itemize}
+  \begin{block}{Possible Approach}<+->
+    Can quasi-relative entropies be used to compute upper bounds? What general conclusions can we draw about DIQKD key rates from these bounds?
+  \end{block}
+\end{frame}
 
 \subsection{Nonlocality Monotones}
 
-\section*{Conclusion}
-
-\begin{frame}{Discussion}
-  \begin{onlyenv}<1-6>
-    \begin{itemize}[<+->]
-      \item Information-theoretic perspective: significant difference in key expansion ratio
-        \begin{itemize}
-          \item Limits of authentication achievable, but effect of QKD protocol unclear
-        \end{itemize}
-      \item However, finite-key effects only signficant in low-keyrate regime
-        \begin{itemize}
-          \item Authentication keys are \(\sim 10^2\) bits
-          \item May have applications in resource-constrained scenarios
-          \item Require more detailed analysis and optimisation
-        \end{itemize}
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<7-10>
-    \begin{itemize}[<+->]
-      \item Tradeoff in \(k_{\pa}\) seems worse for polynomial hashing
-        \begin{align*}
-          k_{\pa}^T &= 2l + \ceil{ 4\log n + 2\log \frac{1}{\hat{\epsilon}} } \\
-          k_{\pa}^P &= 2l + 2\floor{ 3 \log n - \log l - 2\log \frac{1}{\hat{\epsilon}} } - 2
-        \end{align*}
-      \item However, a ``polynomial stack'' seems to fare better generally
-        \begin{itemize}
-          \item More efficient authentication makes up for greater hash key length
-        \end{itemize}
-      \item The penalty from almost-universal privacy amplification impacts key length logarithmically in \(\hat{\epsilon}\)
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<11->
-    \begin{itemize}[<+->]
-      \item Information reconciliation schemes must be carefully analysed
-        \begin{itemize}
-          \item \(\xi\) can be punishing for small block sizes
-        \end{itemize}
-      \item Measurement quality has a significant impact on finite-key and asymptotic performance
-    \end{itemize}
-  \end{onlyenv}
+\begin{frame}{Monotones}
+  \begin{itemize}[<+->]
+    \item Functions of resources that \emph{preserve the pre-order} of the resources
+      \[ R_1 \leadsto R_2 \Rightarrow \mu(R_1) \succeq \mu(R_2) \]
+    \item Establish fundamental limits on achievable behaviours
+      \[ \sWB(p) \subseteq \{ p' : \mu(p) \succeq \mu(p') \} \]
+    \item Provide insight into structure of behaviour and wiring spaces
+    \item Monotones known for multi-copy LO, but not multi-copy LOSR
+  \end{itemize}
 \end{frame}
+
+\begin{frame}{Maximal Correlation}
+  \begin{itemize}[<+->]
+    \item Maximal correlation of two classical rvs \(A\) and \(B\)
+      \[ \rho(A,B) = \max_{f,g} \frac{\E[(f(A)-\E[f(A)])(g(B)-\E[g(B)])]}{\sqrt{\Var[f(A)]\Var[g(B)]}} \]
+      \begin{Array*}{rcl}
+        \rho(A,B) = & \max_{f,g}  & \E[f(A)g(B)] \\
+                    & \text{s.t.} & \E[f(A)] = \E[g(B)] = 0 \\
+                    &             & \E[f(A)^2] = \E[g(B)^2] = 1,
+      \end{Array*}
+    \item Extend to conditional distributions: \(\rho(A,B|X,Y) = \max_{x,y} \rho(A,B|X=x,Y=y)\)
+    \item \emph{Tensorisation}: multiple i.i.d.\ copies do not increase \(\rho\) \(\Rightarrow\) \(\rho\) is a monotone with \(\succeq = \geq\)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Related Measures}
+  \begin{itemize}[<+->]
+    \item Hypercontractivity (HC) and maximal correlation (MC) ribbons are subsets of \({[0,1]}^2\)
+    \item Ribbons expand under wiring:
+      \[ \HC(A,B) \subseteq \HC(A',B'), \MC(A,B) \subseteq \MC(A',B') \]
+    \item Ribbons are monotones with \(\succeq = \subseteq\)
+    \item Properties of \(\rho\) derived from ribbons
+    \item \(\rho\) can be efficiently computed, ribbons cannot!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Maximal Correlation Over Behaviours}
+\end{frame}
+
+\begin{frame}{Desiderata}
+  \begin{enumerate}[<+->]
+    \item Easy to compute \(\mu(p)\)
+    \item \(\{ p : \mu(p) = \mu' \}\) can be efficiently optimised over
+    \item Tight: if \(\mu(p) = \mu(p')\), there exists a wiring \(p \mapsto p'\)
+    \item If \(\mu(p) = \mu(p')\), wiring for \(p \mapsto p'\) can be expicitly constructed
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Evaluation}
+  \begin{itemize}[<+->]
+    \item \(\rho\) is easy to compute but probably not tight
+    \item Effect of shared randomness unclear
+    \item Potentially rich area to explore
+    \item Caveat: we want something like
+      \[ \max_{E|AB} \frac{H(A|E) - H(A|B)}{H(A)} \leq f(\rho(A,B)) \]
+  \end{itemize}
+\end{frame}
+
+\section*{Conclusion}
 
 \begin{frame}[c]{}
   \begin{center}
