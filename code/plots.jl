@@ -125,8 +125,7 @@ function maxcorr_data3d(is, js, HAB::Function, HAE::Function, corrf::Function;
   xysel = get(kwd, :xysel, (0,0))
   modesel = get(kwd, :modesel, :reg)
   il = length(is); jl = length(js)
-  pts = Array{Tuple{T, T}}(undef, il, jl)
-  rhos = Array{T}(undef, il, jl)
+  pts = Array{Tuple{T, T, T}}(undef, il, jl)
 
   for ii in eachindex(is), ji in eachindex(js)
     i = is[ii]; j = js[ji]
@@ -195,6 +194,23 @@ function farkas_wiring_data(n, HAE::Function, HAB::Function; c = 2, iterf = noth
 end
 
 # %%
+# Correlation functions
+
+function qset_corrf()
+  corrf = (fI, fLD) -> (((1-fI) .* (((1-fLD) .* EaxQ) .+ (fLD .* EaxLD))) .+ (fI .* Eaxbound),
+                     ((1-fI) .* (((1-fLD) .* EbyQ) .+ (fLD .* EbyLD))) .+ (fI .* Ebybound),
+                     ((1-fI) .* (((1-fLD) .* EabxyQ) .+ (fLD .* EabxyLD))) .+ (fI .* Eabxybound),)
+  return corrf
+end
+
+function expt_corrf(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi])
+  Atlds, Btlds, ABtlds = meas_corrs(theta=theta, mus=mus, nus=nus)
+  tldcorrs = Correlators(Atlds, Btlds, ABtlds)
+  corrf = (nc, eta) -> expt_corrs(nc, eta, tldcorrs...)
+  return corrf
+end
+
+# %%
 # Given i, minimum j reqd for r > 0
 
 function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname, corrf::Function; kwargs...) where T <: Real
@@ -235,51 +251,6 @@ function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname,
 
   return plt
 end
-
-# %%
-# Correlation functions
-
-function qset_corrf()
-  corrf = (fI, fLD) -> (((1-fI) .* (((1-fLD) .* EaxQ) .+ (fLD .* EaxLD))) .+ (fI .* Eaxbound),
-                     ((1-fI) .* (((1-fLD) .* EbyQ) .+ (fLD .* EbyLD))) .+ (fI .* Ebybound),
-                     ((1-fI) .* (((1-fLD) .* EabxyQ) .+ (fLD .* EabxyLD))) .+ (fI .* Eabxybound),)
-  return corrf
-end
-
-function qset_wiring_plot(QLDsamples = 100, boundsamples = 100, kwargs...)
-  fIs = range(0,1,length=boundsamples) |> collect
-  fLDs = range(0,1,length=QLDsamples) |> collect
-  return wiring_plot(fIs, fLDs, "Isotropic fraction", "Deterministic fraction", qset_corrf(), kwargs=kwargs)
-end
-
-function expt_corrf(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi])
-  Atlds, Btlds, ABtlds = meas_corrs(theta=theta, mus=mus, nus=nus)
-  tldcorrs = Correlators(Atlds, Btlds, ABtlds)
-  corrf = (nc, eta) -> expt_corrs(nc, eta, tldcorrs...)
-  return corrf
-end
-
-function expt_wiring_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.925, ncstart=0.8, kwargs...)
-  ncs = range(ncstart, stop=1, length=ncsamples)
-  etas = range(etastart, stop=1, length=etasamples)
-  corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
-  return wiring_plot(ncs, etas, L"n_c", L"\eta", corrf, kwargs=kwargs)
-end
-
-function new_expt_maxcorr_plt(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.925, ncstart=0.8, kwargs...) 
-  names = Dict{Symbol, String}(:x => "H(A|B)", :y => "H(A|E)", :z => "Maximal Correlation",
-                               :i => L"n_c", :j => L"\eta", :set => "Experimental Model"
-                              )
-  ncs = range(ncstart, stop=1, length=ncsamples)
-  etas = range(etastart, stop=1, length=etasamples)
-  corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
-  return ij_xyz_plot(ncs, etas, dataf, names, kwargs=kwargs)
-end
-
-
-
-# %%
-# Plot key rates over points
 
 # %%
 # Compute values given behaviour params TODO make generic
@@ -385,8 +356,8 @@ end
 function DW_frontier_plot(plt, xs, ys, zs)
   # show Devetak-Winter frontier
   uss = [filter(u -> isfinite(u), vec(us)) for us in (xs, ys, zs)]
-  ptmins = [min(us) for us in uss]
-  ptmaxs = [max(us) for us in uss]
+  ptmins = [minimum(us) for us in uss]
+  ptmaxs = [maximum(us) for us in uss]
   ptranges = [ptmaxs[i] - ptmins[i] for i in eachindex(uss)]
   ptlims = [(ptmins[i]-0.1*ptranges[i], ptmaxs[i]+0.1*ptranges[i]) for i in eachindex(uss)]
 
@@ -398,16 +369,16 @@ function DW_frontier_plot(plt, xs, ys, zs)
   plot!(plt, DW_corners, st=:mesh3d, colorbar_entry=false, seriescolor=greyscheme, alpha=0.5, label="Devetak-Winter bound")
 end
 
-function ij_xyz_plot(is, js, dataf, names::Dict{Symbol, S}, kwargs...) where {T <: Real, S <: AbstractString}
-  kwargsd = Dict(kwargs)
-  contoursel = get(kwargsd, :contoursel, :z)
-  ncontours = get(kwargsd, :ncontours, 10)
-  addplotf = get(kwargsd, :addplotf, (plt, xs, ys, zs) -> nothing)
-  contourzf = get(kwargsd, :contourrzf, (lvl, _x, _y) -> lvl)
+function ij_xyz_plot(is, js, dataf, names::Dict{Symbol, S}; type::Type{T} = Float64, kwargs...) where {T <: Real, S <: AbstractString}
+  kwd = Dict(kwargs)
+  contoursel = get(kwd, :contoursel, :z)
+  ncontours = get(kwd, :ncontours, 10)
+  addplotf = get(kwd, :addplotf, (plt, xs, ys, zs) -> nothing)
+  contourzf = get(kwd, :contourzf, (lvl, _xs, _ys) -> fill(lvl, size(_xs)))
   imax, imin, ilen = maximum(is), minimum(is), length(is)
   jmax, jmin, jlen = maximum(js), minimum(js), length(js)
 
-  pts = dataf(is, js, kwargs=kwargs)
+  pts = dataf(is, js; kwargs...)
   xs, ys, zs = [Array{T}(undef, ilen, jlen) for i in 1:3]
   for ii in 1:ilen, ji in 1:jlen
     xs[ii, ji], ys[ii, ji], zs[ii, ji] = pts[ii, ji]
@@ -416,7 +387,7 @@ function ij_xyz_plot(is, js, dataf, names::Dict{Symbol, S}, kwargs...) where {T 
 
   # boundary
   boundvals = [(imin, js), (imax, js), (is, jmin), (is, jmax)]
-  consts = vcat([dataf(b..., kwargs=kwargs) |> vec for b in boundvals]...)
+  consts = vcat([dataf(b...; kwargs...) |> vec for b in boundvals]...)
   plot!(plt, vec([(c[1], c[2], 0) for c in consts]), primary=false, linecolor=:blue, label="Boundary")
 
   # contours
@@ -443,12 +414,51 @@ function ij_xyz_plot(is, js, dataf, names::Dict{Symbol, S}, kwargs...) where {T 
     lvl = level(cl) # the z-value of this contour level
     for line in lines(cl)
       _xs, _ys = coordinates(line) # coordinates of this line segment
-      _zs = contourzf(lvl, _x, _y)
+      _zs = contourzf(lvl, _xs, _ys)
       plot!(plt, _xs, _ys, _zs, linecolor=:black, primary=false, label="$contourlabel = $lvl") # add curve on x-y plane
     end
   end
 
+  addplotf(plt, xs, ys, zs)
+
   return plt
+end
+
+# %%
+# Top level plotting
+function qset_wiring_plot(QLDsamples = 100, boundsamples = 100, kwargs...)
+  fIs = range(0,1,length=boundsamples) |> collect
+  fLDs = range(0,1,length=QLDsamples) |> collect
+  return wiring_plot(fIs, fLDs, "Isotropic fraction", "Deterministic fraction", qset_corrf(), kwargs...)
+end
+
+function expt_wiring_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.925, ncstart=0.8, kwargs...)
+  ncs = range(ncstart, stop=1, length=ncsamples)
+  etas = range(etastart, stop=1, length=etasamples)
+  corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
+  return wiring_plot(ncs, etas, L"n_c", L"\eta", corrf, kwargs...)
+end
+
+function new_expt_maxcorr_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.65, ncstart=0.0, kwargs...) 
+  names = Dict{Symbol, String}(:x => "H(A|B)", :y => "H(A|E)", :z => "Maximal Correlation",
+                               :i => L"n_c", :j => L"\eta", :set => "Experimental Model"
+                              )
+  ncs = range(ncstart, stop=1, length=ncsamples)
+  etas = range(etastart, stop=1, length=etasamples)
+  corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
+  dataf = (is, js; kwargs...) -> maxcorr_data3d(is, js, HAB_oneway, HAE_CHSH, corrf; kwargs...)
+  return ij_xyz_plot(ncs, etas, dataf, names; addplotf=DW_frontier_plot, contourzf = (lvl, _xs, _ys) -> 0 .* _xs, kwargs...)
+end
+
+function new_qset_maxcorr_plot(QLDsamples = 100, boundsamples = 100, kwargs...) 
+  names = Dict{Symbol, String}(:x => "H(A|B)", :y => "H(A|E)", :z => "Maximal Correlation",
+                               :i => L"f_I", :j => L"f_{LD}", :set => "Polytope Slice"
+                              )
+  fIs = range(0,1,length=boundsamples)
+  fLDs = range(0,1,length=QLDsamples)
+  corrf = qset_corrf()
+  dataf = (is, js; kwargs...) -> maxcorr_data3d(is, js, HAB_oneway, HAE_CHSH, corrf; kwargs...)
+  return ij_xyz_plot(fIs, fLDs, dataf, names; addplotf=DW_frontier_plot, contourzf = (lvl, _xs, _ys) -> 0 .* _xs, kwargs...)
 end
 
 # %%
