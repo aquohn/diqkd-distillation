@@ -522,7 +522,7 @@
 
 \begin{frame}{Nonlocal Behaviours}
   \begin{itemize}[<+->]
-    \item \emph{Local set} \(\Ls\): \(p(ab|xy) = p(a|x)p(b|y)\)
+    \item \emph{Local set} \(\Ls\): \(p(ab|xy) = \int Q(\lambda) p_{\lambda}(a|x)p_{\lambda}(b|y) \dif{\lambda} \)
     \item \emph{Quantum set} \(\Qs\): \(p(ab|xy) = \Tr\left[ \left(M_{a|x} \otimes N_{b|y}\right) \rho_{AB} \right]\)
     \item \emph{No-signalling set} \(\NSs\) defined by no-signalling conditions
     \item \(\Ls \subsetneq \Qs \subsetneq \NSs\)
@@ -582,7 +582,7 @@
     \item Bound Eve's knowledge using CHSH
       \[ {H(A|E)}_{\rho} \geq {H_S(A|E)}_{\rho} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right) \]
     \item Standard protocol key rate
-      \[ r_{\DW} \geq r_{\std} \coloneqq \max \left\{ 0, {H_S(A|E)}_{\rho} - h_2(Q) \right\} \]
+      \[ r_{\DW} \geq r_{\std} \coloneqq \max \left\{ 0, {H_S(A|E)}_{\rho} - h_2(Q_{02}) \right\} \]
     \end{itemize}
 \end{frame}
 
@@ -677,6 +677,8 @@
   \end{block}
 \end{frame}
 
+% show key rates over polytope slice here
+
 \note{
   In my report there's a bunch of very nicely formatted tables that give us the statistics for these PR analogue behaviours, but if I show this here your eyes are just going to glaze over, so you'll have to take my word for it.
 }
@@ -686,8 +688,8 @@
 \begin{frame}{Resource Theory}
   \begin{itemize}[<+->]
     \item \emph{Converting} between \emph{nonfree resources} using \emph{free actions} and \emph{free resources}
-    \item \(R_2\) can be converted from \(R_2\): \(R_1 \leadsto R_2\)
-    \item \emph{Multi-copy local operations with shared randomness} for \(c\) copies:
+    \item \(R_1\) can be converted into \(R_2\): \(R_1 \leadsto R_2\)
+    \item \emph{Multi-copy local operations with shared randomness} (MCLOSR) for \(c\) copies:
       \[ p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \]
       \[ \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{r_A r_B} \chi_A(a\cvec{x}^c r_A|\cvec{a}^cx) \chi_B(b\cvec{y}^c r_B|\cvec{b}^cy) p_r(r_A r_B) \]
     \item Proceed with DIQKD protocol using \(p'\)
@@ -708,7 +710,7 @@
     \[ x_1 = x \qquad x_j = W^{(j)}_A(\cvec{x}^{j-1}, \cvec{a}^{j-1}) \qquad
       a = W_A(\cvec{x}^{c}, \cvec{a}^{c}) \]
     \item \(\chi_A = 1\) for sequences obeying these constraints, \(0\) otherwise
-    \item Deterministic wirings \(\sW_D\), wiring choice for a given round from \(\sW \times \sW\), generated behaviours \(\sWB(p)\)
+    \item Deterministic wirings \(\sW_D^{(i,o)}\), wiring choice for a given round from \(\sW_D^{(i_A,o_A)} \times \sW_D^{(i_B,o_B)}\), polytope of generated behaviours \(\sWB(p)\)
   \end{itemize}
 
   \begin{block}{Possible Approach}<+->
@@ -717,18 +719,18 @@
 \end{frame}
 
 \begin{frame}{A Proposed Classification}
-  \begin{onlyenv}<1-7>
-    \begin{itemize}[<+->]
+  \begin{onlyenv}<1-3>
+    \begin{itemize}
       \item Deterministic: \(a = 0\)
       \item One-sided: \(a = a_1\)
       \item Sequential: \(x_2 = a_1, a = a_2\)
       \item AND-gated: \(x_1 = x_2 = x, a = a_1a_2\)
-      \item XOR-gated: \(x_1 = x_2 = x, a = a_1 + a_2 \bmod 2\)
-      \item 82 wirings of this form are vertices of a polytope
-      \item This classification is \alert{wrong}!
+      \item<+-> XOR-gated: \(x_1 = x_2 = x, a = a_1 + a_2 \bmod 2\)
+      \item<+-> 82 wirings of this form are vertices of a polytope
+      \item<+-> This classification is \alert{wrong}!
     \end{itemize}
   \end{onlyenv}
-  \begin{onlyenv}<8->
+  \begin{onlyenv}<4->
     \begin{itemize}[<+->]
       \item Explicit counterexample:
         \[ x_2 = \bar{a}_1x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2 \]
@@ -737,16 +739,16 @@
     \end{itemize}
   \end{onlyenv}
   \begin{block}{Possible Approach}<+->
-    Can we reduce the degrees of freedom in \(\sW\) or \(\sWB(p)\)?
+    Can we reduce the degrees of freedom in \(\sW_D\) or \(\sWB(p)\)?
   \end{block}
 \end{frame}
 
 \begin{frame}{Number of Distinct Wirings}
   \begin{itemize}[<+->]
-    \item With \(c=2\), \(4096\) wirings for Alice, and \(\approx 2.48 \times 10^{10}\) for Bob, under a naive enumeration
+    \item With \(c=2\), \(4096\) wirings for Alice, and \(\approx 2.48 \times 10^{10}\) for Bob
     \item Fixing key-generating settings to AND gates gives \(1024\) wirings for Alice and \(\approx 3.10 \times 10^{9}\) for Bob
-    \item Without parametrising behaviours or wirings, brute force will be uninsightful
-    \item However, may answer fundamdental question of whether revival is possible
+    \item Without parametrising behaviours and/or wirings, brute force will be uninsightful
+    \item However, may answer fundamental question of whether revival is possible
   \end{itemize}
   \begin{block}{Possible Approach}<+->
     Is there a simple way to identify unhelpful or redundant wirings?
@@ -773,7 +775,7 @@
     \item \emph{Faithful} bounds \(> 0\) for all nonlocal behaviours/entangled states
     \item Secret key capacity of a quantum state
       \[ C_{\sk}(\rho_{Q_A Q_B E}) = \sup_{\mathfrak{P}_{\omega}} 
-      r(\mathfrak{P}_{\omega}, \rho_{ABE}) \]
+      r(\mathfrak{P}_{\omega}, \rho_{Q_A Q_B E}) \]
     \item \emph{Conditional mutual information}: how much information do \(A\) and \(B\) share that \(E\) does not have?
         \[ I{(A:B|E)}_{\rho} = H{(A|E)}_{\rho} + H{(B|E)}_{\rho} - H{(AB|E)}_{\rho} \]
     \item \emph{Locking}: removing a single bit/qubit of information from a party changes a measure arbitrarily much
@@ -791,16 +793,16 @@
 \begin{frame}{Upper Bounds for States}
   \begin{itemize}[<+->]
     \item Intrinsic information: conditional mutual information with optimal post-processing by Eve
-      \[ I{(Q_A : Q_B \downarrow E)}_{\rho} = \inf_{\cE} I{(Q_A : Q_B|E')}_{\cE(\rho)} \]
+      \[ I{(Q_A : Q_B \downarrow E)}_{\rho} = \inf_{\cE} I{(Q_A : Q_B|\hat{E})}_{\cE(\rho)} \]
     \item Reduced intrinsic information: non-\(E\)-lockable intrinsic information; \(a = 1 + \delta\{E' \text{ classical}\}\)
       \[ 
         I{(Q_A : Q_B \downarrow\downarrow E)}_{\rho} = \inf_{\rho_{Q_A Q_B EE'}}
         I{(Q_A : Q_B \downarrow EE')}_{\rho} + aH(E')
  \]
     \item Squashed entanglement: conditional mutual information with best quantum state for Eve
-      \[ E_{sq}(\rho_{Q_A Q_B}) = \frac{1}{2} \inf_{\rho_{Q_A Q_B E}} I{(Q_A:Q_B|E)}_{\rho} \]
-    \item Relative entropy of entanglement; \(\sigma_{Q_AQ_A'Q_BQ_B'}\) separable
-      \[ E_R\left({\rho_{Q_AQ_A'Q_BQ_B'}}\right) = \inf_{\sigma_{Q_AQ_A'Q_BQ_B'}} D(\rho_{Q_AQ_A'Q_BQ_B'}||\sigma_{Q_AQ_A'Q_BQ_B'}) \]
+      \[ E_{sq}({\psi^{\rho}_{Q_A Q_B}}) = \frac{1}{2} \inf_{\psi^{\rho}_{Q_A Q_B E}} I{(Q_A:Q_B|E)}_{\psi^\rho} \]
+    \item Relative entropy of entanglement; \(\psi^{\sigma}_{Q_A Q_B}\) separable
+      \[ E_R\left({\psi^{\rho}_{Q_A Q_B}}\right) = \inf_{\psi^{\sigma}_{Q_A Q_B}} D(\psi^{\rho}_{Q_A Q_B}||\psi^{\sigma}_{Q_A Q_B}) \]
   \end{itemize}
 \end{frame}
 
@@ -808,7 +810,8 @@
   \begin{onlyenv}<1-2>
     \begin{itemize}[<+->]
       \item Local--nonlocal decomposition (general protocols)
-        \[ C_{\sk}(p) \leq \inf_{\substack{\rho, \sM : \\ p = \cP(\rho, \sM) }} \inf_{\substack{q : \\ \rho = (1-q)\rho^{NL} + q\rho^L}} (1-q) E_R(\rho^{NL}) + q E_R(\rho^L) \]
+        % \[ C_{\sk}(p) \leq \inf_{\substack{\rho, \sM : \\ p = \cP(\rho, \sM) }} \inf_{\substack{q : \\ \rho = (1-q)\rho^{NL} + q\rho^L}} (1-q) E_R(\rho^{NL}) + q E_R(\rho^L) \]
+        \[ C_{\sk}(p) \leq \inf_{\substack{p^{L}, p^{NL} : \\ p = qp^{L} + (1-q)p^{NL}}} (1-q) \inf_{\substack{\rho^{NL}, \sM^{NL}}} E_R(\rho^{NL}) + q \inf_{\substack{\rho^{L}, \sM^{L}}} E_R(\rho^L) \]
       \item Quantum intrinsic nonlocality (setting-broadcast protocols)
         \begin{gather*}
           N^Q{(A:B)}_p = \sup_{p(x,y)} \inf_{\rho_{ABXYE}} I{(A:B|XYE)}_{\rho} \\
@@ -821,7 +824,7 @@
       \begin{figure}
         \centering
         \includegraphics[height=0.7\textheight]{new_plot.pdf}
-        \caption{Comparison of upper bounds for CHSH-based protocols}
+        \caption{Comparison of upper bounds for CHSH-based protocols (Source:~\cite{CCSquashedEntangle})}
       \end{figure}
   \end{onlyenv}
 \end{frame}
@@ -836,19 +839,18 @@
     \item \(I(A:B \downarrow E) = 0\) for \(v < v_{\crit} \approx 0.7263 > v_{NL}\) via \emph{convex combination attack}, which requires measurement settings to be broadcast
   \end{itemize}
 
-  \begin{onlyenv}<+->
-    \begin{block}{Possible Approach}
-      Can we prove the security of a non-broadcast protocol against quantum adversaries?
-    \end{block}
-  \end{onlyenv}
+  \begin{block}{Possible Approach}<+->
+    Can we prove the security of a non-broadcast protocol against quantum adversaries?
+  \end{block}
 \end{frame}
 
 \begin{frame}{A Convex Hull of Bounds}
   \begin{itemize}[<+->]
-    \item \emph{Classical-classical (cc) squashed entanglement} \(E^{cc}_{sq,dev}(\rho, \sM, p(x,y))\)
-      \[ \inf_{\substack{\sigma, \sN : \cP(\sigma, \sN) = \cP(\rho, \sM)}} \sum_{xy} p(x,y) \inf_{\cE_{x,y}} I{(A : B|E)}_{\cE_{x,y}(\psi^{\sigma})} \]
+    \item \emph{Classical-classical (cc) squashed entanglement} \(E^{cc}_{sq,par}(\rho, \sM(x^*, y^*))\)
+      \[ \inf_{\substack{\sigma, \sN \cong \rho, \sM}} \inf_{\cE = \sN \otimes \Lambda_E} I{(A : B|E)}_{\cE(\psi^{\sigma})} \]
     \item Convex lower bound for convex combination attack and Bell-diagonal intrinsic information
-    \item Upper bound for protocols with broadcast settings, Werner states, and only one basis
+    \item Upper bound for settings-broadcast protocols with one pair of key-generating settings
+    \item Exceeded by full-behaviour version \(E^{cc}_{sq,dev}(\rho, \sM, p(x,y))\), where choice of \(\cE\) then depends on \((x,y)\), but still limited to settings-broadcast
   \end{itemize}
 
   \begin{block}{Possible Approach}<+->
@@ -864,7 +866,7 @@
   \end{itemize}
 
   \begin{block}{Possible Approach}<+->
-      Are there any choices of states/measurements that will give greater insights? Can we simplify the optimisations? Can the restricted-setting bounds be generalised?
+      Are there any choices of states/measurements that will give greater insights? Can the restricted-setting bounds be generalised?
   \end{block}
 \end{frame}
 
@@ -910,7 +912,7 @@
 \begin{frame}{Calculating Conditional Entropy}
   \begin{itemize}[<+->]
     \item Need conditional entropy of classical Bell test data
-    \item Must introduce Alice's measurement operators \(M_{a|x}\)
+    \item Must inifimise over Alice's measurement operators \(M_{a|x}\) and quantum state \(\rho_{Q_A Q_B Q_E}\)
     \item Can impose additional constraints with Bob's measurement operators \(N_{b|y}\)
     \item Lower bound is always valid and converges for \(m\to\infty\)
     \item However, not possible to optimise efficiently
@@ -949,7 +951,7 @@
     \item Establish fundamental limits on achievable behaviours
       \[ \sWB(p) \subseteq \{ p' : \mu(p) \succeq \mu(p') \} \]
     \item Provide insight into structure of behaviour and wiring spaces
-    \item Monotones known for multi-copy LO, but not multi-copy LOSR
+    \item Monotones known for MCLO, but not MCLOSR
   \end{itemize}
 \end{frame}
 
@@ -967,6 +969,8 @@
   \end{itemize}
 \end{frame}
 
+% show maxcorr over polytope slice here
+
 \begin{frame}{Related Measures}
   \begin{itemize}[<+->]
     \item Hypercontractivity (HC) and maximal correlation (MC) ribbons are subsets of \({[0,1]}^2\)
@@ -976,9 +980,6 @@
     \item Properties of \(\rho\) derived from ribbons
     \item \(\rho\) can be efficiently computed, ribbons cannot!
   \end{itemize}
-\end{frame}
-
-\begin{frame}{Maximal Correlation Over Behaviours}
 \end{frame}
 
 \begin{frame}{Desiderata}
@@ -1001,6 +1002,35 @@
 \end{frame}
 
 \section*{Conclusion}
+
+\begin{frame}{Behaviours and Wiring}
+  \begin{itemize}[<+->]
+    \item QKD setting polytope is still quite simple
+    \item Symmetry considerations may be helpful
+    \item Space of wirings lacks obvious structure
+    \item \(\sWB(p)\) is a very messy polytope
+    \item Need to find some structure to simplify it
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Key Rate Bounds}
+  \begin{itemize}[<+->]
+    \item Gap between upper bounds for general protocols and specific protocols
+    \item Analysing nonstandard protocols might be insightful
+    \item Upper bounds difficult to evaluate in general
+    \item Fixed states and measurements give a looser-tight bound---are there any interesting settings that have not been tried?
+    \item Quasi-relative entropy framework is powerful---might help to evaluate some upper bounds
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Monotones}
+  \begin{itemize}[<+->]
+    \item Most glaring issue: does not handle shared randomness
+    \item Does not seem to provide no-go
+    \item Higher-dimensional monotones intractable
+    \item May be very insightful nonetheless
+  \end{itemize}
+\end{frame}
 
 \begin{frame}[c]{}
   \begin{center}

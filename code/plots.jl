@@ -292,67 +292,6 @@ function expt_grad_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi
   return plt
 end
 
-function expt_maxcorr_plot(; theta::T=0.15*pi, mus::Array{T}=[pi, 2.53*pi], nus::Array{T}=[2.8*pi, 1.23*pi, pi],
-    ncsamples=20, etasamples=100, etastart::T=0.65, kwargs...) where T <: Real
-  kwargs = Dict(kwargs)
-  ncs = range(0, stop=1, length=ncsamples)
-  etas = range(etastart, stop=1, length=etasamples)
-  xysel = get(kwargs, :xysel, (0,0))
-  modesel = get(kwargs, :modesel, :reg)
-  contoursel = get(kwargs, :contoursel, :corr)
-  ncontours = get(kwargs, :ncontours, 10)
-
-  Atlds, Btlds, ABtlds = meas_corrs(theta=theta, mus=mus, nus=nus)
-  corrf = (nc, eta) -> expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
-  Hs, rhos = maxcorr_data(ncs, etas, HAB_oneway, HAE_CHSH, corrf; xysel=xysel, modesel=modesel)
-
-  Hmaxs = map(max, Hs...)
-  Hmins = map(min, Hs...)
-  Hranges = [Hmaxs[i] - Hmins[i] for i in 1:2]
-  Hlims = [(Hmins[i] - Hranges[i]*0.1, Hmaxs[i] + Hranges[i]*0.1) for i in 1:2]
-  rhomax = maximum(x->isnan(x) ? -Inf : x, rhos)
-
-  etas_const_nc = range(etastart, stop=1, length=50)
-  const_nc, const_nc_rhos = maxcorr_data([0.0], etas_const_nc, HAB_oneway, HAE_CHSH, corrf; xysel=xysel, modesel=modesel)
-
-  # show Devetak-Winter frontier
-  greyscheme = ColorPalette(ColorScheme([colorant"grey", colorant"grey"]))
-  plt = plot([(0, 0, 0), (1, 1, rhomax), (-0.01, 0, rhomax), (1.01, 1, 0)], st=:mesh3d, colorbar_entry=false, seriescolor=greyscheme, alpha=0.5, label="Devetak-Winter bound", xlabel="H(A|B)",ylabel="H(A|E)",zlabel="Maximal Correlation", xlims=Hlims[1], ylims=Hlims[2])
-
-  # find S region
-  xs, ys, zs = [Array{T}(undef, ncsamples, etasamples) for i in 1:3]
-  for nci in 1:ncsamples, etai in 1:etasamples
-    xs[nci, etai], ys[nci, etai], zs[nci, etai] = Hs[nci, etai]..., rhos[nci, etai]
-  end
-  plot!(plt, xs, ys, zs, label="Quantum", st = :surface)
-
-  # boundary
-  plot!(plt, vec([(pt..., 0) for pt in const_nc]), primary=false, linecolor=:blue, label="nc = 0")
-
-  # contours
-  if contoursel == :etas
-    etazs = Array{T}(undef, ncsamples, etasamples)
-    for nci in 1:ncsamples, etai in 1:etasamples
-      etazs[nci, etai] = etas[etai]
-    end
-    contourdata = levels(contours(xs, ys, etazs, ncontours))
-    contourlabel = "eta"
-  else
-    contourdata = levels(contours(xs, ys, zs, ncontours))
-    contourlabel = "corr"
-  end
-  for cl in contourdata
-    lvl = level(cl) # the z-value of this contour level
-    for line in lines(cl)
-      _xs, _ys = coordinates(line) # coordinates of this line segment
-      _zs = 0 .* _xs
-      plot!(plt, _xs, _ys, _zs, linecolor=:black, primary=false, label="$contourlabel = $lvl") # add curve on x-y plane
-    end
-  end
-
-  return plt
-end
-
 function DW_frontier_plot(plt, xs, ys, zs)
   # show Devetak-Winter frontier
   uss = [filter(u -> isfinite(u), vec(us)) for us in (xs, ys, zs)]
@@ -387,8 +326,10 @@ function ij_xyz_plot(is, js, dataf, names::Dict{Symbol, S}; type::Type{T} = Floa
 
   # boundary
   boundvals = [(imin, js), (imax, js), (is, jmin), (is, jmax)]
-  consts = vcat([dataf(b...; kwargs...) |> vec for b in boundvals]...)
-  plot!(plt, vec([(c[1], c[2], 0) for c in consts]), primary=false, linecolor=:blue, label="Boundary")
+  plot!(plt, vec([(c[1], c[2], 0) for c in dataf([imin], js; kwargs...)]), primary=false, linecolor=:blue, label="Minimal $(names[:i])")
+  plot!(plt, vec([(c[1], c[2], 0) for c in dataf([imax], js; kwargs...)]), primary=false, linecolor=:blue, label="Maximal $(names[:i])")
+  plot!(plt, vec([(c[1], c[2], 0) for c in dataf(is, [jmin]; kwargs...)]), primary=false, linecolor=:blue, label="Minimal $(names[:j])")
+  plot!(plt, vec([(c[1], c[2], 0) for c in dataf(is, [jmax]; kwargs...)]), primary=false, linecolor=:blue, label="Maximal $(names[:j])")
 
   # contours
   if contoursel == :i
@@ -450,7 +391,7 @@ function new_expt_maxcorr_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 
   return ij_xyz_plot(ncs, etas, dataf, names; addplotf=DW_frontier_plot, contourzf = (lvl, _xs, _ys) -> 0 .* _xs, kwargs...)
 end
 
-function new_qset_maxcorr_plot(QLDsamples = 100, boundsamples = 100, kwargs...) 
+function new_qset_maxcorr_plot(QLDsamples = 100, boundsamples = 100; kwargs...) 
   names = Dict{Symbol, String}(:x => "H(A|B)", :y => "H(A|E)", :z => "Maximal Correlation",
                                :i => L"f_I", :j => L"f_{LD}", :set => "Polytope Slice"
                               )

@@ -335,7 +335,7 @@
 
   The set of no-signalling behaviours is the \emph{no-signalling polytope} \(\NSs \in \R^{d_{NS}}\), which is defined by the aforementioned no-signalling, positivity, and normalisation constraints. \(\NSs\) contains the \emph{local polytope} \(\Ls\), which consists of the behaviours that could be produced from pre-shared (and therefore insecure) data. Formally, the local set consists of all behaviours that can be written as 
   \begin{equation}\label{eqn:localdef}
-    p(ab|xy) = p(a|x)p(b|y).
+    p(ab|xy) = \int Q(\lambda) p_{\lambda}(a|x)p_{\lambda}(b|y) \dif{\lambda}.
   \end{equation}
 
   The behaviours we are most interested in are those in the \emph{quantum set} \(\Qs\), where \(\Ls \subsetneq \Qs \subsetneq \NSs\), which is the set of behaviours achievable according to quantum theory. This is important because, until quantum theory is superseded, the devices we engineer can only achieve behaviours within \(\Qs\). Notably, the quantum set is \emph{not} a polytope, with boundaries that are curved rather than defined by linear inequalities. This contributes very significantly to the difficulty of analysing DIQKD.\@
@@ -802,6 +802,7 @@
 
       Entanglement measures include the \emph{squashed entanglement}
       \begin{equation}
+      % E_{sq}({\psi^{\rho}_{Q_A Q_B}}) = \frac{1}{2} \inf_{\substack{ {\psi^{\rho}_{Q_A Q_B E}} : \\ {\psi^{\rho}_{Q_A Q_B}} = \Tr_E {\psi^{\rho}_{Q_A Q_B E}}}} I{(Q_A:Q_B|E)}_{\psi^\rho}
         E_{sq}(\rho_{Q_A Q_B}) = \frac{1}{2} \inf_{\substack{\rho_{Q_A Q_BE} : \\ \rho_{Q_A Q_B} = \Tr_E \rho_{Q_A Q_BE}}} I(Q_A:Q_B|E)_{\rho},
       \end{equation}
       which can be seen as the minimisation of the conditional mutual information on all possible states for Eve, and gives
@@ -851,6 +852,8 @@
         C_{\sk}(p) \leq \inf_{\substack{\rho, \sM : \\ p = \cP(\rho, \sM) }} \inf_{\substack{q : \\ \rho = (1-q)\rho^{NL} + q\rho^L}} (1-q) E_R(\rho^{NL}) + q E_R(\rho^L),
       \end{equation}
       where \(\cP(\rho^L, \sM) \in \Ls\) and \(\cP(\rho^{NL}, \sM) \not\in \Ls\). Essentially, we first select a state and measurement strategy consistent with the observed behaviour, decompose the state into local and nonlocal parts (where states are classified as local or nonlocal based on the chosen measurement strategy), and compute the relative entropy of entanglement for each part.
+
+        \[ C_{\sk}(p) \leq \inf_{\substack{p^{L}, p^{NL} : \\ p = (1-q)p^{L} + qp^{NL}}} (1-q) \inf_{\substack{\rho^{NL}, \sM^{NL} : \\ p^{NL} = \cP(\rho^{NL}, \sM^{NL}) }} E_R(\rho^{NL}) + q \inf_{\substack{\rho^{L}, \sM^{L} : \\ p^{L} = \cP(\rho^{L}, \sM^{L}) }} E_R(\rho^L) \]
 
       While highly general, this bound is extremely difficult to compute, since there are three levels of optimisation that need to be done, including the optimisation for the relative entropy of entanglement. The authors themselves computed this bound only for a specific implementation of the measurements, and specific decompositions of specific states parametrised by CHSH values, as shown in \Cref{fig:genubound}. These are \emph{isotropic states} with
       \begin{equation}
@@ -1006,7 +1009,7 @@
         \end{aligned}
       \end{align}
 
-      This optimisation can be converted into an efficiently solvable semidefinite program. By assuming the state of the system on \(Q_A \otimes Q_B \otimes E\) is a pure state \(\ket{\psi}\bra{\psi}_{Q_A Q_B E}\), which can only help Eve (due to data-processing), we can replace all instances of \(\Tr\left[\rho Z\right]\) with \(\braket{\psi|Z\psi}\) for all monomials \(Z\) (individual operators and products of operators, with no operator occuring more than once). These can then be seen as elements of a Gram matrix for the vectors \(Z\ket{\psi}\), which must be positive semidefinite, hence enabling the use of semidefinite programming.
+      This optimisation can be converted into an efficiently solvable semidefinite program. By assuming the state of the system on \(Q_A \otimes Q_B \otimes E\) is a pure state \(\ket{\psi}\bra{\psi}_{Q_A Q_B E}\), which can only help Eve (due to data-processing), we can replace all instances of \(\Tr\left[\rho Z\right]\) with \(\braket{\psi|Z|\psi}\) for all monomials \(Z\) (individual operators and products of operators, with no operator occuring more than once). These can then be seen as elements of a Gram matrix for the vectors \(Z\ket{\psi}\), which must be positive semidefinite, hence enabling the use of semidefinite programming.
 
       Finally, in order to constrain \(\rho_{Q_A Q_B E}\) to be a state, we can increase the size of our positive semidefinite matrix by replacing the tensor product structure with a commutation relationship and introducing more terms of the form \(\braket{\psi|\prod M|\psi}\), where \(M \in \{M_{a|x}, N_{b|y}\}\). This is the NPA hierarchy, and in order for the computed Gram matrix to represent a valid quantum strategy, it must be positive semidefinite even with all these terms introduced. The final expression for \(C_m\) then becomes
       \begin{align}
