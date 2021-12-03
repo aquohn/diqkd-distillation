@@ -86,7 +86,7 @@
 {\vspace\abovedisplayskip\begin{center}\begin{tabular}{#1}}
 {\end{tabular}\end{center}\vspace\belowdisplayskip}
 
-\newcommand{\tableline}[1]{\dimexpr \linewidth/#1 - 2\tabcolsep}
+\newcommand{\tableline}[1]{\dimexpr #1\linewidth-2\tabcolsep}
 
 % temporarily change margins
 \newenvironment{changemargin}[2]{% 
@@ -256,6 +256,7 @@
   \newcommand{\rY}{\mathrm{Y}}
 
   \newcommand{\crv}[1]{\mathsf{#1}}
+  \newcommand{\LCxE}[1]{\mathrm{LCxE}\left(#1\right)}
   \newcommand{\meas}{\rm meas}
   \newcommand{\perm}{\rm perm}
   \newcommand{\pe}{\rm pe}
@@ -857,15 +858,13 @@
         \caption{\label{fig:genubound} Upper bounds based on \Cref{eqn:genubound} for a specific CHSH-based implementation, with either Bell-diagonal states or isotropic states used in the decomposition. The bounds from quantum intrinsic nonlocality~\cite{DIQKD_Limits}~\cite[Appendix B]{RevisedPeres} are plotted for comparison. (Source:~\cite{CCSquashedEntangle})}
       \end{figure}
 
-      Let \(\cP(\rho, \sM)\) be the behaviour when the state \(\rho = \rho_{A B}\) is measured according to \(\sM\), where we drop the subscripts in this definition. Then, for an arbitrary LOPC protocol, even with two-way information reconciliation, we have~\cite[Thm. 3]{CCSquashedEntangle}
+      Let \(\cP(\rho, \sM)\) be the behaviour when the state \(\rho = \rho_{AB}\) is measured according to \(\sM\). Then, for an arbitrary LOPC protocol, we have~\cite[Thm. 3]{CCSquashedEntangle}
       \begin{equation}\label{eqn:genubound}
         C_{\sk}(p) \leq \inf_{\substack{\rho, \sM : \\ p = \cP(\rho, \sM) }} \inf_{\substack{q : \\ \rho = (1-q)\rho^{NL} + q\rho^L}} (1-q) E_R(\rho^{NL}) + q E_R(\rho^L),
       \end{equation}
-      where \(\cP(\rho^L, \sM) \in \Ls\) and \(\cP(\rho^{NL}, \sM) \not\in \Ls\). Essentially, we first select a state and measurement strategy consistent with the observed behaviour, decompose the state into local and nonlocal parts (where states are classified as local or nonlocal based on the chosen measurement strategy), and compute the relative entropy of entanglement for each part.
+      where \(\cP(\rho^L, \sM) \in \Ls\) and \(\cP(\rho^{NL}, \sM) \not\in \Ls\). Essentially, we first select a state and measurement strategy consistent with the observed behaviour, decompose the state into local and nonlocal parts (where states are classified as local or nonlocal based on the chosen measurement strategy), and compute the relative entropy of entanglement for each part, then infimise over the possible states, measurements and decompositions.
 
-        \[ C_{\sk}(p) \leq \inf_{\substack{p^{L}, p^{NL} : \\ p = (1-q)p^{L} + qp^{NL}}} (1-q) \inf_{\substack{\rho^{NL}, \sM^{NL} : \\ p^{NL} = \cP(\rho^{NL}, \sM^{NL}) }} E_R(\rho^{NL}) + q \inf_{\substack{\rho^{L}, \sM^{L} : \\ p^{L} = \cP(\rho^{L}, \sM^{L}) }} E_R(\rho^L) \]
-
-      While highly general, this bound is extremely difficult to compute, since there are three levels of optimisation that need to be done, including the optimisation for the relative entropy of entanglement. The authors themselves computed this bound only for a specific implementation of the measurements, and specific decompositions of specific states parametrised by CHSH values, as shown in \Cref{fig:genubound}. These are \emph{isotropic states} with
+      While highly general, this bound is extremely difficult to compute, since there are three levels of optimisation that need to be done, including the optimisation for the relative entropy of entanglement. The authors themselves computed this bound only for a specific choice of the measurements, and specific decompositions of specific states parametrised by CHSH values, as shown in \Cref{fig:genubound}. These are \emph{isotropic states} with
       \begin{equation}
         \rho^{I}(v) = (1-v)\ket{\Psi_+}\bra{\Psi_+} + \frac{v}{4}I
       \end{equation}
@@ -911,11 +910,33 @@
         Can we characterise the quantumly achievable behaviours from Werner states of a given visibility?
       \end{question}
 
-      One version of the \emph{classical-classical (cc) squashed entanglement} defined in~\cite{CCSquashedEntangle} is a convex lower bound to the bound established by this result on Werner state visibilities, as well as the bound in~\cite{RevisedPeres}, which applies only to protocols using only one pair of settings for key generation. The cc-squashed entanglement is itself an upper bound for the key rate for the intersection of the sets of applicable protocols for these two results (that is, protocols using Werner states, announcement of basis choice, and only one basis being used for key generation). In particular, it is given by
+      Many of these bounds were generalised and superseded using the \emph{classical-classical (cc) squashed entanglement} defined in~\cite{CCSquashedEntangle} as
       \begin{equation}
-        E^{cc}_{sq,dev}(\rho, \sM, p(x,y)) = \inf_{\substack{\sigma, \sN : \cP(\sigma, \sN) = \cP(\rho, \sM)}} \sum_{xy} p(x,y) \inf_{\cE_{x,y}} I{(\crv{A} : \crv{B}|E)}_{\cE_{x,y}(\psi^{\sigma})},
+        E^{cc}_{sq}(\rho, \sM, p(x,y)) = \sum_{xy} p(x,y) \inf_{\cE_{x,y}} I{(\crv{A} : \crv{B}|E)}_{\cE_{x,y}(\psi^{\rho})},
       \end{equation}
-      where \(\cE_{x,y}\) measures \(\psi^\sigma\), the purification of \({\sigma}\), using the POVMs in \(\sN\) corresponding to \(x\) and \(y\), while applying an arbitrary CPTP map to Eve's system. Once again, it is fortunate that all optimisations are infima, because this is a difficult optimisation to compute. Although it was applied to bound a specific set of protocols, it might be interesting to see if it could have more general applicability.
+      where \(\cE_{x,y}\) measures \(\psi^\sigma\), the purification of \({\sigma}\), using the POVMs in \(\sM\) corresponding to \(x\) and \(y\), while applying an arbitrary CPTP map to Eve's system. Notably, this function is convex in \(\rho\). This bound for states and measurements yields several different bounds for behaviours that generally improve on previous results. Denoting the key-generating inputs as \((\hat{x},\hat{y})\), the error rate in the key-generating basis as \(Q(p) = p(a\neq{b}|\hat{x}\hat{y})\) and the value of some function corresponding to the LHS of a Bell inequality as \(\hat{S}\), we have
+      \begin{align}
+        E^{cc,(\hat{x},\hat{y})}_{sq,par}(p) &= \inf_{\substack{\rho, \sM : \\ \hat{S}(p) = \hat{S}(\cP(\rho, \sM)) \\ Q(p) = Q(\cP(\rho, \sM)) }} E^{cc}_{sq}(\rho, \sM, \{p(\hat{x},\hat{y})=1\}) \\
+        E^{cc,(\hat{x},\hat{y})}_{sq,dev}(p) &= \inf_{\substack{\rho, \sM : \\ p = \cP(\rho, \sM)}} E^{cc}_{sq}(\rho, \sM, \{p(\hat{x},\hat{y})=1\}) \\
+        E^{cc}_{sq,dev}(p) &= \inf_{\substack{\rho, \sM : \\ p = \cP(\rho, \sM)}} E^{cc}_{sq}(\rho, \sM, p(x,y)).
+      \end{align}
+
+      We define the \emph{lower convex envelope} \(\LCxE{\{f_i\}} = \tilde{f}\) of a set of functions \(\{f_i\}\) as
+      \begin{equation}\label{eqn:LCxEdef}
+        \tilde{f}(x) = \max\{ f(x) : \forall x, i : f(x) \leq f_i(x) \land f\text{ convex} \},
+      \end{equation}
+      and compare the bounds and their domains of validity in \Cref{tab:ccsqcomp}.
+
+      \begin{table}
+        \begin{tabular}{|p{\tableline{0.3}}|p{\tableline{0.7}}|}
+          \hline
+          \( E^{cc,(\hat{x},\hat{y})}_{sq,par} \leq \LCxE{\{I_{AL}, I_{FBJKL+}\}} \) & For any protocol that uses one key-generating basis and the statistics \(Q\) and \(\hat{S}\), if these statistics can be generated from Werner states with projective measurements, \(I_{AL}\) is an upper bound for intrinsic information computed in~\cite{RevisedPeres}, while \(I_{FBJKL+}\) is the non-faithful upper bound from~\cite{NotSufficient}. However, \(E^{cc,(\hat{x},\hat{y})}_{sq,par}\) is a convex upper bound for the key rate, and a lower bound for their lower convex envelope, which itself is a convex upper bound for the key rate. \\ \hline
+          \( E^{cc,(\hat{x},\hat{y})}_{sq,dev} \leq I_{FBJKL+} \) & For any behaviour that can be generated from Werner states with projective measurements, and any protocol that broadcasts the input settings, \(I_{FBJKL+}\) is the non-faithful upper bound from~\cite{NotSufficient}. However, \(E^{cc,(\hat{x},\hat{y})}_{sq,par}\) is a convex upper bound for the key rate, and a lower bound for \(I_{FBJKL+}\). \\ \hline
+        \end{tabular}
+        \caption{\label{tab:ccsqcomp} Comparison between bounds from cc-squashed entanglement and earlier results.}
+      \end{table}
+
+      Once again, it is fortunate that all optimisations are infima, because this is a difficult optimisation to compute. Although it was applied to bound a specific set of protocols, it might be interesting to see if it could have more general applicability.
 
       \begin{question}
         What bounds on general protocols can we achieve using the cc-squashed entanglement?
@@ -1045,11 +1066,11 @@
         \end{aligned}
       \end{align}
 
-      We can use Naimark's dilation theorem to construct a state \(\tilde{\rho}\) and projective measurement operators\footnote{Projective in the sense that \(\tilde{M}_{a|x}\tilde{M}_{a'|x} = \delta_{a,a'}\tilde{M}_{a|x}\), with the analogous relation for Bob.} \(\{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\) on a Hilbert space \(\Hs\), such that \(\Tr\left[\tilde{\rho}\tilde{M}_{a|x}\right] = \Tr\left[\rho M_{a|x}\right]\) and  \(\Tr\left[\tilde{\rho}\tilde{N}_{b|y}\right] = \Tr\left[\rho M_{b|y}\right]\): the behaviour remains the same. These can be mapped to the original behaviour and states via local isometries. We can further assume that the state is pure, that is, \(\tilde{\rho} = {\ket{\psi}\bra{\psi}}_{\Hs}\), which can only help Eve (due to the data-processing inequality).
+      We can use Naimark's dilation theorem to construct a state \(\tilde{\rho}\) and projective measurement operators\footnote{Projective in the sense that \(\tilde{M}_{a|x}\tilde{M}_{a'|x} = \delta_{a,a'}\tilde{M}_{a|x}\), with the analogous relation for Bob.} \(\{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\) on a Hilbert space \(\Hs\), such that \(\Tr\left[\tilde{\rho}\tilde{M}_{a|x}\right] = \Tr\left[\rho M_{a|x}\right]\) and  \(\Tr\left[\tilde{\rho}\tilde{N}_{b|y}\right] = \Tr\left[\rho N_{b|y}\right]\): the behaviour remains the same. These can be mapped to the original behaviour and states via local isometries. We can further assume that the state is pure, that is, \(\tilde{\rho} = {\ket{\psi}\bra{\psi}}_{\Hs}\), which can only help Eve (due to the data-processing inequality).
 
       Additionally, instead of enforcing the tensor product explicitly, we can enforce that the operators \(Z_{a,i}\) commute with all \(\tilde{M}_{a|x}\) and \(\tilde{N}_{b|y}\), which in turn commute with each other.\footnote{This is equivalent to enforcing the tensor product structure in finite dimensions, but in infinite dimensions it may lead to a looser bound.} Therefore, we can replace all instances of \(\Tr\left[\rho S\right]\) in our objective function with \(\braket{\psi|\tilde{S}|\psi}\) for all monomials \(S\) (individual operators and products of operators), where \(\tilde{S}\) is the monomial with all measurements replaced by their projective versions on \(\Hs\). 
 
-      These inner products can then be seen as elements of a Gram matrix for the vectors \(\{\ket{\psi}, \tilde{S}\ket{\psi}\}\), which must be positive semidefinite. In order to constrain \(\ket{\psi}\) to be a valid quantum state, we introduce more vectors of the form \(\prod M\ket{\psi}\) to our Gram matrix, where \(M \in \{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\). If these are valid states and measurements, the Gram matrix should still be positive semidefinite, even if we include vectors that result from an arbitrarily long sequence of measurement operators applied to \(\ket{\psi}\). This is the \emph{NPA hierarchy}, which is a converging hierarchy of approximations\footnote{If we assume finite-dimensional systems} to the set of quantumly realisable states and measurements. Higher levels of the hierarchy involve monomials consisting of longer chains of measurement operators. The final expression for \(C_m\) then becomes
+      These inner products can then be seen as elements of a Gram matrix for the vectors \(\{\ket{\psi}, \tilde{S}\ket{\psi}\}\), which must be positive semidefinite. In order to constrain \(\ket{\psi}\) to be a valid quantum state, we introduce more vectors of the form \(\prod M\ket{\psi}\) to our Gram matrix, where \(M \in \{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\). If these are valid states and measurements, the Gram matrix should still be positive semidefinite, even if we include vectors that result from an arbitrarily long sequence of measurement operators applied to \(\ket{\psi}\). This is the \emph{NPA hierarchy}, which is a converging hierarchy of approximations to the set of quantumly realisable states and measurements.\footnote{Recent results imply that we only have convergence in the finite-dimensional case; in infinite dimensions, the set of states and measurements converged to is strictly larger than that allowed for by quantum theory.} Higher levels of the hierarchy involve monomials consisting of longer chains of measurement operators. The final expression for \(C_m\) then becomes
       \begin{align}
         \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \angleb{\psi\left|
          \tilde{M}_{a|x^*} \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) + t_i Z_{a,i}Z_{a,i}^{\dagger} \right|\psi} \\
@@ -1166,7 +1187,7 @@
     \begin{equation}
       \HC(\crv{A},\crv{B}) = \{(\nu_{\crv{A}}, \nu_{\crv{B}}) \in {[0,1]}^2 \st \forall f,g; \E[f(\crv{A})g(\crv{B})] \leq {\E[\abs{f(\crv{A})}^{1/\nu_{\crv{A}}}]}^{\nu_{\crv{A}}} {\E[\abs{g(\crv{B})}^{1/\nu_{\crv{B}}}]}^{\nu_{\crv{B}}} \},
     \end{equation}
-    or, with \(\Upsilon_{\crv{AB}}(\nu_{\crv{A}}, \nu_{\crv{B}}) = \nu_{\crv{A}} H(\crv{A}) + \nu_{\crv{B}} H(\crv{B}) - H(\crv{AB})\) and \(\tilde{\Upsilon}_{\crv{AB}}\) its lower convex envelope (pointwise largest convex function that fulfills \(\tilde{\Upsilon}_{\crv{AB}}(\nu_{\crv{A}}, \nu_{\crv{B}}) \leq \Upsilon_{\crv{AB}}(\nu_{\crv{A}}, \nu_{\crv{B}})\) for all \(\nu_{\crv{A}}, \nu_{\crv{B}}\)):
+    or, with \(\Upsilon_{\crv{AB}}(\nu_{\crv{A}}, \nu_{\crv{B}}) = \nu_{\crv{A}} H(\crv{A}) + \nu_{\crv{B}} H(\crv{B}) - H(\crv{AB})\) and \(\tilde{\Upsilon}_{\crv{AB}} = \LCxE{\{\Upsilon_{\crv{AB}}\}}\) its lower convex envelope (\Cref{eqn:LCxEdef}):
     \begin{equation}
       \HC(\crv{A},\crv{B}) = \{(\nu_{\crv{A}}, \nu_{\crv{B}}) \in {[0,1]}^2 \st \Upsilon_{\crv{AB}}(\nu_{\crv{A}}, \nu_{\crv{B}}) = \tilde{\Upsilon}_{\crv{AB}}(\nu_{\crv{A}}, \nu_{\crv{B}}) \};
     \end{equation}
