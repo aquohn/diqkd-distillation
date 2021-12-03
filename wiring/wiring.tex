@@ -255,6 +255,7 @@
   \newcommand{\rX}{\mathrm{X}}
   \newcommand{\rY}{\mathrm{Y}}
 
+  \newcommand{\crv}[1]{\mathsf{#1}}
   \newcommand{\meas}{\rm meas}
   \newcommand{\perm}{\rm perm}
   \newcommand{\pe}{\rm pe}
@@ -335,8 +336,9 @@
 
   The set of no-signalling behaviours is the \emph{no-signalling polytope} \(\NSs \in \R^{d_{NS}}\), which is defined by the aforementioned no-signalling, positivity, and normalisation constraints. \(\NSs\) contains the \emph{local polytope} \(\Ls\), which consists of the behaviours that could be produced from pre-shared (and therefore insecure) data. Formally, the local set consists of all behaviours that can be written as 
   \begin{equation}\label{eqn:localdef}
-    p(ab|xy) = \int Q(\lambda) p_{\lambda}(a|x)p_{\lambda}(b|y) \dif{\lambda}.
+    p(ab|xy) = \sum_e P_E(e) p_{e}(a|x)p_{e}(b|y)
   \end{equation}
+  where \(P_E\) is an arbitrary probability mass function over an alphabet \(\{e\}\), whose elements parametrise the distributions \(\{p_e(a|x), p_e(b|y)\}\).\footnote{\(E\) could be a continuous random variable as well, but we will assume that it is a discrete random variable for simplicity.} Operationally, this is the set of all behaviours that could result from randomness pre-shared between Alice and Bob.
 
   The behaviours we are most interested in are those in the \emph{quantum set} \(\Qs\), where \(\Ls \subsetneq \Qs \subsetneq \NSs\), which is the set of behaviours achievable according to quantum theory. This is important because, until quantum theory is superseded, the devices we engineer can only achieve behaviours within \(\Qs\). Notably, the quantum set is \emph{not} a polytope, with boundaries that are curved rather than defined by linear inequalities. This contributes very significantly to the difficulty of analysing DIQKD.\@
 
@@ -379,11 +381,11 @@
 
     In order to quantify the amount of shared secrecy that can be extracted from this certified randomness, given a specific behaviour, we must define and mathematically model a DIQKD protocol. At the most general level, a DIQKD protocol can be defined as finite sequence of \emph{local operations and public communication} operations (LOPC) that distills a key of length \(\ell\) from the data from \(n\) rounds of Bell tests~\cite{DIQKD_Limits}.
 
-    Let \(A^n\), \(B^n\) and \(E^n\) be the systems of Alice, Bob, and Eve respectively after executing \(n\) rounds of Bell tests, and let their joint \emph{ccq} (classical-classical-quantum) state be \(\rho_{A^n B^n E^n}\), so called because \(A^n\) and \(B^n\) store classical Bell test data, while Eve's system is quantum.
+    Let \(\crv{A}^n\), \(\crv{B}^n\) and \(E^n\) be the systems of Alice, Bob, and Eve respectively after executing \(n\) rounds of Bell tests, and let their joint \emph{ccq} (classical-classical-quantum) state be \(\rho_{\crv{A}^n \crv{B}^n E^n}\), so called because \(\crv{A}^n\) and \(\crv{B}^n\) store classical Bell test data, while Eve's system is quantum. The sans-serif font indicates \(\crv{A}\) and \(\crv{B}\) as classical random variables.
 
-    A DIQKD protocol \(\mathfrak{P}_{\omega}\) maps \(\rho_{A^n B^n E^n} \mapsto \omega_{K_A K_B E^n D}\), where \(K_A\) and \(K_B\) are Alice and Bob's keys of length \(\ell\), respectively, while \(D\) is the public data that is communicated during the protocol. Alice and Bob's key is \(\epsilon\)-\emph{secure} if \(\omega_{K_A K_B E^n D}\) satisfies~\cite{SecurityQKD}
+    A DIQKD protocol \(\mathfrak{P}_{\omega}\) maps \(\rho_{\crv{A}^n \crv{B}^n E^n} \mapsto \omega_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}}\), where \(\crv{K}_{A}^{\ell}\) and \(\crv{K}_{B}^{\ell}\) are Alice and Bob's keys of length \(\ell\), respectively, while \(\crv{D}\) is the public data that is communicated during the protocol. Alice and Bob's key is \(\epsilon\)-\emph{secure} if \(\omega_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}}\) satisfies~\cite{SecurityQKD}
     \begin{equation}
-      (1-\erob{n})\Delta_{\Tr}(\omega_{K_A K_B E^n D}, \tau_{K_A K_B}^{\ell} \otimes \rho_{E^n} \otimes \omega_D) \leq \epsilon,
+      (1-\erob{n})\Delta_{\Tr}(\omega_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}}, \tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}} \otimes \rho_{E^n} \otimes \omega_{\crv{D}}) \leq \epsilon,
     \end{equation}
     where \(\erob{n}\) is the probability of the protocol aborting without interference from Eve, \(\Delta_{\Tr}(\rho,\sigma)\) is the \emph{trace distance}
     \begin{equation}
@@ -393,15 +395,15 @@
     \[ \Delta_{\Tr}(p(x),q(x)) = \frac{1}{2} \sum_{x} \abs{p(x)-q(x)}. \]
     The states in the equation are the \emph{ideal key}
     \begin{equation}
-      \tau_{K_A K_B}^{\ell} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{K_A} \otimes \ket{j}\bra{j}_{K_B},
+      \tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{\crv{K}_{A}^{\ell}} \otimes \ket{j}\bra{j}_{\crv{K}_{B}^{\ell}},
     \end{equation}
     a uniformly distributed mixture amongst all possible keys of length \(\ell\), Eve's marginal state
     \begin{equation}
-      \rho_{E^n} = \Tr_{A^n B^n}\left[ \rho_{A^n B^n E^n} \right],
+      \rho_{E^n} = \Tr_{\crv{A}^n \crv{B}^n}\left[ \rho_{\crv{A} \crv{B} E^n} \right],
     \end{equation}
     and the publicly exchanged data
     \begin{equation}
-      \omega_D = \Tr_{K_A K_B E^n}\left[ \omega_{K_A K_B E^n D} \right],
+      \omega_{\crv{D}} = \Tr_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n}\left[ \omega_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}} \right],
     \end{equation} 
     which is to say that Alice and Bob's keys should ideally be uniformly distributed and independent of Eve's quantum side information and the publicly exchanged data. Eve's marginal state is left unchanged because the protocol is executed only by Alice and Bob. The trace distance is written in terms of the \emph{trace norm}
     \begin{equation}
@@ -414,55 +416,54 @@
       r(\mathfrak{P}_{\omega}, \rho) = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\erob{n}) \frac{\ell_n}{n},
     \end{equation}
     where the supremum is over all sequences \(\{\ell_n\}\) such that
-    \[ \lim_{n\to\infty} (1-\erob{n})\Delta_{\Tr}(\omega_{K_A K_B E^n D}, \tau_{K_A K_B}^{\ell_n} \otimes \rho_{E^n} \otimes \omega_{D}) = 0. \]
+    \[ \lim_{n\to\infty} (1-\erob{n})\Delta_{\Tr}(\omega_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}}, \tau_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n}} \otimes \rho_{E^n} \otimes \omega_{\crv{D}}) = 0. \]
 
     In the limit of asymptotically many rounds, we can consider each round to be independent and identically distributed (i.i.d.). I.i.d.\ attacks where Eve stores quantum information are referred to as \emph{collective attacks} in the literature, as opposed to \emph{individual attacks}, like the one characterised in \Cref{eqn:finethm}, where Eve's information is purely classical. We need the machinery of quantum theory to prove that Eve storing quantum information does not compromise the security of the generated key. Remarkably, however, security against collective attacks can be extended to general, non-i.i.d.\ attacks, and in finite-key settings the decrease in the key rate from the collective case is \(O(1/\sqrt{n})\)~\cite{DI_Proofs, DIQKD_PracticalEAT}.
 
     Therefore, we can write Alice, Bob and Eve's state before distillation as
-    \[ \rho_{A^n B^n E^n} = \rho_{ABE}^{\otimes n}, \]
-    where the systems \(A\), \(B\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. This data is derived from measurements on a \emph{qqq} state \(\rho_{Q_A Q_B E}\). The measurements on \(Q_A\) and \(Q_B\), given the input settings \((x,y)\), are characterised by the \emph{positive operator-valued measures} (POVMs)  \({\{M_{a|x}\}}_{a}\) and \({\{N_{b|y}\}}_{b}\) respectively, \(M_{a|x}\) corresponding to output \(a\) and \(N_{b|y}\) corresponding to output \(b\). The operators in a POVM are constrained to have
-    \[ \sum_{a} M_{a|x} = I_{Q_A}\;\forall x \qquad M_{a|x} \geq 0\;\forall a, x \qquad \sum_{b} N_{b|y} = I_{Q_B}\;\forall y \qquad N_{b|y} \geq 0\;\forall b, y, \]
+    \[ \rho_{\crv{A}^n \crv{B}^n E^n} = \rho_{\crv{A}\crv{B}E}^{\otimes n}, \]
+    where the systems \(\crv{A}\), \(\crv{B}\) and \(E\) are Alice's, Bob's and Eve's systems, respectively, in an individual Bell test round. This data is derived from measurements on a qqq state \(\rho_{A B E}\). The measurements on \(A\) and \(B\), given the input settings \((x,y)\), are characterised by the \emph{positive operator-valued measures} (POVMs)  \({\{M_{a|x}\}}_{a}\) and \({\{N_{b|y}\}}_{b}\) respectively, \(M_{a|x}\) corresponding to output \(a\) and \(N_{b|y}\) corresponding to output \(b\). The operators in a POVM are constrained to have
+    \[ \sum_{a} M_{a|x} = I_{A}\;\forall x \qquad M_{a|x} \geq 0\;\forall a, x \qquad \sum_{b} N_{b|y} = I_{B}\;\forall y \qquad N_{b|y} \geq 0\;\forall b, y, \]
     where \(M \geq 0\) means that the operator is positive-semidefinite, and \(\Tr\left[\rho M\right]\) gives the probability of obtaining the measurement outcome associated with \(M\) when measured on a state \(\rho\). The behaviour is then given by
     \begin{equation}\label{eqn:probmeas}
-      p(ab|xy) = \Tr\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right],
+      p(ab|xy) = \Tr\left[\rho_{A B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right],
     \end{equation}
-    where the tensor product structure represents the fact that there is no signalling between Alice, Bob and Eve at the point of measurement.
+    where the tensor product structure represents the fact that there is no signalling between Alice, Bob and Eve at the point of measurement. We refer to the whole set of POVMs for all inputs as the \emph{measurement strategy}
+    \[ \sM = \left({\{ {\{ M_{a|x}\}}_a \}}_x, {\{ {\{N_{b|y}\}}_b \}}_y \right). \]
 
     We are interested in what we will call the \emph{secret key capacity} \(C_{\sk}\) of a given behaviour. That is, we want to find 
     \begin{equation}\label{eqn:seckeycap}
-      C_{\sk}(p) = \sup_{\mathfrak{P}_{\omega}} \inf_{ \substack{
-          \rho_{Q_A Q_B E}, \\
-          {\{M_{a|x}\}}_a, {\{N_{b|y}\}}_b
-        }
+      C_{\sk}(p) = \sup_{\mathfrak{P}_{\omega}} \inf_{ 
+          \rho_{A B E}, \sM
       } r(\mathfrak{P}_{\omega}, \rho_{ABE}),
     \end{equation}
-    where \(\rho_{Q_A Q_B E}\), \({\{M_{a|x}\}}_a\), and \({\{N_{b|y}\}}_b\) satisfy \Cref{eqn:probmeas}, and we minimise over these parameters in order to give as much of an advantage as possible to Eve, since we cannot rule anything else out based on the behaviour. Computing the secret key capacity is the fundamental question that DIQKD research is trying to answer:
+    where \(\rho_{A B E}\) and \(\sM\) satisfy \Cref{eqn:probmeas}, and we minimise over these parameters in order to give as much of an advantage as possible to Eve, since we cannot rule anything else out based on the behaviour. Computing the secret key capacity is the fundamental question that DIQKD research is trying to answer:
     \begin{funqn}\label{fqn:cap}
       Can we design an algorithm to compute the secret key capacity of an arbitrary behaviour?
     \end{funqn}
 
-    While we do not have such an algorithm in general, we do have techniques for finding upper and lower bounds. One such lower bound is the the \emph{Devetak-Winter key rate}~\cite{DevetakWinter} \(r_{\DW}\). Intuitively, the amount of information that Alice has in each round which is secret to Eve is \({H(A|E)}_{\rho}\), where \(H\) is the von Neumann entropy, \({H(A)}_{\rho} = -\Tr\left[\rho_{A}\log\rho_{A}\right]\), which reduces to the Shannon entropy for a classical system. A classical system can be represented as a density matrix, with the probabilities of the individual outcomes on the diagonal, and all other entries 0.
+    While we do not have such an algorithm in general, we do have techniques for finding upper and lower bounds. One such lower bound is the the \emph{Devetak-Winter key rate}~\cite{DevetakWinter} \(r_{\DW}\). Intuitively, the amount of information that Alice has in each round which is secret to Eve is \({H(\crv{A}|E)}_{\rho}\), where \({H(\cdot)}_{\rho}\) is the von Neumann entropy of a system that is part of a state \(\rho\). The unconditional von Neumann entropy for a quantum system \(X\) in a state \(\rho\) is then \({H(X)}_{\rho} = -\Tr\left[\rho_{X}\log\rho_{X}\right]\). This reduces to the Shannon entropy for a classical system, which can be represented as a density matrix with the probabilities of the individual outcomes on the diagonal, and all other entries 0. The conditional entropy, conditioned on a quantum system, is significantly more difficult to compute and interpret (it can be negative for entangled systems, for example), but \({H(\crv{A}|E)}_{\rho}\) can still intuitively be understood as the uncertainty that Eve, who possess the \(E\) system, has about Alice's \(\crv{A}\) system, when the joint state of the two subsystems is \(\rho_{\crv{A}E}\).
 
-    On the other hand, \(B\) may not be perfectly correlated with \(A\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve during reconciliation is upper bounded by \({H(A|B)}_{\rho}\). This gives us
+    On the other hand, \(\crv{B}\) may not be perfectly correlated with \(\crv{A}\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve during reconciliation is upper bounded by \({H(\crv{A}|\crv{B})}_{\rho}\). This gives us
     \begin{equation}
-      r_{\DW}(p) \coloneqq {H(A|E)}_{\rho} - {H(A|B)}_{\rho} \leq C_{\sk}(p).
+      r_{\DW}(p) \coloneqq {H(\crv{A}|E)}_{\rho} - {H(\crv{A}|\crv{B})}_{\rho} \leq C_{\sk}(p).
     \end{equation}
 
-    Much of the effort in bounding \(C_{\sk}\) has focused on this definition, because two-way information reconciliation is much more poorly understood (although it can provide an advantage, see~\cite{AdvantageDistill}).  While \({H(A|B)}_{\rho}\) can be computed directly as the QBER, upper and lower bounds for \({H(A|E)}_{\rho}\) are much harder to find.
+    Much of the effort in bounding \(C_{\sk}\) has focused on this definition, because two-way information reconciliation is much more poorly understood (although it can provide an advantage, see~\cite{AdvantageDistill}).  While \({H(\crv{A}|\crv{B})}_{\rho}\), being purely classical, can be estimated quite directly, upper and lower bounds for \({H(\crv{A}|E)}_{\rho}\) are much harder to find.
 
-    We will now consider what we refer to as the \emph{standard protocol}, proposed and proved secure in~\cite{DIQKD_Lower}. It was based on the first DIQKD protocol, E91~\cite{E91}, and is the first DIQKD protocol proven to be secure against collective attacks. This takes place in the \((2,2,3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}. The protocol uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key, while bounding Eve's information with the CHSH value for \(x,y \in \{0,1\}\) after symmetrising the marginals \(\angleb{A_x}\) and \(\angleb{B_y}\) for those values of \(x\) and \(y\). This was done by randomly choosing to flip the outcomes of half of the rounds, and publicly communicating this choice. Therefore, we have \({H(A|B)}_{\rho} = Q_{02} = Q\), and a CHSH-based lower bound for \({H(A|E)}_{\rho}\) was proved:
+    We will now consider what we refer to as the \emph{standard protocol}, proposed and proved secure in~\cite{DIQKD_Lower}. It was based on the first DIQKD protocol, E91~\cite{E91}, and is the first DIQKD protocol proven to be secure against collective attacks. This takes place in the \((2,2,3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}. The protocol uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key, while bounding Eve's information with the CHSH value for \(x,y \in \{0,1\}\) after symmetrising the marginals \(\angleb{A_x}\) and \(\angleb{B_y}\) for those values of \(x\) and \(y\). This was done by randomly choosing to flip the outcomes of half of the rounds, and publicly communicating this choice. Therefore, we have \({H(\crv{A}|\crv{B})}_{\rho} = Q_{02} = Q\), and a CHSH-based lower bound for \({H(\crv{A}|E)}_{\rho}\) was proved:
     \begin{equation}
-      {H(A|E)}_{\rho} \geq {H_S(A|E)}_{\rho} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
+      {H(\crv{A}|E)}_{\rho} \geq {H_S(\crv{A}|E)}_{\rho} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
     \end{equation}
     where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, and where \(S\) is calculated from \(x,y \in \{0,1\}\). Therefore,
     \begin{equation}
-      r_{\DW} \geq r_{\std} = \max \left\{ 0, {H_S(A|E)}_{\rho} - h_2(Q) \right\},
+      r_{\DW} \geq r_{\std} = \max \left\{ 0, {H_S(\crv{A}|E)}_{\rho} - h_2(Q) \right\},
     \end{equation}
     where we refer to \(r_{\std}\) as the \emph{standard protocol key rate}. Being the rate for an explicit, achievable protocol, this is a lower bound for the total secrecy extractable. However, because the proof of the bound involves explicitly constructing the states and measurements that gives the greatest advantage to Eve while still producing the observed value of \(S\), it is also an upper bound for any method for computing key rates for this protocol based only on \(S\), since the observed \(S\) could have been produced by those states.
 
     \section{Preliminary Results}\label{sec:preres}
 
-    Our preliminary results found a revival of the standard protocol key rate for states that are generated according to a simple experimental model. We will be using it to illustrate the relevant issues and directions we wish to pursue in our analysis. In this model, we denote the density matrix of the state as \(\rho_{AB}\) and observables as \(\tilde{A}_x\) and \(\tilde{B}_y\), for a perfect experimental setup, and let the Hilbert spaces of systems \(A\) and \(B\) be \(d_A\) and \(d_B\) respectively.
+    Our preliminary results found a revival of the standard protocol key rate for states that are generated according to a simple experimental model. We will be using it to illustrate the relevant issues and directions we wish to pursue in our analysis. In this model, we denote the density matrix of Alice's and Bob's quantum state as \(\rho_{AB}\) and observables as \(\tilde{A}_x\) and \(\tilde{B}_y\) for a perfect experimental setup, and let the dimensions of the Hilbert spaces of systems \(A\) and \(B\) be \(d_A\) and \(d_B\) respectively.
 
     We now model some possible experimental flaws. If our source of quantum states produces one state per time bin, then \(n_c\) is the probability that a state is not produced during a given time bin (where we assume this process to be i.i.d.). Further, Alice and Bob's detectors have efficiencies \(\eta_A\) and \(\eta_B\) respectively, which are the probabilities for them to detect a state given that one is produced. If nothing is detected, either due to no signal being produced or due to detector inefficiency, we assign the \(-1\) outcome. The detector failure events are independent, but if no signal is produced, both Alice and Bob will receive no signal. We can then express the new states and observables as follows:
     \begin{align*}
@@ -482,11 +483,11 @@
       \end{aligned}
       \end{align*}
 
-      For our purposes, we fix \(\eta_A = \eta_B = \eta\). We want to study the variation of the key rate with the variation of these parameters. Since \(S\) is a linear combination of the correlators, we only need to compute the variation of the correlators with \(\eta\) and \(n_c\). We connect this to the key rate by studying the variation of \(H_S(A|E)\) with \(S\).
+      For our purposes, we fix \(\eta_A = \eta_B = \eta\). We want to study the variation of the key rate with the variation of these parameters. Since \(S\) is a linear combination of the correlators, we only need to compute the variation of the correlators with \(\eta\) and \(n_c\). We connect this to the key rate by studying the variation of \(H_S(\crv{A}|E)\) with \(S\).
       \begin{align*}
         \diffp{}{{n_c}} \angleb{A_x B_y} &= \eta \left( \left(1-\eta\right) \left(\langle\tilde{A}_x\rangle + \langle\tilde{B}_y\rangle\right) - \eta \langle\tilde{A}_x\tilde{B}_y\rangle + \left(2 - \eta\right) \right) \\
         \diffp{}{{\eta}} \angleb{A_x B_y} &= \left(1 - n_{c}\right) \left( \left(1-2\eta\right) \left(\langle\tilde{A}_x\rangle+\langle\tilde{B}_y\rangle\right) - 2\eta \langle\tilde{A}_x\tilde{B}_y\rangle + (2-2\eta) \right) \\
-        \diffp{}{S} H_S(A|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right].
+        \diffp{}{S} H_S(\crv{A}|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right].
       \end{align*}
 
       Consider the following simple wiring, the \emph{N-AND wiring}, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs. Clearly, this can only increase the correlations between Alice and Bob, since \(a \neq b\) only if all \(N\) boxes return different outputs to Alice and Bob. However, this means that if Eve knows that any of the boxes produced 0, she can conclude that the overall output is 0, increasing her correlation with Alice. If the increase in \(H(A|B)\) can make up for the decrease in \(H(A|E)\), then this wiring improves the key rate.
@@ -523,7 +524,7 @@
 
       Now, moving to the QKD setting, if we pick two out of three values for \(y\), we can still calculate the CHSH value for those two settings, and Alice's two values of \(x\). Or, more operationally, we can delete the data for the rounds where Bob chooses \(y=2\), and the Bell test data will then be that for a \((2,2,2,2)\) test. However we compute it, the CHSH value still should not violate the inequality for a behaviour in \(\Ls\). Since there are \(\binom{3}{2} = 3\) ways to select Bob's settings, there are 3 \emph{liftings} of each CHSH facet in the QKD setting, and therefore we have 24 liftings of CHSH in total. This gives us 48 facets for \(\Ls\) in the QKD setting.
 
-      Unlike \(\NSs\), \(\Ls\) is defined by its vertices. As discussed in \Cref{sec:pre_diqkd}, local behaviours can be considered as probabilistic mixtures of deterministic behaviours according to \Cref{eqn:finethm}. There, it was explained that this is necessary for Eve if she wants to eavesdrop on the generated key; from a different perspective, if the correlations between Alice and Bob arise from some preshared data, the data can have been generated in the same manner, with \(p_E(e)\) being the distribution of the process which selects the behaviour to encode in each round. If the devices use local randomness to generate their behaviour in each round, the effect on the overall distribution can be absorbed into \(p_E(e)\), so that a system without local randomness and with a different \(p_E(e)\) can reproduce the same statistics. This result is known as \emph{Fine's theorem}~\cite{FineThm}, and is discussed more rigorously in~\cite{BellNonlocality}.
+      Unlike \(\NSs\), \(\Ls\) is defined by its vertices. As discussed in \Cref{sec:pre_diqkd}, local behaviours can be considered as probabilistic mixtures of deterministic behaviours according to \Cref{eqn:finethm}. There, it was explained that this is necessary for Eve if she wants to eavesdrop on the generated key; from a different perspective, if the correlations between Alice and Bob arise from some pre-shared data, the data can have been generated in the same manner, with \(p_E(e)\) being the distribution of the process which selects the behaviour to encode in each round. If the devices use local randomness to generate their behaviour in each round, the effect on the overall distribution can be absorbed into \(p_E(e)\), so that a system without local randomness and with a different \(p_E(e)\) can reproduce the same statistics. This result is known as \emph{Fine's theorem}~\cite{FineThm}, and is discussed more rigorously in~\cite{BellNonlocality}.
 
       Using the \verb`LazySets.jl` package for the Julia programming language, we specified the deterministic behaviours as vertices of \(\Ls\), since all other local behaviours can be specified as probabilistic mixtures, that is, convex combinations, of the deterministic behaviours. For each \(x \in \dintv{1}{i_A}\), we have \(i_A\) choices for the output \(a\) to assign, with the analogous scenario for Bob. Therefore, there are \(i_A^{o_A}i_B^{o_B} = 32\) vertices. The GLPK solver was then used to identify the facets and their corresponding inequalities, and yielding 48 facets for our polytope. Therefore, all facets in the QKD setting are either liftings of CHSH or positivity facets, which is expected, since the next unique Bell inequality is \(I_{3322}\), in the \((3,2,3,2)\) setting.
 
@@ -643,7 +644,7 @@
       \end{equation}
       where \(p_r\) is the distribution of the shared randomness \(r_A\) and \(r_B\). However, since our wirings combine multiple boxes, their effect cannot be expressed in this form. This automatically makes many of the specific results in LOSR resource theories of nonlocality inapplicable to our case, while increasing the dimension of the space of possible wirings significantly.
 
-      In this cryptographic scenario, it might be interesting to ask if there is any benefit to be gained from using \emph{private} shared randomness, unknown to Eve. However, if they have \(h\) bits of preshared randomness, since they are performing classical data processing, this can only increase Eve's entropy by at most \(h\), which can already be achieved by simply using the shared randomness as part of their secret key.
+      In this cryptographic scenario, it might be interesting to ask if there is any benefit to be gained from using \emph{private} shared randomness, unknown to Eve. However, if they have \(h\) bits of pre-shared randomness, since they are performing classical data processing, this can only increase Eve's entropy by at most \(h\), which can already be achieved by simply using the shared randomness as part of their secret key.
 
       Operationally, \(h\) bits of randomness will lead to \(2^h\) possible different behaviours.
 
@@ -779,9 +780,9 @@
 
       \subsection{Upper Bounds for States}
 
-      The definitions are taken from the summary in~\cite{CQKeyDistill}. We define the secret key capacity of a qqq state \(\rho_{Q_AQ_BE}\):
+      The definitions are taken from the summary in~\cite{CQKeyDistill}. We define the secret key capacity of a qqq state \(\rho_{ABE}\):
       \begin{equation}
-      C_{\sk}(\rho_{Q_A Q_B E}) = \sup_{\mathfrak{P}_{\omega}} 
+      C_{\sk}(\rho_{A B E}) = \sup_{\mathfrak{P}_{\omega}} 
       r(\mathfrak{P}_{\omega}, \rho_{ABE}),
       \end{equation}
       where the choice of the measurement POVMs is now absorbed into \(\mathfrak{P}_{\omega}\).
@@ -793,37 +794,37 @@
                           &= H{(A|E)}_{\rho} - H{(A|BE)}_{\rho} \\
                           &= H{(B|E)}_{\rho} - H{(B|AE)}_{\rho}
       \end{align}
-      where \(A\), \(B\) and \(E\) may be either classical or quantum, and their joint state is \(\rho_{ABE}\). The \emph{intrinsic information} of a tripartite quantum state \(\rho_{Q_A Q_B E}\) is
+      where \(A\), \(B\) and \(E\) may be either classical or quantum, and their joint state is \(\rho_{ABE}\). The \emph{intrinsic information} of a tripartite quantum state \(\rho_{A B E}\) is
       \begin{equation}
-        I{(Q_A : Q_B \downarrow E)}_{\rho} = \inf_{\cE} I{(Q_A : Q_B|E')}_{\cE(\rho)},
+        I{(A : B \downarrow E)}_{\rho} = \inf_{\cE} I{(A : B|E')}_{\cE(\rho)},
       \end{equation}
-      where the infimum is taken over \emph{completely positive trace-preserving} (CPTP) maps \(\cE : \rho_{Q_A Q_B E} \mapsto \rho_{Q_A Q_B E'} = \left(I_{Q_A Q_B} \otimes \Lambda_{E \to E'}\right) \rho_{Q_A Q_B E}\), for some operator \(\Lambda_{E \to E'}\). Intuitively, this measures how much private information Alice and Bob have, assuming Eve performs the optimal postprocessing on her state. This gives
+      where the infimum is taken over \emph{completely positive trace-preserving} (CPTP) maps \(\cE : \rho_{A B E} \mapsto \rho_{A B E'} = \left(I_{A B} \otimes \Lambda_{E \to E'}\right) \rho_{A B E}\), for some operator \(\Lambda_{E \to E'}\). Intuitively, this measures how much private information Alice and Bob have, assuming Eve performs the optimal postprocessing on her state. This gives
       \begin{equation}
-        C_{\sk}(\rho_{Q_A Q_B E}) \leq I{(Q_A : Q_B \downarrow E)}_{\rho}.
+        C_{\sk}(\rho_{A B E}) \leq I{(A : B \downarrow E)}_{\rho}.
       \end{equation}
 
       However, this bound is not tight, because the classical intrinsic information is \(E\)-lockable: it can increase by arbitrarily much if Eve loses a single bit, while the secret key capacity is not \(E\)-lockable. This motivates the definition of the \emph{reduced intrinsic information}
       \begin{equation}
-        I{(Q_A : Q_B \downarrow\downarrow E)}_{\rho} = \inf_{%
-        \substack{\rho_{Q_A Q_B EE'} : \\ 
-        \Tr_{E'} \rho_{Q_A Q_B EE'} = \rho_{Q_A Q_B E}}}
-        I{(Q_A : Q_B \downarrow EE')}_{\rho} + (1+\delta\{E' \text{ classical}\})H(E'),
+        I{(A : B \downarrow\downarrow E)}_{\rho} = \inf_{%
+        \substack{\rho_{A B EE'} : \\ 
+        \Tr_{E'} \rho_{A B EE'} = \rho_{A B E}}}
+        I{(A : B \downarrow EE')}_{\rho} + (1+\delta\{E' \text{ classical}\})H(E'),
       \end{equation}
       The increase in the reduced intrinsic information from Eve's loss of \(E'\) is bounded by \((1+\delta\{E' \text{ classical}\})H(E')\), where \(\delta\{\angleb{proposition}\}\) is the \emph{indicator function} that is 1 when the proposition is true, and 0 otherwise.
 
       Entanglement measures include the \emph{squashed entanglement}
       \begin{equation}
-        E_{sq}(\rho_{Q_A Q_B}) = \frac{1}{2} \inf_{\substack{\rho_{Q_A Q_BE} : \\ \rho_{Q_A Q_B} = \Tr_E \rho_{Q_A Q_BE}}} I(Q_A:Q_B|E)_{\rho},
+        E_{sq}(\rho_{A B}) = \frac{1}{2} \inf_{\substack{\rho_{A BE} : \\ \rho_{A B} = \Tr_E \rho_{A BE}}} I(A:B|E)_{\rho},
       \end{equation}
       which can be seen as the minimisation of the conditional mutual information on all possible states for Eve, and gives
       \begin{equation}
-        C_{\sk}(\rho_{Q_A Q_B E}) \leq E_{sq}(\rho_{Q_A Q_A' Q_B Q_B'}),
+        C_{\sk}(\rho_{A B E}) \leq E_{sq}(\rho_{A A' B B'}),
       \end{equation}
-      where \(Q_A'\) and \(Q_B'\) hold the purifications of the state on \(Q_A\) and \(Q_B\) respectively.
+      where \(A'\) and \(B'\) hold the purifications of the state on \(A\) and \(B\) respectively.
 
       However, the squashed entanglement is also subject to locking. There is, however, a non-lockable entanglement measure: the \emph{relative entropy of entanglement},  
       \begin{equation}
-        E_R\left({\rho_{Q_AQ_B}}\right) = \inf_{\sigma_{Q_AQ_B}} D(\rho_{Q_AQ_B}||\sigma_{Q_AQ_B})
+        E_R\left({\rho_{AB}}\right) = \inf_{\sigma_{AB}} D(\rho_{AB}||\sigma_{AB})
       \end{equation}
       defined in terms of the \emph{relative entropy}
       \begin{equation}
@@ -831,13 +832,13 @@
       \end{equation}
       and where the infimum is over all separable states
       \begin{equation}
-        \sigma_{Q_AQ_B} = \sum_i p_i \sigma_{Q_A}^{(i)} \otimes \sigma_{Q_B}^{(i)}.
+        \sigma_{AB} = \sum_i p_i \sigma_{A}^{(i)} \otimes \sigma_{B}^{(i)}.
       \end{equation}
       This gives the upper bound
       \begin{equation}
-        C_{\sk}(\rho_{Q_A Q_B E}) \leq E_{R}^{\infty}(\rho_{Q_A Q_A' Q_B Q_B'}) \leq E_{R}(\rho_{Q_A Q_A' Q_B Q_B'}),
+        C_{\sk}(\rho_{A B E}) \leq E_{R}^{\infty}(\rho_{A A' B B'}) \leq E_{R}(\rho_{A A' B B'}),
       \end{equation}
-      where \(Q_A'\) and \(Q_B'\) hold the purifications of the state, and \(E_{R}^{\infty}\) is the \emph{regularised} version of the relative entropy of entanglement
+      where \(A'\) and \(B'\) hold the purifications of the state, and \(E_{R}^{\infty}\) is the \emph{regularised} version of the relative entropy of entanglement
       \begin{equation}
         E_{R}^{\infty}(\rho) = \limsup_{n\to\infty} \frac{E_R(\rho^{\otimes n})}{n}.
       \end{equation}
@@ -848,9 +849,7 @@
 
       There has been a recent flurry of research related to upper bounds on behaviours~\cite{NotSufficient, RevisedPeres, DIQKD_QKD_Gap, CCSquashedEntangle, DIQKD_Limits}. Fortunately,~\cite{CCSquashedEntangle} unifies most of these results to produce state-of-the-art upper bounds. We modify their notation in order to align it better with the work that has been done.
 
-      % TODO clarify that iid restriction is unimportant for computing key
-      % rates, but wiring explicitly breaks it and should not be considered part
-      % of a protocol to achieve rates
+      TODO clarify that iid restriction is unimportant for computing key rates, but wiring explicitly breaks it and should not be considered part of a protocol to achieve rates
 
       \begin{figure}
         \centering
@@ -858,7 +857,7 @@
         \caption{\label{fig:genubound} Upper bounds based on \Cref{eqn:genubound} for a specific CHSH-based implementation, with either Bell-diagonal states or isotropic states used in the decomposition. The bounds from quantum intrinsic nonlocality~\cite{DIQKD_Limits}~\cite[Appendix B]{RevisedPeres} are plotted for comparison. (Source:~\cite{CCSquashedEntangle})}
       \end{figure}
 
-      Let \(\sM\) be a set of POVMs \({\{{\{M_{a|x}\}}_{a}, {\{N_{b|y}\}}_{b}\}}_{x,y}\), and let \(\cP(\rho, \sM)\) be the behaviour when the state \(\rho = \rho_{Q_A Q_B}\) is measured according to \(\sM\), where we drop the subscripts in this definition. Then, for an arbitrary LOPC protocol, even with two-way information reconciliation, we have~\cite[Thm. 3]{CCSquashedEntangle}
+      Let \(\cP(\rho, \sM)\) be the behaviour when the state \(\rho = \rho_{A B}\) is measured according to \(\sM\), where we drop the subscripts in this definition. Then, for an arbitrary LOPC protocol, even with two-way information reconciliation, we have~\cite[Thm. 3]{CCSquashedEntangle}
       \begin{equation}\label{eqn:genubound}
         C_{\sk}(p) \leq \inf_{\substack{\rho, \sM : \\ p = \cP(\rho, \sM) }} \inf_{\substack{q : \\ \rho = (1-q)\rho^{NL} + q\rho^L}} (1-q) E_R(\rho^{NL}) + q E_R(\rho^L),
       \end{equation}
@@ -868,11 +867,11 @@
 
       While highly general, this bound is extremely difficult to compute, since there are three levels of optimisation that need to be done, including the optimisation for the relative entropy of entanglement. The authors themselves computed this bound only for a specific implementation of the measurements, and specific decompositions of specific states parametrised by CHSH values, as shown in \Cref{fig:genubound}. These are \emph{isotropic states} with
       \begin{equation}
-        \rho^{I,v} = (1-v)\ket{\Psi_+}\bra{\Psi_+} + \frac{v}{4}I
+        \rho^{I}(v) = (1-v)\ket{\Psi_+}\bra{\Psi_+} + \frac{v}{4}I
       \end{equation}
       and \(S = 2\sqrt{2}(1-v)\), and \emph{Bell diagonal states} with
       \begin{equation}
-        \rho^{\Psi,C} = \frac{1+C}{2}\ket{\Psi_+}\bra{\Psi_+} + \frac{1-C}{2}\ket{\Psi_-}\bra{\Psi_-}
+        \rho^{\Psi}(C) = \frac{1+C}{2}\ket{\Psi_+}\bra{\Psi_+} + \frac{1-C}{2}\ket{\Psi_-}\bra{\Psi_-}
       \end{equation}
       and \(S = 2\sqrt{C^2+1}\), where the \emph{Bell states} are
       \begin{equation}
@@ -884,17 +883,17 @@
 
       The \emph{quantum intrinsic nonlocality} is~\cite{DIQKD_Limits}
       \begin{equation}
-        N^Q{(A:B)}_p = \sup_{p(x,y)} \inf_{\rho_{ABXYE}} I{(A:B|XYE)}_{\rho},
+        N^Q{(\crv{A}:\crv{B})}_p = \sup_{p(x,y)} \inf_{\rho_{\crv{ABXY}E}} I{(\crv{A}:\crv{B}|\crv{XY}E)}_{\rho},
       \end{equation}
       where
       \begin{align}
-        \rho_{ABXYE} = \sum_{abxy} p(x,y) p(ab|xy) \ket{abxy}\bra{abxy}_{ABXY} \otimes \rho_{E|abxy},
+        \rho_{\crv{ABXY}E} = \sum_{abxy} p(x,y) p(ab|xy) \ket{abxy}\bra{abxy}_{\crv{ABXY}} \otimes \rho_{E|abxy},
       \end{align}
       with
       \begin{equation}
-        p(ab|xy) \rho_{E|abxy} \coloneqq \Tr_{Q_A Q_B}\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right]
+        p(ab|xy) \rho_{E|abxy} \coloneqq \Tr_{A B}\left[\rho_{A B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right]
       \end{equation}
-      is Eve's state conditioned on the inputs \(x,y\) and outouts \(a,b\), and \(X\) and \(Y\) being the classical registers holding the values of \(x\) and \(y\). \(N^Q{(A:B)}_p\) is an upper bound on almost all protocols, including those with two-way error correction, but excluding those where the measurement settings are not revealed. \(N^Q\) was proposed and evaluated on isotropic states with fixed measurements in~\cite{DIQKD_Limits}. For evaluating a CHSH-based protocol, where only the CHSH value, and not the full behaviour, is used to decide whether or not to abort, this implementation is outperformed by \Cref{eqn:genubound} using either Bell-diagonal or isotropic decompositions, both of which are in turn outperformed by an estimate of \(N^Q\) using Bell-diagonal states in~\cite[Appendix B]{RevisedPeres} for \(S \gtrsim 2.525\).
+      is Eve's state conditioned on the inputs \(x,y\) and outouts \(a,b\), and \(\crv{X}\) and \(\crv{Y}\) being the classical registers holding the values of \(x\) and \(y\). \(N^Q{(\crv{A}:\crv{B})}_p\) is an upper bound on a wide range of protocols, including those with two-way error correction, but excluding those where the measurement settings are not revealed. \(N^Q\) was proposed and evaluated on isotropic states with fixed measurements in~\cite{DIQKD_Limits}. For evaluating a CHSH-based protocol, where only the CHSH value, and not the full behaviour, is used to decide whether or not to abort, this implementation is outperformed by \Cref{eqn:genubound} using either Bell-diagonal or isotropic decompositions, both of which are in turn outperformed by an estimate of \(N^Q\) using Bell-diagonal states in~\cite[Appendix B]{RevisedPeres} for \(S \gtrsim 2.525\).
 
       Unfortunately, these bounds are faithful, at least for the implementations considered. There is thus far only one (possibly) non-faithful upper bound that has been found for quantum adversaries~\cite{NotSufficient}. Interestingly, it uses classical information processing to carry out the attack, by proving the existence of a classical strategy for Eve to reduce the conditional mutual information of Alice and Bob to 0, for behaviours that can be obtained by arbtirarily many projective measurements of a class of quantum states. However, like \(N^Q\), it applies only to DIQKD protocols where Alice and Bob announce their choice of basis, leaving open the possibility that protocols that do not involve such announcements, such as~\cite{NonstandardProtocol}, may be able to achieve positive key rates, so this is not completely conclusive evidence that \(C_{\sk} = 0\) for these behaviours. However, it seems that this particular protocol has only been proved secure against individual attacks, and it might be interesting to see if it can be proved secure against collective attacks.
 
@@ -904,9 +903,9 @@
 
       Returning to the bound in~\cite{NotSufficient}, it is known that \emph{Werner states} with visibility \(v\)
       \begin{equation}
-        \rho^{W,v} = v{\ket{\Psi_-}\bra{\Psi_-}} + \frac{1-v}{4}I,
+        \rho^{W}(v) = v{\ket{\Psi_-}\bra{\Psi_-}} + \frac{1-v}{4}I,
       \end{equation}
-      cannot exhibit nonlocality for \(v < v_L \approx 0.6829\), but can do so for \(v \geq v_{NL} \approx 0.6964\). However, it is shown that for \(v < v_{\crit} \approx 0.7263 > v_{NL}\), any measurement strategy using projective measurements will produce correlations that can be expressed as a convex combination of behaviours that gives \(I(A:B \downarrow E) = 0\), implying that \(C_{\sk} = 0\) for all such correlations. Since \(v_{NL} < v_{\crit}\), this includes some correlations that exhibit nonlocality. The critical visibility can be increased even further for specific protocols. These behaviours, then, are prospective targets for revival. However, while we are able to specify some behaviours within this set, it is not clear what this set looks like in general. Characterising it might give more insight into how to go about reviving this region.
+      cannot exhibit nonlocality for \(v < v_L \approx 0.6829\), but can do so for \(v \geq v_{NL} \approx 0.6964\). However, it is shown that for \(v < v_{\crit} \approx 0.7263 > v_{NL}\), any measurement strategy using projective measurements will produce correlations that can be expressed as a convex combination of behaviours that gives \(I(\crv{A}:\crv{B} \downarrow E) = 0\), implying that \(C_{\sk} = 0\) for all such correlations. Since \(v_{NL} < v_{\crit}\), this includes some correlations that exhibit nonlocality. The critical visibility can be increased even further for specific protocols. These behaviours, then, are prospective targets for revival. However, while we are able to specify some behaviours within this set, it is not clear what this set looks like in general. Characterising it might give more insight into how to go about reviving this region.
 
       \begin{question}
         Can we characterise the quantumly achievable behaviours from Werner states of a given visibility?
@@ -914,7 +913,7 @@
 
       One version of the \emph{classical-classical (cc) squashed entanglement} defined in~\cite{CCSquashedEntangle} is a convex lower bound to the bound established by this result on Werner state visibilities, as well as the bound in~\cite{RevisedPeres}, which applies only to protocols using only one pair of settings for key generation. The cc-squashed entanglement is itself an upper bound for the key rate for the intersection of the sets of applicable protocols for these two results (that is, protocols using Werner states, announcement of basis choice, and only one basis being used for key generation). In particular, it is given by
       \begin{equation}
-        E^{cc}_{sq,dev}(\rho, \sM, p(x,y)) = \inf_{\substack{\sigma, \sN : \cP(\sigma, \sN) = \cP(\rho, \sM)}} \sum_{xy} p(x,y) \inf_{\cE_{x,y}} I{(A : B|E)}_{\cE_{x,y}(\psi^{\sigma})},
+        E^{cc}_{sq,dev}(\rho, \sM, p(x,y)) = \inf_{\substack{\sigma, \sN : \cP(\sigma, \sN) = \cP(\rho, \sM)}} \sum_{xy} p(x,y) \inf_{\cE_{x,y}} I{(\crv{A} : \crv{B}|E)}_{\cE_{x,y}(\psi^{\sigma})},
       \end{equation}
       where \(\cE_{x,y}\) measures \(\psi^\sigma\), the purification of \({\sigma}\), using the POVMs in \(\sN\) corresponding to \(x\) and \(y\), while applying an arbitrary CPTP map to Eve's system. Once again, it is fortunate that all optimisations are infima, because this is a difficult optimisation to compute. Although it was applied to bound a specific set of protocols, it might be interesting to see if it could have more general applicability.
 
@@ -930,8 +929,8 @@
       \begin{equation}
         S_{\alpha} \coloneqq \alpha\angleb{A_0 B_0} + \alpha\angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1}.
       \end{equation}
-      This technique can then be combined with noisy preprocessing, where Alice replaces each bit of her key with a locally random bit with probability \(q\). The lower bound for \(H(A|E)\), with \(s = S_{\alpha}\) from the test statistics, is
-      \begin{equation} H(A|E) \geq g_{q,\alpha}(s) = \begin{cases}
+      This technique can then be combined with noisy preprocessing, where Alice replaces each bit of her key with a locally random bit with probability \(q\). The lower bound for \(H(\crv{A}|E)\), with \(s = S_{\alpha}\) from the test statistics, is
+      \begin{equation} H(\crv{A}|E) \geq g_{q,\alpha}(s) = \begin{cases}
         g(s) & \text{ for } \abs{\alpha} \geq 1 \text{ or } s \geq s^* \\
         h_2(q) + g'(s^*)(\abs{s}-2) & \text{ otherwise},
       \end{cases}
@@ -1023,26 +1022,26 @@
       With \(r\) arbitary linear constraints on the behaviour, indexed by \(j\)
       \[ \sum_{abxy} c^{(j)}_{abxy} p(ab|xy) \geq v_j, \]
       and recalling that
-      \[ p(ab|xy) = \Tr\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right], \]
-      we have the following lower bound on \(H(A|E, X=x^*)\), the conditional entropy for a particular \(x^*\):
+      \[ p(ab|xy) = \Tr\left[\rho_{A B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right], \]
+      we have the following lower bound on \(H(\crv{A}|E, X=x^*)\), the conditional entropy for a particular \(x^*\):
       \begin{equation}
-        H(A|E, X=x^*) \geq c_m + C_m,
+        H(\crv{A}|E, \crv{X}=x^*) \geq c_m + C_m,
       \end{equation}
       where \(C_m\) is given by
       \begin{align}
         \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \Tr\left[ 
           \begin{aligned}[c]
-          & \rho_{Q_A Q_B E} \left(M_{a|x^*} \otimes I_{Q_B} \otimes \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) \right) \\
-            + & t_i \left( I_{Q_A Q_B} \otimes Z_{a,i}Z_{a,i}^{\dagger}\right)
+          & \rho_{A B E} \left(M_{a|x^*} \otimes I_{B} \otimes \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) \right) \\
+            + & t_i \left( I_{A B} \otimes Z_{a,i}Z_{a,i}^{\dagger}\right)
           \end{aligned}
         \right] \\
         \text{s.t.} & \begin{aligned}[t] 
-          & \sum_{abxy} c^{(j)}_{abxy} \Tr\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right] \geq v_j & & \forall 1 \leq j \leq r \\
-          & \sum_{a} M_{a|x} = I_{Q_A}, \sum_{b} N_{b|y} = I_{Q_B} & & \forall x, y \\
+          & \sum_{abxy} c^{(j)}_{abxy} \Tr\left[\rho_{A B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right] \geq v_j & & \forall 1 \leq j \leq r \\
+          & \sum_{a} M_{a|x} = I_{A}, \sum_{b} N_{b|y} = I_{B} & & \forall x, y \\
           & M_{a|x} \geq 0, N_{b|y} \geq 0 & & \forall a, b, x, y \\
           & \norm{Z_{a,i}} \leq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
-          & M_{a|x} \in \sB(Q_A), N_{b|y} \in \sB(Q_B), Z_{a,i} \in \sB(E) & & \forall a, b, x, y, i \\
-          & \rho_{Q_A Q_B E} \text{ is a valid state} & &
+          & M_{a|x} \in \sB(A), N_{b|y} \in \sB(B), Z_{a,i} \in \sB(E) & & \forall a, b, x, y, i \\
+          & \rho_{A B E} \text{ is a valid state} & &
         \end{aligned}
       \end{align}
 
@@ -1056,7 +1055,7 @@
          \tilde{M}_{a|x^*} \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) + t_i Z_{a,i}Z_{a,i}^{\dagger} \right|\psi} \\
         \text{s.t.} & \begin{aligned}[t] 
           & \sum_{abxy} c^{(j)}_{abxy} \angleb{\psi\left| \tilde{M}_{a|x} \tilde{N}_{b|y} \right|\psi} \geq v_j & & \forall 1 \leq j \leq r \\
-          & \sum_{a} \tilde{M}_{a|x} = I_{Q_A}, \sum_{b} \tilde{N}_{b|y} = I_{Q_B} & & \forall x, y \\
+          & \sum_{a} \tilde{M}_{a|x} = I_{A}, \sum_{b} \tilde{N}_{b|y} = I_{B} & & \forall x, y \\
           & \tilde{M}_{a|x} \geq 0, \tilde{N}_{b|y} \geq 0 & & \forall a, b, x, y \\
           & Z_{a,i} Z_{a,i}^{\dagger} \leq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
           & Z_{a,i}^{\dagger} Z_{a,i} \leq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
@@ -1084,59 +1083,59 @@
 
     \subsection{Maximal Correlation and Related Measures}\label{sec:nlmono_maxcorr}
 
-    The maximal correlation between two random variables (rvs) \(A,B\) is denoted as \(\rho(A,B)\) and defined as~\cite{NLMonotones}
+    The maximal correlation between two random variables (rvs) \(\crv{A},\crv{B}\) is denoted as \(\rho(\crv{A},\crv{B})\) and defined as~\cite{NLMonotones}
     \begin{equation}
-      \rho(A,B) = \max_{f,g} \frac{\E[(f(A)-\E[f(A)])(g(B)-\E[g(B)])]}{\sqrt{\Var[f(A)]\Var[g(B)]}}
+      \rho(\crv{A},\crv{B}) = \max_{f,g} \frac{\E[(f(\crv{A})-\E[f(\crv{A})])(g(\crv{B})-\E[g(\crv{B})])]}{\sqrt{\Var[f(\crv{A})]\Var[g(\crv{B})]}}
     \end{equation}
     or equivalently
     \begin{Array}{rcl}
-      \rho(A,B) = & \max_{f,g}  & \E[f(A)g(B)] \\
-                  & \text{s.t.} & \E[f(A)] = \E[g(B)] = 0 \\
-                  &             & \E[f(A)^2] = \E[g(B)^2] = 1,
+      \rho(\crv{A},\crv{B}) = & \max_{f,g}  & \E[f(\crv{A})g(\crv{B})] \\
+                  & \text{s.t.} & \E[f(\crv{A})] = \E[g(\crv{B})] = 0 \\
+                  &             & \E[f(\crv{A})^2] = \E[g(\crv{B})^2] = 1,
     \end{Array}
     where the equivalent description essentially enforces normalisation on the functions to simplify the expression.
 
-    The maximal correlation is a nonlocality monotone because it possesses the \emph{tensorisation} property: if rvs \((A_1, B_1)\) are statistically independent of \((A_2,B_2)\), that is, their pmfs obey \(P_{A_1A_2B_1B_2} = P_{A_1B_1}P_{A_2B_2}\), then
+    The maximal correlation is a nonlocality monotone because it possesses the \emph{tensorisation} property: if rvs \((\crv{A}_1, \crv{B}_1)\) are statistically independent of \((\crv{A}_2,\crv{B}_2)\), that is, their pmfs obey \(P_{\crv{A}_1\crv{A}_2\crv{B}_1\crv{B}_2} = P_{\crv{A}_1\crv{B}_1}P_{\crv{A}_2\crv{B}_2}\), then
     \begin{equation}
-      \rho(A_1A_2,B_1B_2) = \max\{ \rho(A_1,B_1), \rho(A_2,B_2) \}.
+      \rho(\crv{A}_1\crv{A}_2,\crv{B}_1\crv{B}_2) = \max\{ \rho(\crv{A}_1,\crv{B}_1), \rho(\crv{A}_2,\crv{B}_2) \}.
     \end{equation}
-    In particular, this means that the maximal correlation of \(n\) i.i.d.\ copies of the pair \((A,B)\) is \(\rho(A,B)\), even though the functions \(f\) and \(g\) can operate on all copies at once. This seems to imply that wiring cannot increase the maximal correlation between \(A\) and \(B\).
+    In particular, this means that the maximal correlation of \(n\) i.i.d.\ copies of the pair \((\crv{A},\crv{B})\) is \(\rho(\crv{A},\crv{B})\), even though the functions \(f\) and \(g\) can operate on all copies at once. This seems to imply that wiring cannot increase the maximal correlation between \(\crv{A}\) and \(\crv{B}\).
 
-    To apply it more formally to wirings, we define \(\rho(A,B|X=x,Y=y)\) as the maximal correlation computed using the distribution \(P_{AB}(a,b) = p(ab|xy)\). If we wire the bxoes that Alice used in over several rounds together, and did likewise with Bob, the boxes in each round can be seen as having a joint distribution determined by \((x,y)\). Although the choice of \((x,y)\) in each round is no longer independent of the previous rounds, the distributions conditioned on \((x,y)\) are still independent. Therefore, the maximal correlation of the boxes that are wired together cannot exceed
-    \[ \max_{x,y} \rho(A,B|X=x,Y=y). \]
-    Since the output rvs \(A', B'\) after wiring are themselves functions of the rvs corresponding to the individual rounds, this can only restrict the possible range of \(f\) and \(g\) when computing their maximal correlation, as compared to the maximal correlation of the individual rounds. Therefore
-    \[ \rho(A',B'|X=x,Y=y) \leq \max_{x,y} \rho(A,B|X=x,Y=y). \]
+    To apply it more formally to wirings, we define \(\rho(\crv{A},\crv{B}|\crv{X}=x,\crv{Y}=y)\) as the maximal correlation computed using the distribution \(P_{\crv{AB}}(a,b) = p(ab|xy)\). If we wire the bxoes that Alice used in over several rounds together, and did likewise with Bob, the boxes in each round can be seen as having a joint distribution determined by \((x,y)\). Although the choice of \((x,y)\) in each round is no longer independent of the previous rounds, the distributions conditioned on \((x,y)\) are still independent. Therefore, the maximal correlation of the boxes that are wired together cannot exceed
+    \[ \max_{x,y} \rho(\crv{A},\crv{B}|\crv{X}=x,\crv{Y}=y). \]
+    Since the output rvs \(\crv{A}', \crv{B}'\) after wiring are themselves functions of the rvs corresponding to the individual rounds, this can only restrict the possible range of \(f\) and \(g\) when computing their maximal correlation, as compared to the maximal correlation of the individual rounds. Therefore
+    \[ \rho(\crv{A}',\crv{B}'|\crv{X}=x,\crv{Y}=y) \leq \max_{x,y} \rho(\crv{A},\crv{B}|\crv{X}=x,\crv{Y}=y). \]
 
     The maximal correlation is particularly important because it can be efficiently computed given a distribution, despite its generality. We define the matrices
     \begin{align}
-      \matrp{P}{_{AB|xy}}_{ab} &= \Pr(A = a, B = b|X = x, Y = y) \\
-      \matrp{P}{_{A|x}}_{ab} &= \delta_{ab} \Pr(A = a|X = x) \\
-      \matrp{P}{_{B|y}}_{ab} &= \delta_{ab} \Pr(B = b|Y = y) \\
-      \matrp{\tilde{P}}{_{AB|xy}} &= \matrp{P}{_{A|x}}^{-1/2} \matrp{P}{_{AB|xy}} \matrp{P}{_{B|y}}^{-1/2} \\
-      \therefore \matrp{\tilde{P}}{_{AB|xy}}_{ab} &= \frac{p(a,b|x,y)}{\sqrt{p(a|x)p(b|y)}},
+      \matrp{P}{_{\crv{AB}|xy}}_{ab} &= \Pr(\crv{A} = a, \crv{B} = b|\crv{X} = x, \crv{Y} = y) \\
+      \matrp{P}{_{\crv{A}|x}}_{ab} &= \delta_{ab} \Pr(\crv{A} = a|\crv{X} = x) \\
+      \matrp{P}{_{\crv{B}|y}}_{ab} &= \delta_{ab} \Pr(\crv{B} = b|\crv{Y} = y) \\
+      \matrp{\tilde{P}}{_{\crv{AB}|xy}} &= \matrp{P}{_{\crv{A}|x}}^{-1/2} \matrp{P}{_{\crv{AB}|xy}} \matrp{P}{_{\crv{B}|y}}^{-1/2} \\
+      \therefore \matrp{\tilde{P}}{_{\crv{AB}|xy}}_{ab} &= \frac{p(a,b|x,y)}{\sqrt{p(a|x)p(b|y)}},
     \end{align}
-    where \(\matrp{P}{_{A|x}}_{ab}\), \(\matrp{P}{_{B|y}}_{ab}\), \(\matrp{P}{_{AB|xy}}_{ab}\) and \(\matrp{\tilde{P}}{_{AB|xy}}\) have dimensions \(o_A \times o_A\), \(o_B \times o_B\), \(o_A \times o_B\), \(o_A \times o_B\) respectively. We use the Moore-Penrose inverse for this inversion, which, since \(\matrp{P}{_{A|x}}_{ab}\) and \(\matrp{P}{_{B|y}}_{ab}\) are diagonal, involves inverting their non-zero diagonal entries and leaving the zero entries in place.
+    where \(\matrp{P}{_{\crv{A}|x}}_{ab}\), \(\matrp{P}{_{\crv{B}|y}}_{ab}\), \(\matrp{P}{_{\crv{AB}|xy}}_{ab}\) and \(\matrp{\tilde{P}}{_{\crv{AB}|xy}}\) have dimensions \(o_A \times o_A\), \(o_B \times o_B\), \(o_A \times o_B\), \(o_A \times o_B\) respectively. We use the Moore-Penrose inverse for this inversion, which, since \(\matrp{P}{_{\crv{A}|x}}_{ab}\) and \(\matrp{P}{_{\crv{B}|y}}_{ab}\) are diagonal, involves inverting their non-zero diagonal entries and leaving the zero entries in place.
 
-    Let the singular values of \(\matrp{\tilde{P}}{_{AB|xy}}\) be \(\sigma_i\) for \(i \in \dintv{1}{\min\{o_A, o_B\}}\) such that \(\sigma_{i} \geq \sigma_{i+1}\),
+    Let the singular values of \(\matrp{\tilde{P}}{_{\crv{AB}|xy}}\) be \(\sigma_i\) for \(i \in \dintv{1}{\min\{o_A, o_B\}}\) such that \(\sigma_{i} \geq \sigma_{i+1}\),
     \begin{equation}
-      \rho(A,B|X=x,Y=y) = \sigma_2\left( \matrp{\tilde{P}}{_{AB|xy}} \right).
+      \rho(\crv{A},\crv{B}|\crv{X}=x,\crv{Y}=y) = \sigma_2\left( \matrp{\tilde{P}}{_{\crv{AB}|xy}} \right).
     \end{equation}
 
     Working with the normalised form of the maximum correlation function, and so considering only normalised functions, we have
     \begin{align}
-      \E[f(A)g(B)|xy] &= \sum_{a,b} p(a,b|x,y) f(a)g(b) \\
+      \E[f(\crv{A})g(\crv{B})|xy] &= \sum_{a,b} p(a,b|x,y) f(a)g(b) \\
                       &= \sum_{a,b} \sqrt{p(a|x)} f(a) \frac{p(a,b|x,y)}{\sqrt{p(a|x)p(b|y)}} \sqrt{p(b|y)} g(b) \\
-                      &= \rvec{f} \matrp{\tilde{P}}{_{AB|xy}} \cvec{g},
+                      &= \rvec{f} \matrp{\tilde{P}}{_{\crv{AB}|xy}} \cvec{g},
     \end{align}
     where we have defined
     \begin{equation}
       \cvec{f} = {[\sqrt{p(a|x)} f(a)]}^T_a \qquad \cvec{g} = {[\sqrt{p(b|y)} g(b)]}^T_b.
     \end{equation}
-    The technicalities arising from cases where \(p(a|x)\) or \(p(b|y)\) are zero, which result in \(p(a,b|x,y)\) being divided by zero, are handled by the Moore-Penrose inverse, which maps those entries of \(\matrp{\tilde{P}}{_{AB|xy}}\) to zero.
+    The technicalities arising from cases where \(p(a|x)\) or \(p(b|y)\) are zero, which result in \(p(a,b|x,y)\) being divided by zero, are handled by the Moore-Penrose inverse, which maps those entries of \(\matrp{\tilde{P}}{_{\crv{AB}|xy}}\) to zero.
 
-    We also represent \(\matrp{\tilde{P}}{_{AB|xy}}\) in its compact singular value decomposition as
+    We also represent \(\matrp{\tilde{P}}{_{\crv{AB}|xy}}\) in its compact singular value decomposition as
     \begin{equation}
-      \matrp{\tilde{P}}{_{AB|xy}} = \sum_i \sigma_i \cvec{u}_i \rvec{v}_i,
+      \matrp{\tilde{P}}{_{\crv{AB}|xy}} = \sum_i \sigma_i \cvec{u}_i \rvec{v}_i,
     \end{equation}
     where \(\{\cvec{u}_i\}\) and \(\{\cvec{v}_i\}\) are sets of orthonormal vectors in \(\R^{o_A}\) and \(\R^{o_B}\) respectively.
 
@@ -1146,10 +1145,10 @@
     \end{equation}
     This gives us that
     \begin{align}
-      \rvec{f} \cvec{u}_1 &= \sum_a p(a|x) f(a) = \E[f(A)|x] = 0 \\
-      \norm{\cvec{f}}_2 &= \sum_a p(a|x) {f(a)}^2 = \E[{f(A)}^2|x] = 1 \\
-      \rvec{v}_1 \cvec{g} &= \sum_b p(b|y) g(b) = \E[g(B)|y] = 0 \\
-      \norm{\cvec{g}}_2 &= \sum_b p(b|y) {g(b)}^2 = \E[{g(B)}^2|y] = 1.
+      \rvec{f} \cvec{u}_1 &= \sum_a p(a|x) f(a) = \E[f(\crv{A})|x] = 0 \\
+      \norm{\cvec{f}}_2 &= \sum_a p(a|x) {f(a)}^2 = \E[{f(\crv{A})}^2|x] = 1 \\
+      \rvec{v}_1 \cvec{g} &= \sum_b p(b|y) g(b) = \E[g(\crv{B})|y] = 0 \\
+      \norm{\cvec{g}}_2 &= \sum_b p(b|y) {g(b)}^2 = \E[{g(\crv{B})}^2|y] = 1.
     \end{align}
 
     The singular value decomposition can be characterised variationally by
@@ -1161,42 +1160,42 @@
 
     In~\cite{NLMonotones}, these properties of the maximal correlation are proved using the properties of various related measures, that typically take the form of \emph{ribbons}: subsets of \({[0,1]}^2\). These include the hypercontractivity (HC) ribbon:
     \begin{equation}
-      \HC(A,B) = \{(\nu_A, \nu_B) \in {[0,1]}^2 \st \forall U, \nu_A I(U:A) + \nu_B I(U:B) \leq I(U:AB)\},
+      \HC(\crv{A},\crv{B}) = \{(\nu_{\crv{A}}, \nu_{\crv{B}}) \in {[0,1]}^2 \st \forall U, \nu_{\crv{A}} I(U:\crv{A}) + \nu_{\crv{B}} I(U:\crv{B}) \leq I(U:\crv{AB})\},
     \end{equation}
     or equivalently,
     \begin{equation}
-      \HC(A,B) = \{(\nu_A, \nu_B) \in {[0,1]}^2 \st \forall f,g; \E[f(A)g(B)] \leq {\E[\abs{f(A)}^{1/\nu_A}]}^{\nu_A} {\E[\abs{g(B)}^{1/\nu_B}]}^{\nu_B} \},
+      \HC(\crv{A},\crv{B}) = \{(\nu_{\crv{A}}, \nu_{\crv{B}}) \in {[0,1]}^2 \st \forall f,g; \E[f(\crv{A})g(\crv{B})] \leq {\E[\abs{f(\crv{A})}^{1/\nu_{\crv{A}}}]}^{\nu_{\crv{A}}} {\E[\abs{g(\crv{B})}^{1/\nu_{\crv{B}}}]}^{\nu_{\crv{B}}} \},
     \end{equation}
-    or, with \(\Upsilon_{AB}(\nu_A, \nu_B) = \nu_A H(A) + \nu_B H(B) - H(AB)\) and \(\tilde{\Upsilon}_{AB}\) its lower convex envelope (pointwise largest convex function that fulfills \(\tilde{\Upsilon}_{AB}(\nu_A, \nu_B) \leq \Upsilon_{AB}(\nu_A, \nu_B)\) for all \(\nu_A, \nu_B\)):
+    or, with \(\Upsilon_{\crv{AB}}(\nu_{\crv{A}}, \nu_{\crv{B}}) = \nu_{\crv{A}} H(\crv{A}) + \nu_{\crv{B}} H(\crv{B}) - H(\crv{AB})\) and \(\tilde{\Upsilon}_{\crv{AB}}\) its lower convex envelope (pointwise largest convex function that fulfills \(\tilde{\Upsilon}_{\crv{AB}}(\nu_{\crv{A}}, \nu_{\crv{B}}) \leq \Upsilon_{\crv{AB}}(\nu_{\crv{A}}, \nu_{\crv{B}})\) for all \(\nu_{\crv{A}}, \nu_{\crv{B}}\)):
     \begin{equation}
-      \HC(A,B) = \{(\nu_A, \nu_B) \in {[0,1]}^2 \st \Upsilon_{AB}(\nu_A, \nu_B) = \tilde{\Upsilon}_{AB}(\nu_A, \nu_B) \};
+      \HC(\crv{A},\crv{B}) = \{(\nu_{\crv{A}}, \nu_{\crv{B}}) \in {[0,1]}^2 \st \Upsilon_{\crv{AB}}(\nu_{\crv{A}}, \nu_{\crv{B}}) = \tilde{\Upsilon}_{\crv{AB}}(\nu_{\crv{A}}, \nu_{\crv{B}}) \};
     \end{equation}
     and the maximal correlation (MC) ribbon:
     \begin{equation}
-      \MC(A,B) = \left\{ 
-        (\nu_A, \nu_B) \in {[0,1]}^2 \st \forall f; \Var[f(A,B)] \geq 
+      \MC(\crv{A},\crv{B}) = \left\{ 
+        (\nu_{\crv{A}}, \nu_{\crv{B}}) \in {[0,1]}^2 \st \forall f; \Var[f(\crv{A},\crv{B})] \geq 
         \begin{aligned}[c]
-          & \nu_A \Var_A[\E_{B|A}[f(A,B)]] \\
-          + & \nu_B \Var_B[\E_{A|B}[f(A,B)]] \\
+          & \nu_{\crv{A}} \Var_{\crv{A}}[\E_{\crv{B}|\crv{A}}[f(\crv{A},\crv{B})]] \\
+          + & \nu_{\crv{B}} \Var_{\crv{B}}[\E_{\crv{A}|\crv{B}}[f(\crv{A},\crv{B})]] \\
         \end{aligned}
       \right\},
     \end{equation}
-    which can be normalised by restricting to \(\E[f(A,B)] = 0\), giving
+    which can be normalised by restricting to \(\E[f(\crv{A},\crv{B})] = 0\), giving
     \begin{equation}
-      \MC(A,B) = \left\{(\nu_A, \nu_B) \in {[0,1]}^2 \st \forall f; \E[{f(A,B)}^2] \geq 
+      \MC(\crv{A},\crv{B}) = \left\{(\nu_{\crv{A}}, \nu_{\crv{B}}) \in {[0,1]}^2 \st \forall f; \E[{f(\crv{A},\crv{B})}^2] \geq 
         \begin{aligned}[c]
-          & \nu_A \E_A[{(\E_{B|A}[f(A,B)])}^2] \\ + & \nu_B \E_B[{(\E_{A|B}[f(A,B)])}^2] \\
+          & \nu_{\crv{A}} \E_{\crv{A}}[{(\E_{\crv{B}|\crv{A}}[f(\crv{A},\crv{B})])}^2] \\ + & \nu_{\crv{B}} \E_{\crv{B}}[{(\E_{\crv{A}|\crv{B}}[f(\crv{A},\crv{B})])}^2] \\
         \end{aligned}
       \right\}.
     \end{equation}
 
-    The ribbon for a behaviour can be defined as the intersection of the ribbons for the individual conditional distributions. The ribbons have the tensorisation property, the ribbon of a post-wiring behaviour is a superset of the intersection of the ribbon of pre-wiring behaviours (that is, it expands under wirings), and the ribbons occupy the whole of \({[0,1]}^2\) for independent variables, while being restricted to \(\{(\nu_A, \nu_B) \st \nu_A + \nu_B \leq 1\}\) for perfectly correlated boxes. This makes them nonlocality monotones in the sense of monotonically changing under wirings, despite not fulfilling the resource-theoretic definition since they are not scalars.
+    The ribbon for a behaviour can be defined as the intersection of the ribbons for the individual conditional distributions. The ribbons have the tensorisation property, the ribbon of a post-wiring behaviour is a superset of the intersection of the ribbon of pre-wiring behaviours (that is, it expands under wirings), and the ribbons occupy the whole of \({[0,1]}^2\) for independent variables, while being restricted to \(\{(\nu_{\crv{A}}, \nu_{\crv{B}}) \st \nu_{\crv{A}} + \nu_{\crv{B}} \leq 1\}\) for perfectly correlated boxes. This makes them nonlocality monotones in the sense of monotonically changing under wirings, despite not fulfilling the resource-theoretic definition since they are not scalars.
 
     The relations between the measures discussed are
     \begin{gather}
-      {\rho(A,B)}^2 = \inf_{\substack{(\nu_A, \nu_B) \in \MC(A,B) \\ \nu_B \neq 0}} \frac{1 - \nu_A}{\nu_B} \\
-      \HC(A,B) \subseteq \MC(A,B) \\
-      s^*(A,B) \coloneqq \inf_{\substack{(\nu_A, \nu_B) \in \HC(A,B) \\ \nu_B \neq 0}} \frac{1 - \nu_A}{\nu_B} \geq {\rho(A,B)}^2
+      {\rho(\crv{A},\crv{B})}^2 = \inf_{\substack{(\nu_{\crv{A}}, \nu_{\crv{B}}) \in \MC(\crv{A},\crv{B}) \\ \nu_{\crv{B}} \neq 0}} \frac{1 - \nu_{\crv{A}}}{\nu_{\crv{B}}} \\
+      \HC(\crv{A},\crv{B}) \subseteq \MC(\crv{A},\crv{B}) \\
+      s^*(\crv{A},\crv{B}) \coloneqq \inf_{\substack{(\nu_{\crv{A}}, \nu_{\crv{B}}) \in \HC(\crv{A},\crv{B}) \\ \nu_{\crv{B}} \neq 0}} \frac{1 - \nu_{\crv{A}}}{\nu_{\crv{B}}} \geq {\rho(\crv{A},\crv{B})}^2
     \end{gather}
 
     \subsection{CHSH Distillability of Isotropic Boxes}\label{sec:nlmono_isodist}
@@ -1221,9 +1220,9 @@
 
     Property 1 is satisfied by the maximal correlation, but the extent to which it satisfies the other desiderata is still unclear. However, given that its monotonicity is derived from that of higher-dimensional monotones, namely the MC and HC ribbons, it is unlikely that the maximal correlation is tight (Property 3), since a transformation could change other regions of the ribbon without affecting the maximal correlation. Nonetheless, it would be helpful to see if these measures can satisfy these demands, or to find out why it might not be possible to meet them.
 
-    Another caveat arises when attempting to explicitly compute bounds on the key rate from the maximal correlation. Observe that, for \(K_A\) and \(K_B\), two perfectly correlated and uniformly distributed secret keys, we have \(\rho(K_A, K_B) = 1\), with the maximum achieved by mapping half of the keys to \(1\) and half to \(-1\) for both \(f\) and \(g\). However, if the two keys are independent, then \(\rho(K_A,K_B) = \E[f(K_A)g(K_B)] = \E[f(K_A)]\E[g(K_B)] = 0\). Likewise, if the two keys are deterministic (not secret), then \(f(K_A) = g(K_B) = 0\) and so \(\rho(K_A, K_B) = 0\). However, this poses an issue for longer keys. As long as \(K_A\) and \(K_B\) are uniformly distributed over \(N > 1\) values, \(\rho(K_A, K_B) = 1\), regardless of whether \(N = 2\) or (say) \(N = 10^{12}\). Therefore, we need to find a bound that looks something like
+    Another caveat arises when attempting to explicitly compute bounds on the key rate from the maximal correlation. Observe that, for \(\crv{K}_A\) and \(\crv{K}_B\), two perfectly correlated and uniformly distributed secret keys, we have \(\rho(\crv{K}_A, \crv{K}_B) = 1\), with the maximum achieved by mapping half of the keys to \(1\) and half to \(-1\) for both \(f\) and \(g\). However, if the two keys are independent, then \(\rho(\crv{K}_A,\crv{K}_B) = \E[f(\crv{K}_A)g(\crv{K}_B)] = \E[f(\crv{K}_A)]\E[g(\crv{K}_B)] = 0\). Likewise, if the two keys are deterministic (not secret), then \(f(\crv{K}_A) = g(\crv{K}_B) = 0\) and so \(\rho(\crv{K}_A, \crv{K}_B) = 0\). However, this poses an issue for longer keys. As long as \(\crv{K}_A\) and \(\crv{K}_B\) are uniformly distributed over \(N > 1\) values, \(\rho(\crv{K}_A, \crv{K}_B) = 1\), regardless of whether \(N = 2\) or (say) \(N = 10^{12}\). Therefore, we need to find a bound that looks something like
     \begin{equation}
-      \max_{E|AB} \frac{H(A|E) - H(A|B)}{H(A)} \leq f(\rho(A,B))
+      \max_{E|\crv{AB}} \frac{H(\crv{A}|E) - H(\crv{A}|\crv{B})}{H(\crv{A})} \leq f(\rho(\crv{A},\crv{B}))
     \end{equation}
     in order to achieve the correct scaling for an estimate of the key rate.
 

@@ -314,6 +314,8 @@ function qkd_iso(::Type{T} = Float64) where T <: Real
 end
 
 # Couplers
+# "Entaglement swapping for generalized non-local correlations"; Short, Popescu
+# and Gisin
 function find_couplers(iA, oA, iB, oB, n)
   poly = cg_polytope(iA, oA, iB, oB)
   vs = vertices_list(poly)
