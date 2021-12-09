@@ -376,7 +376,7 @@
     \begin{equation}\label{eqn:finethm}
       p(ab|xy) = \sum_e p_E(e) p_e(ab|xy)
     \end{equation}
-    If Eve wants to know the output of every round, each \(p_e\) must be deterministic, i.e.\ \(p_e(ab|xy) \in \{0, 1\}\;\forall a,b,x,y,e\). Then, knowing the behaviour, based on \(e\), and the input settings \((x,y)\),which Alice and Bob typically announce in the course of a DIQKD protocol, Eve can deduce the outputs \((a,b)\).
+    If Eve wants to know the output of every round, each \(p_e\) must be deterministic, i.e.\ \(p_e(ab|xy) \in \{0, 1\}\;\forall a,b,x,y,e\). Then, knowing the behaviour, based on \(e\), and the input settings \((x,y)\), which Alice and Bob typically announce in the course of a DIQKD protocol, Eve can deduce the outputs \((a,b)\).
 
     These behaviours, therefore, are the ones which fall within \(\Ls\). If, for a given \(e = e'\), \(p_{e'}(ab|xy)\) is random even for Eve, then she cannot know the outputs \((a,b)\) with certainty when \(e=e'\). Since quantum phenomena are capable of producing truly random outputs, such that it is impossible even in principle to predict those outcomes, they must be the source for such true randomness if we wish to pessimistically grant Eve full control of the environment outside of Alice and Bob's detectors and information-processing devices. Note that, while Eve cannot have full control over the measurement devices, they can be arbitrarily flawed---nonlocal statistics will be detected \emph{only if} they are generated from a quantum measurement that extracts randomness, so nonlocal statistics are sufficient to guarantee secrecy. This is why it is called \emph{device-independent}: the devices can be almost arbitrarily faulty, and the reported statistics will reveal a fault if it exists.
 
@@ -714,8 +714,7 @@
       \end{equation}
       where juxtaposition is the Boolean AND, addition is the Boolean OR, and the overbar is the Boolean NOT.\ This cannot be expressed as one of the wirings from~\cite{ShortEntangleSwap}: the boxes are clearly non-constant and dependent on each other, so they are not one-sided or deterministic, and the functional dependence of the output is too complex to be expressed simply with a single AND or XOR gate.
 
-      % TODO show that this \chi is outside the polytope formed by pairs of
-      % the Short classification wirings
+      TODO show that this \(\chi\) is outside the polytope formed by pairs of the Short classification wirings
 
       Let us see why this is the case. The classification of~\cite{ShortEntangleSwap} attempts to find a parametrisation of \emph{couplers}, which are a specific type of transformation which ``collapses'' multiple boxes of one party, replacing their inputs and outputs with a single output, whose probability distribution depends on the behaviours of the individual boxes that are collapsed. Importantly, this \emph{does not} replace the collapsed boxes with a larger box with one input and one output, which is what we are attempting to do through wirings, but rather simply generates one output. Although couplers can be characterised by a vector of parameters, and the possible vectors form a polytope that has these specific wirings as its extremal points, this is not the type of operation we are looking for.
 

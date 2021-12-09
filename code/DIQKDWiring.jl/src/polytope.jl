@@ -1,6 +1,6 @@
 using Revise
 using Printf
-using LazySets, Polyhedra, Symbolics, CDDLib, LRSLib
+using LazySets, Polyhedra, Symbolics, LRSLib
 
 # TODO: optimise for cache efficiency - iterate from last to first indices
 
@@ -317,7 +317,7 @@ end
 # "Entaglement swapping for generalized non-local correlations"; Short, Popescu
 # and Gisin
 function find_couplers(iA, oA, iB, oB, n)
-  poly = cg_polytope(iA, oA, iB, oB)
+  poly = cg_polytope(iA, oA, iB, oB, Rational{Int64})
   vs = vertices_list(poly)
   l = length(vs) 
 
@@ -375,6 +375,34 @@ function cg_alicecouplers(vs, iA, oA, iB, oB, n)
   ps = cg_to_full.(vs, iA, oA, iB, oB)
   pbys = [p[3] for p in ps]
   return find_couplers(pbys, n)
+end
+
+function couplerpoly_from_verts()
+  # b, y^c | b^c
+  verts = Vector{Array{Bool, 5}}()
+
+  # TODO make all zero-based
+  
+  # deterministic
+  for p in Iterators.product((1:2 for i in 1:1)...)
+    C = zeros(Bool, (2 for i in 1:5)...)
+    C[p[1], 1, 1, :, :] .= 1
+    push!(verts, C)
+  end
+
+  # one-sided
+  for p in Iterators.product((1:2 for i in 1:3)...)
+    C = zeros(Bool, (2 for i in 1:5)...)
+    for v in Iterators.product((0:1 for j in 1:3)...)
+      # bp, b1, b2 = v
+      if v[1] == xor(v[1+p[2]], (p[3]-1))
+        C[v[1]+1, p[1], p[1], v[2]+1, v[3]+1] = 1
+      end
+    end
+  end
+
+  # TODO below
+
 end
 
 function test_couplers()
