@@ -691,13 +691,15 @@
       \begin{equation}
         p'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}}) = \sum_{\cvec{by}} \chi(b',\cvec{by})p(\cvec{a\breve{b}b}|\cvec{x\breve{y}y}),
       \end{equation}
-      where the breve indicates the inputs and outputs corresponding to boxes that were not coupled together, and \(b'\) is the coupler output. Comparing this to \Cref{eqn:wiringprobdef}, we see that, correctly interpreted, the coupler is simply a wiring performed only on Bob's boxes. \(b'\) is then the overall output \(b\) in our notation, while \(y\) in our notation is equal to the first element of \(\cvec{y}\), the vector of inputs to the boxes that are coupled/wired together.
+      where the breve indicates the inputs and outputs corresponding to boxes that were not coupled together, and \(b'\) is the coupler output. Comparing this to \Cref{eqn:wiringprobdef}, we see that, correctly interpreted, the coupler is simply a wiring performed only on Bob's boxes, despite the different approach and motivation involved here. \(b'\) is then the overall output \(b\) in our notation, while \(y\) in our notation is equal to the first element of \(\cvec{y}\), the vector of inputs to the boxes that are coupled/wired together.
 
-      However, the analysis also differs in important ways. The distribution \(p(\cvec{b}^c|\cvec{y}^c)\) is allowed to be an arbitrary behaviour in \(\NSs\) in their analysis, not necessarily and i.i.d.\ joint distribution, with the only constraint being the normalisation of \(p'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}})\). Therefore, \(p(\cvec{b}^c|\cvec{y}^c)\) can be any behaviour in the \(c\)-partite \(\NSs\), which is markedly more complicated than the bipartite scenarios we have assumed throughout this analysis.
+      However, the analysis also differs in important ways.  \(p(\cvec{b}^c|\cvec{y}^c)\) can be any behaviour in the \(c\)-partite \(\NSs\), not necessarily an i.i.d.\ joint distribution, which is markedly more complicated than the bipartite scenarios we have assumed throughout this analysis. Further, this analysis does not include the causality restrictions that we have used to reduce the number of possible wirings. The authors identified this polytope by applying normalisation constraints to \(p'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}})\), when computed using the extremal points of \(\NSs\). While highly general, this approach is difficult to generalise to \(c > 2\) (for example, for the simplest tripartite scenario of \((2,2; 2,2; 2,2)\), \(\NSs\) has 53856 extremal points~\cite{Tripartite}). We will therefore attempt a different approach which may be simpler.
 
-      TODO do we proceed with this? Why or why not?
+      TODO classify the extremal points for the QKD setting
 
-      \subsection{Number of Distinct Wirings}
+      \subsection{Enumerating Deterministic Wirings}
+
+      Instead of using the no-signalling inequalities to identify the possible wirings, we could instead identify the possible deterministic wirings, since all randomness can be represented as the convex combination of deterministic wirings.
 
       Using our classification for \(\sW_D\), simple combinatorics gives us \(i_A^{j-1} o_A^{j-1}\) possible inputs for \(W_j^A\). However, since \(x_j\) is completely fixed by \({(x_k)}_{k=1}^{j-1}\) and \({(a_k)}_{k=1}^{j-1}\), there are only \(i_A o_A^{j-1}\) valid inputs, with the rest corresponding to don't-cares. Therefore, the number of possible \(W^{(j)}_A\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(W_A\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
       \begin{equation}

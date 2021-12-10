@@ -1,6 +1,6 @@
 using Revise
 using Printf
-using LazySets, Polyhedra, Symbolics, LRSLib
+using LazySets, Polyhedra, Symbolics, LRSLib, Combinatorics
 
 # TODO: optimise for cache efficiency - iterate from last to first indices
 
@@ -17,20 +17,72 @@ ld_length(iA, oA, iB, oB) = oA^iA * oB^iB
 positivities(iA, oA, iB, oB) = oA * oB * iA * iB
 
 # generating 
-function full_polytope(iA, oA, iB, oB, ::Type{T} = Float64) where T <: Real
-  vars = Symbolics.@variables pax[1:oA, 1:iA], pby[1:oB, 1:iB], pabxy[1:oA, 1:oB, 1:iA, 1:iB]
-  allvars = vcat([vec(ps) for ps in vars]...)
 
-  atob_nsconstr = [sum(pabxy[:, b, x, y] |> collect) <= pby[b, y] for b in 1:oB for x in 1:iA for y in 1:iB]
-  btoa_nsconstr = [sum(pabxy[a, :, x, y] |> collect) <= pax[a, x] for a in 1:oA for x in 1:iA for y in 1:iB]
+function expr_to_vec(::Type{T}, expr, veclen, numdict) where {T <: Real}
+    avec = zeros(T, veclen)
+    nums = Num.(Symbolics.get_variables(expr))
+    subdict = Dict(num => 0 for num in nums)
+    for num in nums
+      subdict[num] = 1
+      val = substitute(expr, subdict)
+      seqn = numdict[num]
+      avec[seqn] = val
+      subdict[num] = 0
+    end
+    return avec
+end
 
-  lnormconstr = [0 <= v for v in allvars]
-  unormconstr = vcat([sum(pax[:, x] |> collect) <= 1 for x in 1:iA],
-                     [sum(pby[:, y] |> collect) <= 1 for y in 1:iB],
-                     [sum(pabxy[:, :, x, y] |> collect) <= 1 for x in 1:iA for y in 1:iB])
+function full_polytope(n, i, o, polylib=LRSLib.Library())
+  full_polytope(Float64, n, i, o, polylib)
+end
 
-  allconstrs = vcat(atob_nsconstr, btoa_nsconstr, unormconstr, lnormconstr)
-  return HPolytope(allconstrs, allvars, N=T) |> remove_redundant_constraints
+function full_polytope(::Type{T}, n, i, o, polylib=LRSLib.Library()) where {T <: Real}
+  # HalfSpace(a,b) => a \dot x \leq b
+  # HyperPlane(a,b) => a \dot x = b
+
+  otupranges = [1:o for j in 1:n]
+  itupranges = [1:i for j in 1:n]
+  tupranges  = vcat(otupranges, itupranges)
+  vars = Symbolics.@variables P[tupranges...]
+
+  iT = typeof(n)
+  numdict = Dict{Num, iT}()
+  tupseqn::iT = 0
+  for tup in Iterators.product(tupranges...)
+    tupseqn += 1
+    numdict[P[tup...]] = tupseqn
+  end
+
+  lnormconstrs = vec([-P[tup...] for tup in Iterators.product(tupranges...)])
+  unormconstrs = vec([sum([P[otup..., itup...] for otup in Iterators.product(otupranges...)]) for itup in Iterators.product(itupranges...)])
+  icombs = collect(combinations(1:i, 2))
+  nsconstrs = Num[]
+  for p in 1:n
+    currtups = deepcopy(tupranges)
+    currtups[p] = 0:0
+    currtups[p + n] = 0:0
+    for tup in Iterators.product(currtups...)
+      params = [tup...]
+      for is in icombs
+        constr = 0
+        for oval in 1:o
+          params[p] = oval
+          params[n + p] = is[1]
+          constr += P[params...]
+          params[n + p] = is[2]
+          constr -= P[params...]
+        end
+        push!(nsconstrs, constr)
+      end
+    end
+  end
+
+  ineqconstrs = [Polyhedra.HalfSpace(expr_to_vec(T, constr, tupseqn, numdict), 0) for constr in lnormconstrs]
+  println(ineqconstrs)
+  eqconstrs = vcat([Polyhedra.HyperPlane(expr_to_vec(T, constr, tupseqn, numdict), 0) for constr in nsconstrs],
+                   [Polyhedra.HyperPlane(expr_to_vec(T, constr, tupseqn, numdict), 1) for constr in unormconstrs])
+  hr = hrep(eqconstrs, ineqconstrs)
+  return polyhedron(hr, polylib)
 end
 
 function cg_polytope(iA, oA, iB, oB, ::Type{T} = Float64) where T <: Real
@@ -318,7 +370,7 @@ end
 # and Gisin
 
 # hrep for polytope of couplers for two binary-output boxes
-function SPGcouplers(setting=(2,2,2,2), ::Type{T}=Rational{Int64}) where {T <: Real}
+function SPGcouplers_hrep(setting=(2,2,2,2), ::Type{T}=Rational{Int64}) where {T <: Real}
   poly = cg_polytope(setting..., T)
   vs = vertices_list(poly)
   hss = Vector{Polyhedra.HalfSpace{T, Vector{T}}}()
@@ -331,6 +383,19 @@ function SPGcouplers(setting=(2,2,2,2), ::Type{T}=Rational{Int64}) where {T <: R
   end
   return hrep(hss)
 end
+
+function qkdset_couplers()
+  hr = SPGcouplers_hrep(qkdset)
+  poly = polyhedron(hr, LRSLib.Library())
+  removehredundancy!(poly)
+  # hr = hrep(poly)
+  # hmat = LRSLib.RepMatrix(hr)
+  # LRSLib.getoutputlinset(hmat)
+  # redhss = [Polyhedra.HalfSpace(LRSLib.extractrow(hmat, i)...) for i in 1:LRSLib.nhreps(hmat)]
+  # redpoly = polyhedron(hrep(redhss), LRSLib.Library())
+  return poly
+end
+# poly, hr, vr, hmat, vmat = qkdset_couplers()
 
 const chsh_poly = cg_polytope(chshset...)
 const chsh_v = vertices_list(chsh_poly)
@@ -362,3 +427,9 @@ a, b/x, y|1, 1|1, 2|1, 3|2, 1|2, 2|2, 3|
 Q = 0.000, S = 4.000, rho = 1.000
 a, b/x, y|1, 1|1, 2|1, 3|2, 1|2, 2|2, 3|
 =#
+
+# halfspace -> A
+# A:               1  -1   0   1  -1   0  -1   0   0   0  -1   0   0   0  -1   0   0
+# halfspace:       1   0  -1   1   0   1   0   0   0   1   0   0   0   1   0   0   1
+# halfspace * -1: -1   0   1  -1   0  -1   0   0   0  -1   0   0   0  -1   0   0  -1
+# move constant over to get A
