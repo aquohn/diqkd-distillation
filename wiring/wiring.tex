@@ -635,7 +635,7 @@
 
       While there has been a recent resurgence of interest in developing resource theories of nonlocality and other unusual quantum phenomena, much of the recent work is too abstract and general to be directly applied by us~\cite{Monotones, TypeIndepLOSR}, or focuses only on \emph{single-copy conversions} using \emph{local operations and shared randomness} (LOSR) as the set of free actions~\cite{BellResourceTheory, TraceDistNL, NLMeas}, instead of the multiple-copy conversions that wirings perform (with a notable exception discussed in \Cref{sec:nlmono_maxcorr}).
 
-      LOSR actions transform \(p(a_0 b_0|x_0 y_0) \mapsto p(ab|xy)\) using a conditional distribution \(\chi\):
+      LOSR actions transform \(p(a_0 b_0|x_0 y_0) \mapsto p'(ab|xy)\) using a conditional distribution \(\chi\):
       \begin{equation}
         p(ab|xy) = \sum_{abxy} \chi(abx_0y_0|a_0b_0xy) p(a_0b_0|x_0y_0)
       \end{equation}
@@ -659,8 +659,11 @@
       \[ \chi_A(ax_0r_A'|a_0x) \gets 1 \qquad p_r(r_A', r_B) \gets qp_r(r_A', r_B) \]
       to obtain the desired behaviour.
 
-      Therefore, for our purposes, we can straightforwardly generalise the expression for LOSR operations to the following form, for \(c\) boxes wired together:
-      \begin{equation}\label{eqn:wiringdef}
+      Therefore, for our purposes, we can straightforwardly generalise the expressions for LOSR operations, for \(c\) boxes wired together, as:
+      \begin{equation}\label{eqn:wiringprobdef}
+        p'(ab|xy) = \sum_{\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p(\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^c)
+      \end{equation}
+      \begin{equation}\label{eqn:wiringchardef}
         \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{r_A r_B} \chi_A(a\cvec{x}^c r_A|\cvec{a}^cx) \chi_B(b\cvec{y}^c r_B|\cvec{b}^cy) p_r(r_A r_B)
       \end{equation}
       where \(\cvec{a}^c = (a_1, a_2, \ldots, a_c)\) is the vector of all the outputs from Alice's boxes that are wired together, with analogous definitions for \(\cvec{b}^c\), \(\cvec{x}^c\) and \(\cvec{y}^c\), and with \(\chi_A\) and \(\chi_B\) restricted to \(\{0,1\}\).
@@ -672,7 +675,7 @@
       \begin{equation} a = W_A(\cvec{x}^{c}, \cvec{a}^{c}). \end{equation}
       Then, if \(\chi_A\) for a given value of \(r_A\) is specified by these functions, \(\chi_A(a\cvec{x}^c r_A|\cvec{a}^cx) = 1\) if the above equations are satisfied. The analogous definitions for Bob hold with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). 
 
-      Alice and Bob interact with their boxes in increasing order of the index \(j\). The condition that the input to box \(j\) can only depend on the inputs and outputs of boxes with index \(< j\) is equivalent to enforcing that Alice and Bob do not have quantum memories: both players must provide an input to a given box before it can produce an output. We refer to this discrete set of deterministic wirings as \(\sW_D\). We can apply pairs of wirings to behaviours, so the set of wirings that can be applied is actually the convex hull of \(\sW_D \times \sW_D\), which we call \(\sW\), and we call the set of behaviours generated via applying \(\sW\) to a given behaviour \(p\) using \Cref{eqn:wiringdef} as \(\sWB(p)\).
+      Alice and Bob interact with their boxes in increasing order of the index \(j\). The condition that the input to box \(j\) can only depend on the inputs and outputs of boxes with index \(< j\) is equivalent to enforcing that Alice and Bob do not have quantum memories: both players must provide an input to a given box before it can produce an output. We refer to this discrete set of deterministic wirings as \(\sW_D\). We can apply pairs of wirings to behaviours, so the set of wirings that can be applied is actually the convex hull of \(\sW_D \times \sW_D\), which we call \(\sW\), and we call the set of behaviours generated via applying \(\sW\) to a given behaviour \(p\) using \Cref{eqn:wiringchardef} as \(\sWB(p)\).
 
       Having thus characterised the set of wirings, our next task is to optimise our key rate over it. However, despite this simple description of the space of achievable behaviours, it is unclear if there are bounds that can be optimised efficiently over it.
       \begin{question}\label{qn:wirbehavkeyrate}
@@ -682,46 +685,17 @@
 
       \subsection{The Short, Popescu and Gisin Classification}\label{sec:locwir_class}
 
-      The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short, Popescu and Gisin~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. Their work attempts to generalise joint measurements to the no-signalling setting and finds a polytope of possible operations which happens to have local wirings at its extremal points. For the  \((2,2,2,2)\) setting, there are 82 extremal points, grouped into 5 possible types of wirings: deterministic output, where the input is precisely the output; one-sided, where only one box is used; sequential, where the output of the first box is used as input for the second box, and AND and XOR gated, where the respective gates are used to combine the output of the two boxes.
+      The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short, Popescu and Gisin~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. Their work attempts to generalise quantum joint measurements for general no-signalling systems, and finds a polytope of possible operations (termed \emph{couplers}) which happens to have local wirings at its extremal points. For the  \((2,2,2,2)\) setting, there are 82 extremal points, grouped into 5 possible types of wirings: deterministic output, where the input is precisely the output; one-sided, where only one box is used; sequential, where the output of the first box is used as input for the second box, and AND and XOR gated, where the respective gates are used to combine the output of the two boxes.
 
-      \begin{table}
-        \begin{minipage}{0.5\linewidth}
-          \begin{center}
-            \begin{tabular}{|r|cc|} \hline
-              \diagbox{\(x_1\)}{\(a_1\)} & 0 & 1 \\ \hline
-              0 & 1 & 0 \\
-              1 & 1 & 1 \\ \hline
-            \end{tabular}
-          \end{center}
-        \end{minipage}
-        \begin{minipage}{0.5\linewidth}
-          \begin{center}
-            \begin{tabular}{|r|cccc|} \hline
-              \diagbox{\(x_1 x_2\)}{\(a_1 a_2\)} & 00 & 01 & 11 & 10 \\ \hline
-              00 & X & X & 1 & 0 \\
-              01 & 0 & 0 & X & X \\
-              11 & 1 & 0 & 0 & 0 \\
-              10 & X & X & X & X \\ \hline
-            \end{tabular}
-          \end{center}
-        \end{minipage}
-        \caption{Left: Lookup table for \(W_A^{(2)}\), giving \(x_2\). Right: Lookup table for \(W_A\), giving overall output \(a\). Entries forbidden by \(W_A^{(2)}\) are marked with X (don't care). Both are written as Karnaugh maps, with the row and column labels in Gray code order.}\label{tab:wiring_lut}
-      \end{table}
-
-      However, a wiring corresponding to the lookup tables in~\Cref{tab:wiring_lut} would have
+      The coupler equation is~\cite[Eq. 29]{ShortEntangleSwap}
       \begin{equation}
-        x_2 = \bar{a}_1x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2,
+        p'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}}) = \sum_{\cvec{by}} \chi(b',\cvec{by})p(\cvec{a\breve{b}b}|\cvec{x\breve{y}y}),
       \end{equation}
-      where juxtaposition is the Boolean AND, addition is the Boolean OR, and the overbar is the Boolean NOT.\ This cannot be expressed as one of the wirings from~\cite{ShortEntangleSwap}: the boxes are clearly non-constant and dependent on each other, so they are not one-sided or deterministic, and the functional dependence of the output is too complex to be expressed simply with a single AND or XOR gate.
+      where the breve indicates the inputs and outputs corresponding to boxes that were not coupled together, and \(b'\) is the coupler output. Comparing this to \Cref{eqn:wiringprobdef}, we see that, correctly interpreted, the coupler is simply a wiring performed only on Bob's boxes. \(b'\) is then the overall output \(b\) in our notation, while \(y\) in our notation is equal to the first element of \(\cvec{y}\), the vector of inputs to the boxes that are coupled/wired together.
 
-      TODO show that this \(\chi\) is outside the polytope formed by pairs of the Short classification wirings
+      However, the analysis also differs in important ways. The distribution \(p(\cvec{b}^c|\cvec{y}^c)\) is allowed to be an arbitrary behaviour in \(\NSs\) in their analysis, not necessarily and i.i.d.\ joint distribution, with the only constraint being the normalisation of \(p'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}})\). Therefore, \(p(\cvec{b}^c|\cvec{y}^c)\) can be any behaviour in the \(c\)-partite \(\NSs\), which is markedly more complicated than the bipartite scenarios we have assumed throughout this analysis.
 
-      Let us see why this is the case. The classification of~\cite{ShortEntangleSwap} attempts to find a parametrisation of \emph{couplers}, which are a specific type of transformation which ``collapses'' multiple boxes of one party, replacing their inputs and outputs with a single output, whose probability distribution depends on the behaviours of the individual boxes that are collapsed. Importantly, this \emph{does not} replace the collapsed boxes with a larger box with one input and one output, which is what we are attempting to do through wirings, but rather simply generates one output. Although couplers can be characterised by a vector of parameters, and the possible vectors form a polytope that has these specific wirings as its extremal points, this is not the type of operation we are looking for.
-
-      One might ask if an analogous polytope structure might help us to explore the space of generated behaviours more efficiently. Indeed, it is conceivable that \(\sW\) could have some redundancies, so we would like to ask:
-      \begin{question}\label{qn:wirspace}
-        Can we decrease the number of degrees of freedom in \(\sWB(p)\)? 
-      \end{question}
+      TODO do we proceed with this? Why or why not?
 
       \subsection{Number of Distinct Wirings}
 
@@ -1093,7 +1067,7 @@
 
     \section{Nonlocality Monotones}\label{sec:nlmono}
 
-    Instead of trying to find achievable behaviours from a given one, we can try to approach the problem from the opposite direction, by establishing fundamental limits on the achievable behaviours, as was suggessted in \Cref{qn:wirspace}. To this end, we wish to find \emph{monotone measures under wiring}, which are functions of a behaviour that change monotonically when wiring is applied to them. Maximising the key rate over the set of behaviours with the same monotone would then provide an upper bound, and may help give insight into the fundamental limits of wiring.
+    Instead of trying to find achievable behaviours from a given one, we can try to approach the problem from the opposite direction, by establishing fundamental limits on the achievable behaviours. To this end, we wish to find \emph{monotone measures under wiring}, which are functions of a behaviour that change monotonically when wiring is applied to them. Maximising the key rate over the set of behaviours with the same monotone would then provide an upper bound, and may help give insight into the fundamental limits of wiring.
 
     In the language of resource theories, monotones are functions that preserve the pre-order of a resource theory~\cite{BellResourceTheory}. That is, for resource \(R_1\) and \(R_2\) in a theory, a monotone \(\mu\) satisfies
     \begin{equation}

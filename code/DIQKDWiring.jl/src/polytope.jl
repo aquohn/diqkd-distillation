@@ -77,10 +77,10 @@ function ld_polytope(iA, oA, iB, oB, ::Type{T} = Float64) where T <: Real
 end
 
 # converting
-function cg_to_full(v, iA, oA, iB, oB)
-  pabxy = fill(NaN, oA, oB, iA, iB)
-  pax = fill(NaN, oA, iA)
-  pby = fill(NaN, oB, iB)
+function cg_to_full(v::AbstractVector{T}, iA, oA, iB, oB) where {T <: Real}
+  pabxy = Array{T, 4}(undef, oA, oB, iA, iB)
+  pax = Array{T, 2}(undef, oA, iA)
+  pby = Array{T, 2}(undef, oB, iB)
 
   @sliceup(v, pax_vec, (oA-1) * iA, pby_vec, (oB-1) * iB, pabxy_vec, ((oA-1) * (oB-1) * iA * iB))
 
@@ -316,113 +316,20 @@ end
 # Couplers
 # "Entaglement swapping for generalized non-local correlations"; Short, Popescu
 # and Gisin
-function find_couplers(iA, oA, iB, oB, n)
-  poly = cg_polytope(iA, oA, iB, oB, Rational{Int64})
+
+# hrep for polytope of couplers for two binary-output boxes
+function SPGcouplers(setting=(2,2,2,2), ::Type{T}=Rational{Int64}) where {T <: Real}
+  poly = cg_polytope(setting..., T)
   vs = vertices_list(poly)
-  l = length(vs) 
-
-  # compute coupler for each party independently
-  bsysdims = ((oB for i in 1:n)..., (iB for i in 1:n)...)
-  bsysranges = (1:d for d in bsysdims)
-  vars = Symbolics.@variables C[1:oB-1, bsysranges...]
-  allvars = vcat([vec(arr) for arr in vars]...)
-
-  unormconstrs = Vector{Num}(undef, l * oB)
-  lnormconstrs = Vector{Num}(undef, l * oB)
-
-  for idx in eachindex(vs)
-    v = vs[idx]
-    pax, pby, pabxy = cg_to_full(v, iA, oA, iB, oB)
-    constridx = (idx - 1) * oB
-    iter = Iterators.product(bsysranges...)
-    pbsys = fill(Num(1), bsysdims...)
-    for bsys in iter # tabulate p(bs|ys) 
-      # TODO use commutativity to tabulate more efficiently
-      for i in 1:n # find individual p(b|y) and accumulate
-        b = bsys[i]
-        y = bsys[i+n]
-        pbsys[bsys...] *= pby[b,y]
-      end
-    end
-
-    iter = Iterators.product(bsysranges...)
-    total_pbp = 0
-    for bp in 1:oB-1 # compute the probability of an overall output bp
-      pbp = 0
-      for bsys in iter
-        pbp += C[bp, bsys...] * pbsys[bsys...]
-      end
-
-      unormconstrs[constridx + bp] = pbp <= 1
-      lnormconstrs[constridx + bp] = 0 <= pbp
-      total_pbp += pbp
-    end
-    unormconstrs[constridx + oB] = total_pbp <= 1
-    lnormconstrs[constridx + oB] = 0 <= total_pbp
-  end
-
-  allconstrs = vcat(unormconstrs, lnormconstrs)
-  return HPolytope(allconstrs, allvars) |> remove_redundant_constraints
-end
-
-function cg_bobcouplers(vs, iA, oA, iB, oB, n)
-  ps = cg_to_full.(vs, iA, oA, iB, oB)
-  pbys = [p[2] for p in ps]
-  return find_couplers(pbys, n)
-end
-
-function cg_alicecouplers(vs, iA, oA, iB, oB, n)
-  ps = cg_to_full.(vs, iA, oA, iB, oB)
-  pbys = [p[3] for p in ps]
-  return find_couplers(pbys, n)
-end
-
-function couplerpoly_from_verts()
-  # b, y^c | b^c
-  verts = Vector{Array{Bool, 5}}()
-
-  # TODO make all zero-based
-  
-  # deterministic
-  for p in Iterators.product((1:2 for i in 1:1)...)
-    C = zeros(Bool, (2 for i in 1:5)...)
-    C[p[1], 1, 1, :, :] .= 1
-    push!(verts, C)
-  end
-
-  # one-sided
-  for p in Iterators.product((1:2 for i in 1:3)...)
-    C = zeros(Bool, (2 for i in 1:5)...)
-    for v in Iterators.product((0:1 for j in 1:3)...)
-      # bp, b1, b2 = v
-      if v[1] == xor(v[1+p[2]], (p[3]-1))
-        C[v[1]+1, p[1], p[1], v[2]+1, v[3]+1] = 1
-      end
-    end
-  end
-
-  # TODO below
-
-end
-
-function test_couplers()
-  coup_2222 = find_couplers(2,2,2,2,2)
-  coup_2222_v = coup_2222 |> vertices_list
-  for v in chsh_v
+  hss = Vector{Polyhedra.HalfSpace{T, Vector{T}}}()
+  for v in vs
     pax, pby, pabxy = cg_to_full(v, chshset...)
-    for coup in coup_2222_v
-      pbp1 = 0
-      coupmatr = reshape(coup, 2,2,2,2)
-      for bsys in Iterators.product(1:2, 1:2, 1:2, 1:2)
-        b1, b2, y1, y2 = bsys
-        pbsys = pby[b1, y1] * pby[b2, y2]
-        pbp1 += coupmatr[b1, b2, y1, y2] * pbsys
-      end
-      if pbp1 < 0 || pbp1 > 1
-        println("pbp1 = $pbp1, v = $v, coup = $coup")
-      end
-    end
+    hsu = Polyhedra.HalfSpace(vec(pabxy), 1)
+    hsl = Polyhedra.HalfSpace(-1 .* vec(pabxy), 0)
+    push!(hss, hsu)
+    push!(hss, hsl)
   end
+  return hrep(hss)
 end
 
 const chsh_poly = cg_polytope(chshset...)
