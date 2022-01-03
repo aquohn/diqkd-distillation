@@ -637,19 +637,19 @@
 
       LOSR actions transform \(p(a_0 b_0|x_0 y_0) \mapsto p'(ab|xy)\) using a conditional distribution \(\chi\):
       \begin{equation}
-        p(ab|xy) = \sum_{abxy} \chi(abx_0y_0|a_0b_0xy) p(a_0b_0|x_0y_0)
+        p'(ab|xy) = \sum_{abxy} \chi(abx_0y_0|a_0b_0xy) p(a_0b_0|x_0y_0)
       \end{equation}
       that satisfies
       \begin{equation}
-        \chi(abx_0y_0|a_0b_0xy) = \sum_{r_A r_B} \chi_A(ax_0r_A|a_0x) \chi_B(by_0r_B|b_0y) p_r(r_A r_B),
+        \chi(abx_0y_0|a_0b_0xy) = \sum_{r_A r_B} \chi_A(ax_0|a_0xr_A) \chi_B(by_0|b_0yr_B) p_r(r_A r_B),
       \end{equation}
-      where \(p_r\) is the distribution of the shared randomness \(r_A\) and \(r_B\). However, since our wirings combine multiple boxes, their effect cannot be expressed in this form. This automatically makes many of the specific results in LOSR resource theories of nonlocality inapplicable to our case, while increasing the dimension of the space of possible wirings significantly.
+      where \(p_r\) is the distribution of the shared randomness \(r_A\) and \(r_B\), and \(\chi\) can be interpreted as a conditional probability. However, since our wirings combine multiple boxes, their effect cannot be expressed in this form. This automatically makes many of the specific results in LOSR resource theories of nonlocality inapplicable to our case, while increasing the dimension of the space of possible wirings significantly.
 
       In this cryptographic scenario, it might be interesting to ask if there is any benefit to be gained from using \emph{private} shared randomness, unknown to Eve. However, if they have \(h\) bits of pre-shared randomness, since they are performing classical data processing, this can only increase Eve's entropy by at most \(h\), which can already be achieved by simply using the shared randomness as part of their secret key.
 
       Operationally, \(h\) bits of randomness will lead to \(2^h\) possible different behaviours.
 
-      TODO can private synchronisation of the inputs improve Alice and Bob's entropy? Or does input dependency decrease entropy?
+      TODO can private correlation of the inputs improve Alice and Bob's entropy? Or does input correlation decrease entropy?
 
       TODO distinguish between: Eve knowing no inputs, Eve knowing overall inputs only, Eve knowing physical inputs only?, and Eve knowing both inputs.
 
@@ -660,15 +660,13 @@
       to obtain the desired behaviour.
 
       Therefore, for our purposes, we can straightforwardly generalise the expressions for LOSR operations, for \(c\) boxes wired together, as:
-      \begin{equation}\label{eqn:wiringprobdef}
-        p'(ab|xy) = \sum_{\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p(\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^c)
-      \end{equation}
-      \begin{equation}\label{eqn:wiringchardef}
-        \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{r_A r_B} \chi_A(a\cvec{x}^c r_A|\cvec{a}^cx) \chi_B(b\cvec{y}^c r_B|\cvec{b}^cy) p_r(r_A r_B)
-      \end{equation}
-      where \(\cvec{a}^c = (a_1, a_2, \ldots, a_c)\) is the vector of all the outputs from Alice's boxes that are wired together, with analogous definitions for \(\cvec{b}^c\), \(\cvec{x}^c\) and \(\cvec{y}^c\), and with \(\chi_A\) and \(\chi_B\) restricted to \(\{0,1\}\).
+      \begin{gather}
+        p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)\label{eqn:wiringprobdef} \\
+        \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{r_A r_B} \chi_A(a\cvec{x}^c|\cvec{a}^cx r_A) \chi_B(b\cvec{y}^c|\cvec{b}^cy r_B) p_r(r_A r_B)\label{eqn:wiringchardef}
+      \end{gather}
+      where \(\cvec{a}^c = {(a_1, a_2, \ldots, a_c)}^{\rm T}\) is the vector of all the outputs from Alice's boxes that are wired together, with analogous definitions for \(\cvec{b}^c\), \(\cvec{x}^c\) and \(\cvec{y}^c\), and with \(\chi_A\) and \(\chi_B\) restricted to \(\{0,1\}\).
 
-      The possible functions \(\chi_A, \chi_B\) for fixed values of \(r_A\) and \(r_B\) can be restricted with causality constraints. Let \(x_1\) and \(a_1\) be the input and output, respectively, of the first box Alice uses, \(x_2\) and \(a_2\) that of the second, and so forth. Then, Alice's inputs \(\cvec{x}^c\) are computed by a sequence of \(c\) functions with range \(\dintv{1}{i_A}\):
+      The possible functions \(\chi_A\) and \(\chi_B\) for fixed values of \(r_A\) and \(r_B\) can be restricted with causality constraints. Let \(x_1\) and \(a_1\) be the input and output, respectively, of the first box Alice uses, \(x_2\) and \(a_2\) that of the second, and so forth. Then, Alice's inputs \(\cvec{x}^c\) are computed by a sequence of \(c\) functions with range \(\dintv{1}{i_A}\):
       \begin{equation} x_1 = x \end{equation}
       \begin{equation} x_j = W^{(j)}_A(\cvec{x}^{j-1}, \cvec{a}^{j-1}),\,j \in \dintv{2}{c} \end{equation}
       and a final output function with range \(\dintv{1}{o_A}\):
@@ -687,21 +685,25 @@
 
       The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short, Popescu and Gisin~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. Their work attempts to generalise quantum joint measurements for general no-signalling systems, and finds a polytope of possible operations (termed \emph{couplers}) which happens to have local wirings at its extremal points. For the  \((2,2,2,2)\) setting, there are 82 extremal points, grouped into 5 possible types of wirings: deterministic output, where the input is precisely the output; one-sided, where only one box is used; sequential, where the output of the first box is used as input for the second box, and AND and XOR gated, where the respective gates are used to combine the output of the two boxes.
 
-      The coupler equation is~\cite[Eq. 29]{ShortEntangleSwap}
+      Using their notation, the coupler equation is~\cite[Eq. 29]{ShortEntangleSwap}
       \begin{equation}
-        p'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}}) = \sum_{\cvec{by}} \chi(b',\cvec{by})p(\cvec{a\breve{b}b}|\cvec{x\breve{y}y}),
+        P'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}}) = \sum_{\cvec{by}} \chi(b',\cvec{by})P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y}),
       \end{equation}
-      where the breve indicates the inputs and outputs corresponding to boxes that were not coupled together, and \(b'\) is the coupler output. Comparing this to \Cref{eqn:wiringprobdef}, we see that, correctly interpreted, the coupler is simply a wiring performed only on Bob's boxes, despite the different approach and motivation involved here. \(b'\) is then the overall output \(b\) in our notation, while \(y\) in our notation is equal to the first element of \(\cvec{y}\), the vector of inputs to the boxes that are coupled/wired together.
+      where the breve indicates the inputs and outputs corresponding to boxes that were not coupled together, and \(b'\) is the coupler output. Comparing this to \Cref{eqn:wiringprobdef}, we see that these couplers seem to be more general than wirings. For couplers, Alice and Bob are allowed to have different numbers of boxes. The boxes are assumed to be arbitrarily related through some no-signalling behaviour, instead of i.i.d.\ rounds of a Bell test: if Alice and Bob have a total of \(c\) boxes, \(P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y})\) can be any behaviour in the \(c\)-partite \(\NSs\), not necessarily i.i.d.\ copies of the same behaviour. This is markedly more complicated than the bipartite scenarios we have assumed throughout this analysis. The output of the coupling operation is a set of new \(c'\)-partite behaviours, with \(c' < c\), each tagged to a distinct value of the output \(b'\), but without specifying the overall input to the boxes that are coupled. Finally, this analysis does not include the causality restrictions that we have used to reduce the number of possible wirings.
 
-      However, the analysis also differs in important ways.  \(p(\cvec{b}^c|\cvec{y}^c)\) can be any behaviour in the \(c\)-partite \(\NSs\), not necessarily an i.i.d.\ joint distribution, which is markedly more complicated than the bipartite scenarios we have assumed throughout this analysis. Further, this analysis does not include the causality restrictions that we have used to reduce the number of possible wirings. The authors identified this polytope by applying normalisation constraints to \(p'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}})\), when computed using the extremal points of \(\NSs\). While highly general, this approach is difficult to generalise to \(c > 2\) (for example, for the simplest tripartite scenario of \((2,2; 2,2; 2,2)\), \(\NSs\) has 53856 extremal points~\cite{Tripartite}). We will therefore attempt a different approach which may be simpler.
+      The one way in which couplers seem more restricted than wirings is that the coupler is applied to only one party, but this can be overcome by optimising \(\chi_A\) and \(\chi_B\) in \Cref{eqn:wiringchardef} over the space of possible couplers. \(\chi\) would then be an element of a polytope whose extremal points are products of the extremal points of the coupler polytope.
+
+      Nonetheless, it does not seem feasible to use the unmodified coupler polytope beyond the simplest case. The authors identified the polytope of wirings by applying normalisation constraints \(0 \leq P'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}}) \leq 1\), setting the values of \(\chi(b',\cvec{by})\) as variables and the values of \(P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y})\) to those corresponding to the extremal points of the relevant version of \(\NSs\). In particular, they considered the case where Alice has no boxes and Bob has two binary-input, binary-output boxes, where \(P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y})\) is then a behaviour in the familiar CHSH setting, except it describes the arbitrary no-signalling relationship between Bob's two boxes, rather than Alice and Bob's boxes. This approach is difficult to generalise to \(c > 2\). For example, for the simplest tripartite scenario of \((2,2; 2,2; 2,2)\), \(\NSs\) has 53856 extremal points~\cite{Tripartite}, and since the polytope of wirings is defined by two inequalities per extremal point, this would yield a polytope defined by 107712 inequalities.
 
       TODO classify the extremal points for the QKD setting
 
+      Instead, we apply the methodology
+
+      TODO couplers with \(o_B \times i_B\) outcomes, and input distributions are iid products of the arbitrary single-box distribution characterised by \(o_B \times i_B\) extremal points
+
       \subsection{Enumerating Deterministic Wirings}
 
-      Instead of using the no-signalling inequalities to identify the possible wirings, we could instead identify the possible deterministic wirings, since all randomness can be represented as the convex combination of deterministic wirings.
-
-      Using our classification for \(\sW_D\), simple combinatorics gives us \(i_A^{j-1} o_A^{j-1}\) possible inputs for \(W_j^A\). However, since \(x_j\) is completely fixed by \({(x_k)}_{k=1}^{j-1}\) and \({(a_k)}_{k=1}^{j-1}\), there are only \(i_A o_A^{j-1}\) valid inputs, with the rest corresponding to don't-cares. Therefore, the number of possible \(W^{(j)}_A\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(W_A\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
+      Instead of using the no-signalling inequalities to identify the possible wirings, we could instead identify the possible deterministic wirings, since all randomness can be represented as the convex combination of deterministic wirings. Using our classification for \(\sW_D\), simple combinatorics gives us \(i_A^{j-1} o_A^{j-1}\) possible inputs for \(W_j^A\). However, since \(x_j\) is completely fixed by \({(x_k)}_{k=1}^{j-1}\) and \({(a_k)}_{k=1}^{j-1}\), there are only \(i_A o_A^{j-1}\) valid inputs, with the rest corresponding to don't-cares. Therefore, the number of possible \(W^{(j)}_A\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(W_A\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
       \begin{equation}
         \exp_{o_A}(i_A o_A^c) \prod_{j=2}^c \exp_{i_A}(i_A o_A^{j-1}),
       \end{equation}
