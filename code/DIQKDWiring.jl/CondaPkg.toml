@@ -1,0 +1,8 @@
+channels = ["mosek", "aquohn"]
+
+[deps]
+numpy = ""
+sympy = ""
+chaospy = ""
+mosek = ""
+ncpol2sdpa = ""

@@ -34,6 +34,7 @@ tags
 *.toc
 
 .ipynb_checkpoints
+__pycache__
 
 .pnpm
 pnpm-lock.yaml

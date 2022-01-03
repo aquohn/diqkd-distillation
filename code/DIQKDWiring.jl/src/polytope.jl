@@ -137,16 +137,6 @@ function cg_to_full(v::AbstractVector{T}, iA, oA, iB, oB) where {T <: Real}
   @sliceup(v, pax_vec, (oA-1) * iA, pby_vec, (oB-1) * iB, pabxy_vec, ((oA-1) * (oB-1) * iA * iB))
 
   pabxy[1:oA-1, 1:oB-1, 1:iA, 1:iB] = reshape(pabxy_vec, oA-1, oB-1, iA, iB)
-  pax[1:oA-1, 1:iA] = reshape(pax_vec, oA-1, iA)
-  pby[1:oB-1, 1:iB] = reshape(pby_vec, oB-1, iB)
-
-  for x in eachindex(pax[oA, :])
-    pax[oA, x] = 1 - sum(pax[1:oA-1, x])
-  end
-  for y in eachindex(pby[oB, :])
-    pby[oB, y] = 1 - sum(pby[1:oB-1, y])
-  end
-
   for x in 1:iA, y in 1:iB
     for a in 1:(oA-1)
       pabxy[a, oB, x, y] = pax[a,x] - sum(pabxy[a, 1:(oB-1), x, y])
@@ -157,7 +147,7 @@ function cg_to_full(v::AbstractVector{T}, iA, oA, iB, oB) where {T <: Real}
     end
   end
 
-  return pax, pby, pabxy
+  return Behaviour(pabxy)
 end
 
 function full_to_cg(pax, pby, pabxy)
@@ -229,7 +219,7 @@ end
 function cg_debug(behavs, iA, oA, iB, oB)
   for behav in behavs
     fullbehav = cg_to_full(behav, iA, oA, iB, oB)
-    pax, pby, pabxy = fullbehav
+    pabxy = fullbehav.pabxy
     if !(all([all(ps .>= 0) && all(ps .<= 1) for ps in fullbehav])
          && all([sum(pabxy[:, b, x, y]) == pby[b, y] for b in 1:oB for x in 1:iA for y in 1:iB])
          && all([sum(pabxy[a, :, x, y]) == pax[a, x] for a in 1:oA for x in 1:iA for y in 1:iB])
@@ -263,9 +253,9 @@ end
 
 function qkd_analysis(vs, testf = (Q, S, rho) -> abs(S) == 4)
   for v in vs
-    probs = Behaviour(cg_to_full(v, qkdset...)...)
-    corrs = Correlators(corrs_from_probs(probs...)...)
-    Q, S, rhos = QBER(corrs...), CHSH(corrs...), maxcorrs(probs...)
+    probs = cg_to_full(v, qkdset...)
+    corrs = corrs_from_probs(probs)
+    Q, S, rhos = QBER(corrs), CHSH(corrs), maxcorrs(probs)
     if testf(Q, S, rhos)
       println(v)
       print(@sprintf "Q = %.3f, S = %.3f, " Q S)
@@ -350,9 +340,9 @@ function qkd_iso(::Type{T} = Float64) where T <: Real
 
   for frac in 0.5:0.05:1
     v = frac .* cg_best_qkd + (1-frac) .* cg_maxmix_qkd
-    probs = Behaviour(cg_to_full(v, qkdset...)...)
-    corrs = Correlators(corrs_from_probs(pax, pby, pabxy)...)
-    Q, S, rhos = QBER(corrs...), CHSH(corrs...), maxcorr(probs...)
+    probs = cg_to_full(v, qkdset...)
+    corrs = corrs_from_probs(probs)
+    Q, S, rhos = QBER(corrs), CHSH(corrs), maxcorr(probs)
     print(@sprintf "Q = %.3f, S = %.3f, " Q S)
     println(@sprintf "rho = %.3f" maximum(rhos))
   end
@@ -375,7 +365,7 @@ function SPGcouplers_hrep(setting=(2,2,2,2), ::Type{T}=Rational{Int64}) where {T
   vs = vertices_list(poly)
   hss = Vector{Polyhedra.HalfSpace{T, Vector{T}}}()
   for v in vs
-    pax, pby, pabxy = cg_to_full(v, chshset...)
+    pabxy = cg_to_full(v, chshset...).pabxy
     hsu = Polyhedra.HalfSpace(vec(pabxy), 1)
     hsl = Polyhedra.HalfSpace(-1 .* vec(pabxy), 0)
     push!(hss, hsu)

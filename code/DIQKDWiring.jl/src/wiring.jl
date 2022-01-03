@@ -45,9 +45,11 @@ end
 
 num_wirings(c, o, i) = o^(i * o^c) * prod([i^(i * o^(j-1)) for j in 2:c])
 num_wirings_fix(c, o, i, f) = o^((i-f)*i * o^c) * prod([i^((i-f) * o^(j-1)) for j in 2:c])
-function wiring_prob(CA, CAj, CB, CBj, pax::Array{T,2}, pby::Array{T,2}, pabxy::Array{T,4}) where T <: Real
+function wiring_prob(wiring::Wiring, behav::Behaviour)
+  CA, CAj, CB, CBj = wiring
+  pax, pby, pabxy = behav
   oA, oB, iA, iB = size(pabxy)
-  ppax, ppby, ppabxy = (zeros(size(p)) for p in [pax, pby, pabxy]) |> collect
+  ppabxy = zeros(size(pabxy))
   c = Integer((CA |> size |> length) / 2)
 
   aseqs = BoxSequence[BoxSequence(:A, [a], [x]) for (a,x) in Iterators.product(1:oA, 1:iA)] |> vec
@@ -79,8 +81,7 @@ function wiring_prob(CA, CAj, CB, CBj, pax::Array{T,2}, pby::Array{T,2}, pabxy::
     end
   end
 
-  ppax, ppby, ppabxy = margps_from_jointp(nothing, nothing, ppabxy)
-  return ppax, ppby, ppabxy
+  return Behaviour(ppabxy)
 end
 
 # %%
@@ -100,15 +101,16 @@ function meas_corrs(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi
   Btlds = Float64[E(Mtld(nu), rhoB) for nu in nus]
   ABtlds = Float64[E(kron(Mtld(mu), Mtld(nu)), rhov) for mu in mus, nu in nus]
 
-  return Atlds, Btlds, ABtlds
+  return Correlators(Atlds, Btlds, ABtlds)
 end
 
-function expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
+function expt_corrs(nc, eta, tldcorrs)
+  Atlds, Btlds, ABtlds = tldcorrs 
   iA, iB = length(Atlds), length(Btlds)
   Eax = Float64[-nc-(1-nc)*((1-eta)-eta*Atlds[x]) for x in 1:iA]
   Eby = Float64[-nc-(1-nc)*((1-eta)-eta*Btlds[y]) for y in 1:iB]
   Eabxy = Float64[nc + (1-nc)*(eta^2 * ABtlds[x,y] - eta*(1-eta)*(Atlds[x] + Btlds[y]) + (1-eta)^2) for x in 1:iA, y in 1:iB]
-  return Eax, Eby, Eabxy
+  return Correlators(Eax, Eby, Eabxy)
 end
 
 function expt_grads(nc, eta, Atlds, Btlds, ABtlds)
@@ -136,20 +138,22 @@ function expt_chsh_ncgrads(ncgrad, etagrad, S)
 end
 
 
-function and_corrs(N, Eax, Eby, Eabxy)
+function and_corrs(N, corrs)
+  Eax, Eby, Eabxy = corrs
   iA, iB = length(Eax), length(Eby)
 
   EaxN = [1 - 2*((1-Eax[x])/2)^N for x in 1:iA]
   EbyN = [1 - 2*((1-Eby[y])/2)^N for y in 1:iB]
   EabxyN = [1 - ((1-Eax[x])^N + (1-Eby[y])^N)/(2.0^(N-1)) + (1-Eax[x]-Eby[y]+Eabxy[x,y])^N/(4.0^(N-1)) for x in 1:iA, y in 1:iB]
 
-  return EaxN, EbyN, EabxyN
+  return Correlators(EaxN, EbyN, EabxyN)
 end
 
 # %%
 # Wiring exhaustive search
 
-function wiring_iters(iA::T, oA::T, iB::T, oB::T, c::T) where T <: Integer
+function wiring_iters(sett::Setting{T}, c::T) where T <: Integer
+  oA, oB, iA, iB = sett
   CAiters = [1:oA for i in 1:(iA * oA^c)]
   CBiters = [1:oB for i in 1:(iB * oB^c)]
   CAjiters = vcat([fill(T, 0:0, 0)], [[1:iA for i in 1:(iA * oA^(j-1))] for j in 2:c])
@@ -192,6 +196,7 @@ function wiring_policy(CA, CAj, CB, CBj, CAvec, CBvec, CAjvec, CBjvec, iA, oA, i
   end
 end
 
+# TODO return wiring objects
 function generate_wirings(CAvec::Vector{T}, CBvec::Vector{T},
     CAjvec::Vector{Vector{T}}, CBjvec::Vector{Vector{T}}, iA, oA, iB, oB, c, policy = wiring_policy) where T <: Integer
   CAvec, CBvec, CAjvec, CBjvec = (deepcopy(v) for v in (CAvec, CBvec, CAjvec, CBjvec))
@@ -266,8 +271,8 @@ function diqkd_wiring_and_iters(c = 2)
   return CAiters, CBiters, CAjiters, CBjiters
 end
 
-function diqkd_wiring_eval(pax, pby, pabxy, HAE, HAB; c = 2, iterf = nothing, policy = wiring_policy)
-  oA, oB, iA, iB = size(pabxy)
+function diqkd_wiring_eval(behav, HAE, HAB; c = 2, iterf = nothing, policy = wiring_policy)
+  oA, oB, iA, iB = size(behav.pabxy)
   if isnothing(iterf)
     iterf = () -> wiring_iters(iA, oA, iB, oB, c)
   end
@@ -283,16 +288,16 @@ function diqkd_wiring_eval(pax, pby, pabxy, HAE, HAB; c = 2, iterf = nothing, po
     l = Integer(length(sliced[3:end]) / 2)
     CAjvec, CBjvec = sliceup(sliced[3:end], l, l)
 
-    CA, CAj, CB, CBj = generate_wirings(CAvec, CBvec, CAjvec, CBjvec, iA, oA, iB, oB, c, policy)
+    wiring = generate_wirings(CAvec, CBvec, CAjvec, CBjvec, iA, oA, iB, oB, c, policy)
 
-    HAEval, HAEdata = HAE(pax, pby, pabxy)
-    HABval, HABdata = HAB(pax, pby, pabxy)
+    HAEval, HAEdata = HAE(behav)
+    HABval, HABdata = HAB(behav)
     r = HAEval - HABval
 
-    ppax, ppby, ppabxy = wiring_prob(CA, CAj, CB, CBj, pax, pby, pabxy)
+    behavp = wiring_prob(wiring, behav)
 
-    HAEvalp, HAEdatap = HAE(ppax, ppby, ppabxy)
-    HABvalp, HABdatap = HAB(ppax, ppby, ppabxy)
+    HAEvalp, HAEdatap = HAE(behavp)
+    HABvalp, HABdatap = HAB(behavp)
     rp = HAEvalp - HABvalp
 
     if rp > r

@@ -39,10 +39,10 @@ const EbyLD = [1.0, 1.0, 1.0]
 const EabxyLD = [1.0 1.0 1.0
            1.0 1.0 1.0]
 function werner_corrs(v)
-  EaxW = v * EaxQ + (1-v) * Eaxmix
-  EbyW = v * EbyQ + (1-v) * Ebymix
-  EabxyW = v * EabxyQ + (1-v) * Eabxymix
-  return Correlators(Eax, Eby, EabxyW)
+  Eax = v * EaxQ + (1-v) * Eaxmix
+  Eby = v * EbyQ + (1-v) * Ebymix
+  Eabxy = v * EabxyQ + (1-v) * Eabxymix
+  return Correlators(Eax, Eby, Eabxy)
 end
 
 v_L = 0.6829; v_NL = 0.6964; v_crit = 0.7263
@@ -77,9 +77,9 @@ end
 
 # %% 3D plot data generators
 
-function maxcorrval_from_probs(pax, pby, pabxy, xysel, modesel)
-    Eax, Eby, Eabxy = corrs_from_probs(pax, pby, pabxy)
-    maxcorrvals = maxcorrs(pax, pby, pabxy)
+function maxcorrval_from_probs(behav::Behaviour, xysel, modesel)
+    Eax, Eby, Eabxy = Correlators(behav)
+    maxcorrvals = maxcorrs(behav)
     xsel, ysel = xysel
     if modesel == :maxdiff
       maxcorrval = max(maxcorrvals...) - min(maxcorrvals...)
@@ -110,10 +110,10 @@ function maxcorr_data(is, js, HAB::Function, HAE::Function, corrf::Function;
 
   for ii in eachindex(is), ji in eachindex(js)
     i = is[ii]; j = js[ji]
-    Eax, Eby, Eabxy = corrf(i, j)
-    pabxy, pax, pby = probs_from_corrs(Eax, Eby, Eabxy)
-    pts[ii, ji] = (HAB(pabxy, pax, pby)[1], HAE(pabxy, pax, pby)[1])
-    rhos[ii, ji] = maxcorrval_from_probs(pabxy, pax, pby, xysel, modesel)
+    corrs = corrf(i, j)
+    behav = Behaviour(corrs)
+    pts[ii, ji] = (HAB(behav)[1], HAE(behav)[1])
+    rhos[ii, ji] = maxcorrval_from_probs(behav, xysel, modesel)
   end
 
   return pts, rhos
@@ -129,9 +129,9 @@ function maxcorr_data3d(is, js, HAB::Function, HAE::Function, corrf::Function;
 
   for ii in eachindex(is), ji in eachindex(js)
     i = is[ii]; j = js[ji]
-    Eax, Eby, Eabxy = corrf(i, j)
-    pabxy, pax, pby = probs_from_corrs(Eax, Eby, Eabxy)
-    pts[ii, ji] = (HAB(pabxy, pax, pby)[1], HAE(pabxy, pax, pby)[1], maxcorrval_from_probs(pabxy, pax, pby, xysel, modesel))
+    corrs = corrf(i, j)
+    behav = Behaviour(corrs)
+    pts[ii, ji] = (HAB(behav)[1], HAE(behav)[1], maxcorrval_from_probs(behav, xysel, modesel))
   end
 
   return pts
@@ -145,10 +145,10 @@ function grad_data(is, js, HAB::Function, HAE::Function, corrf::Function, gradf:
 
   for ii in eachindex(is), ji in eachindex(js)
     i = is[ii]; j = js[ji]
-    Eax, Eby, Eabxy = corrf(i, j)
-    pabxy, pax, pby = probs_from_corrs(Eax, Eby, Eabxy)
-    pts[ii, ji] = (HAB(pabxy, pax, pby)[1], HAE(pabxy, pax, pby)[1])
-    grads[ii, ji] = gradf(i, j, Eax, Eby, Eabxy)
+    corrs = corrf(i, j)
+    pabxy, pax, pby = Behaviour(corrs)
+    pts[ii, ji] = (HAB(behav)[1], HAE(behav)[1])
+    grads[ii, ji] = gradf(i, j, corrs)
   end
 
   return pts, grads
@@ -161,7 +161,7 @@ function appwirf_data(is, js, corrf::Function, krf::Function, wirf::Function;
 
   for ii in eachindex(is), ji in eachindex(js)
     i = is[ii]; j = js[ji]
-    wircorrs = Correlators(corrf(i, j)...) |> wirf
+    wircorrs = corrf(i, j) |> wirf
     rps[ii, ji] = krf(wircorrs)
   end
 
@@ -175,9 +175,10 @@ function farkas_wiring_data(n, HAE::Function, HAB::Function; c = 2, iterf = noth
     Eax = EaxLD * (i-1)/n + EaxW * (n-i+1)/n
     Eby = EbyLD * (i-1)/n + EbyW * (n-i+1)/n
     Eabxy = EabxyLD * (i-1)/n + EabxyW * (n-i+1)/n
-    pax, pby, pabxy = probs_from_corrs(Eax, Eby, Eabxy)
+    corrs = Correlators(Eax, Eby, Eabxy)
+    behav = Behaviour(corrs)
 
-    recs = diqkd_wiring_eval(pax, pby, pabxy, HAE, HAB, c=c, iterf=iterf, policy=policy)
+    recs = diqkd_wiring_eval(behav, HAE, HAB, c=c, iterf=iterf, policy=policy)
     maxrec = nothing
     maxgain = 0
     for rec in recs
@@ -206,21 +207,20 @@ end
 function expt_corrf(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi])
   Atlds, Btlds, ABtlds = meas_corrs(theta=theta, mus=mus, nus=nus)
   tldcorrs = Correlators(Atlds, Btlds, ABtlds)
-  corrf = (nc, eta) -> expt_corrs(nc, eta, tldcorrs...)
+  corrf = (nc, eta) -> expt_corrs(nc, eta, tldcorrs)
   return corrf
 end
 
 # %%
 # Given i, minimum j reqd for r > 0
-
 function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname, corrf::Function; kwargs...) where T <: Real
   kwargs = Dict(kwargs)
   tol = get(kwargs, :tol, 1e-2)
-  krf = get(kwargs, :krf, (corrs) -> gchsh(max(2.0, CHSH(corrs...))) - h(QBER(corrs...)))
+  krf = get(kwargs, :krf, (corrs) -> gchsh(max(2.0, CHSH(corrs))) - h(QBER(corrs)))
   wirings = get(kwargs, :wirings, 
-                [((corrs) -> and_corrs(N, corrs...), "$N-AND") for N in 2:6])
+                [((corrs) -> and_corrs(N, corrs), "$N-AND") for N in 2:6])
 
-  rs = T[Correlators(corrf(i, j)...) |> krf for i in is, j in js]
+  rs = T[corrf(i, j) |> krf for i in is, j in js]
   basezeros = Tuple{T,T}[]
   for ii in eachindex(is)
     # find elements close to 0
@@ -259,9 +259,9 @@ function expt_grad_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi
   ncs = range(0, stop=1, length=ncsamples)
   etas = range(etastart, stop=1, length=etasamples)
 
-  Atlds, Btlds, ABtlds = meas_corrs(theta=theta, mus=mus, nus=nus)
-  corrf = (nc, eta) -> expt_corrs(nc, eta, Atlds, Btlds, ABtlds)
-  ncgradf = (nc, eta, Eax, Eby, Eabxy) -> expt_chsh_ncgrads(expt_grads(nc, eta, Eax, Eby, Eabxy)..., CHSH(Eax, Eby, Eabxy))
+  tldcorrs = meas_corrs(theta=theta, mus=mus, nus=nus)
+  corrf = (nc, eta) -> expt_corrs(nc, eta, tldcorrs)
+  ncgradf = (nc, eta, corr) -> expt_chsh_ncgrads(expt_grads(nc, eta, Eax, Eby, Eabxy)..., CHSH(Eax, Eby, Eabxy))
   qSreg, qSreggrad = grad_data(ncs, etas, HAB_oneway, HAE_CHSH, corrf, ncgradf)
 
   Hmaxs = map(max, qSreg...)
@@ -380,7 +380,7 @@ function expt_wiring_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*
   return wiring_plot(ncs, etas, L"n_c", L"\eta", corrf, kwargs...)
 end
 
-function new_expt_maxcorr_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.65, ncstart=0.0, kwargs...) 
+function expt_maxcorr_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.65, ncstart=0.0, kwargs...) 
   names = Dict{Symbol, String}(:x => "H(A|B)", :y => "H(A|E)", :z => "Maximal Correlation",
                                :i => L"n_c", :j => L"\eta", :set => "Experimental Model"
                               )
@@ -391,7 +391,7 @@ function new_expt_maxcorr_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 
   return ij_xyz_plot(ncs, etas, dataf, names; addplotf=DW_frontier_plot, contourzf = (lvl, _xs, _ys) -> 0 .* _xs, kwargs...)
 end
 
-function new_qset_maxcorr_plot(QLDsamples = 100, boundsamples = 100; kwargs...) 
+function qset_maxcorr_plot(QLDsamples = 100, boundsamples = 100; kwargs...) 
   names = Dict{Symbol, String}(:x => "H(A|B)", :y => "H(A|E)", :z => "Maximal Correlation",
                                :i => L"f_I", :j => L"f_{LD}", :set => "Polytope Slice"
                               )

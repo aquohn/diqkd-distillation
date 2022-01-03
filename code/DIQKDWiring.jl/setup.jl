@@ -1,15 +1,15 @@
 import Pkg
 Pkg.activate(@__DIR__)
 
-import Conda
+import CondaPkg
 
-envdir = String(@__DIR__) * "/conda_env"
-Conda.add_channel("aquohn", envdir)
-Conda.add("numpy", envdir)
-Conda.add("chaospy", envdir)
-Conda.add("sympy", envdir)
-Conda.add("ncpol2sdpa", envdir; channel="aquohn")
-Conda.list(envdir)
+CondaPkg.add_channel("aquohn")
+CondaPkg.add_channel("mosek")
+CondaPkg.add("numpy")
+CondaPkg.add("chaospy")
+CondaPkg.add("sympy")
+CondaPkg.add("ncpol2sdpa")
+CondaPkg.status()
 pirntln("NOTE: If the installed ncpol2sdpa is the conda-forge \
         version, activate the environment from the command line \
         and run

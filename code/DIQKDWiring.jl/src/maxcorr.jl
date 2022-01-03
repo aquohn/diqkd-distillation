@@ -30,8 +30,10 @@ Ptld = sqrt(PA) * PAB * sqrt(PB)
 lambdap, lambdam = Ptld |> reg_to_pauli |> pauli_to_sv
 =#
 
-function maxcorrs(pax::Array{T}, pby::Array{T}, pabxy::Array{T}) where T <: Real
+function maxcorrs(behav::Behaviour)
+  pax, pby, pabxy = behav
   oA, oB, iA, iB = size(pabxy)
+  T = typeof(behav).parameters[end]
   corrs = Array{T}(undef, iA, iB)
   for x in 1:iA, y in 1:iB
     PAB = Array{T}(undef, oA, oB)

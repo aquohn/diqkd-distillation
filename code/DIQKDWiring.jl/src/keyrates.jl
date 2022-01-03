@@ -9,8 +9,9 @@ import Juniper, NLopt, Ipopt, Cbc
 includet("helpers.jl")
 includet("nonlocality.jl")
 
-using PyCall
-pushfirst!(PyVector(pyimport("sys")."path"), @__DIR__)
+using PythonCall
+const pysys = pyimport("sys")
+pushfirst!(PyList(pysys.path), Py(@__DIR__))
 const qre = pyimport("qre")
 
 h(x) = (x == 0 || x == 1) ? 0 : -x*log2(x) - (1-x)*log2(1-x)
@@ -51,19 +52,20 @@ end
 
 gchsh(s) = 1-phi(sqrt(s^2/4 - 1))
 
-QBER(Eax, Eby, Eabxy) = (1 - Eabxy[1,3]) / 2
-CHSH(Eax, Eby, Eabxy) = Eabxy[1,1] + Eabxy[1,2] + Eabxy[2,1] - Eabxy[2,2]
-function HAB_oneway(pax, pby, pabxy)
-  Eax, Eby, Eabxy = corrs_from_probs(pax, pby, pabxy)
-  return h(QBER(Eax, Eby, Eabxy)), nothing
+QBER(corrs::Correlators) = (1 - corrs.Eabxy[1,3]) / 2
+CHSH(corrs::Correlators) = corrs.Eabxy[1,1] + corrs.Eabxy[1,2] + corrs.Eabxy[2,1] - corrs.Eabxy[2,2]
+function HAB_oneway(behav::Behaviour)
+  corrs = Correlators(behav)
+  return h(QBER(corrs)), nothing
 end
-function HAE_CHSH(pax, pby, pabxy)
-  Eax, Eby, Eabxy = corrs_from_probs(pax, pby, pabxy)
-  S = CHSH(Eax, Eby, Eabxy)
+function HAE_CHSH(behav::Behaviour)
+  corrs = Correlators(behav)
+  S = CHSH(corrs)
   return gchsh(max(S, 2.0)), nothing
 end
-function HAE_CHSHa(pax, pby, pabxy)
-  Eax, Eby, Eabxy = corrs_from_probs(pax, pby, pabxy)
+function HAE_CHSHa(behav::Behaviour)
+  corrs = Correlators(behav)
+  Eabxy = corrs.Eabxy
   corrp = Eabxy[1,1] + Eabxy[1,2]
   corrm = Eabxy[2,1] + Eabxy[2,2]
 
@@ -79,7 +81,7 @@ end
 
 nl_solver = optimizer_with_attributes(Ipopt.Optimizer)
 mip_solver = optimizer_with_attributes(Cbc.Optimizer)
-juniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => nl_solver, "mip_solver" => mip_solver)
+uniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => nl_solver, "mip_solver" => mip_solver)
 
 isres = optimizer_with_attributes(NLopt.Optimizer, "algorithm"=>:GN_ISRES)
 direct = optimizer_with_attributes(NLopt.Optimizer, "algorithm"=>:GN_ORIG_DIRECT)
@@ -146,3 +148,4 @@ function asym_chsh_bigalpha_model(corrp, corrm; optim=isres)
   return mdl
 end
 
+# f = S -> (-0.0625*S^4 + 0.0625*S^2*sqrt(S^2 - 4)*log(0.5 - 0.25*sqrt(S^2 - 4)) - 0.0625*S^2*sqrt(S^2 - 4)*log(0.25*sqrt(S^2 - 4) + 0.5) + 0.25*S^2 - 0.5*sqrt(S^2 - 4)*log(0.5 - 0.25*sqrt(S^2 - 4)) + 0.5*sqrt(S^2 - 4)*log(0.25*sqrt(S^2 - 4) + 0.5))./((0.0625*S^6 - 1.0*S^4 + 5.0*S^2 - 8.0)*log(2))

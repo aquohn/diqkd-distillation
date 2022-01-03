@@ -27,7 +27,7 @@ Eabxy = nc + (1 - nc) * (
 dEabxydnc = diff(Eabxy, nc).simplify()
 dEabxydeta = diff(Eabxy, eta).simplify()
 
-S = symbols(r"S")
+Q, S = symbols(r"Q S", real=True)
 HAE = (1 - phi(sqrt(S ** 2 / 4 - 1))).simplify()
 dHAEdS = diff(HAE, S).simplify()
 
