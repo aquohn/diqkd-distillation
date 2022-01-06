@@ -86,16 +86,15 @@ class BFFProblem(object):
     def __init__(self, **kwargs):
         self.T, self.W = generate_quadrature(M)  # Nodes, weights of quadrature
 
-        # number of outputs for each inputs of Alice / Bobs devices
-        # (Dont need to include 3rd input for Bob here as we only constrain the statistics
-        # for the other inputs).
+        # number of outputs for each input of Alice's / Bob's devices
         self.A_config = kwargs.get("A_config", [2, 2])
         self.B_config = kwargs.get("B_config", [2, 2, 2])
         self.M = kwargs.get("M", 6)
         self.solvef = kwargs.get("solvef", lambda sdp: sdp.solve())
 
         # Operators in problem (only o-1 for o outputs, because the last
-        # operator is enforced by normalisation)
+        # operator is enforced by normalisation). Here, A and B are measurement
+        # operators
         self.A = [Ai for Ai in ncp.generate_measurements(self.A_config, "A")]
         self.B = [Bj for Bj in ncp.generate_measurements(self.B_config, "B")]
         self.Z = ncp.generate_operators("Z", 2, hermitian=0)
@@ -388,3 +387,6 @@ class BFFProblem(object):
             monos += [self.A[0][0] * Dagger(z) * z]
 
         return monos[:]
+
+# TODO add scalar variables, either as diagonal entries in the variable matrix,
+# or as identity operators
