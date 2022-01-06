@@ -75,7 +75,7 @@ function plot_sstar(q, alpha)
   plot(starfn, xlims=(starl, staru))
 end
 
-# %% 3D plot data generators
+# %% Plot data generators
 
 function maxcorrval_from_probs(behav::Behaviour, xysel, modesel)
     Eax, Eby, Eabxy = Correlators(behav)
@@ -100,10 +100,11 @@ function maxcorrval_from_probs(behav::Behaviour, xysel, modesel)
     end
 end
 
-# TODO standardise data functions: 3ddata vs data, and all to return aux info
-
 function maxcorr_data(is, js, HAB::Function, HAE::Function, corrf::Function;
-    xysel=(0,0), modesel=:reg, type::Type{T} = Float64) where {T <: Real}
+    type::Type{T} = Float64, kwargs...) where {T <: Real}
+  kwd = Dict(kwargs)
+  xysel = get(kwd, :xysel, (0,0))
+  modesel = get(kwd, :modesel, :reg)
   il = length(is); jl = length(js)
   pts = Array{Tuple{T, T}}(undef, il, jl)
   rhos = Array{T}(undef, il, jl)
@@ -119,22 +120,16 @@ function maxcorr_data(is, js, HAB::Function, HAE::Function, corrf::Function;
   return pts, rhos
 end
 
-function maxcorr_data3d(is, js, HAB::Function, HAE::Function, corrf::Function;
+function maxcorr_3ddata(is, js, HAB::Function, HAE::Function, corrf::Function;
     type::Type{T} = Float64, kwargs...) where {T <: Real}
-  kwd = Dict(kwargs)
-  xysel = get(kwd, :xysel, (0,0))
-  modesel = get(kwd, :modesel, :reg)
-  il = length(is); jl = length(js)
-  pts = Array{Tuple{T, T, T}}(undef, il, jl)
+  pts, rhos = maxcorr_data(is, js, HAB, HAE, corrf, type=type, kwargs...)
+  pts3d = Array{Tuple{T, T, T}}(undef, size(pts)...)
 
   for ii in eachindex(is), ji in eachindex(js)
-    i = is[ii]; j = js[ji]
-    corrs = corrf(i, j)
-    behav = Behaviour(corrs)
-    pts[ii, ji] = (HAB(behav)[1], HAE(behav)[1], maxcorrval_from_probs(behav, xysel, modesel))
+    pts3d[ii, ji] = (pts[ii, ji]..., rhos[ii, ji])
   end
 
-  return pts
+  return pts3d
 end
 
 function grad_data(is, js, HAB::Function, HAE::Function, corrf::Function, gradf::Function;
@@ -168,6 +163,8 @@ function appwirf_data(is, js, corrf::Function, krf::Function, wirf::Function;
   return rps
 end
 
+# n points along the line between LD and critical Werner state
+# search for optimal wiring
 function farkas_wiring_data(n, HAE::Function, HAB::Function; c = 2, iterf = nothing, policy = wiring_policy)
   maxrecs = Union{WiringData, Nothing}[]
   for i in 1:n
@@ -195,10 +192,10 @@ function farkas_wiring_data(n, HAE::Function, HAB::Function; c = 2, iterf = noth
 end
 
 # %%
-# Correlation functions
+# Correlation function generators
 
 function qset_corrf()
-  corrf = (fI, fLD) -> (((1-fI) .* (((1-fLD) .* EaxQ) .+ (fLD .* EaxLD))) .+ (fI .* Eaxbound),
+  corrf = (fI, fLD) -> Correlators(((1-fI) .* (((1-fLD) .* EaxQ) .+ (fLD .* EaxLD))) .+ (fI .* Eaxbound),
                      ((1-fI) .* (((1-fLD) .* EbyQ) .+ (fLD .* EbyLD))) .+ (fI .* Ebybound),
                      ((1-fI) .* (((1-fLD) .* EabxyQ) .+ (fLD .* EabxyLD))) .+ (fI .* Eabxybound),)
   return corrf
@@ -212,7 +209,7 @@ function expt_corrf(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi
 end
 
 # %%
-# Given i, minimum j reqd for r > 0
+# Given i, minimum j req'd for r > 0
 function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname, corrf::Function; kwargs...) where T <: Real
   kwargs = Dict(kwargs)
   tol = get(kwargs, :tol, 1e-2)
@@ -292,6 +289,7 @@ function expt_grad_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi
   return plt
 end
 
+# Adds the plane x = y to plt
 function DW_frontier_plot(plt, xs, ys, zs)
   # show Devetak-Winter frontier
   uss = [filter(u -> isfinite(u), vec(us)) for us in (xs, ys, zs)]
@@ -380,6 +378,30 @@ function expt_wiring_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*
   return wiring_plot(ncs, etas, L"n_c", L"\eta", corrf, kwargs...)
 end
 
+function qset_kr_plot(QLDsamples = 100, boundsamples = 100; type::Type{T} = Float64,  kwargs...) where {T <: Real}
+  fIs = range(0,1,length=boundsamples) |> collect
+  fLDs = range(0,1,length=QLDsamples) |> collect
+  names = Dict{Symbol, String}(:x => "Isotropic Fraction", :y => "Local Fraction", :z => "Keyrate",
+                               :i => "Isotropic Fraction", :j => "Local Fraction", :set => "Polytope Slice"
+                              )
+  fIs = range(0,1,length=boundsamples) |> collect
+  fLDs = range(0,1,length=QLDsamples) |> collect
+  corrf = qset_corrf()
+  dataf = (is, js; kwargs...) -> begin
+    il = length(is); jl = length(js)
+    pts = Array{Tuple{T, T, T}}(undef, il, jl)
+    for ii in eachindex(is), ji in eachindex(js)
+      i = is[ii]; j = js[ji]
+      corrs = corrf(i, j)
+      behav = Behaviour(corrs)
+      hab, hae = HAB_oneway(behav)[1], HAE_CHSH(behav)[1]
+      pts[ii, ji] = (i, j, hae - hab)
+    end
+    return pts
+  end
+  return ij_xyz_plot(fIs, fLDs, dataf, names; addplotf=DW_frontier_plot, contourzf = (lvl, _xs, _ys) -> 0 .* _xs, kwargs...)
+end
+
 function expt_maxcorr_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.65, ncstart=0.0, kwargs...) 
   names = Dict{Symbol, String}(:x => "H(A|B)", :y => "H(A|E)", :z => "Maximal Correlation",
                                :i => L"n_c", :j => L"\eta", :set => "Experimental Model"
@@ -387,7 +409,7 @@ function expt_maxcorr_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23
   ncs = range(ncstart, stop=1, length=ncsamples)
   etas = range(etastart, stop=1, length=etasamples)
   corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
-  dataf = (is, js; kwargs...) -> maxcorr_data3d(is, js, HAB_oneway, HAE_CHSH, corrf; kwargs...)
+  dataf = (is, js; kwargs...) -> maxcorr_3ddata(is, js, HAB_oneway, HAE_CHSH, corrf; kwargs...)
   return ij_xyz_plot(ncs, etas, dataf, names; addplotf=DW_frontier_plot, contourzf = (lvl, _xs, _ys) -> 0 .* _xs, kwargs...)
 end
 
@@ -398,7 +420,7 @@ function qset_maxcorr_plot(QLDsamples = 100, boundsamples = 100; kwargs...)
   fIs = range(0,1,length=boundsamples)
   fLDs = range(0,1,length=QLDsamples)
   corrf = qset_corrf()
-  dataf = (is, js; kwargs...) -> maxcorr_data3d(is, js, HAB_oneway, HAE_CHSH, corrf; kwargs...)
+  dataf = (is, js; kwargs...) -> maxcorr_3ddata(is, js, HAB_oneway, HAE_CHSH, corrf; kwargs...)
   return ij_xyz_plot(fIs, fLDs, dataf, names; addplotf=DW_frontier_plot, contourzf = (lvl, _xs, _ys) -> 0 .* _xs, kwargs...)
 end
 

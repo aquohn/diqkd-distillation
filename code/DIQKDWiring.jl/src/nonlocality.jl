@@ -19,7 +19,7 @@ struct Correlators{Sax, Sby, Sabxy, T <: Real}
     if !(T <: Real)
       throw(ArgumentError("All arrays must contain real values!"))
     end
-    corrsarrs = [SArray{Tuple{size(E)...}}(E) for E in corrarrs]
+    corrsarrs = [SArray{Tuple{size(E)...}, T}(E) for E in corrarrs]
     corrsarrshapes = [typeof(corr).parameters[1] for corr in corrsarrs]
     new{corrsarrshapes..., T}(corrsarrs...)
   end
@@ -36,7 +36,7 @@ struct Behaviour{Sax, Sby, Sabxy, T <: Real}
     pax = T[sum(pabxy[a,:,x,1]) for a in 1:oA, x in 1:iA]
     pby = T[sum(pabxy[:,b,1,y]) for b in 1:oB, y in 1:iB]
     parrs = [pax, pby, pabxy]
-    psarrs = [SArray{Tuple{size(p)...}}(p) for p in parrs]
+    psarrs = [SArray{Tuple{size(p)...}, T}(p) for p in parrs]
     psarrshapes = [typeof(p).parameters[1] for p in psarrs]
     new{psarrshapes..., T}(psarrs...)
   end
@@ -95,8 +95,6 @@ struct WiringData
   rp::Real
   Hdata # object holding additional details about the computed rates
 end
-
-# TODO rewrite functions to take structs as args
 
 kd(i,j) = (i == j) ? 1 : 0
 E(M, rho) = tr(M * rho)
