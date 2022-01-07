@@ -667,64 +667,44 @@
         p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)\label{eqn:wiringprobdef} \\
         \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{\lambda} \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda) p_{\Lambda}(\lambda)\label{eqn:wiringfndef}
       \end{gather}
-      where \(\cvec{a}^c = {(a_1, a_2, \ldots, a_c)}^{\rm T}\) is the vector of all the outputs from Alice's boxes that are wired together, with analogous definitions for \(\cvec{b}^c\), \(\cvec{x}^c\) and \(\cvec{y}^c\). In this context, we refer to \(\chi\) as the \emph{wiring function}. The set of no-retrocausation conditions is more complex, since the later boxes can depend on the output of the earlier boxes. If Alice and Bob interact with their boxes in increasing order of the index \(j\), we have:
+      where \(\cvec{a}^c = {(a_1, a_2, \ldots, a_c)}^{\rm T}\) is the vector of all the outputs from Alice's boxes that are wired together, with analogous definitions for \(\cvec{b}^c\), \(\cvec{x}^c\) and \(\cvec{y}^c\). In this context, we refer to \(\chi\) as the \emph{joint wiring function}. The set of no-retrocausation conditions is more complex, since the later boxes can depend on the output of the earlier boxes. If Alice and Bob interact with their boxes in increasing order of the index \(j\), we have:
       \begin{equation}
         \begin{aligned}[c]
         \chi_A(a\cvec{x}^j|\cvec{a}^cx\lambda) &= \chi_A(a\cvec{x}^j|\cvec{a}^{j-1}x\lambda),\,\forall j \in \dintv{1}{c} \\
-        \chi_B(b\cvec{y}^j|\cvec{b}^cy\lambda) &= \chi_B(b\cvec{y}^j|\cvec{b}^{j-1}y\lambda),\,\forall j \in \dintv{1}{c}.
+        \chi_B(b\cvec{y}^j|\cvec{b}^cy\lambda) &= \chi_B(b\cvec{y}^j|\cvec{b}^{j-1}y\lambda),\,\forall j \in \dintv{1}{c},
         \end{aligned}\label{eqn:wiringnoretro}
       \end{equation}
-      If we focus only on \(j = c\), we can see these distributions as elements of \(\Ls\), with outputs \((a, \cvec{x}^c)\) and \((b, \cvec{y}^c)\), and inputs \((\cvec{a}^{c-1}, x)\) and \((\cvec{b}^{c-1}, y)\). However, unlike the simple LOSR case for a single box, the space of possible distributions \(\chi\) may be a strict subset of \(\Ls\), due to the additional no-retrocausation conditions for \(j < c\). We next turn our attention to characterising this space.
+      which we refer to as the \emph{marginal wiring functions}. If we focus only on \(j = c\), we can see these distributions as elements of \(\Ls\), with outputs \((a, \cvec{x}^c)\) and \((b, \cvec{y}^c)\), and inputs \((\cvec{a}^{c-1}, x)\) and \((\cvec{b}^{c-1}, y)\). However, unlike the simple LOSR case for a single box, the space of possible distributions \(\chi\) may be a strict subset of \(\Ls\), due to the additional no-retrocausation conditions for \(j < c\). This will hopefully simplify the space of wirings, since it would otherwise be a polytope with \({(o_A i_A^c)}^{i_A^c o_A} {(o_B i_B^c)}^{i_B^c o_B}\) vertices (\(\approx \num{5.12e18}\) for the QKD setting). We next turn our attention to characterising this space.
 
       \subsection{Generating the Wiring Polytope}
 
-      To determine the polytope of possible wirings, we can use the same approach as is typically used for \(\Ls\), where deterministic operations are taken as the vertices of the polytope, and the facet-defining inequalities derived from there. However, we must also prove that the analogue of Fine's theorem holds for this more restricted polytope.
-      \begin{theorem}[Deterministic Decomposition]
-        Any wiring function can be written as a convex combination of deterministic wiring functions. For a given setting \((i_A, o_A; i_B, o_B)\) and number of wirings \(c\), the valid deterministic wirings form a finite, discrete set. Formally, denote the corresponding index set by \(\Lambda_D\). Then any wiring function can be written as
-        \begin{equation}
-          \chi_A(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{\lambda\in\Lambda_D} \chi(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda) p_{\Lambda}(\lambda),
-        \end{equation}
-        where \(\chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda)\) and \(\chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda)\) only take values in \(\{0,1\}\), for some probability distribution \(p_{\Lambda}\) on \(\Lambda_D\).
-      \end{theorem}
-      \begin{proof}
-        We begin using Fine's theorem to obtain a decomposition in terms of local deterministic operations. Let the indices for local deterministic operations that do not respect the no-retrocausation conditions form a set \(\Lambda_R\). Then we have that
-        \begin{equation}
-          \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{\lambda\in\Lambda_D\cup\Lambda_R} \chi(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda) p_{\Lambda}(\lambda).
-        \end{equation}
-        We now have to show that there always exists a distribution \(\forall \lambda\in\Lambda_R,\, p_{\Lambda}(\lambda) = 0\) whenever the no-retrocausation conditions are satisfied.
-      \end{proof}
+      Physically, a probabilistic wiring must actually execute some deterministic wiring, and its joint wiring function is then a probability distribution over the deterministic joint wiring functions, of which there are finitely many. This is the intuition behind the proof of Fine's theorem, which can be straightforwardly adapted to this polytope. Therefore, to determine the polytope of joint wiring functions, we can use the same approach as is typically used for \(\Ls\), where deterministic operations are taken as the vertices of the polytope, and the facet-defining inequalities derived from there. 
 
-      % TODO need to re-prove Fine's theorem?
-      % TODO relabel with lambda?
-
-      For ease of implementation, we use a different, more operational description for deterministic wirings. We describe Alice's inputs \(\cvec{x}^c\) to her boxes as being computed by a sequence of \(c\) functions with range \(\dintv{1}{i_A}\):
-      \begin{equation} x_1 = x \end{equation}
-      \begin{equation} x_j = W^{(j)}_A(\cvec{x}^{j-1}, \cvec{a}^{j-1}),\,j \in \dintv{2}{c} \end{equation}
+      For ease of implementation, we use a different, more operational description for deterministic marginal wiring functions. Focusing on Alice's marginal wiring functions, her inputs \(\cvec{x}^c\) to her boxes as being computed by a sequence of \(c\) functions with range \(\dintv{1}{i_A}\):
+      \begin{equation} x_j = W^{(j)}_{A,\lambda}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x),\,j \in \dintv{1}{c} \end{equation}
       and a final output function with range \(\dintv{1}{o_A}\):
-      \begin{equation} a = W_A(\cvec{x}^{c}, \cvec{a}^{c}). \end{equation}
-      The corresponding \(\chi_A\) is then
+      \begin{equation} a = W_{A,\lambda}(\cvec{x}^{c}, \cvec{a}^{c}, x). \end{equation}
+      We refer to this set of functions as a \emph{marginal wiring map}. The corresponding marginal wiring function \(\chi_A\) is then
       \begin{equation}
-        \chi_A(a\cvec{x}^c|\cvec{a}^cx\lambda) = \indic{x=x_1} \indic{a = W_A(\cvec{x}^{c}, \cvec{a}^{c})} \prod_{j=2}^c \indic{x_j = W^{(j)}_A(\cvec{x}^{j-1}, \cvec{a}^{j-1})}
+        \chi_A(a\cvec{x}^c|\cvec{a}^cx\lambda) = \indic{a = W_{A,\lambda}(\cvec{x}^{c}, \cvec{a}^{c}, x)} \prod_{j=1}^c \indic{x_j = W^{(j)}_{A,\lambda}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x)}
       \end{equation}
       where \(\indic{\angleb{proposition}}\) is the \emph{indicator function} that is 1 when the proposition is true, and 0 otherwise. The analogous definitions for Bob hold with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). Probabilistic wirings can then be described as convex combinations of such deterministic wirings.
 
-      We refer to the discrete set of deterministic wirings that obey these relations as \(\sW_D\). Since we can apply pairs of wirings to behaviours, so the set of wirings that can be applied is actually the convex hull \(\sW\) of \(\sW_D \times \sW_D\). We also define \(\sWB(p)\) as the set of behaviours generated via applying \(\sW\) to a given behaviour \(p\) using \Cref{eqn:wiringfndef}.
+      We refer to the discrete set of deterministic marginal wiring functions that obey these relations as \(\sW_D\), and the polytope of joint wirings \(\sW\) is then the convex polytope with vertices \(\sW_D \times \sW_D\). We also define \(\sWB(p)\) as the set of behaviours generated by applying \(\sW\) to a given behaviour \(p\) using \Cref{eqn:wiringfndef}.
 
-      Using our classification for \(\sW_D\), simple combinatorics gives us \(i_A^{j-1} o_A^{j-1}\) possible inputs for \(W_j^A\). However, since \(x_j\) is completely fixed by \({(x_k)}_{k=1}^{j-1}\) and \({(a_k)}_{k=1}^{j-1}\), there are only \(i_A o_A^{j-1}\) valid inputs, with the rest corresponding to don't-cares. Therefore, the number of possible \(W^{(j)}_A\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(W_A\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
+      Using our classification for \(\sW_D\), simple combinatorics gives us \(i_A^{j} o_A^{j-1}\) possible inputs for \(W^{(j)}_{A,\lambda}\). However, since the wiring is deterministic, \(x_j\) is completely fixed by \(\cvec{x}^{j-1}\), \(\cvec{a}^{j-1}\) and \(x\). Therefore, the only free input is \(x\), and so there are only \(i_A o_A^{j-1}\) valid inputs. Therefore, the number of possible \(W^{(j)}_{A,\lambda}\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(W_{A,\lambda}\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
       \begin{equation}
-        \exp_{o_A}(i_A o_A^c) \prod_{j=2}^c \exp_{i_A}(i_A o_A^{j-1}),
+        \exp_{o_A}(i_A o_A^c) \prod_{j=1}^c \exp_{i_A}(i_A o_A^{j-1}).
       \end{equation}
-      where we count from \(j = 2\) because for \(j = 1\), there is only one possibility. The same applies to Bob with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). 
+      The same applies to Bob with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). 
 
       We may wish to fix some input settings to use a given wiring. For example, it is clear that the AND gating can only increase the value of the correlator. Therefore, we can fix the key generating settings \(A_1\) and \(B_3\) to be AND-wired, so that all functions with \(x_1 = 1\) or \(y_1 = 3\) are fixed to the AND wiring. If we fix the wirings for \(f\) input settings, then we are free to choose the outputs for only \(i_A - f\) possible values of \(x_1\), so the number of possible wirings becomes
       \begin{equation}
-        \exp_{o_A}((i_A-f) o_A^c) \prod_{j=2}^c \exp_{i_A}((i_A-f) o_A^{j-1})
+        \exp_{o_A}((i_A-f) o_A^c) \prod_{j=1}^c \exp_{i_A}((i_A-f) o_A^{j-1})
       \end{equation}
       for Alice, with the analogous relabelling for Bob.
 
-      Unfortunately, with just two boxes, there are 4096 wirings for Alice, and \(\approx \num{2.48e10}\) for Bob. Fixing the AND gating as discussed above gives us 1024 wirings for Alice and \(\approx \num{3.10e9}\) for Bob. Since \(\sW\) contains pairs of wirings from \(\sW_D\), we must multiply the figures for Alice and Bob together, which would make even a brute force evaluation of deterministic wirings very inefficient, to say nothing of a linear optimisation.
-
-      This enumeration of the possible wirings is naive, and does not attempt to use symmetry arguments to remove degeneracy or wirings that will not be helpful. Based on the symmetry considerations in \Cref{sec:qkdset}, it might be possible to prune the search space of wirings that take us out of the region where our chosen version of the CHSH inequality is violated.
+      Unfortunately, with just two boxes, there are 16384 marginal wirings for Alice, and \(\approx \num{8.06e7}\) for Bob, for a total of \(\approx \num{1.32e12}\). Fixing the AND gating as discussed above gives us 128 wirings for Alice and 186624 for Bob, for a total of \(\approx \num{2.39e7}\). Both are much more manageable than the number of vertices of \(\Ls\) without causality constraints. Still, this enumeration of the possible wirings is naive, and does not attempt to use symmetry arguments to remove degeneracy or wirings that will not be helpful. Based on the symmetry considerations in \Cref{sec:qkdset}, we should be able to confine ourselves to a smaller region of the polytope.
 
       \begin{question}
         Is there a simple way to identify and eliminate wirings that will not be helpful based on symmetry considerations?
@@ -1099,7 +1079,7 @@
 
       \subsection{Direct Optimisation}
 
-      A possible approach is to graft the wiring function \(\chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy)\) directly onto this semidefinite program, or more specifically \(\chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda)\) and \(\chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda)\), as defined in \Cref{eqn:wiringfndef}. Since \(\chi\) takes a discrete set of arguments, these can be added as optimisation variables, and constrained with the no-retrocausation conditions in \Cref{eqn:wiringnoretro}, and the appropriate normalisation:
+      A possible approach is to graft the joint wiring function \(\chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy)\) directly onto this semidefinite program, or more specifically \(\chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda)\) and \(\chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda)\), as defined in \Cref{eqn:wiringfndef}. Since \(\chi\) takes a discrete set of arguments, these can be added as optimisation variables, and constrained with the no-retrocausation conditions in \Cref{eqn:wiringnoretro}, and the appropriate normalisation:
       \begin{equation}
         \begin{aligned}[c]
           \sum_{a\cvec{x}^c} \chi_A(a\cvec{x}^c|\cvec{a}^cx) &= 1 \\

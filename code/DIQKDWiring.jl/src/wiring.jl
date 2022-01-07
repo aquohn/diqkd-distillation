@@ -43,8 +43,17 @@ struct BoxSequence{T <: Integer}
   end
 end
 
-num_wirings(c, o, i) = o^(i * o^c) * prod([i^(i * o^(j-1)) for j in 2:c])
-num_wirings_fix(c, o, i, f) = o^((i-f)*i * o^c) * prod([i^((i-f) * o^(j-1)) for j in 2:c])
+num_lds(c, sett::Setting) = num_lds(c, sett.oA, sett.iA) * num_lds(c, sett.oB, sett.iB)
+num_lds(c, o, i) = (o * i^c)^(i^c * o)
+num_wirings(c, sett::Setting) = num_wirings(c, sett.oA, sett.iA) * num_wirings(c, sett.oB, sett.iB)
+num_wirings(c, o, i) = o^(i * o^c) * prod([i^(i * o^(j-1)) for j in 1:c])
+num_wirings_fix(c, sett::Setting, fA, fB) = num_wirings_fix(c, sett.oA, sett.iA, fA) * num_wirings_fix(c, sett.oB, sett.iB, fB)
+function num_wirings_fix(c, o, i, f)
+  if f > i
+    throw(ArgumentError("$f inputs to fix, but there are only $i inputs!"))
+  end
+  o^((i-f) * o^c) * prod([i^((i-f) * o^(j-1)) for j in 1:c])
+end
 function wiring_prob(wiring::Wiring, behav::Behaviour)
   CA, CAj, CB, CBj = wiring
   pax, pby, pabxy = behav

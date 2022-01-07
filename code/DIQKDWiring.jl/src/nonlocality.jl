@@ -1,12 +1,12 @@
 using StaticArrays
 
 struct Setting{T <: Integer}
-  oA::T
-  oB::T
   iA::T
+  oA::T
   iB::T
+  oB::T
 end
-Base.iterate(s::Setting) = s.oA, reverse([s.oB, s.iA, s.iB])
+Base.iterate(s::Setting) = s.iA, reverse([s.oA, s.iB, s.oB])
 Base.iterate(s::Setting, state) = isempty(state) ? nothing : (pop!(state), state)
 
 struct Correlators{Sax, Sby, Sabxy, T <: Real}
