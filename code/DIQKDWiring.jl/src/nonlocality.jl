@@ -27,6 +27,13 @@ end
 Base.iterate(C::Correlators) = C.Eax, reverse([C.Eby, C.Eabxy])
 Base.iterate(C::Correlators, state) = isempty(state) ? nothing : (pop!(state), state)
 
+function convexsum(ws::AbstractVector{Real}, Cs::AbstractVector{Correlators})
+  Eax = ws .* [C.Eax for C in Cs]
+  Eby = ws .* [C.Eby for C in Cs]
+  Eabxy = ws .* [C.Eabxy for C in Cs]
+  return Correlators(Eax, Eby, Eabxy)
+end
+
 struct Behaviour{Sax, Sby, Sabxy, T <: Real}
   pax::SArray{Sax, T}
   pby::SArray{Sby, T}
@@ -44,6 +51,11 @@ end
 Base.iterate(P::Behaviour) = P.pax, reverse([P.pby, P.pabxy])
 Base.iterate(P::Behaviour, state) = isempty(state) ? nothing : (pop!(state), state)
 # TODO constructor that checks if pabxy is normalised?
+
+function convexsum(ws::AbstractVector{Real}, Ps::AbstractVector{Behaviour})
+  pabxy = ws .* [P.pabxy for P in Ps]
+  return Behaviour(pabxy)
+end
 
 function Correlators(behav::Behaviour)
   pax, pby, pabxy = behav

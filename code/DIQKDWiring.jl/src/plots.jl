@@ -14,38 +14,33 @@ includet("maxcorr.jl")
 # Constants
 
 # Impt states
-const EaxQ = [0.0, 0.0]
-const EbyQ = [0.0, 0.0, 0.0]
-const EabxyQ = [1/sqrt(2) 1/sqrt(2) 1
-          1/sqrt(2) -1/sqrt(2) 0]
+const singlet_corrs = Correlators([0.0, 0.0],
+                                 [0.0, 0.0, 0.0],
+                                 [1/sqrt(2) 1/sqrt(2) 1
+                                  1/sqrt(2) -1/sqrt(2) 0])
 
-const Eaxbound = [0.0, 0.0]
-const Ebybound = [0.0, 0.0, 0.0]
-const Eabxybound = [0.5 0.5 0.5
-              0.5 -0.5 0.5]
+const bound_corrs = Correlators([0.0, 0.0],
+                         [0.0, 0.0, 0.0],
+                         [0.5 0.5 0.5
+                          0.5 -0.5 0.5])
 
-const EaxPR = [0.0, 0.0]
-const EbyPR = [0.0, 0.0, 0.0]
-const EabxyPR = [1.0 1.0 1.0;
-           1.0 -1.0 1.0]
+const PR_corrs = Correlators([0.0, 0.0],
+                      [0.0, 0.0, 0.0],
+                      [1.0 1.0 1.0;
+                       1.0 -1.0 1.0])
 
-const Eaxmix = [0.0, 0.0]
-const Ebymix = [0.0, 0.0, 0.0]
-const Eabxymix = [0.0 0.0 0.0
-            0.0 0.0 0.0]
+const mix_corrs = Correlators([0.0, 0.0],
+                       [0.0, 0.0, 0.0],
+                       [0.0 0.0 0.0
+                        0.0 0.0 0.0])
 
-const EaxLD = [1.0, 1.0]
-const EbyLD = [1.0, 1.0, 1.0]
-const EabxyLD = [1.0 1.0 1.0
-           1.0 1.0 1.0]
-function werner_corrs(v)
-  Eax = v * EaxQ + (1-v) * Eaxmix
-  Eby = v * EbyQ + (1-v) * Ebymix
-  Eabxy = v * EabxyQ + (1-v) * Eabxymix
-  return Correlators(Eax, Eby, Eabxy)
-end
+const LD_corrs = Correlators([1.0, 1.0],
+                      [1.0, 1.0, 1.0],
+                      [1.0 1.0 1.0
+                       1.0 1.0 1.0])
 
-v_L = 0.6829; v_NL = 0.6964; v_crit = 0.7263
+werner_corrs(v) = convexsum([v, 1-v], [singlet_corrs, mix_corrs])
+const v_L = 0.6829; const v_NL = 0.6964; const v_crit = 0.7263
 
 # %%
 # Pironio rates
@@ -168,11 +163,7 @@ end
 function farkas_wiring_data(n, HAE::Function, HAB::Function; c = 2, iterf = nothing, policy = wiring_policy)
   maxrecs = Union{WiringData, Nothing}[]
   for i in 1:n
-    EaxW, EbyW, EabxyW = werner_corrs(v_crit)
-    Eax = EaxLD * (i-1)/n + EaxW * (n-i+1)/n
-    Eby = EbyLD * (i-1)/n + EbyW * (n-i+1)/n
-    Eabxy = EabxyLD * (i-1)/n + EabxyW * (n-i+1)/n
-    corrs = Correlators(Eax, Eby, Eabxy)
+    corrs = convexsum([(i-1)/n, (n-i+1)/n], [LD_corrs, werner_corrs(v_crit)])
     behav = Behaviour(corrs)
 
     recs = diqkd_wiring_eval(behav, HAE, HAB, c=c, iterf=iterf, policy=policy)
@@ -195,9 +186,8 @@ end
 # Correlation function generators
 
 function qset_corrf()
-  corrf = (fI, fLD) -> Correlators(((1-fI) .* (((1-fLD) .* EaxQ) .+ (fLD .* EaxLD))) .+ (fI .* Eaxbound),
-                     ((1-fI) .* (((1-fLD) .* EbyQ) .+ (fLD .* EbyLD))) .+ (fI .* Ebybound),
-                     ((1-fI) .* (((1-fLD) .* EabxyQ) .+ (fLD .* EabxyLD))) .+ (fI .* Eabxybound),)
+  corrf = (fI, fLD) -> convexsum([fI, (1-fI)*(1-fLD), (1-fI)*fLD], 
+                                 [bound_corrs, singlet_corrs, LD_corrs])
   return corrf
 end
 
