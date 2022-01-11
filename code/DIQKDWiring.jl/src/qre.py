@@ -229,7 +229,8 @@ class BFFProblem(object):
 
         constraints = []
         oA, oB, iA, iB = pabxy.shape
-        for (a, b, x, y) in itprod(range(oA - 1), range(oB - 1), range(iA), range(iB)):
+        idx_ranges = [range(idx) for idx in [oA - 1, oB - 1, iA, iB]]
+        for (a, b, x, y) in itprod(*idx_ranges):
             constraints.append(self.A[x][a] * self.B[y][b] - pabxy[a, b, x, y])
         for (a, x) in itprod(range(oA - 1), range(iA)):
             constraints.append(
