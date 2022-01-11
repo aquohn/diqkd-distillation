@@ -9,8 +9,8 @@ includet("nonlocality.jl")
 includet("keyrates.jl")
 includet("maxcorr.jl")
 
-const chshset = (2,2,2,2)
-const qkdset = (2,2,3,2)
+const chshsett = Setting(2,2,2,2)
+const qkdsett = Setting(2,2,3,2)
 
 cg_length(iA, oA, iB, oB) = oA*(iA-1)*oB*(iB-1) + oA*(iA-1) + oB*(iB-1)
 ld_length(iA, oA, iB, oB) = oA^iA * oB^iB
@@ -18,13 +18,13 @@ positivities(iA, oA, iB, oB) = oA * oB * iA * iB
 
 # generating 
 
-function expr_to_vec(::Type{T}, expr, veclen, numdict) where {T <: Real}
-    avec = zeros(T, veclen)
+function expr_to_vec(::Type{T}, expr, numdict) where {T <: Real}
+    avec = zeros(T, length(numdict))
     nums = Num.(Symbolics.get_variables(expr))
     subdict = Dict(num => 0 for num in nums)
     for num in nums
       subdict[num] = 1
-      val = substitute(expr, subdict)
+      val = substitute(expr, subdict).val
       seqn = numdict[num]
       avec[seqn] = val
       subdict[num] = 0
@@ -36,6 +36,16 @@ function full_polytope(n, i, o, polylib=LRSLib.Library())
   full_polytope(Float64, n, i, o, polylib)
 end
 
+function generate_numdict(::Type{T}, numarr, tupranges) where {T <: Integer}
+  numdict = Dict{Num, T}()
+  tupseqn::T = 0
+  for tup in Iterators.product(tupranges...)
+    tupseqn += 1
+    numdict[numarr[tup...]] = tupseqn
+  end
+  return numdict
+end
+
 function full_polytope(::Type{T}, n, i, o, polylib=LRSLib.Library()) where {T <: Real}
   # HalfSpace(a,b) => a \dot x \leq b
   # HyperPlane(a,b) => a \dot x = b
@@ -44,14 +54,7 @@ function full_polytope(::Type{T}, n, i, o, polylib=LRSLib.Library()) where {T <:
   itupranges = [1:i for j in 1:n]
   tupranges  = vcat(otupranges, itupranges)
   vars = Symbolics.@variables P[tupranges...]
-
-  iT = typeof(n)
-  numdict = Dict{Num, iT}()
-  tupseqn::iT = 0
-  for tup in Iterators.product(tupranges...)
-    tupseqn += 1
-    numdict[P[tup...]] = tupseqn
-  end
+  numdict = generate_numdict(typeof(n), P, tupranges)
 
   lnormconstrs = vec([-P[tup...] for tup in Iterators.product(tupranges...)])
   unormconstrs = vec([sum([P[otup..., itup...] for otup in Iterators.product(otupranges...)]) for itup in Iterators.product(itupranges...)])
@@ -77,10 +80,9 @@ function full_polytope(::Type{T}, n, i, o, polylib=LRSLib.Library()) where {T <:
     end
   end
 
-  ineqconstrs = [Polyhedra.HalfSpace(expr_to_vec(T, constr, tupseqn, numdict), 0) for constr in lnormconstrs]
-  println(ineqconstrs)
-  eqconstrs = vcat([Polyhedra.HyperPlane(expr_to_vec(T, constr, tupseqn, numdict), 0) for constr in nsconstrs],
-                   [Polyhedra.HyperPlane(expr_to_vec(T, constr, tupseqn, numdict), 1) for constr in unormconstrs])
+  ineqconstrs = [Polyhedra.HalfSpace(expr_to_vec(T, constr, numdict), 0) for constr in lnormconstrs]
+  eqconstrs = vcat([Polyhedra.HyperPlane(expr_to_vec(T, constr, numdict), 0) for constr in nsconstrs],
+                   [Polyhedra.HyperPlane(expr_to_vec(T, constr, numdict), 1) for constr in unormconstrs])
   hr = hrep(eqconstrs, ineqconstrs)
   return polyhedron(hr, polylib)
 end
@@ -253,7 +255,7 @@ end
 
 function qkd_analysis(vs, testf = (Q, S, rho) -> abs(S) == 4)
   for v in vs
-    probs = cg_to_full(v, qkdset...)
+    probs = cg_to_full(v, qkdsett...)
     corrs = corrs_from_probs(probs)
     Q, S, rhos = QBER(corrs), CHSH(corrs), maxcorrs(probs)
     if testf(Q, S, rhos)
@@ -266,9 +268,9 @@ end
 
 function qkd_find_lintersections(::Type{T} = Float64) where T <: Real
   qkd_v_maxmix = T[1//2, 1//2, 1//2, 1//2, 1//2, 1//4, 1//4, 1//4, 1//4, 1//4, 1//4]
-  qkd_ldpoly = ld_polytope(qkdset..., T)
+  qkd_ldpoly = ld_polytope(qkdsett..., T)
   qkd_ldconstr = constraints_list(qkd_ldpoly)
-  qkd_poly = cg_polytope(qkdset..., T)
+  qkd_poly = cg_polytope(qkdsett..., T)
   qkd_v = vertices_list(qkd_poly)
   CT, VT = eltype(qkd_ldconstr), eltype(qkd_v)
   constrs_to_extrv = Dict{CT, Vector{Tuple{VT, T}}}()
@@ -309,9 +311,9 @@ function qkd_iso(::Type{T} = Float64) where T <: Real
 
   cg_best_qkd = T[1//2, 1//2, 1//2, 1//2, 1//2, 1//2, 1//2, 1//2, 0//1, 1//2, 1//2]
   cg_boundary_qkd = 1//2 .* cg_best_qkd + 1//2 .* cg_maxmix_qkd
-  best_qkd = cg_to_full(cg_best_qkd, qkdset...)
-  maxmix_qkd = cg_to_full(cg_maxmix_qkd, qkdset...)
-  boundary_qkd = cg_to_full(cg_boundary_qkd, qkdset...)
+  best_qkd = cg_to_full(cg_best_qkd, qkdsett...)
+  maxmix_qkd = cg_to_full(cg_maxmix_qkd, qkdsett...)
+  boundary_qkd = cg_to_full(cg_boundary_qkd, qkdsett...)
 
   println("PR-equivalent for QKD")
   print_full(best_qkd...)
@@ -320,19 +322,19 @@ function qkd_iso(::Type{T} = Float64) where T <: Real
   println("Boundary?")
   print_full(boundary_qkd...)
 
-  qkd_ldpoly = ld_polytope(qkdset..., T)
+  qkd_ldpoly = ld_polytope(qkdsett..., T)
   qkd_ldconstr = constraints(qkd_ldpoly)
   bestconstr = nothing; boundconstr = nothing
   for constr in qkd_ldconstr
     boundval = dot(constr.a, cg_boundary_qkd)
     if boundval > constr.b
-      print_cg_constr(constr, qkdset...)
+      print_cg_constr(constr, qkdsett...)
       boundconstr = constr
       println("Boundary value achieves $boundval)")
     end
     bestval = dot(constr.a, cg_best_qkd)
     if bestval > constr.b
-      print_cg_constr(constr, qkdset...)
+      print_cg_constr(constr, qkdsett...)
       bestconstr = constr
       println("Best value achieves $bestval)")
     end
@@ -340,7 +342,7 @@ function qkd_iso(::Type{T} = Float64) where T <: Real
 
   for frac in 0.5:0.05:1
     v = frac .* cg_best_qkd + (1-frac) .* cg_maxmix_qkd
-    probs = cg_to_full(v, qkdset...)
+    probs = cg_to_full(v, qkdsett...)
     corrs = corrs_from_probs(probs)
     Q, S, rhos = QBER(corrs), CHSH(corrs), maxcorr(probs)
     print(@sprintf "Q = %.3f, S = %.3f, " Q S)
@@ -365,7 +367,7 @@ function SPGcouplers_hrep(setting=(2,2,2,2), ::Type{T}=Rational{Int64}) where {T
   vs = vertices_list(poly)
   hss = Vector{Polyhedra.HalfSpace{T, Vector{T}}}()
   for v in vs
-    pabxy = cg_to_full(v, chshset...).pabxy
+    pabxy = cg_to_full(v, chshsett...).pabxy
     hsu = Polyhedra.HalfSpace(vec(pabxy), 1)
     hsl = Polyhedra.HalfSpace(-1 .* vec(pabxy), 0)
     push!(hss, hsu)
@@ -374,8 +376,37 @@ function SPGcouplers_hrep(setting=(2,2,2,2), ::Type{T}=Rational{Int64}) where {T
   return hrep(hss)
 end
 
-function qkdset_couplers()
-  hr = SPGcouplers_hrep(qkdset)
+function wirings_from_couplers(::Type{T}, c::Integer, o::Integer, i::Integer) where {T <: Real}
+  tupranges = [1:o-1, repeat([1:o], c)..., repeat([1:i], c)...]
+  vars = Symbolics.@variables chi[tupranges...]
+  iT = promote_type(typeof(c), typeof(o), typeof(i))
+  numdict = generate_numdict(iT, chi, tupranges)
+  behav_iter = Iterators.product(repeat([1:o], i)...)
+  ys_iter = Iterators.product(repeat([1:i], c)...)
+
+  lnormconstrs = Num[]
+  unormconstrs = Num[]
+  for behav in behav_iter
+    ps = Num[]
+    for bp in 1:o-1
+      p::Num = 0
+      for ys in ys_iter
+        bs = [behav[y] for y in ys]
+        p += chi[bp, bs..., ys...]
+      end
+      push!(ps, p)
+      push!(lnormconstrs, -p)
+    end
+    push!(unormconstrs, sum(ps))
+  end
+
+  ineqconstrs = vcat([Polyhedra.HalfSpace(expr_to_vec(T, constr, numdict), 0) for constr in lnormconstrs], [Polyhedra.HalfSpace(expr_to_vec(T, constr, numdict), 1) for constr in unormconstrs])
+  return hrep(ineqconstrs)
+end
+wirings_from_couplers(c, o, i) = wirings_from_couplers(Rational{Int64}, c, o, i)
+
+function qkdsett_couplers()
+  hr = SPGcouplers_hrep(qkdsett)
   poly = polyhedron(hr, LRSLib.Library())
   removehredundancy!(poly)
   # hr = hrep(poly)
@@ -385,16 +416,16 @@ function qkdset_couplers()
   # redpoly = polyhedron(hrep(redhss), LRSLib.Library())
   return poly
 end
-# poly, hr, vr, hmat, vmat = qkdset_couplers()
+# poly, hr, vr, hmat, vmat = qkdsett_couplers()
 
-const chsh_poly = cg_polytope(chshset...)
+const chsh_poly = cg_polytope(chshsett...)
 const chsh_v = vertices_list(chsh_poly)
-const chsh_ldpoly = cg_polytope(chshset...)
+const chsh_ldpoly = cg_polytope(chshsett...)
 const chsh_ldconstr = vertices_list(chsh_poly)
 
-const qkd_poly = cg_polytope(qkdset...)
+const qkd_poly = cg_polytope(qkdsett...)
 const qkd_v = vertices_list(qkd_poly)
-const qkd_ldpoly = ld_polytope(qkdset...)
+const qkd_ldpoly = ld_polytope(qkdsett...)
 const qkd_ldconstr = constraints_list(qkd_ldpoly)
 
 #=
