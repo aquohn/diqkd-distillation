@@ -9,6 +9,8 @@ CondaPkg.add("numpy")
 CondaPkg.add("chaospy")
 CondaPkg.add("sympy")
 CondaPkg.add("ncpol2sdpa")
+CondaPkg.add("scs")
+CondaPkg.add("cvxpy")
 CondaPkg.status()
 pirntln("NOTE: If the installed ncpol2sdpa is the conda-forge \
         version, activate the environment from the command line \

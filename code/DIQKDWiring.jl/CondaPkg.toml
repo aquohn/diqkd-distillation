@@ -1,9 +1,11 @@
 channels = ["mosek", "aquohn"]
 
 [deps]
-numpy = ""
-sympy = ""
+cvxpy = ""
+bidict = ""
 chaospy = ""
 mosek = ""
+scs = ""
+numpy = ""
+sympy = ""
 ncpol2sdpa = ""
-bidict = ""

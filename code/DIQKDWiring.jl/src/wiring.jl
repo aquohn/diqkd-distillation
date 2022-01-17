@@ -18,6 +18,7 @@
 # Basic definitions and imports
 
 using Revise
+using Combinatorics
 using QuantumInformation, LinearAlgebra
 
 includet("helpers.jl")
@@ -48,12 +49,23 @@ num_lds(c, o, i) = (o * i^c)^(i^c * o)
 num_wirings(c, sett::Setting) = num_wirings(c, sett.oA, sett.iA) * num_wirings(c, sett.oB, sett.iB)
 num_wirings(c, o, i) = o^(i * o^c) * prod([i^(i * o^(j-1)) for j in 1:c])
 num_wirings_fix(c, sett::Setting, fA, fB) = num_wirings_fix(c, sett.oA, sett.iA, fA) * num_wirings_fix(c, sett.oB, sett.iB, fB)
+num_perms(sett::Setting) = factorial(sett.iA) * factorial(sett.iB) * factorial(sett.oA)^(sett.iA) * factorial(sett.oB)^(sett.iB)
 function num_wirings_fix(c, o, i, f)
   if f > i
     throw(ArgumentError("$f inputs to fix, but there are only $i inputs!"))
   end
   o^((i-f) * o^c) * prod([i^((i-f) * o^(j-1)) for j in 1:c])
 end
+
+function sett_perms(sett::Setting)
+  iA, oA, iB, oB = sett
+  iters = [1:iA, 1:iB, [1:oA for _ in 1:iA]..., [1:oB for _ in 1:iB]...]
+  return Iterators.product(permutations.(iters))
+end
+function apply_perm(behav::Behaviour{Sax, Sby, Sabxy, T}, perm_data::AbstractArray) where {Sax, Sby, Sabxy, T}
+  ppabxy = Array{T}(undef, Sabxy.parameters...)
+end
+
 function wiring_prob(wiring::Wiring, behav::Behaviour)
   CA, CAj, CB, CBj = wiring
   pax, pby, pabxy = behav
@@ -99,6 +111,8 @@ end
 psi(theta) = cos(theta) * kron(ket(1,2), ket(1,2)) + sin(theta) * kron(ket(2,2), ket(2,2))
 rho(theta) = proj(psi(theta))
 Mtld(mu) = cos(mu) * sigmas[3] + sin(mu) * sigmas[1]
+mus = [0, pi/2]
+nus = [pi/2, 0, -pi/2]
 
 function meas_corrs(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi])
   rhov = rho(theta)
@@ -147,7 +161,7 @@ function expt_chsh_ncgrads(ncgrad, etagrad, S)
 end
 
 
-function and_corrs(N, corrs)
+function and_corrs(N, corrs::Correlators)
   Eax, Eby, Eabxy = corrs
   iA, iB = length(Eax), length(Eby)
 
@@ -165,13 +179,13 @@ function wiring_iters(sett::Setting{T}, c::T) where T <: Integer
   oA, oB, iA, iB = sett
   CAiters = [1:oA for i in 1:(iA * oA^c)]
   CBiters = [1:oB for i in 1:(iB * oB^c)]
-  CAjiters = vcat([fill(T, 0:0, 0)], [[1:iA for i in 1:(iA * oA^(j-1))] for j in 2:c])
-  CBjiters = vcat([fill(T, 0:0, 0)], [[1:iB for i in 1:(iB * oB^(j-1))] for j in 2:c])
+  CAjiters = [[1:iA for i in 1:(iA * oA^(j-1))] for j in 1:c]
+  CBjiters = [[1:iB for i in 1:(iB * oB^(j-1))] for j in 1:c]
 
   return CAiters, CBiters, CAjiters, CBjiters
 end
 
-function wiring_policy(CA, CAj, CB, CBj, CAvec, CBvec, CAjvec, CBjvec, iA, oA, iB, oB, c)
+function wiring_policy!(wiring::Wiring, CAvec, CBvec, CAjvec, CBjvec, iA, oA, iB, oB, c)
   aseqs = BoxSequence[BoxSequence(:A, [a], [x]) for (a,x) in Iterators.product(1:oA, 1:iA)] |> vec
   while !isempty(aseqs) # depth-first search
     aseq = pop!(aseqs)
@@ -270,10 +284,11 @@ function diqkd_wiring_and_policy(CA, CAj, CB, CBj, CAvec, CBvec, CAjvec, CBjvec,
 end
 
 function diqkd_wiring_and_iters(c = 2)
-  iA, oA, iB, oB = 2, 2, 3, 2
-  CAiters, CBiters, CAjiters, CBjiters = wiring_iters(iA, oA, iB, oB, c)
+  qkdsett = Setting(2,2,3,2)
+  CAiters, CBiters, CAjiters, CBjiters = wiring_iters(qkdsett, c)
   CAiters = CAiters[1:end-oA^c]
   CBiters = CBiters[1:end-oB^c]
+  # TODO check below
   CAjiters = [CAjiters[j][1:end-iA^(j-1)] for j in 1:c]
   CBjiters = [CBjiters[j][1:end-iB^(j-1)] for j in 1:c]
 
