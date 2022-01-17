@@ -21,11 +21,8 @@ import ncpol2sdpa as ncp
 from sympy.physics.quantum.dagger import Dagger
 import chaospy
 
-# import mosek
-
-
-M = 6  # Number of nodes / 2 in gaussian quadrature
-KEEP_M = 0  # Optimizing mth objective function?
+DEFAULT_M = 6  # Number of nodes / 2 in gaussian quadrature
+KEEP_M = False  # Optimizing mth objective function?
 VERBOSE = 0  # If > 1 then ncpol2sdpa will also be verbose
 EPS_M, EPS_A = 1e-4, 1e-4  # Multiplicative/Additive epsilon in iterative optimization
 
@@ -84,21 +81,20 @@ def sdp_dual_vec(SDP):
 
 class BFFProblem(object):
     def __init__(self, **kwargs):
-        self.T, self.W = generate_quadrature(M)  # Nodes, weights of quadrature
-
         # number of outputs for each input of Alice's / Bob's devices
         self.A_config = kwargs.get("A_config", [2, 2])
         self.B_config = kwargs.get("B_config", [2, 2, 2])
-        self.M = kwargs.get("M", 6)
-        self.solvef = kwargs.get("solvef", lambda sdp: sdp.solve())
+        self.M = kwargs.get("M", DEFAULT_M)
+        self.T, self.W = generate_quadrature(self.M)  # Nodes, weights of quadrature
 
         # Operators in problem (only o-1 for o outputs, because the last
         # operator is enforced by normalisation). Here, A and B are measurement
         # operators
         self.A = [Ai for Ai in ncp.generate_measurements(self.A_config, "A")]
         self.B = [Bj for Bj in ncp.generate_measurements(self.B_config, "B")]
-        self.Z = ncp.generate_operators("Z", 2, hermitian=0)
+        self.Z = ncp.generate_operators("Z", max(self.A_config), hermitian=0)
 
+        self.solvef = kwargs.get("solvef", lambda sdp: sdp.solve())
         self.substitutions = self.get_subs()  # substitutions used in ncpol2sdpa
         self.moment_ineqs = []  # moment inequalities
         self.moment_eqs = []  # moment equalities
@@ -136,7 +132,7 @@ class BFFProblem(object):
         SDP.process_constraints(
             equalities=self.op_eqs,
             inequalities=self.op_ineqs,
-            momentequalities=self.moment_eqs[:],
+            momentequalities=self.moment_eqs,
             momentinequalities=self.moment_ineqs,
         )
         ck = 0.0  # kth coefficient
@@ -233,15 +229,17 @@ class BFFProblem(object):
         for (a, b, x, y) in itprod(*idx_ranges):
             constraints.append(self.A[x][a] * self.B[y][b] - pabxy[a, b, x, y])
         for (a, x) in itprod(range(oA - 1), range(iA)):
-            constraints.append(
-                self.A[x][a]
-                - sum([pabxy[a, b, x, y] for (b, y) in itprod(range(oB), range(iB))])
-            )
+            for y in range(iB):
+                constraints.append(
+                    self.A[x][a]
+                    - sum([pabxy[a, b, x, y] for b in range(oB)])
+                )
         for (b, y) in itprod(range(oB - 1), range(iB)):
-            constraints.append(
-                self.B[y][b]
-                - sum([pabxy[a, b, x, y] for (a, x) in itprod(range(oA), range(iA))])
-            )
+            for x in range(iA):
+                constraints.append(
+                    self.B[y][b]
+                    - sum([pabxy[a, b, x, y] for a in range(oA)])
+                )
         return constraints
 
     def optimise_q(self, SDP, sys, eta, q):
@@ -381,13 +379,13 @@ class BFFProblem(object):
         for a in Aflat:
             for b in Bflat:
                 for z in ZZ:
-                    monos += [a * b * z]
+                    monos.append(a * b * z)
 
         # Add monos appearing in objective function
         for z in self.Z:
-            monos += [self.A[0][0] * Dagger(z) * z]
+            monos.append(self.A[0][0] * Dagger(z) * z)
 
-        return monos[:]
+        return monos
 
 # TODO add scalar variables, either as diagonal entries in the variable matrix,
 # or as identity operators

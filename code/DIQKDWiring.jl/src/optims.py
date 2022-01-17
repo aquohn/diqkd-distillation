@@ -36,6 +36,30 @@ TEST_P = np.array(
         ],
     ]
 )
+SINGLET_P = np.array(
+    [
+        [
+            [[0.4267767, 0.4267767, 0.5], [0.4267767, 0.0732233, 0.25]],
+            [[0.0732233, 0.0732233, 0.0], [0.0732233, 0.4267767, 0.25]],
+        ],
+        [
+            [[0.0732233, 0.0732233, 0.0], [0.0732233, 0.4267767, 0.25]],
+            [[0.4267767, 0.4267767, 0.5], [0.4267767, 0.0732233, 0.25]],
+        ],
+    ]
+)
+WERNER_P = np.array(
+    [
+        [
+            [[0.37839291, 0.37839291, 0.431575], [0.37839291, 0.12160709, 0.25]],
+            [[0.12160709, 0.12160709, 0.068425], [0.12160709, 0.37839291, 0.25]],
+        ],
+        [
+            [[0.12160709, 0.12160709, 0.068425], [0.12160709, 0.37839291, 0.25]],
+            [[0.37839291, 0.37839291, 0.431575], [0.37839291, 0.12160709, 0.25]],
+        ],
+    ]
+)
 
 
 def SOLVEF(sdp):
@@ -45,21 +69,24 @@ def SOLVEF(sdp):
 try:
     import mosek
 
-    def SOLVEF(sdp):
+    # WARNING seems quite unreliable
+    def MOSEK_SOLVEF(sdp):
         sdp.solve("mosek", solverparameters={"num_threads": int(NUM_SUBWORKERS)})
 
 except ModuleNotFoundError:
-    try:
-        import scs, cvxpy
+    MOSEK_SOLVEF = None
 
-        def SOLVEF(sdp):
-            sdp.solve("scs")
+try:
+    import scs, cvxpy
 
-    except ModuleNotFoundError:
-        pass
+    def SCS_SOLVEF(sdp):
+        sdp.solve("scs")
+
+except ModuleNotFoundError:
+    SCS_SOLVEF = None
 
 
-def bound_entr_using_behav(p=None, q=0, solvef=SOLVEF):
+def bound_entr_using_behav(p=None, q=0, **kwargs):
     starttime = datetime.datetime.now()
     print(f"Start: {starttime}")
 
@@ -67,17 +94,17 @@ def bound_entr_using_behav(p=None, q=0, solvef=SOLVEF):
         print("No behaviour provided; using a fixed test behaviour.")
         p = TEST_P
 
-    prob = BFFProblem(solvef=solvef)
+    prob = BFFProblem(**kwargs)
     ops = ncp.flatten([prob.A, prob.B, prob.Z])  # Base monomials involved in problem
     obj = prob.objective(1, q)  # Placeholder objective function
 
     sdp = ncp.SdpRelaxation(ops, verbose=VERBOSE - 1, normalized=True, parallel=0)
-    momeqs = prob.moment_eqs + prob.behav_eqs(p)
+    prob.moment_eqs += prob.behav_eqs(p)
     sdp.get_relaxation(
         level=NPA_LEVEL,
         equalities=prob.op_eqs[:],
         inequalities=prob.op_ineqs[:],
-        momentequalities=momeqs[:],
+        momentequalities=prob.moment_eqs[:],
         momentinequalities=prob.moment_ineqs[:],
         objective=obj,
         substitutions=prob.substitutions,
@@ -90,6 +117,7 @@ def bound_entr_using_behav(p=None, q=0, solvef=SOLVEF):
     print(f"Entropy: {ent}")
     endtime = datetime.datetime.now()
     print(f"End: {endtime}, Delta: {endtime - setuptime}")
+    return ent
 
 
 class Wiring(object):
@@ -127,7 +155,7 @@ class Wiring(object):
         for (a, b, x, y) in itprod(*idx_ranges):
             self.ppabxy[a, b, x, y] = 0
             for vals in itprod(*rawidx_ranges):
-                vallists = [vals[(i * c): ((i + 1) * c)] for i in range(4)]
+                vallists = [vals[(i * c) : ((i + 1) * c)] for i in range(4)]
                 xvals, yvals, avals, bvals = vallists
                 vallists_for_p = [avals, bvals, xvals, yvals]
                 p = prod([self.pabxy[(*args,)] for args in zip(*vallists_for_p)])
@@ -143,7 +171,7 @@ class Wiring(object):
                 ]
             )
             - 1
-            for cond_idx in itprod(*idx_ranges[2 + 2 * c:])
+            for cond_idx in itprod(*idx_ranges[2 + 2 * c :])
         ]
 
         # TODO add LOSR constraints
@@ -160,7 +188,7 @@ def bound_entr_with_wirings(c=2, p=None, q=0, solvef=SOLVEF):
     prob = BFFProblem(solvef=solvef)
     ops = ncp.flatten([prob.A, prob.B, prob.Z])  # Base monomials involved in problem
     obj = prob.objective(1, q)  # Placeholder objective function
-    chi = WiringChar(p, c)
+    chi = Wiring(p, c)
 
     # TODO see if chi.params need to be parameters or variables
     sdp = ncp.SdpRelaxation(
@@ -184,3 +212,8 @@ def bound_entr_with_wirings(c=2, p=None, q=0, solvef=SOLVEF):
     print(f"Entropy: {ent}")
     endtime = datetime.datetime.now()
     print(f"End: {endtime}, Delta: {endtime - setuptime}")
+    return ent
+
+
+# SCS, M+6, singlet, KEEP_M: Entropy: 0.9937548088160353, Delta: 0:30:22.533141
+# SCS, M+6, singlet, !KEEP_M: Entropy: 0.9937548088160353, Delta: 0:28:11.155171

@@ -13,6 +13,7 @@ using PythonCall
 const pysys = pyimport("sys")
 pushfirst!(PyList(pysys.path), Py(@__DIR__))
 const qre = pyimport("qre")
+const optims = pyimport("optims")
 
 h(x) = (x == 0 || x == 1) ? 0 : -x*log2(x) - (1-x)*log2(1-x)
 r(Q,S) = 1-h((1+sqrt((S/2)^2 - 1))/2)-h(Q)
@@ -52,8 +53,8 @@ end
 
 gchsh(s) = 1-phi(sqrt(s^2/4 - 1))
 
-QBER(corrs::Correlators) = (1 - corrs.Eabxy[1,3]) / 2
-CHSH(corrs::Correlators) = corrs.Eabxy[1,1] + corrs.Eabxy[1,2] + corrs.Eabxy[2,1] - corrs.Eabxy[2,2]
+QBER(C::Correlators) = (1 - C.Eabxy[1,3]) / 2
+CHSH(C::Correlators) = C.Eabxy[1,1] + C.Eabxy[1,2] + C.Eabxy[2,1] - C.Eabxy[2,2]
 function HAB_oneway(behav::Behaviour)
   corrs = Correlators(behav)
   return h(QBER(corrs)), nothing
