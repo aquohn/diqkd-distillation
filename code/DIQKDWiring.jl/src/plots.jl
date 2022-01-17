@@ -13,35 +13,6 @@ includet("maxcorr.jl")
 # %%
 # Constants
 
-# Impt states
-const singlet_corrs = Correlators([0.0, 0.0],
-                                 [0.0, 0.0, 0.0],
-                                 [1/sqrt(2) 1/sqrt(2) 1
-                                  1/sqrt(2) -1/sqrt(2) 0])
-
-const bound_corrs = Correlators([0.0, 0.0],
-                         [0.0, 0.0, 0.0],
-                         [0.5 0.5 0.5
-                          0.5 -0.5 0.5])
-
-const PR_corrs = Correlators([0.0, 0.0],
-                      [0.0, 0.0, 0.0],
-                      [1.0 1.0 1.0;
-                       1.0 -1.0 1.0])
-
-const mix_corrs = Correlators([0.0, 0.0],
-                       [0.0, 0.0, 0.0],
-                       [0.0 0.0 0.0
-                        0.0 0.0 0.0])
-
-const LD_corrs = Correlators([1.0, 1.0],
-                      [1.0, 1.0, 1.0],
-                      [1.0 1.0 1.0
-                       1.0 1.0 1.0])
-
-werner_corrs(v) = convexsum([v, 1-v], [singlet_corrs, mix_corrs])
-const v_L = 0.6829; const v_NL = 0.6964; const v_crit = 0.7263
-
 # %%
 # Pironio rates
 

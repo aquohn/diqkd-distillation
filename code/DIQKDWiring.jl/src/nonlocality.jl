@@ -1,4 +1,4 @@
-using StaticArrays
+using StaticArrays, SparseArrays
 
 struct Setting{T <: Integer}
   iA::T
@@ -15,7 +15,7 @@ struct Correlators{Sax, Sby, Sabxy, T <: Real}
   Eabxy::SArray{Sabxy, T}
   function Correlators(Eax::AbstractArray, Eby::AbstractArray, Eabxy::AbstractArray)
     corrarrs = [Eax, Eby, Eabxy]
-    T = promote_type(eltype.(corrarrs)...)
+    T = promote_type(eltype(Eax), eltype(Eby), eltype(Eabxy))
     if !(T <: Real)
       throw(ArgumentError("All arrays must contain real values!"))
     end
@@ -27,10 +27,10 @@ end
 Base.iterate(C::Correlators) = C.Eax, reverse([C.Eby, C.Eabxy])
 Base.iterate(C::Correlators, state) = isempty(state) ? nothing : (pop!(state), state)
 
-function convexsum(ws::AbstractVector{Real}, Cs::AbstractVector{Correlators})
-  Eax = ws .* [C.Eax for C in Cs]
-  Eby = ws .* [C.Eby for C in Cs]
-  Eabxy = ws .* [C.Eabxy for C in Cs]
+function convexsum(ws::AbstractVector{T}, Cs::AbstractVector{Tc}) where {T <: Real, Tc <: Correlators}
+  Eax = sum(ws .* [C.Eax for C in Cs])
+  Eby = sum(ws .* [C.Eby for C in Cs])
+  Eabxy = sum(ws .* [C.Eabxy for C in Cs])
   return Correlators(Eax, Eby, Eabxy)
 end
 
@@ -52,8 +52,8 @@ Base.iterate(P::Behaviour) = P.pax, reverse([P.pby, P.pabxy])
 Base.iterate(P::Behaviour, state) = isempty(state) ? nothing : (pop!(state), state)
 # TODO constructor that checks if pabxy is normalised?
 
-function convexsum(ws::AbstractVector{Real}, Ps::AbstractVector{Behaviour})
-  pabxy = ws .* [P.pabxy for P in Ps]
+function convexsum(ws::AbstractVector{T}, Cs::AbstractVector{Tp}) where {T <: Real, Tp <: Behaviour}
+  pabxy = sum(ws .* [P.pabxy for P in Ps])
   return Behaviour(pabxy)
 end
 
@@ -110,5 +110,52 @@ end
 
 kd(i,j) = (i == j) ? 1 : 0
 E(M, rho) = tr(M * rho)
-sigmas = [[kd(j, 3) kd(j,1)-im*kd(j,2); kd(j,1)+im*kd(j,2) -kd(j,3)] for j in 1:3]
+const sigmas = [[kd(j, 3) kd(j,1)-im*kd(j,2); kd(j,1)+im*kd(j,2) -kd(j,3)] for j in 1:3]
+# Generalised Gell-Mann matrices
+function su_generators(n::Integer)
+  Emats = [sparse([j], [k], [1], n, n) for j in 1:n, k in 1:n]
+  T = typeof(n)
+  idxs = Vector{Tuple{T,T}}(undef, Int(n * (n-1) / 2))
+  pos = 1
+  for j in 1:n
+    for k in 1:j
+      j != k || continue
+      idxs[pos] = (j,k)
+      pos += 1
+    end
+  end
+  syms = [Emats[k,j] + Emats[j,k] for (j,k) in idxs]
+  antisyms = [-im * (Emats[k,j] - Emats[j,k]) for (j,k) in idxs]
+  diags = [sqrt(2/(l*(l+1))) * sum([Emats[j,j] - l*Emats[l+1,l+1] for j in 1:l])
+           for l in 1:n-1]
+  return vcat(syms, antisyms, diags)
+end
 
+# Impt states
+const singlet_corrs = Correlators([0, 0],
+                                 [0, 0, 0],
+                                 [1/sqrt(2) 1/sqrt(2) 1
+                                  1/sqrt(2) -1/sqrt(2) 0])
+
+const bound_corrs = Correlators([0, 0],
+                         [0, 0, 0],
+                         [1//2 1//2 1//2
+                          1//2 -1//2 1//2])
+
+const PR_corrs = Correlators([0, 0],
+                      [0, 0, 0],
+                      [1 1 1;
+                       1 -1 1])
+
+const mix_corrs = Correlators([0, 0],
+                       [0, 0, 0],
+                       [0 0 0
+                        0 0 0])
+
+const LD_corrs = Correlators([1, 1],
+                      [1, 1, 1],
+                      [1 1 1
+                       1 1 1])
+
+werner_corrs(v) = convexsum([v, 1-v], [singlet_corrs, mix_corrs])
+const v_L = 0.6829; const v_NL = 0.6964; const v_crit = 0.7263
