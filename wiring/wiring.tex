@@ -625,7 +625,7 @@
 
       \section{Local Wirings}\label{sec:locwir}
 
-      Before proceeding with our analysis, we must define what we mean by ``wirings''. In other words, we must define our \emph{resource theory}. Taking inspiration from entanglement theory, which studies entanglement as a resource, a more general resource theory defines a set of \emph{free resources} and a set of \emph{free actions}, and studies how the resources in the theory can be converted between each other using only those free actions and free resources~\cite{BellResourceTheory}. If it is possible to convert a resource \(R_1\) into a resource \(R_2\), we write \(R_1 \leadsto R_2\), and we write \(R \not\leadsto S\) otherwise. This relation defines a \emph{pre-order} for the resource theory: given any two resources \(R_1\) and \(R_2\), one of the following statements must hold
+      Before proceeding with our analysis, we must define what we mean by ``wirings''. In other words, we must define our \emph{resource theory}. Our approach is based on that of~\cite{BellResourceTheory}, which also reviews the following preliminary material. Taking inspiration from entanglement theory, which studies entanglement as a resource, a more general resource theory defines a set of \emph{free resources} and a set of \emph{free actions}, and studies how the resources in the theory can be converted between each other using only those free actions and free resources. If it is possible to convert a resource \(R_1\) into a resource \(R_2\), we write \(R_1 \leadsto R_2\), and we write \(R \not\leadsto S\) otherwise. This relation defines a \emph{pre-order} for the resource theory: given any two resources \(R_1\) and \(R_2\), one of the following statements must hold
       \begin{itemize}
         \item \(R_1\) is \emph{strictly below} \(R_2\): \(R_1 \not\leadsto R_2\) and \(R_2 \leadsto R_1\)
         \item \(R_1\) is \emph{strictly above} \(R_2\): \(R_1 \leadsto R_2\) and \(R_2 \not\leadsto R_1\)
@@ -674,11 +674,11 @@
         \chi_B(b\cvec{y}^j|\cvec{b}^cy\lambda) &= \chi_B(b\cvec{y}^j|\cvec{b}^{j-1}y\lambda),\,\forall j \in \dintv{1}{c},
         \end{aligned}\label{eqn:wiringnoretro}
       \end{equation}
-      which we refer to as the \emph{marginal wiring functions}. If we focus only on \(j = c\), we can see these distributions as elements of \(\Ls\), with outputs \((a, \cvec{x}^c)\) and \((b, \cvec{y}^c)\), and inputs \((\cvec{a}^{c-1}, x)\) and \((\cvec{b}^{c-1}, y)\). However, unlike the simple LOSR case for a single box, the space of possible distributions \(\chi\) may be a strict subset of \(\Ls\), due to the additional no-retrocausation conditions for \(j < c\). This will hopefully simplify the space of wirings, since it would otherwise be a polytope with \({(o_A i_A^c)}^{i_A^c o_A} {(o_B i_B^c)}^{i_B^c o_B}\) vertices (\(\approx \num{5.12e18}\) for the QKD setting). We next turn our attention to characterising this space.
+      which we refer to as the \emph{marginal wiring functions}. If we focus only on \(j = c\), we can see these distributions as elements of \(\Ls\), with outputs \((a, \cvec{x}^c)\) and \((b, \cvec{y}^c)\), and inputs \((\cvec{a}^{c-1}, x)\) and \((\cvec{b}^{c-1}, y)\). This will hopefully simplify the space of wirings, since it would otherwise be a polytope with \({(o_A i_A^c)}^{i_A^c o_A} {(o_B i_B^c)}^{i_B^c o_B}\) vertices (\(\approx \num{5.12e18}\) for the QKD setting). We will shortly turn our attention to characterising this space, but first briefly remark that, while the definitions and discussion thus far focus on the bipartite case, they generalise readily to the \(n\)-partite case, although we will not treat this case in detail here.
 
       \subsection{Generating the Wiring Polytope}
 
-      Physically, a probabilistic wiring must actually execute some deterministic wiring, and its joint wiring function is then a probability distribution over the deterministic joint wiring functions, of which there are finitely many. This is the intuition behind the proof of Fine's theorem, which can be straightforwardly adapted to this polytope. Therefore, to determine the polytope of joint wiring functions, we can use the same approach as is typically used for \(\Ls\), where deterministic operations are taken as the vertices of the polytope, and the facet-defining inequalities derived from there. 
+      Physically, a probabilistic wiring must actually execute some deterministic wiring, and its joint wiring function is then a probability distribution over the deterministic joint wiring functions, of which there are finitely many. This is the intuition behind the proof of Fine's theorem presented in~\cite{BellNonlocality}, which can be straightforwardly adapted to this polytope. Therefore, to determine the polytope of joint wiring functions, we can use the same approach as is typically used for \(\Ls\), where deterministic operations are taken as the vertices of the polytope, and the facet-defining inequalities derived from there. 
 
       For ease of implementation, we use a different, more operational description for deterministic wirings. Focusing on Alice's marginal wiring functions, her inputs \(\cvec{x}^c\) to her boxes as being computed by a sequence of \(c\) functions with range \(\dintv{1}{i_A}\):
       \begin{equation} x_j = W^{(j)}_{A,\lambda}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x),\,j \in \dintv{1}{c} \end{equation}
@@ -690,17 +690,9 @@
       \end{equation}
       where \(\indic{\angleb{proposition}}\) is the \emph{indicator function} that is 1 when the proposition is true, and 0 otherwise. The analogous definitions for Bob hold with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). Probabilistic wirings can then be described as convex combinations of such deterministic wirings.
 
-      We refer to the discrete set of deterministic marginal wiring functions that obey these relations as \(\sW_D\), and the polytope of joint wirings \(\sW\) is then the convex polytope with vertices \(\sW_D \times \sW_D\). We also define \(\sWB(p)\) as the set of behaviours generated by applying \(\sW\) to a given behaviour \(p\) using \Cref{eqn:wiringfndef}.
+      We refer to the discrete set of deterministic marginal wiring functions that obey these relations as \(\sW_D\), and the polytope generated by them as vertices as \(\sW\). \(\sW^n\) is then the convex polytope with vertices \(\sW_D^n = \underbrace{\sW_D \times \sW_D \times \cdots \times \sW_D}_{n\text{ times}}\). We also define \(\sWB(p)\) as the set of behaviours generated by applying \(\sW^n\) to an \(n\)-partite behaviour \(p\) using \Cref{eqn:wiringprobdef}.
 
-      Using our classification for \(\sW_D\), simple combinatorics gives us \(i_A^{j} o_A^{j-1}\) possible inputs for \(W^{(j)}_{A,\lambda}\). However, since the wiring is deterministic, \(x_j\) is completely fixed by \(\cvec{x}^{j-1}\), \(\cvec{a}^{j-1}\) and \(x\). Therefore, when considering the function, the only free input that is provided to it as an argument is \(x\), and so there are only \(i_A o_A^{j-1}\) valid arguments. Formally,
-      \begin{lemma}
-        For any deterministic marginal wiring, for each wiring map \(W^{(j)}\),
-        \[ W^{(j)}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x) = W^{(j)}(\cvec{x'}^{j-1}, \cvec{a}^{j-1}, x) \]
-        for all input sequences \(\cvec{x'}^{j-1}\) and \(\cvec{x}^{j-1}\), where \(W^{(c+1)} = W\).
-      \end{lemma}
-      \begin{proof}
-        If 
-      \end{proof}
+      Using our classification for \(\sW_D\), simple combinatorics gives us \(i_A^{j} o_A^{j-1}\) possible inputs for \(W^{(j)}_{A,\lambda}\). However, since the wiring is deterministic, \(x_j\) is completely fixed by \(\cvec{x}^{j-1}\), \(\cvec{a}^{j-1}\) and \(x\). Therefore, when considering the function, the only free input that is provided to it as an argument is \(x\), and so there are only \(i_A o_A^{j-1}\) valid arguments.
 
       Therefore, the number of possible \(W^{(j)}_{A,\lambda}\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(W_{A,\lambda}\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
       \begin{equation}
@@ -716,7 +708,12 @@
 
       Consider two boxes in the QKD setting. There are 16384 marginal wirings for Alice, and \(\approx \num{8.06e7}\) for Bob, for a total of \(\approx \num{1.32e12}\). Fixing the AND gating as discussed above gives us 128 wirings for Alice and 186624 for Bob, for a total of \(\approx \num{2.39e7}\). Both are much more manageable than the number of vertices of \(\Ls\) without causality constraints. Still, this enumeration of the possible wirings is naive, and does not attempt to use symmetry arguments to remove degeneracy or wirings that will not be helpful.
 
-      A step towards this simplification would be another change of perspective, where each wiring map is now viewed as a block matrix, acting on the behaviour represented as a vector.
+      A step towards this simplification would be another change of perspective. A deterministic marginal wiring map can be considered as a local transformation on a single-player behaviour. We therefore now consider the case of a single player, with input \(z_1 \in \dintv{1}{i_1}\) and output \(c_1 \in \dintv{1}{o_1}\). Each wiring map is now viewed as a block matrix \(\matrp{W}{^{(j)}}\), acting on the single-player behaviour represented as a vector \(\cvec{p}^{(j)}\).
+
+      We vectorise the behaviour in column-major order, that is
+      \begin{equation}
+        p_k = p(c_1|z_1) \Leftrightarrow k = (c_1-1) \times o_1 + z_1.
+      \end{equation}
       % TODO express as sequence of LD operations
 
       However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a bounding function, it is possible to search for the wiring for each particular behaviour that produces the largest increase in the bound. However, without a convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Indeed, the underlying problem in our study of the space of wirings is summed up in the following question:
@@ -746,7 +743,7 @@
 
       TODO classify the extremal points for the QKD setting
 
-      Instead, we can adapt the methodology to our situation in order to derive the possible deterministic wirings for a single player. The different values of \(b'\) correspond to different values of the overall output \(b\), while the distributions \(P(\cvec{b}|\cvec{y})\) must be the product of \(c\) deterministic single-box wirings, of which there are \(o_B^{i_B}\).
+      One possible approach is to adapt the methodology by only considering distributions consisting of independent boxes, instead of allowing an arbitrary nonsignalling relationship between the boxes. The different values of \(b'\) then correspond to different values of the overall output \(b\), while the distributions \(P(\cvec{b}|\cvec{y})\) must be the product of \(c\) deterministic single-box wirings, of which there are \(o_B^{i_B}\). Essentially, this approach allows us to explore the possible probability distributions that can arise from combining boxes across several independent rounds, without restricting ourselves to wirings that are physically realisable as a sequence of local operations that respect causality. It therefore contains \(\sW^c\), and also contains the polytope of couplers in this scenario, since the latter are defined by a larger number of inequalities.
 
       \subsection{Dynamic Programming}
 
@@ -1110,7 +1107,7 @@
     \begin{equation}
       R_1 \leadsto R_2 \Rightarrow \mu(R_1) \succeq \mu(R_2)
     \end{equation}
-    for some pre-order \(\succeq\) defined on the codomain of the monotone. As mentioned in \Cref{sec:locwir}, wirings are \emph{multiple-copy conversions}~\cite{BellResourceTheory}. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under a set of free actions that is a strict superset of \(\sW_D\) defined in \Cref{sec:locwir}. These wirings additionally allow the order in which the boxes are used to be permuted and for non-deterministic wirings. However, its monotonicity under wirings with shared randomness was not proved. Nonetheless, we will review these results to see how they can help us.
+    for some pre-order \(\succeq\) defined on the codomain of the monotone. As mentioned in \Cref{sec:locwir}, wirings are \emph{multiple-copy conversions}~\cite{BellResourceTheory}. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under a set of free actions that is a strict superset of \(\sW_D^c\) defined in \Cref{sec:locwir}. These wirings additionally allow the order in which the boxes are used to be permuted and for non-deterministic wirings. However, its monotonicity under wirings with shared randomness was not proved. Nonetheless, we will review these results to see how they can help us.
 
     \subsection{Maximal Correlation and Related Measures}\label{sec:nlmono_maxcorr}
 
