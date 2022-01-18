@@ -50,6 +50,7 @@
 \usepackage{appendix}
 \usepackage{hyperref} % hyperlinks
 \usepackage{bookmark} % PDF bookmarks
+\usepackage{tocbibind} % include extra sections in the TOC
 \hypersetup{%
   colorlinks=true,
   linkcolor=purple,
@@ -289,8 +290,77 @@
 
   \begin{document}
 
-  \maketitle
+  \thispagestyle{empty}
+  \begin{center}
+    \LARGE \textbf{DEVICE-INDEPENDENT QUANTUM CRYPTOGRAPHY AND NONLOCAL DISTILLATION}
+  \end{center}
+ 
+    \vspace{20em}
 
+  \begin{center}
+    Submitted by: \\
+    John Cuthbert Khoo Teng Fong
+
+    \vfill{}
+    In partial fulfilment of the \\
+    requirements for the Degree of \\
+    Bachelor of Engineering (Computer Engineering) \\
+    National University of Singapore
+  \end{center}
+  \clearpage
+
+  \thispagestyle{empty}
+  \begin{center}
+    B.Eng. Dissertation
+  \end{center}
+  \vspace{8em}
+  \begin{center}
+    \Large \textbf{DEVICE-INDEPENDENT QUANTUM CRYPTOGRAPHY AND NONLOCAL DISTILLATION}
+  \end{center}
+  \vspace{8em}
+  \begin{center}
+    By \\
+    John Cuthbert Khoo Teng Fong \\
+    National University of Singapore \\
+    2021/2022
+  \end{center}
+  \vfill{}
+
+  \noindent Project ID: H666010 \\
+  Project Supervisors: Asst Prof.\ Charles Lim Ci Wen and Assoc.\ Prof.\ Marco Tomamichel
+
+  \noindent \hangindent=4em
+  Deliverables: \\
+  Report: 1 Volume \\
+  Code: \href{https://github.com/aquohn/diqkd-distillation}{1 Repository}
+  \clearpage
+
+  \pagenumbering{roman}
+  \phantomsection{}
+  \addcontentsline{toc}{section}{Abstract}%
+  \section*{Abstract}
+  \clearpage
+
+  \phantomsection{}
+  \addcontentsline{toc}{section}{Acknowledgements}%
+  \section*{Acknowledgements}
+  \clearpage
+
+  \tableofcontents
+  \clearpage
+
+  \listoffigures
+  \clearpage
+
+  \listoftables
+  \clearpage
+
+  \phantomsection{}
+  \addcontentsline{toc}{section}{List of Symbols and Abbreviations}%
+  \section*{List of Symbols and Abbreviations}
+  \clearpage
+
+  \pagenumbering{arabic}
   \section{Introduction}
 
   Device-independent quantum key distribution (DIQKD) is a remarkable form of quantum key distribution (QKD) that relies on fundamental properties of causality in order to certify the security of a generated secret key, removing the need to characterise the physical devices involved in generating them. These devices are then seen as black boxes with classical inputs and outputs, whose statistical correlations can certify the non-classical nature of their internal processes, and therefore the privacy of the generated data. This certification is done using \emph{Bell tests}, which detects the non-classical phenomenon of \emph{nonlocality}. Formally, in each round, the two players Alice and Bob can provide inputs \(x\) and \(y\), respectively, to their devices, and obtain outputs \(a\) and \(b\), respectively. The joint conditional distribution that is observed over asymptotically many rounds is called the \emph{behaviour} \(p(ab|xy)\). The behaviour alone (with a few weak assumptions) is sufficient for Alice and Bob to generate secret keys.
@@ -369,7 +439,7 @@
     \end{gather}
     Behaviours with \(S > 2\) are not contained in \(\Ls\), while behaviours in \(\Qs\) are constrained to have \(S \leq 2\sqrt{2}\). Therefore, \(S \leq 2\) is referred to as the \emph{CHSH inequality}: violation of the inequality implies the presence of nonlocality.
 
-    \subsection{Device-independent quantum key distribution}\label{sec:pre_diqkd}
+    \subsection{Device-Independent Quantum Key Distribution}\label{sec:pre_diqkd}
 
     A typical Bell test setup is as follows. Alice and Bob have measurement devices that can be arbitrarily \emph{flawed}, but not actively malicious (if they were actively malicious, they could simply leak the measurement results to Eve after the protocol is completed). The devices receive quantum signals (in essentially all practical cases, entangled photons) from a source that we pessimistically assume to be fully controlled by Eve, and input settings chosen independently and randomly by Alice and Bob. The devices then perform the quantum measurements corresponding to the input settings on the received signals, and output the measurement results as Bell test data. The settings are selected based on randomness private to Alice and Bob, and unknown to Eve, and to Bob and Alice respectively, at the time of measurement.
 
@@ -492,6 +562,12 @@
         \diffp{}{S} H_S(\crv{A}|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right].
       \end{align*}
 
+    \begin{figure}
+      \centering
+      \includegraphics[width=\linewidth]{exptplt.pdf}
+      \caption{\label{fig:exptplt} Minimum \(\eta\) required for \(r_{\std} > 0\), given \(n_c\).}
+    \end{figure}
+
       Consider the following simple wiring, the \emph{N-AND wiring}, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs. Clearly, this can only increase the correlations between Alice and Bob, since \(a \neq b\) only if all \(N\) boxes return different outputs to Alice and Bob. However, this means that if Eve knows that any of the boxes produced 0, she can conclude that the overall output is 0, increasing her correlation with Alice. If the increase in \(H(A|B)\) can make up for the decrease in \(H(A|E)\), then this wiring improves the key rate.
 
       For \(N\) boxes, the correlators and marginals become
@@ -500,12 +576,6 @@
         \angleb{A_x}_{N} = 1 - 2 {\left(\frac{1-\angleb{A_x}}{2}\right)}^N \qquad \angleb{B_y}_{N} = 1 - 2 {\left(\frac{1-\angleb{B_y}}{2}\right)}^N,
       \end{gather}
       and we denote the resultant behaviour as \(p_N\).
-
-      \begin{figure}
-        \centering
-        \includegraphics[width=\linewidth]{exptplt.pdf}
-        \caption{\label{fig:exptplt} Minimum \(\eta\) required for \(r_{\std} > 0\), given \(n_c\).}
-      \end{figure}
 
       Using the standard protocol key rate, we are able to find \emph{revival} in certain parameter regimes: behaviours with \(r_{\std}(p) = 0\), but which have \(r_{\std}(p_N) > 0\), as shown in \Cref{fig:exptplt}. However, since wiring no longer treats the individual rounds as i.i.d., it should not be used as part of a protocol for the purpose of computing \(C_{\sk}\). Therefore, it is possible that \(C_{\sk}(p_N) > C_{\sk}(p)\). However, it might just be that \(r_{\std}(p) < C_{\sk}(p)\), and that the wiring does not improve the secret key capacity. We can now state one of the aims of our research more precisely:
       \begin{funqn}\label{fqn:wircap}
@@ -527,10 +597,6 @@
       Now, moving to the QKD setting, if we pick two out of three values for \(y\), we can still calculate the CHSH value for those two settings, and Alice's two values of \(x\). Or, more operationally, we can delete the data for the rounds where Bob chooses \(y=2\), and the Bell test data will then be that for a \((2,2,2,2)\) test. However we compute it, the CHSH value still should not violate the inequality for a behaviour in \(\Ls\). Since there are \(\binom{3}{2} = 3\) ways to select Bob's settings, there are 3 \emph{liftings} of each CHSH facet in the QKD setting, and therefore we have 24 liftings of CHSH in total. This gives us 48 facets for \(\Ls\) in the QKD setting.
 
       Unlike \(\NSs\), \(\Ls\) is defined by its vertices. As discussed in \Cref{sec:pre_diqkd}, local behaviours can be considered as probabilistic mixtures of deterministic behaviours according to \Cref{eqn:finethm}. There, it was explained that this is necessary for Eve if she wants to eavesdrop on the generated key; from a different perspective, if the correlations between Alice and Bob arise from some pre-shared data, the data can have been generated in the same manner, with \(p_E(e)\) being the distribution of the process which selects the behaviour to encode in each round. If the devices use local randomness to generate their behaviour in each round, the effect on the overall distribution can be absorbed into \(p_E(e)\), so that a system without local randomness and with a different \(p_E(e)\) can reproduce the same statistics. This result is known as \emph{Fine's theorem}~\cite{FineThm}, and is discussed more rigorously in~\cite{BellNonlocality}.
-
-      Using the \verb`LazySets.jl` package for the Julia programming language, we specified the deterministic behaviours as vertices of \(\Ls\), since all other local behaviours can be specified as probabilistic mixtures, that is, convex combinations, of the deterministic behaviours. For each \(x \in \dintv{1}{i_A}\), we have \(i_A\) choices for the output \(a\) to assign, with the analogous scenario for Bob. Therefore, there are \(i_A^{o_A}i_B^{o_B} = 32\) vertices. The GLPK solver was then used to identify the facets and their corresponding inequalities, and yielding 48 facets for our polytope. Therefore, all facets in the QKD setting are either liftings of CHSH or positivity facets, which is expected, since the next unique Bell inequality is \(I_{3322}\), in the \((3,2,3,2)\) setting.
-
-      To generate \(\NSs\), we provided the aforementioned positivity, normalisation, and no-signalling constraints, which are also solved using GLPK to eliminate redundant constraints, and to find the vertices of the polytope. This yields 24 constraints (namely, the positivity constraints in the CG representation) and 128 vertices.
 
       \begin{table}
         \begin{minipage}{0.5\linewidth}
@@ -612,6 +678,9 @@
         \caption{\(p(ab|xy)\) for PR-box analogues in the QKD setting.}\label{tab:qkd_iso}
       \end{table}
 
+      Using the \verb`LazySets.jl` package for the Julia programming language, we specified the deterministic behaviours as vertices of \(\Ls\), since all other local behaviours can be specified as probabilistic mixtures, that is, convex combinations, of the deterministic behaviours. For each \(x \in \dintv{1}{i_A}\), we have \(i_A\) choices for the output \(a\) to assign, with the analogous scenario for Bob. Therefore, there are \(i_A^{o_A}i_B^{o_B} = 32\) vertices. The GLPK solver was then used to identify the facets and their corresponding inequalities, and yielding 48 facets for our polytope. Therefore, all facets in the QKD setting are either liftings of CHSH or positivity facets, which is expected, since the next unique Bell inequality is \(I_{3322}\), in the \((3,2,3,2)\) setting.
+
+      To generate \(\NSs\), we provided the aforementioned positivity, normalisation, and no-signalling constraints, which are also solved using GLPK to eliminate redundant constraints, and to find the vertices of the polytope. This yields 24 constraints (namely, the positivity constraints in the CG representation) and 128 vertices.
 
       In the \((2,2,2,2)\) setting, each of the 8 CHSH facets contains 8 deterministic points with \(S = 2\), and is violated to the algebraic maximum of \(S = 4\) by a \emph{Popescu–Rohrlich} (PR) box, whose outputs are always anti-correlated for one pair of inputs and always correlated otherwise. This behaviour is not within \(\Qs\), and so is not physically realisable as far as we know, but it still plays a crucial role in understanding nonlocality, and the geometry of \(\NSs\). For example, being the only extremal point of \(\NSs\) to have \(S > 2\), all behaviours that violate the corresponding CHSH inequality can be decomposed as a mixture of the PR box and a local box on the CHSH facet~\cite{GeomDecomp}. The line between the \emph{maximally mixed behaviour} \(p_{\varnothing}\), which has all correlators and marginals 0 and \(p_{\varnothing}(ab|xy) = 1/o_A o_B\; \forall a,b,x,y\), and a PR box is called the \emph{isotropic line}, and behaviours on the line (so-called \emph{isotropic boxes}) are convex combinations of the two. Notably, the quantum maximum of \(S = 2\sqrt{2}\) is achieved by a behaviour that is on this line.
 
@@ -757,38 +826,69 @@
 
       Without this simplification, there will be a large number of generated wirings that are actually identical in effect. While these will correspond to identical vertices in the polytope and can therefore be removed during vertex enumeration, removing them pre-emptively would mitigate the combinatorial explosion of possible local transformations, resulting in a significant reduction in the number of vertices and improving the scalability of our methods.
 
-      We will formalise this by expressing the transformations in the language of linear algebra. A deterministic marginal wiring map can be considered as a local transformation on a single-player behaviour. We therefore now consider the case of a single player, whose box takes input \(z_1 \in \dintv{1}{i_1}\) and gives output \(c_1 \in \dintv{1}{o_1}\). Each wiring map is now viewed as a matrix \(\matrp{W}{^{(j)}}\), acting on the single-player behaviour represented as a vector \(\cvec{p}^{(j)}\).
+      We will formalise this by expressing the transformations in the language of linear algebra. Since the deterministic marginal wiring maps are local, they are entirely characterised by their effect on a single-player behaviour, with the transformation of the overall behaviour arising from the tensor product structure. We therefore now consider the case of a single player, whose box takes input \(x \in \dintv{1}{i_A}\) and gives output \(a \in \dintv{1}{o_A}\). Each wiring map is now viewed as a matrix \(\matrp{W}{_A^{(j)}}\), acting on the single-player behaviour represented as a vector \(\cvec{p}^{(j)}_A\).
 
-      We vectorise the behaviour by incrementing \(c_1\), then \(z_1\), that is
+      We vectorise the behaviour by incrementing \(a\), then \(x\), that is
       \begin{equation}
-        p_k = p(c_1|z_1) \Leftrightarrow k = (z_1-1) \times i_1 + c_1,
+        p_{A;k} = p(a|x) \Leftrightarrow k = (a-1) \times i_A + x,
       \end{equation}
-      which means that \(\cvec{p}^{(1)}\) is the direct sum of normalised probability vectors corresponding to each value of \(z_1\). We refer to the real vector space that \(\cvec{p}^{(1)}\) lives in as \(\sP \cong \R^{o_1i_1}\): that is \(\sP\) is isomorphic to \(o_1i_1\)-dimensional Euclidean space. Now, application of a wiring map, aside from the overall output map, corresponds to performing a wiring, inputting the wiring target into the next box, and then retrieving the box output. However, we do not need to record the wiring target, as argued above: we only need the box output. Therefore, we can have
+      which means that \(\cvec{p}_A\), the vector corresponding to the behaviour, is the direct sum of normalised probability vectors \(\cvec{p}_{A|x}\), each corresponding to the distribution obtained from input \(x\). We refer to the real vector space that \(\cvec{p}_A\) lives in as \(\sP_A \cong \R^{o_Ai_A}\): that is \(\sP\) is isomorphic to \(o_Ai_A\)-dimensional Euclidean space. However, to represent \(c\) independent boxes that are being wired together, and to represent the dependency on the overall input \(x\), the initial state of the system must be an element of \(\sP_A^{\otimes c} \otimes \R^{i_A}\). Therefore, we have
       \begin{equation}
-        \matrp{W}{^{(1)}} \cvec{p}^{(1)} = \cvec{p}^{(2)} \in \sP \otimes \R^{o_1}
-      \end{equation}
-      which gives us that 
-      \begin{equation}
-        \matrp{W}{^{(j)}} \cvec{p}^{(j)} = \cvec{p}^{(j+1)} \in \sP \otimes \bigotimes_{k=1}^j \R^{o_1}.
-      \end{equation}
-      For \(j = c+1\), the wiring map produces the final output, so
-      \begin{equation}
-        \matrp{W}{^{(c+1)}} \cvec{p}^{(c+1)} = \cvec{p}' \in \sP.
+        \cvec{p}_A^{(1)} = \bigotimes_{k=1}^c \cvec{p}_A \otimes \bigoplus_{l=1}^{i_A} 1.
       \end{equation}
 
-      The matrices \(\matrp{W}{^{(j)}}\) can then be factorised into a permutation map (i.e.\ a symmetry operation) followed by an application map, corresponding to \(R\) and \(T\) above, respectively. The application map can be considered abstractly as dividing the source sequences \((\cvec{c}, z_1)\) into \(i_1\) bins, corresponding to the different values of \(z_{j+1}\), and multiplying the probability of the source sequence with a vector of the \(o_1\) probabilities \(p(\cdot|z_{j+1})\). The enumeration of the application maps then reduces to a ``stars and bars'' combinatorics problem, and the permutation maps are likewise elementary to enumerate. Reusing the example of the wiring characterised by \Cref{eqn:wiringeg}: % TODO explain that map acts on vector of ones
+      Now, application of a wiring map, aside from the overall output map, corresponds to performing a wiring, inputting the wiring target into the next box, and then retrieving the box output. However, we do not need to record the wiring target, as argued above: we only need the box output. Therefore, we can have
+      \begin{equation}
+        \matrp{W}{_A^{(1)}} \cvec{p}_A^{(1)} = \cvec{p}_A^{(2)} \in \sP^{\otimes c-1} \otimes \R^{o_A} \otimes \R^{i_A}
+      \end{equation}
+      which we can generalise to
+      \begin{equation}
+        \matrp{W}{_A^{(j)}} \cvec{p}_A^{(j)} = \cvec{p}_A^{(j+1)} \in \bigotimes_{l=1}^{c-j} \sP \otimes \bigotimes_{k=1}^{j} \R^{o_A} \otimes \R^{i_A},\, \forall j \in \dintv{1}{c}.
+      \end{equation}
+      The map \(\matrp{W}{_A^{(j)}}\) for \(j \leq c\) depends on \(\R^{i_A}\) and all existing copies of \(\R^{o_A}\), but maps only one copy of \(\sP\) to one copy of \(\R^{o_A}\) and leaves the values in \(\R^{i_A}\) and the copies of \(\R^{o_A}\) unchanged. That is, we can write this operator as
+      \begin{equation}
+        \matrp{W}{_A^{(j)}} = \bigotimes_{l=1}^{c-j} I_{\sP} \otimes \matrp{\tilde{W}}{_A^{(j)}}\, \forall j \in \dintv{1}{c}.
+      \end{equation}
+
+      The matrices \(\matrp{\tilde{W}}{_A^{(j)}}\), mapping from \(\sP \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \R^{i_A}\) to \(\bigotimes_{k=1}^{j} \R^{o_A} \otimes \R^{i_A}\), can then be factorised into a permutation map (i.e.\ a symmetry operation) followed by an application map, corresponding to \(R\) and \(T\) above, respectively. The application map can be considered abstractly as dividing the source sequences \((\cvec{a}^{j-1}, x)\) into \(i_A\) bins, corresponding to the different values of \(x_{j}\), and multiplying the probability of the source sequence with \(\cvec{p}_{A|x_j}\). The enumeration of the application maps then reduces to a ``stars and bars'' combinatorics problem: each sequence of non-negative integers \({(n_k)}_{k=1}^{i_A}\) such that \( \sum_{k} n_k = i_A o_A^{j-1} \) corresponds to a unique application map. The canonical form is constructed by filling column 1 with \(n_1\) 1s, with other entries 0, then filling rows \(n_1 + 1\) to \(n_1 + n_2\) with 1s in column 2, and so on. Formally, we define the matrix \(\matrp{T}{_A^{(j)}}\) as
+      \begin{equation}
+        \matrp{T}{_A^{(j)}}_{kl} = \indic{\sum_{m=1}^{l-1} n_m + 1 \leq k \leq \sum_{m=1}^{l-1} n_m + n_l}
+      \end{equation}
+      The permutation maps are similarly elementary to enumerate, consisting of all reorderings of the rows of the identity matrix.
+
+      TODO fix j=2 case, respect direct product structure for diff inputs
+
+      For clarity, we provide an explicit example using the wiring characterised by \Cref{eqn:wiringeg}, and define \(\cvec{\tilde{p}}_A^{(j)}\) as the element of \(\sP \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \R^{i_A}\) that is acted on by \(\matrp{\tilde{W}}{_A^{(j)}}\). Then,
       \begin{align*}
-        \matrp{W}{^{(1)}} &= \begin{bmatrix}
-          p(0|0) & 0 \\
-          p(1|0) & 0 \\
-          \hline
-          0 & p(0|1) \\
-          0 & p(1|1) \\
-          \end{bmatrix} \begin{bmatrix}
-          1 & 0 \\
-          0 & 1 \\
-          \end{bmatrix} \\
-        \matrp{W}{^{(2)}} &= \begin{bmatrix}
+        \matrp{\tilde{W}}{_A^{(1)}} \cvec{\tilde{p}}{_A^{(1)}} &= \left( \begin{bmatrix}
+          I_2 & 0_{2\times{2}} \\
+          \end{bmatrix} \oplus \begin{bmatrix}
+          0_{2\times{2}} & I_2 \\
+          \end{bmatrix} \right) \left( I_{4} \oplus I_{4} \right) 
+          \left( \cvec{p}_A \otimes \begin{bmatrix} 1 \\ 1
+          \end{bmatrix} \right) \\
+                                                               &= \begin{bmatrix}
+          I_2 & 0_{2\times 2} & 0_{2\times 2} & 0_{2\times 2} \\
+          0_{2\times 2} & 0_{2\times 2} & 0_{2\times 2} & I_2 \\
+          \end{bmatrix} I_{8} \begin{bmatrix}
+          \cvec{p}_{A|0} \\
+          \cvec{p}_{A|1} \\
+          \cvec{p}_{A|0} \\
+          \cvec{p}_{A|1} \\
+          \end{bmatrix} = \begin{bmatrix}
+          \cvec{p}_{A|0} \\
+          \cvec{p}_{A|1} \\
+          \end{bmatrix} \in \R^{o_A} \otimes \R^{i_A} \\
+        \matrp{\tilde{W}}{_A^{(2)}} \cvec{\tilde{p}}{_A^{(2)}} &=
+        \left( \begin{bmatrix} I_2 & 0_{2\times{2}} \end{bmatrix} \oplus \bigoplus_{k=1}^3
+          \begin{bmatrix} 0_{2\times{2}} & I_2 \end{bmatrix} \right) 
+          \left( I_{4} \oplus I_{4} \right) \left( \cvec{p}_A \otimes \begin{bmatrix}
+          \cvec{p}_{A|0} \\
+          \cvec{p}_{A|1}
+          \end{bmatrix}
+            \right) \\
+                                                               &=
+        \begin{bmatrix}
           p(0|0) & 0 & 0 & 0 \\
           p(1|0) & 0 & 0 & 0 \\
           \hline
@@ -804,7 +904,7 @@
           0 & 0 & 1 & 0 \\
           0 & 0 & 0 & 1 \\
           \end{bmatrix} \\
-        \matr{W} &= \begin{bmatrix}
+        \matrp{W}{_A} &= \begin{bmatrix}
           1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 \\
           0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
           0 & 0 & 0 & 0 & 1 & 1 & 1 & 0 \\
@@ -821,7 +921,10 @@
           \end{bmatrix}
         \end{align*}
 
-        TODO solve for permutation matrix symbolically
+      For \(j = c+1\), the wiring map produces the final output behaviour, so
+      \begin{equation}
+        \matrp{W}{_A^{(c+1)}} \cvec{p}_A^{(c+1)} = \cvec{p}_A' \in \sP.
+      \end{equation}
 
       However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a bounding function, it is possible to search for the wiring for each particular behaviour that produces the largest increase in the bound. However, without a convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Indeed, the underlying problem in our study of the space of wirings is summed up in the following question:
       \begin{funqn}\label{fqn:wir}
@@ -1150,32 +1253,35 @@
         H(\crv{A}|E, \crv{X}=x^*) \geq c_m + C_m,
       \end{equation}
       where \(C_m\) is given by
-      \begin{align}
-        \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \Tr\left[ 
-          \begin{aligned}[c]
-          & \rho_{A B E} \left(M_{a|x^*} \otimes I_{B} \otimes \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) \right) \\
-            + & t_i \left( I_{A B} \otimes Z_{a,i}Z_{a,i}^{\dagger}\right)
+      \begin{equation}
+        \begin{aligned}[c]
+          \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \Tr\left[ 
+            \begin{aligned}[c]
+            & \rho_{A B E} \left(M_{a|x^*} \otimes I_{B} \otimes \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) \right) \\
+              + & t_i \left( I_{A B} \otimes Z_{a,i}Z_{a,i}^{\dagger}\right)
+            \end{aligned}
+          \right] \\
+          \text{s.t.} & \begin{aligned}[t] 
+            & \sum_{abxy} c^{(j)}_{abxy} \Tr\left[\rho_{A B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right] \geq v_j & & \forall 1 \leq j \leq r \\
+            & \sum_{a} M_{a|x} = I_{A}, \sum_{b} N_{b|y} = I_{B} & & \forall x, y \\
+            & M_{a|x} \geq 0, N_{b|y} \geq 0 & & \forall a, b, x, y \\
+            & \norm{Z_{a,i}} \leq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
+            & M_{a|x} \in \sB(A), N_{b|y} \in \sB(B), Z_{a,i} \in \sB(E) & & \forall a, b, x, y, i \\
+            & \rho_{A B E} \text{ is a valid state} & &
           \end{aligned}
-        \right] \\
-        \text{s.t.} & \begin{aligned}[t] 
-          & \sum_{abxy} c^{(j)}_{abxy} \Tr\left[\rho_{A B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right] \geq v_j & & \forall 1 \leq j \leq r \\
-          & \sum_{a} M_{a|x} = I_{A}, \sum_{b} N_{b|y} = I_{B} & & \forall x, y \\
-          & M_{a|x} \geq 0, N_{b|y} \geq 0 & & \forall a, b, x, y \\
-          & \norm{Z_{a,i}} \leq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
-          & M_{a|x} \in \sB(A), N_{b|y} \in \sB(B), Z_{a,i} \in \sB(E) & & \forall a, b, x, y, i \\
-          & \rho_{A B E} \text{ is a valid state} & &
         \end{aligned}
-      \end{align}
+      \end{equation}
 
       We can use Naimark's dilation theorem to construct a state \(\tilde{\rho}\) and projective measurement operators\footnote{Projective in the sense that \(\tilde{M}_{a|x}\tilde{M}_{a'|x} = \delta_{a,a'}\tilde{M}_{a|x}\), with the analogous relation for Bob.} \(\{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\) on a Hilbert space \(\Hs\), such that \(\Tr\left[\tilde{\rho}\tilde{M}_{a|x}\right] = \Tr\left[\rho M_{a|x}\right]\) and  \(\Tr\left[\tilde{\rho}\tilde{N}_{b|y}\right] = \Tr\left[\rho N_{b|y}\right]\): the behaviour remains the same. These can be mapped to the original behaviour and states via local isometries. We can further assume that the state is pure, that is, \(\tilde{\rho} = {\ket{\psi}\bra{\psi}}_{\Hs}\), which can only help Eve (due to the data-processing inequality).
 
       Additionally, instead of enforcing the tensor product explicitly, we can enforce that the operators \(Z_{a,i}\) commute with all \(\tilde{M}_{a|x}\) and \(\tilde{N}_{b|y}\), which in turn commute with each other.\footnote{This is equivalent to enforcing the tensor product structure in finite dimensions, but in infinite dimensions it may lead to a looser bound.} Therefore, we can replace all instances of \(\Tr\left[\rho S\right]\) in our objective function with \(\braket{\psi|\tilde{S}|\psi}\) for all monomials \(S\) (individual operators and products of operators), where \(\tilde{S}\) is the monomial with all measurements replaced by their projective versions on \(\Hs\). 
 
       These inner products can then be seen as elements of a Gram matrix for the vectors \(\{\ket{\psi}, \tilde{S}\ket{\psi}\}\), which must be positive semidefinite. In order to constrain \(\ket{\psi}\) to be a valid quantum state, we introduce more vectors of the form \(\prod M\ket{\psi}\) to our Gram matrix, where \(M \in \{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\). If these are valid states and measurements, the Gram matrix should still be positive semidefinite, even if we include vectors that result from an arbitrarily long sequence of measurement operators applied to \(\ket{\psi}\). This is the \emph{NPA hierarchy}, which is a converging hierarchy of approximations to the set of quantumly realisable states and measurements.\footnote{Recent results imply that we only have convergence in the finite-dimensional case; in infinite dimensions, the set of states and measurements converged to is strictly larger than that allowed by quantum theory.} Higher levels of the hierarchy involve monomials consisting of longer chains of measurement operators. The final expression for \(C_m\) then becomes
-      \begin{align}
-        \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \angleb{\psi\left|
-         \tilde{M}_{a|x^*} \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) + t_i Z_{a,i}Z_{a,i}^{\dagger} \right|\psi} \\
-        \text{s.t.} & \begin{aligned}[t] 
+      \begin{equation}
+        \begin{aligned}[c]
+          \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \angleb{\psi\left|
+          \tilde{M}_{a|x^*} \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) + t_i Z_{a,i}Z_{a,i}^{\dagger} \right|\psi} \\
+            \text{s.t.} & \begin{aligned}[t] 
           & \sum_{abxy} c^{(j)}_{abxy} \angleb{\psi\left| \tilde{M}_{a|x} \tilde{N}_{b|y} \right|\psi} \geq v_j & & \forall 1 \leq j \leq r \\
           & \sum_{a} \tilde{M}_{a|x} = I_{A}, \sum_{b} \tilde{N}_{b|y} = I_{B} & & \forall x, y \\
           & \tilde{M}_{a|x} \geq 0, \tilde{N}_{b|y} \geq 0 & & \forall a, b, x, y \\
@@ -1185,8 +1291,9 @@
           & [\tilde{M}_{a|x}, \tilde{N}_{b|y}] = [\tilde{M}_{a|x}, Z_{b,i}] = [\tilde{N}_{b|y}, Z_{a,i}] = 0 & & \forall a, b, x, y, i \\
           & [\tilde{M}_{a|x}, Z_{b,i}^{\dagger}] = [\tilde{N}_{b|y}, Z_{a,i}^{\dagger}] = 0 & & \forall a, b, x, y, i \\
           & \ket{\psi} \text{ is a valid state} & & \\
+            \end{aligned}
         \end{aligned}
-        \end{align}
+      \end{equation}
 
       Given the generality of these techniques, one could wonder whether any upper bounds can be computed in this fashion as well. This might help alleviate the optimisation difficulties discussed previously. The quadrature would need to be changed to be an upper bound, rather than a lower bound.
       \begin{question}
@@ -1366,8 +1473,12 @@
     \section{Summary and Outlook}
 
     The study of distillation via wiring multiple boxes together has largely fallen by the wayside, and there has been little attention paid to the idea in DIQKD research. However, this review has uncovered a vast variety of related tools and approaches for tackling this problem, for studying the space of behaviours, the space of wirings, and upper and lower bounds on key rates. Having consolidated these techniques, we are ready to embark on a deeper and more focused attempt to apply them. We hope that we will be able to uncover some interesting insights about the structure of nonlocality by utilising these different approaches and techniques.
+    \clearpage
 
+    \phantomsection{}
+    \addcontentsline{toc}{section}{References}%
     \printbibliography{}
+    \clearpage
 
     \begin{appendices}
       \section{Technicalities for Quasi-Relative Entropies}\label{sec:qretech}
