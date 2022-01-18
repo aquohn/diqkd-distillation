@@ -395,7 +395,7 @@ function indep_rounds_couplers(::Type{T}, c::Integer, o::Integer, i::Integer) wh
   ineqconstrs = vcat([Polyhedra.HalfSpace(constr, 0) for constr in lnormconstrs], [Polyhedra.HalfSpace(constr, 1) for constr in unormconstrs])
   return hrep(ineqconstrs)
 end
-wirings_from_couplers(c, o, i) = wirings_from_couplers(Rational{Int64}, c, o, i)
+indep_rounds_couplers(c, o, i) = indep_rounds_couplers(Rational{Int64}, c, o, i)
 
 const chsh_poly = cg_polytope(chshsett...)
 const chsh_v = vertices_list(chsh_poly)

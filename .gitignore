@@ -41,5 +41,7 @@ pnpm-lock.yaml
 node_modules
 package.json
 
+Manifest.toml
+
 .fuse_hidden*
 
