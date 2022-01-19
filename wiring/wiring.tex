@@ -584,7 +584,11 @@
 
       From a theoretical standpoint, answering this question would develop our currently limited understanding of the nature of the secret key capacity, and practically, the use of such wirings would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system. ``Super-activation'' of nonlocality is known to exist for joint quantum operations (e.g.\ two quantum states that do not exhibit nonlocality individually can jointly exhibit it), so there is some hope that similar behaviour might be observed here.
 
+      TODO write out how NL activation can be done in more detail
+
       \section{The Quantum Key Distribution Setting}\label{sec:qkdset}
+
+      TODO shorten this discussion, maybe use the NL convertibility/geometric decomp papers
 
       In order to study the effects of wirings on arbitrary behaviours, we wish to characterise the space of possible behaviours in the QKD setting (that is, \((i_A=2,o_A=2,i_B=3,o_B=2)\)) so as to identify the notable behaviours we may wish to investigate further.
 
@@ -732,6 +736,8 @@
 
       Private shared randomness does not help in deciding the overall outputs, since \(h\) bits of randomness will simply produce \(2^h\) different possibilities for the keys, which we would also obtain by using the private shared randomness as a key. FIXME is this correct?
 
+      TODO maybe junk this section: no reason for this argument since we are considering shared randomness. Maybe argue, based on random basis paper approach, that private randomness forces Eve to not be able to tailor her attacks? Or is that irrelevant here?
+
       However, since our wirings combine multiple boxes, their effect cannot be expressed in this form. Nonetheless, we can straightforwardly generalise the expressions for LOSR operations, for \(c\) boxes wired together, as:
       \begin{gather}
         p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)\label{eqn:wiringprobdef} \\
@@ -745,6 +751,8 @@
         \end{aligned}\label{eqn:wiringnoretro}
       \end{equation}
       which we refer to as the \emph{marginal wiring functions}. If we focus only on \(j = c\), we can see these distributions as elements of \(\Ls\), with outputs \((a, \cvec{x}^c)\) and \((b, \cvec{y}^c)\), and inputs \((\cvec{a}^{c-1}, x)\) and \((\cvec{b}^{c-1}, y)\). This will hopefully simplify the space of wirings, since it would otherwise be a polytope with \({(o_A i_A^c)}^{i_A^c o_A} {(o_B i_B^c)}^{i_B^c o_B}\) vertices (\(\approx \num{5.12e18}\) for the QKD setting). We will shortly turn our attention to characterising this space, but first briefly remark that, while the definitions and discussion thus far focus on the bipartite case, they generalise readily to the \(n\)-partite case, although we will not treat this case in detail here.
+
+      TODO try using the inequalities to find the polytope
 
       \subsection{Generating the Wiring Polytope}
 
@@ -785,9 +793,9 @@
               011 & X & X & X & X \\
               010 & X & X & X & X \\
               110 & X & X & X & X \\
-              111 & 1 & 0 & 0 & 0 \\
+              111 & 1 & 0 & X & X \\
               101 & X & X & X & X \\
-              100 & X & X & X & X \\ \hline
+              100 & X & X & 0 & 0 \\ \hline
             \end{tabular}
           \end{center}
         \end{minipage}
@@ -802,7 +810,7 @@
 
       A concrete example can help illustrate this degeneracy. A wiring characterised by
       \begin{equation}
-        x_1 = x \qquad x_2 = \bar{a}_1x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2\label{eqn:wiringeg}
+        x_1 = x \qquad x_2 = \bar{a}_1 + x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2\label{eqn:wiringeg}
       \end{equation}
       is represented by the lookup tables in~\Cref{tab:wiring_lut}, where juxtaposition is the Boolean AND, addition is the Boolean OR, and the overbar is the Boolean NOT.\ \(W_A^{(2)}\) and \(W_A\) are fully specified by 4 and 8 values respectively, instead of the full 8 and 32 values that would be needed to specify the target for each source sequence.
 
@@ -821,8 +829,8 @@
       Nonetheless, we can simplify our analysis using the observation that the symmetry operations on the target of one wiring map are of the same type as the symmetry operations on the source of the subsequent wiring map. Let \(R\) be a symmetry operation on the source of a wiring map, \(S\) the symmetry operation on the target of a map, and \(T\) the irreversible operation implemented by the wiring map. Then, the overall effect of a wiring on a behaviour \(p\) can be informally expressed as
       \[ S_{c+1}T_{c+1}R_{c+1} \cdots S_2T_2R_2 S_1T_1R_1 p. \]
       Our argument then is that \(R_{j+1}\) and \(S_{j}\) for any \(j\) are elements of the same group of transformations, and can therefore be combined when enumerating the possible deterministic transformations. The sequence of operations is then effectively
-      \[ T_{c+1}R_{c+1} \cdots T_2R_2 T_1R_1 p, \]
-      where \(S_{c+1}\) is removed since it is the final symmetry operation.
+      \[ S_{c+1}T_{c+1}R_{c+1} T_{c}R_{c} \cdots T_2R_2 T_1R_1 p, \]
+      where we keep the final symmetry operation \(S_{c+1}\) since, while \(H(A|E)\) itself is not affected by symmetry operations, some methods for estimating \(H(A|E)\) might be.
 
       Without this simplification, there will be a large number of generated wirings that are actually identical in effect. While these will correspond to identical vertices in the polytope and can therefore be removed during vertex enumeration, removing them pre-emptively would mitigate the combinatorial explosion of possible local transformations, resulting in a significant reduction in the number of vertices and improving the scalability of our methods.
 
@@ -832,41 +840,44 @@
       \begin{equation}
         p_{A;k} = p(a|x) \Leftrightarrow k = (a-1) \times i_A + x,
       \end{equation}
-      which means that \(\cvec{p}_A\), the vector corresponding to the behaviour, is the direct sum of normalised probability vectors \(\cvec{p}_{A|x}\), each corresponding to the distribution obtained from input \(x\). We refer to the real vector space that \(\cvec{p}_A\) lives in as \(\sP_A \cong \R^{o_Ai_A}\): that is \(\sP\) is isomorphic to \(o_Ai_A\)-dimensional Euclidean space. However, to represent \(c\) independent boxes that are being wired together, and to represent the dependency on the overall input \(x\), the initial state of the system must be an element of \(\sP_A^{\otimes c} \otimes \R^{i_A}\). Therefore, we have
+      which means that \(\cvec{p}_A\), the vector corresponding to the behaviour, is the direct sum of normalised probability vectors \(\cvec{p}_{A|x}\), each corresponding to the distribution obtained from input \(x\). We refer to the real vector space that \(\cvec{p}_A\) lives in as \(\sP_A \cong \R^{o_Ai_A}\): that is \(\sP\) is isomorphic to \(o_Ai_A\)-dimensional Euclidean space. However, to represent \(c\) independent boxes that are being wired together, and to represent the dependency on the overall input \(x\), the initial state of the system must be an element of \(\R^{i_A} \otimes \sP_A^{\otimes c}\). Therefore, we have
       \begin{equation}
-        \cvec{p}_A^{(1)} = \bigotimes_{k=1}^c \cvec{p}_A \otimes \bigoplus_{l=1}^{i_A} 1.
+        \cvec{p}_A^{(1)} = \bigoplus_{l=1}^{i_A} 1 \otimes \bigotimes_{k=1}^c \cvec{p}_A.
       \end{equation}
 
       Now, application of a wiring map, aside from the overall output map, corresponds to performing a wiring, inputting the wiring target into the next box, and then retrieving the box output. However, we do not need to record the wiring target, as argued above: we only need the box output. Therefore, we can have
       \begin{equation}
-        \matrp{W}{_A^{(1)}} \cvec{p}_A^{(1)} = \cvec{p}_A^{(2)} \in \sP^{\otimes c-1} \otimes \R^{o_A} \otimes \R^{i_A}
+        \matrp{W}{_A^{(1)}} \cvec{p}_A^{(1)} = \cvec{p}_A^{(2)} \in \R^{i_A} \otimes \R^{o_A} \otimes \sP^{\otimes c-1}
       \end{equation}
       which we can generalise to
       \begin{equation}
-        \matrp{W}{_A^{(j)}} \cvec{p}_A^{(j)} = \cvec{p}_A^{(j+1)} \in \bigotimes_{l=1}^{c-j} \sP \otimes \bigotimes_{k=1}^{j} \R^{o_A} \otimes \R^{i_A},\, \forall j \in \dintv{1}{c}.
+        \matrp{W}{_A^{(j)}} \cvec{p}_A^{(j)} = \cvec{p}_A^{(j+1)} \in \R^{i_A} \otimes \bigotimes_{k=1}^{j} \R^{o_A} \otimes \bigotimes_{l=1}^{c-j} \sP,\, \forall j \in \dintv{1}{c}.
       \end{equation}
       The map \(\matrp{W}{_A^{(j)}}\) for \(j \leq c\) depends on \(\R^{i_A}\) and all existing copies of \(\R^{o_A}\), but maps only one copy of \(\sP\) to one copy of \(\R^{o_A}\) and leaves the values in \(\R^{i_A}\) and the copies of \(\R^{o_A}\) unchanged. That is, we can write this operator as
       \begin{equation}
-        \matrp{W}{_A^{(j)}} = \bigotimes_{l=1}^{c-j} I_{\sP} \otimes \matrp{\tilde{W}}{_A^{(j)}}\, \forall j \in \dintv{1}{c}.
+        \matrp{W}{_A^{(j)}} = \matrp{\tilde{W}}{_A^{(j)}} \otimes \bigotimes_{l=1}^{c-j} I_{\sP} \, \forall j \in \dintv{1}{c}.
       \end{equation}
 
-      The matrices \(\matrp{\tilde{W}}{_A^{(j)}}\), mapping from \(\sP \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \R^{i_A}\) to \(\bigotimes_{k=1}^{j} \R^{o_A} \otimes \R^{i_A}\), can then be factorised into a permutation map (i.e.\ a symmetry operation) followed by an application map, corresponding to \(R\) and \(T\) above, respectively. The application map can be considered abstractly as dividing the source sequences \((\cvec{a}^{j-1}, x)\) into \(i_A\) bins, corresponding to the different values of \(x_{j}\), and multiplying the probability of the source sequence with \(\cvec{p}_{A|x_j}\). The enumeration of the application maps then reduces to a ``stars and bars'' combinatorics problem: each sequence of non-negative integers \({(n_k)}_{k=1}^{i_A}\) such that \( \sum_{k} n_k = i_A o_A^{j-1} \) corresponds to a unique application map. The canonical form is constructed by filling column 1 with \(n_1\) 1s, with other entries 0, then filling rows \(n_1 + 1\) to \(n_1 + n_2\) with 1s in column 2, and so on. Formally, we define the matrix \(\matrp{T}{_A^{(j)}}\) as
+      TODO the writeup below is mostly wrong; follow guidance from explicit example
+
+      The matrices \(\matrp{\tilde{W}}{_A^{(j)}}\), mapping from \(\R^{i_A} \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \sP\) to \(\R^{i_A} \otimes \bigotimes_{k=1}^{j} \R^{o_A}\), can then be factorised into a permutation map (i.e.\ a symmetry operation) followed by an application map, corresponding to \(R\) and \(T\) above, respectively. The application map can be considered abstractly as dividing the source sequences \((\cvec{a}^{j-1}, x)\) into \(i_A\) bins, corresponding to the different values of \(x_{j}\), and multiplying the probability of the source sequence with \(\cvec{p}_{A|x_j}\). The enumeration of the application maps then reduces to a ``stars and bars'' combinatorics problem: each sequence of non-negative integers \({(n_k)}_{k=1}^{i_A}\) such that \( \sum_{k} n_k = i_A o_A^{j-1} \) corresponds to a unique application map. The canonical form is constructed by filling column 1 with \(n_1\) 1s, with other entries 0, then filling rows \(n_1 + 1\) to \(n_1 + n_2\) with 1s in column 2, and so on. Formally, we define the matrix \(\matrp{T}{_A^{(j)}}\) as
       \begin{equation}
         \matrp{T}{_A^{(j)}}_{kl} = \indic{\sum_{m=1}^{l-1} n_m + 1 \leq k \leq \sum_{m=1}^{l-1} n_m + n_l}
       \end{equation}
       The permutation maps are similarly elementary to enumerate, consisting of all reorderings of the rows of the identity matrix.
 
-      TODO fix j=2 case, respect direct product structure for diff inputs
+      For \(j = c+1\), the wiring map produces the final output behaviour, so
+      \begin{equation}
+        \matrp{W}{_A^{(c+1)}} \cvec{p}_A^{(c+1)} = \cvec{p}_A' \in \sP.
+      \end{equation}
 
-      For clarity, we provide an explicit example using the wiring characterised by \Cref{eqn:wiringeg}, and define \(\cvec{\tilde{p}}_A^{(j)}\) as the element of \(\sP \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \R^{i_A}\) that is acted on by \(\matrp{\tilde{W}}{_A^{(j)}}\). Then,
-      \begin{align*}
-        \matrp{\tilde{W}}{_A^{(1)}} \cvec{\tilde{p}}{_A^{(1)}} &= \left( \begin{bmatrix}
-          I_2 & 0_{2\times{2}} \\
-          \end{bmatrix} \oplus \begin{bmatrix}
-          0_{2\times{2}} & I_2 \\
-          \end{bmatrix} \right) \left( I_{4} \oplus I_{4} \right) 
-          \left( \cvec{p}_A \otimes \begin{bmatrix} 1 \\ 1
-          \end{bmatrix} \right) \\
+      For clarity, we provide an explicit example using the wiring characterised by \Cref{eqn:wiringeg}, and define \(\cvec{\tilde{p}}_A^{(j)}\) as the element of \(\R^{i_A} \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \sP\) that is acted on by \(\matrp{\tilde{W}}{_A^{(j)}}\). Then,
+      \begin{align}
+        \matrp{\tilde{W}}{_A^{(1)}} \cvec{\tilde{p}}{_A^{(1)}} &= \left( \left(
+          \begin{bmatrix} 1 & 0 \\ \end{bmatrix} 
+          \oplus \begin{bmatrix} 0 & 1 \\ \end{bmatrix} \right) \otimes I_2 \right)
+          \left( \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} \otimes I_{4} \right) 
+          \left( \begin{bmatrix} 1 \\ 1 \end{bmatrix} \otimes \cvec{p}_A \right) \\
                                                                &= \begin{bmatrix}
           I_2 & 0_{2\times 2} & 0_{2\times 2} & 0_{2\times 2} \\
           0_{2\times 2} & 0_{2\times 2} & 0_{2\times 2} & I_2 \\
@@ -878,53 +889,53 @@
           \end{bmatrix} = \begin{bmatrix}
           \cvec{p}_{A|0} \\
           \cvec{p}_{A|1} \\
-          \end{bmatrix} \in \R^{o_A} \otimes \R^{i_A} \\
+          \end{bmatrix} \in \R^{i_A} \otimes \R^{o_A} \\
         \matrp{\tilde{W}}{_A^{(2)}} \cvec{\tilde{p}}{_A^{(2)}} &=
-        \left( \begin{bmatrix} I_2 & 0_{2\times{2}} \end{bmatrix} \oplus \bigoplus_{k=1}^3
-          \begin{bmatrix} 0_{2\times{2}} & I_2 \end{bmatrix} \right) 
-          \left( I_{4} \oplus I_{4} \right) \left( \cvec{p}_A \otimes \begin{bmatrix}
-          \cvec{p}_{A|0} \\
-          \cvec{p}_{A|1}
-          \end{bmatrix}
-            \right) \\
+        \left( \left(
+          \begin{bmatrix} 1 & 0 \\ \end{bmatrix} 
+          \oplus \bigoplus_{k=1}^3 \begin{bmatrix} 0 & 1 \\ \end{bmatrix} \right) \otimes I_2 \right) 
+          \left( \begin{bmatrix} 0 & 1 & 0 & 0 \\ 1 & 0 & 0 & 0 \\
+          0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \\ \end{bmatrix} \otimes I_{4} \right)
+          \left( \begin{bmatrix} \cvec{p}_{A|0} \\ \cvec{p}_{A|1} \end{bmatrix} \otimes \cvec{p}_A \right) \\
                                                                &=
         \begin{bmatrix}
-          p(0|0) & 0 & 0 & 0 \\
-          p(1|0) & 0 & 0 & 0 \\
-          \hline
-          0 & p(0|1) & 0 & 0 \\
-          0 & p(1|1) & 0 & 0 \\
-          0 & 0 & p(0|1) & 0  \\
-          0 & 0 & p(1|1) & 0  \\
-          0 & 0 & 0 & p(0|1)  \\
-          0 & 0 & 0 & p(1|1)  \\
-          \end{bmatrix} \begin{bmatrix}
-          0 & 1 & 0 & 0 \\
-          1 & 0 & 0 & 0 \\
-          0 & 0 & 1 & 0 \\
-          0 & 0 & 0 & 1 \\
-          \end{bmatrix} \\
-        \matrp{W}{_A} &= \begin{bmatrix}
+          \begin{bmatrix} I_2 & 0_{2\times{2}} \\ \end{bmatrix} & 0_{2\times{4}} & 0_{2\times{4}} & 0_{2\times{4}} \\
+          0_{2\times{4}} & \begin{bmatrix} 0_{2\times{2}} & I_2 \\ \end{bmatrix} & 0_{2\times{4}} & 0_{2\times{4}} \\
+          0_{2\times{4}} & 0_{2\times{4}} & \begin{bmatrix} 0_{2\times{2}} & I_2 \\ \end{bmatrix} & 0_{2\times{4}} \\
+          0_{2\times{4}} & 0_{2\times{4}} & 0_{2\times{4}} & \begin{bmatrix} 0_{2\times{2}} & I_2 \\ \end{bmatrix} \\
+        \end{bmatrix}
+        \begin{bmatrix} 
+          p(1|0) \cvec{p}_A \\ p(0|0) \cvec{p}_A \\
+          p(0|1) \cvec{p}_A \\ p(1|1) \cvec{p}_A \\ 
+        \end{bmatrix} \\
+                                                               &=
+        \begin{bmatrix} 
+          p(1|0) \cvec{p}_{A|0} \\ p(0|0) \cvec{p}_{A|1} \\
+          p(0|1) \cvec{p}_{A|1} \\ p(1|1) \cvec{p}_{A|1} \\ 
+        \end{bmatrix} \in \R^{i_A} \otimes \R^{o_A} \otimes \R^{o_A} \\
+              \matrp{W}{_A} \cvec{p}_A^{(3)} &= \begin{bmatrix}
           1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 \\
           0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
           0 & 0 & 0 & 0 & 1 & 1 & 1 & 0 \\
           0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
           \end{bmatrix} \begin{bmatrix}
-          0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-          0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-          0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-          0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-          0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-          0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-          0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-          0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+          1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+          0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+          0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+          0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+          0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+          0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+          0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+          0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
           \end{bmatrix}
-        \end{align*}
+          \begin{bmatrix} 
+            p(1|0) p(0|0) \\ p(1|0) p(1|0) \\ p(0|0) p(0|1) \\ p(0|0) p(1|1) \\
+            p(0|1) p(0|1) \\ p(0|1) p(1|1) \\ p(1|1) p(0|1) \\ p(1|1) p(1|1) \\ 
+          \end{bmatrix}
+        \end{align}
+        Note that, when \(j=c+1\), the versions of the objects with and without tildes are identical, therefore \(\matrp{\tilde{W}^{(3)}}{_A} \cvec{\tilde{p}}_A^{(3)} = \matrp{W}{_A} \cvec{p}_A^{(3)}\).
 
-      For \(j = c+1\), the wiring map produces the final output behaviour, so
-      \begin{equation}
-        \matrp{W}{_A^{(c+1)}} \cvec{p}_A^{(c+1)} = \cvec{p}_A' \in \sP.
-      \end{equation}
+        TODO final permutation matrix, degeneracies in permutation matrices, permutation shuffle across \(x\) implies one-sided dependence?
 
       However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a bounding function, it is possible to search for the wiring for each particular behaviour that produces the largest increase in the bound. However, without a convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Indeed, the underlying problem in our study of the space of wirings is summed up in the following question:
       \begin{funqn}\label{fqn:wir}
@@ -1248,16 +1259,16 @@
       \[ \sum_{abxy} c^{(j)}_{abxy} p(ab|xy) \geq v_j, \]
       and recalling that
       \[ p(ab|xy) = \Tr\left[\rho_{A B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right], \]
-      we have the following lower bound on \(H(\crv{A}|E, \crv{X}=x^*)\), the conditional entropy for a particular \(x^*\):
+      we have the following lower bound on \(H(\crv{A}|E, \crv{X}=x^{\star})\), the conditional entropy for a particular \(x^{\star}\):
       \begin{equation}
-        H(\crv{A}|E, \crv{X}=x^*) \geq c_m + C_m,
+        H(\crv{A}|E, \crv{X}=x^{\star}) \geq c_m + C_m,
       \end{equation}
       where \(C_m\) is given by
       \begin{equation}
         \begin{aligned}[c]
           \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \Tr\left[ 
             \begin{aligned}[c]
-            & \rho_{A B E} \left(M_{a|x^*} \otimes I_{B} \otimes \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) \right) \\
+            & \rho_{A B E} \left(M_{a|x^{\star}} \otimes I_{B} \otimes \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) \right) \\
               + & t_i \left( I_{A B} \otimes Z_{a,i}Z_{a,i}^{\dagger}\right)
             \end{aligned}
           \right] \\
@@ -1280,7 +1291,7 @@
       \begin{equation}
         \begin{aligned}[c]
           \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \angleb{\psi\left|
-          \tilde{M}_{a|x^*} \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) + t_i Z_{a,i}Z_{a,i}^{\dagger} \right|\psi} \\
+          \tilde{M}_{a|x^{\star}} \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) + t_i Z_{a,i}Z_{a,i}^{\dagger} \right|\psi} \\
             \text{s.t.} & \begin{aligned}[t] 
           & \sum_{abxy} c^{(j)}_{abxy} \angleb{\psi\left| \tilde{M}_{a|x} \tilde{N}_{b|y} \right|\psi} \geq v_j & & \forall 1 \leq j \leq r \\
           & \sum_{a} \tilde{M}_{a|x} = I_{A}, \sum_{b} \tilde{N}_{b|y} = I_{B} & & \forall x, y \\
@@ -1294,6 +1305,19 @@
             \end{aligned}
         \end{aligned}
       \end{equation}
+
+      A few other simplifications are possible, which are discussed and implemented in~\cite{BFF_QRE}:
+      \begin{enumerate}
+        \item From the normalisation of the measurements, we have that \(\tilde{M}_{o_A|x} = I - \sum_{a < o_A} \tilde{M}_{a|x}\). This allows us to eliminate one measurement operator for each value of \(x\), with the analogous simplification for Bob.
+        \item We need only consider inequalities that involve the operators in the objective function, since the other operators can be set to any value without changing the value of the objective function. For a protocol that depends only on the specific input \(x^{\star}\), this means that we need only consider inequalities that involve \(M_{a|x^{\star}}\). Therefore, we need only consider the operators appearing in those inequalities.
+        \item We can commute the infimum with the sum. That is, we use the objective function
+          \begin{equation} 
+            \sum_{i=1}^{m-1} \inf \frac{w_i}{t_i \ln 2} \sum_a \angleb{\psi\left|
+          \tilde{M}_{a|x^{\star}} \left( Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i}\right) + t_i Z_{a,i}Z_{a,i}^{\dagger} \right|\psi},
+          \end{equation}
+          solving \(m-1\) SDPs in sequence. This avoids an optimisation with \((m-1)o_A\) operators \(Z_{a,i}\), which would result in a vastly larger problem that will take much longer to solve. Since the variables in each SDP can be now be varied independently, this can only decrease the infimum computed, thereby decreasing the lower bound on the entropy, but still providing a valid lower bound on the entropy.
+        \item The inequality constraints on the operators can be removed in order to speed up the optimisation. Once again, this decreases the value of the achievable infimum, giving a looser but still valid lower bound.
+      \end{enumerate}
 
       Given the generality of these techniques, one could wonder whether any upper bounds can be computed in this fashion as well. This might help alleviate the optimisation difficulties discussed previously. The quadrature would need to be changed to be an upper bound, rather than a lower bound.
       \begin{question}
