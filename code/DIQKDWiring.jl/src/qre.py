@@ -71,7 +71,7 @@ def sdp_dual_vec(SDP):
     Would need to be modified if the number of moment constraints or their
     nature (equalities vs inequalities) changes.
     """
-    # TODO generalise
+    # TODO generalise: test 
     raw_vec = SDP.y_mat[-16:]
     vec = [0 for _ in range(8)]
     for k in range(8):
@@ -79,6 +79,7 @@ def sdp_dual_vec(SDP):
     return np.array(vec[:])
 
 
+# TODO generalise beyond x* = 0 (zero-based indexing)
 class BFFProblem(object):
     def __init__(self, **kwargs):
         # number of outputs for each input of Alice's / Bob's devices
@@ -165,7 +166,7 @@ class BFFProblem(object):
                 # trivially
                 ent = 0
                 if VERBOSE > 0:
-                    print("Bad solve: ", k, SDP.status)
+                    print("Bad solve for m = ", k, ":", SDP.status)
                 break
 
         return ent
@@ -214,11 +215,10 @@ class BFFProblem(object):
 
         return dual_vec, ent
 
-    def behav_eqs(self, pabxy):
+    def behav_analysis(self, pabxy):
         """
         Returns the moment equality constraints for the distribution specified by the
-        observed p(ab|xy). Note that we ignore constraints for a, b = 1; as in the
-        Collins-Gisin representation, these are unecessary.
+        observed p(ab|xy).
 
             pabxy  --     4D numpy array such that p[a, b, x, y] = p(ab|xy)
         """
@@ -240,7 +240,30 @@ class BFFProblem(object):
                     self.B[y][b]
                     - sum([pabxy[a, b, x, y] for a in range(oA)])
                 )
-        return constraints
+
+        constr_set = set(constraints)
+        keep_constraints = set()
+        keep_ops = set()
+        constr_ops = self.objective_ops[:]  # TODO define this
+        i = 0
+        while i < len(constr_ops):
+            curr_op = constr_ops[i]
+            curr_constrs = set()  # constrs to add from processing this op
+            for constr in constr_set:
+                thisconstr_ops = constr.free_symbols
+                try:  # check if constr contains curr_op
+                    thisconstr_ops.remove(curr_op)
+                except KeyError:
+                    continue
+                new_ops = thisconstr_ops - keep_ops
+                keep_ops += new_ops
+                constr_ops += list(new_ops)
+                keep_constraints.update({constr})
+                curr_constrs.update({constr})
+            constr_set -= curr_constrs
+            i += 1
+
+        return list(keep_constraints), constr_ops
 
     def optimise_q(self, SDP, sys, eta, q):
         """
@@ -365,6 +388,7 @@ class BFFProblem(object):
 
         return subs
 
+    # TODO generalise to extract from objective
     def get_extra_monomials(self):
         """
         Returns additional monomials to add to sdp relaxation.
@@ -376,14 +400,10 @@ class BFFProblem(object):
         ZZ = self.Z + [Dagger(z) for z in self.Z]
         Aflat = ncp.flatten(self.A)
         Bflat = ncp.flatten(self.B)
-        for a in Aflat:
-            for b in Bflat:
-                for z in ZZ:
-                    monos.append(a * b * z)
+        monos += [a * b * z for (a, b, z) in itprod(Aflat, Bflat, ZZ)]
 
         # Add monos appearing in objective function
-        for z in self.Z:
-            monos.append(self.A[0][0] * Dagger(z) * z)
+        monos += [self.A[0][0] * Dagger(z) * z for z in self.Z]
 
         return monos
 

@@ -86,7 +86,17 @@ except ModuleNotFoundError:
     SCS_SOLVEF = None
 
 
-def bound_entr_using_behav(p=None, q=0, **kwargs):
+def compute_entropy(prob, sdp, q=0):
+    starttime = datetime.datetime.now()
+    print(f"Start: {starttime}")
+    ent = prob.compute_entropy(sdp, q)
+    print(f"Entropy: {ent}")
+    endtime = datetime.datetime.now()
+    print(f"End: {endtime}, Delta: {endtime - starttime}")
+    return ent
+
+
+def behav_problem(p=None, **kwargs):
     starttime = datetime.datetime.now()
     print(f"Start: {starttime}")
 
@@ -95,29 +105,23 @@ def bound_entr_using_behav(p=None, q=0, **kwargs):
         p = TEST_P
 
     prob = BFFProblem(**kwargs)
-    ops = ncp.flatten([prob.A, prob.B, prob.Z])  # Base monomials involved in problem
-    obj = prob.objective(1, q)  # Placeholder objective function
+    behav_constrs, behav_ops = prob.behav_analysis(p)
+    prob.moment_eqs += behav_constrs
 
-    sdp = ncp.SdpRelaxation(ops, verbose=VERBOSE - 1, normalized=True, parallel=0)
-    prob.moment_eqs += prob.behav_eqs(p)
+    sdp = ncp.SdpRelaxation(behav_ops, verbose=VERBOSE - 1, normalized=True, parallel=0)
     sdp.get_relaxation(
         level=NPA_LEVEL,
         equalities=prob.op_eqs[:],
         inequalities=prob.op_ineqs[:],
         momentequalities=prob.moment_eqs[:],
         momentinequalities=prob.moment_ineqs[:],
-        objective=obj,
+        objective=prob.objective,
         substitutions=prob.substitutions,
         extramonomials=prob.extra_monos,
     )
     setuptime = datetime.datetime.now()
     print(f"Setup Done At: {setuptime}, Delta: {setuptime - starttime}")
-    ent = prob.compute_entropy(sdp, q)
-
-    print(f"Entropy: {ent}")
-    endtime = datetime.datetime.now()
-    print(f"End: {endtime}, Delta: {endtime - setuptime}")
-    return ent
+    return prob, sdp
 
 
 class Wiring(object):
@@ -174,10 +178,10 @@ class Wiring(object):
             for cond_idx in itprod(*idx_ranges[2 + 2 * c :])
         ]
 
-        # TODO add LOSR constraints
+        # TODO add LOSR variables
 
 
-def bound_entr_with_wirings(c=2, p=None, q=0, solvef=SOLVEF):
+def behav_wirs_problem(c=2, p=None, solvef=SOLVEF):
     starttime = datetime.datetime.now()
     print(f"Start: {starttime}")
 
@@ -187,7 +191,7 @@ def bound_entr_with_wirings(c=2, p=None, q=0, solvef=SOLVEF):
 
     prob = BFFProblem(solvef=solvef)
     ops = ncp.flatten([prob.A, prob.B, prob.Z])  # Base monomials involved in problem
-    obj = prob.objective(1, q)  # Placeholder objective function
+    obj = prob.objective(1, 0)  # Placeholder objective function
     chi = Wiring(p, c)
 
     # TODO see if chi.params need to be parameters or variables
@@ -207,12 +211,7 @@ def bound_entr_with_wirings(c=2, p=None, q=0, solvef=SOLVEF):
     )
     setuptime = datetime.datetime.now()
     print(f"Setup Done At: {setuptime}, Delta: {setuptime - starttime}")
-    ent = prob.compute_entropy(sdp, q)
-
-    print(f"Entropy: {ent}")
-    endtime = datetime.datetime.now()
-    print(f"End: {endtime}, Delta: {endtime - setuptime}")
-    return ent
+    return prob, sdp
 
 
 # SCS, M+6, singlet, KEEP_M: Entropy: 0.9937548088160353, Delta: 0:30:22.533141
