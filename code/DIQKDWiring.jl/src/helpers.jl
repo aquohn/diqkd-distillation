@@ -47,3 +47,5 @@ function sliceup(seq, steps...)
 end
 
 unzip(a) = map(x->getfield.(a, x), fieldnames(eltype(a)))
+const itprod = Iterators.product
+const itrept = Iterators.repeated

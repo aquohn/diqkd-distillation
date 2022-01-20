@@ -59,8 +59,8 @@ end
 
 function sett_perms(sett::Setting)
   iA, oA, iB, oB = sett
-  iters = [1:iA, 1:iB, [1:oA for _ in 1:iA]..., [1:oB for _ in 1:iB]...]
-  return Iterators.product(permutations.(iters))
+  iters = [1:iA, 1:iB, itrep(1:oA, iA)..., itrep(1:oB, iB)...]
+  return itprod(permutations.(iters))
 end
 function apply_perm(behav::Behaviour{Sax, Sby, Sabxy, T}, perm_data::AbstractArray) where {Sax, Sby, Sabxy, T}
   ppabxy = Array{T}(undef, Sabxy.parameters...)
@@ -73,12 +73,12 @@ function wiring_prob(wiring::Wiring, behav::Behaviour)
   ppabxy = zeros(size(pabxy))
   c = Integer((CA |> size |> length) / 2)
 
-  aseqs = BoxSequence[BoxSequence(:A, [a], [x]) for (a,x) in Iterators.product(1:oA, 1:iA)] |> vec
+  aseqs = BoxSequence[BoxSequence(:A, [a], [x]) for (a,x) in itprod(1:oA, 1:iA)] |> vec
   while !isempty(aseqs) # depth-first search
     aseq = pop!(aseqs)
     j = length(aseq.as)
     if j == c # all boxes accounted for; start iterating over Bob's boxes
-      bseqs = BoxSequence[BoxSequence(:B, [b], [y]) for (b,y) in Iterators.product(1:oB, 1:iB)] |> vec
+      bseqs = BoxSequence[BoxSequence(:B, [b], [y]) for (b,y) in itprod(1:oB, 1:iB)] |> vec
       while !isempty(bseqs)
         bseq = pop!(bseqs)
         k = length(bseq.bs)
@@ -177,16 +177,16 @@ end
 
 function wiring_iters(sett::Setting{T}, c::T) where T <: Integer
   oA, oB, iA, iB = sett
-  CAiters = [1:oA for i in 1:(iA * oA^c)]
-  CBiters = [1:oB for i in 1:(iB * oB^c)]
-  CAjiters = [[1:iA for i in 1:(iA * oA^(j-1))] for j in 1:c]
-  CBjiters = [[1:iB for i in 1:(iB * oB^(j-1))] for j in 1:c]
+  CAiters = itrep(1:oA, (iA * oA^c))
+  CBiters = itrep(1:oB, (iB * oB^c))
+  CAjiters = [itrep(1:iA, (iA * oA^(j-1))) for j in 1:c]
+  CBjiters = [itrep(1:iB, (iB * oB^(j-1))) for j in 1:c]
 
   return CAiters, CBiters, CAjiters, CBjiters
 end
 
 function wiring_policy!(wiring::Wiring, CAvec, CBvec, CAjvec, CBjvec, iA, oA, iB, oB, c)
-  aseqs = BoxSequence[BoxSequence(:A, [a], [x]) for (a,x) in Iterators.product(1:oA, 1:iA)] |> vec
+  aseqs = BoxSequence[BoxSequence(:A, [a], [x]) for (a,x) in itprod(1:oA, 1:iA)] |> vec
   while !isempty(aseqs) # depth-first search
     aseq = pop!(aseqs)
     j = length(aseq.as)
@@ -202,7 +202,7 @@ function wiring_policy!(wiring::Wiring, CAvec, CBvec, CAjvec, CBjvec, iA, oA, iB
     end
   end
 
-  bseqs = BoxSequence[BoxSequence(:B, [b], [y]) for (b,y) in Iterators.product(1:oB, 1:iB)] |> vec
+  bseqs = BoxSequence[BoxSequence(:B, [b], [y]) for (b,y) in itprod(1:oB, 1:iB)] |> vec
   while !isempty(bseqs)
     bseq = pop!(bseqs)
     k = length(bseq.bs)
@@ -236,7 +236,7 @@ end
 # fixing the wirings for one i removes o^c degrees of freedom from C, and
 # o^(j-1) degrees of freedom from Cj[j]
 function diqkd_wiring_and_policy(CA, CAj, CB, CBj, CAvec, CBvec, CAjvec, CBjvec, iA, oA, iB, oB, c)
-  aseqs = BoxSequence[BoxSequence(:A, [a], [x]) for (a,x) in Iterators.product(1:oA, 1:iA)] |> vec
+  aseqs = BoxSequence[BoxSequence(:A, [a], [x]) for (a,x) in itprod(1:oA, 1:iA)] |> vec
   while !isempty(aseqs) # depth-first search
     aseq = pop!(aseqs)
     j = length(aseq.as)
@@ -259,7 +259,7 @@ function diqkd_wiring_and_policy(CA, CAj, CB, CBj, CAvec, CBvec, CAjvec, CBjvec,
     end
   end
 
-  bseqs = BoxSequence[BoxSequence(:B, [b], [y]) for (b,y) in Iterators.product(1:oB, 1:iB)] |> vec
+  bseqs = BoxSequence[BoxSequence(:B, [b], [y]) for (b,y) in itprod(1:oB, 1:iB)] |> vec
   while !isempty(bseqs)
     bseq = pop!(bseqs)
     k = length(bseq.bs)
@@ -306,7 +306,7 @@ function diqkd_wiring_eval(behav, HAE, HAB; c = 2, iterf = nothing, policy = wir
   lengths = [prod(shape) for shape in shapes]
   recs = WiringData[]
 
-  for data in Iterators.product(vcat([vec(iterarr) for iterarr in iterarrs]...)...)
+  for data in itprod(vcat([vec(iterarr) for iterarr in iterarrs]...)...)
     sliced = sliceup(data, lengths...)
     CAvec, CBvec = [sliced[1:2]...]
     l = Integer(length(sliced[3:end]) / 2)

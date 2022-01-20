@@ -15,7 +15,7 @@ pushfirst!(PyList(pysys.path), Py(@__DIR__))
 const qre = pyimport("qre")
 const optims = pyimport("optims")
 
-h(x) = (x == 0 || x == 1) ? 0 : -x*log2(x) - (1-x)*log2(1-x)
+h(x) = (x == 0 || x == 1) ? 0.0 : -x*log2(x) - (1-x)*log2(1-x)
 r(Q,S) = 1-h((1+sqrt((S/2)^2 - 1))/2)-h(Q)
 
 # %%
@@ -104,7 +104,7 @@ function asym_chsh_star_model(corrp, corrm; optim=isres)
   @variable(mdl, 0 <= sstar <= 2*sqrt(2))
 
   @NLexpression(mdl, s, alpha * corrp + corrm)
-  @NLconstraint(mdl, h(q) + dg(q, alpha, sstar) * (sstar - 2) - g(sstar) == 0)
+  @NLconstraint(mdl, h(q) + dg(q, alpha, sstar) * (sstar - 2) - g(sstar, q, alpha) == 0)
   @NLconstraint(mdl, s <= sstar)
   @NLobjective(mdl, Max, gbar_opt(q, alpha, s, sstar))
 
@@ -124,7 +124,7 @@ function asym_chsh_nostar_model(corrp, corrm; optim=isres)
   @variable(mdl, 0 <= sstar <= 2*sqrt(2))
 
   @NLexpression(mdl, s, alpha * corrp + corrm)
-  @NLconstraint(mdl, h(q) + dg(q, alpha, sstar) * (sstar - 2) - g(sstar) == 0)
+  @NLconstraint(mdl, h(q) + dg(q, alpha, sstar) * (sstar - 2) - g(sstar, q, alpha) == 0)
   @NLconstraint(mdl, s >= sstar)
   @NLobjective(mdl, Max, g(q, alpha, s))
 

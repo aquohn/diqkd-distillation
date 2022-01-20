@@ -23,7 +23,7 @@ function func_vec(::Type{T}, ::Type{Ti}, tupranges) where {T <: Real, Ti <: Inte
   nidxs = Ti(prod(shape))
   F = Array{SparseVector{T, Ti}}(undef, shape...)
   idx = 1
-  for tup in Iterators.product(tupranges...)
+  for tup in itprod(tupranges...)
     F[tup...] = sparsevec([idx], 1, nidxs)
     idx += 1
   end
@@ -45,15 +45,15 @@ function full_polytope(::Type{T}, n, i, o, polylib=LRSLib.Library()) where {T <:
   P, nidxs = func_vec(T, Ti, tupranges)
   SV = SparseVector{T, Ti}
 
-  lnormconstrs = vec([-P[tup...] for tup in Iterators.product(tupranges...)])
-  unormconstrs = vec([sum([P[otup..., itup...] for otup in Iterators.product(otupranges...)]) for itup in Iterators.product(itupranges...)])
+  lnormconstrs = vec([-P[tup...] for tup in itprod(tupranges...)])
+  unormconstrs = vec([sum([P[otup..., itup...] for otup in itprod(otupranges...)]) for itup in itprod(itupranges...)])
   icombs = collect(combinations(1:i, 2))
   nsconstrs = SV[]
   for p in 1:n
     currtups = deepcopy(tupranges)
     currtups[p] = 0:0
     currtups[p + n] = 0:0
-    for tup in Iterators.product(currtups...)
+    for tup in itprod(currtups...)
       params = [tup...]
       for is in icombs
         constr = spzeros(T, nidxs)
@@ -96,7 +96,7 @@ end
 # TODO inefficient but simple
 function ld_polytope(iA, oA, iB, oB, ::Type{T} = Float64) where T <: Real
   ld_pts = Vector{Vector{T}}()
-  for params in Iterators.product((1:oA for x in 1:iA)..., (1:oB for y in 1:iB)...)
+  for params in itprod((1:oA for x in 1:iA)..., (1:oB for y in 1:iB)...)
     pabxy = zeros(T, oA, oB, iA, iB)
     pax = zeros(T, oA, iA)
     pby = zeros(T, oB, iB)
@@ -373,8 +373,8 @@ function indep_rounds_couplers(::Type{T}, c::Integer, o::Integer, i::Integer) wh
   Ti = promote_type(typeof(c), typeof(o), typeof(i))
   chi, nidxs = func_vec(T, Ti, tupranges)
   SV = SparseVector{T, Ti}
-  behav_iter = Iterators.product(repeat([1:o], i)...)
-  ys_iter = Iterators.product(repeat([1:i], c)...)
+  behav_iter = itprod(repeat([1:o], i)...)
+  ys_iter = itprod(repeat([1:i], c)...)
 
   lnormconstrs = SV[]
   unormconstrs = SV[]
