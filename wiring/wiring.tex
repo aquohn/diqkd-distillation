@@ -583,7 +583,6 @@
       \end{funqn}
 
       From a theoretical standpoint, answering this question would develop our currently limited understanding of the nature of the secret key capacity, and practically, the use of such wirings would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system. ``Super-activation'' of nonlocality is known to exist for joint quantum operations (e.g.\ two quantum states that do not exhibit nonlocality individually can jointly exhibit it), so there is some hope that similar behaviour might be observed here.
-
       TODO write out how NL activation can be done in more detail
 
       \section{The Quantum Key Distribution Setting}\label{sec:qkdset}
@@ -750,21 +749,28 @@
         \chi_B(b\cvec{y}^j|\cvec{b}^cy\lambda) &= \chi_B(b\cvec{y}^j|\cvec{b}^{j-1}y\lambda),\,\forall j \in \dintv{1}{c},
         \end{aligned}\label{eqn:wiringnoretro}
       \end{equation}
-      which we refer to as the \emph{marginal wiring functions}. If we focus only on \(j = c\), we can see these distributions as elements of \(\Ls\), with outputs \((a, \cvec{x}^c)\) and \((b, \cvec{y}^c)\), and inputs \((\cvec{a}^{c-1}, x)\) and \((\cvec{b}^{c-1}, y)\). This will hopefully simplify the space of wirings, since it would otherwise be a polytope with \({(o_A i_A^c)}^{i_A^c o_A} {(o_B i_B^c)}^{i_B^c o_B}\) vertices (\(\approx \num{5.12e18}\) for the QKD setting). We will shortly turn our attention to characterising this space, but first briefly remark that, while the definitions and discussion thus far focus on the bipartite case, they generalise readily to the \(n\)-partite case, although we will not treat this case in detail here.
+      which we refer to as the \emph{marginal wiring functions}. If we focus only on \(j = c\), we can see these distributions as elements of \(\Ls\), with outputs \((a, \cvec{x}^c)\) and \((b, \cvec{y}^c)\), and inputs \((\cvec{a}^{c-1}, x)\) and \((\cvec{b}^{c-1}, y)\). These conditions will hopefully simplify the space of wirings, since it without the conditions, we would have a polytope with \({(o_A i_A^c)}^{i_A^c o_A} {(o_B i_B^c)}^{i_B^c o_B}\) vertices (\(\approx \num{5.12e18}\) for the QKD setting). We will shortly turn our attention to characterising this space, but first briefly remark that, while the definitions and discussion thus far focus on the bipartite case, they generalise readily to the \(n\)-partite case, although we will not treat this case in detail here.
+      
+      \subsection{The Wiring Polytope}
 
-      TODO try using the inequalities to find the polytope
+      Physically, a probabilistic wiring must actually execute some deterministic wiring, and its joint wiring function is then a probability distribution over the deterministic joint wiring functions, of which there are finitely many. This is the intuition behind the proof of Fine's theorem presented in~\cite{BellNonlocality}, which can be straightforwardly adapted to this polytope. Loosely speaking, given if there exists a decomposition of the behaviour into behaviours that obey the no-retrocausation conditions, these latter behaviours can be converted into deterministic behaviours obeying the conditions by offloading the indeterminism into an auxiliary random variable, and redefining \(\lambda\) to incorporate this auxliary variable.
 
-      \subsection{Generating the Wiring Polytope}
+      Therefore, to determine the polytope of joint wiring functions, we can use the same approach as is typically used for \(\Ls\), where deterministic operations are taken as the vertices of the polytope, and the facet-defining inequalities derived from there using a facet-enumeration algorithm. In order to avoid the computational effort of simply enumerating all possible local deterministic behaviours and pruning them by removing those that violate the no-retrocausation conditions, we wish to explore the structure of these wirings, so that we can minimise the generation of wirings that will eventually be pruned. Indeed, this analysis reveals significant redundancies in the wirings that would be generated naively, with many of them corresponding to the same action on the behaviours. Removing them at an early stage rather than generating and then dealing with them will increase the scalability of our methods.
 
-      Physically, a probabilistic wiring must actually execute some deterministic wiring, and its joint wiring function is then a probability distribution over the deterministic joint wiring functions, of which there are finitely many. This is the intuition behind the proof of Fine's theorem presented in~\cite{BellNonlocality}, which can be straightforwardly adapted to this polytope. Therefore, to determine the polytope of joint wiring functions, we can use the same approach as is typically used for \(\Ls\), where deterministic operations are taken as the vertices of the polytope, and the facet-defining inequalities derived from there. 
-
-      In order to illustrate one of the degeneracies in this class of wirings, we use a different, more operational description for deterministic wirings. Focusing on Alice's marginal wiring functions, her inputs \(\cvec{x}^c\) to her boxes as being computed by a sequence of \(c\) functions with range \(\dintv{1}{i_A}\):
+      In order to illustrate one of the redundancies that emerges from the naive approach, we use a different, more operational description for deterministic wirings. Focusing on Alice's marginal wiring functions, we can decompose her marginal wiring function using Bayes' rule as
+      \begin{align}
+        \chi_A(a\cvec{x}^c|\cvec{a}^cx\lambda) &= \chi_A(a|\cvec{x}^c\cvec{a}^cx\lambda) \chi_A(\cvec{x}^{c}|\cvec{a}^cx\lambda) \\
+        &= \chi_A(a|\cvec{x}^c\cvec{a}^cx\lambda) \chi_A(x_c|\cvec{x}^{c-1}\cvec{a}^cx\lambda) \chi_A(\cvec{x}^{c-1}|\cvec{a}^cx\lambda) \\
+        &= \chi_A(a|\cvec{x}^c\cvec{a}^cx\lambda) \prod_{j=1}^c \chi_A(x_j|\cvec{x}^{j-1}\cvec{a}^cx\lambda) \\
+        &= \chi_A(a|\cvec{x}^c\cvec{a}^{c}x\lambda) \prod_{j=1}^c \chi_A(x_j|\cvec{x}^{j-1}\cvec{a}^{j-1}x\lambda),
+      \end{align}
+      where in the last line we have used the no-retrocausation condition. For deterministic wirings, we can consider her inputs \(\cvec{x}^c\) to her boxes as being computed by a sequence of \(c\) deterministic functions with range \(\dintv{1}{i_A}\):
       \begin{equation} x_j = W^{(j)}_{A,\lambda}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x),\,j \in \dintv{1}{c} \end{equation}
       and a final output function with range \(\dintv{1}{o_A}\):
       \begin{equation} a = W_{A,\lambda}(\cvec{x}^{c}, \cvec{a}^{c}, x). \end{equation}
       We refer to each function as a \emph{marginal wiring map}. The corresponding marginal wiring function \(\chi_A\) is then
       \begin{equation}
-        \chi_A(a\cvec{x}^c|\cvec{a}^cx\lambda) = \indic{a = W_{A,\lambda}(\cvec{x}^{c}, \cvec{a}^{c}, x)} \prod_{j=1}^c \indic{x_j = W^{(j)}_{A,\lambda}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x)}
+        \chi_A(a\cvec{x}^c|\cvec{a}^cx\lambda) = \indic{a = W_{A,\lambda}(\cvec{x}^{c}, \cvec{a}^{c}, x)} \prod_{j=1}^c \indic{x_j = W^{(j)}_{A,\lambda}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x)},
       \end{equation}
       where \(\indic{\angleb{proposition}}\) is the \emph{indicator function} that is 1 when the proposition is true, and 0 otherwise. The analogous definitions for Bob hold with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). Probabilistic wirings can then be described as convex combinations of such deterministic wirings.
 
@@ -808,7 +814,7 @@
       \end{equation}
       The same applies to Bob with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). 
 
-      A concrete example can help illustrate this degeneracy. A wiring characterised by
+      A concrete example can help illustrate this degeneracy. Switching to the labels \(\{0, 1\}\) for both inputs and outputs, the wiring characterised by
       \begin{equation}
         x_1 = x \qquad x_2 = \bar{a}_1 + x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2\label{eqn:wiringeg}
       \end{equation}
@@ -820,9 +826,9 @@
       \end{equation}
       for Alice, with the analogous relabelling for Bob.
 
-      For the case of two boxes in the QKD setting, there are 16384 marginal wirings for Alice, and \(\approx \num{8.06e7}\) for Bob, for a total of \(\approx \num{1.32e12}\). Fixing the AND gating as discussed above gives us 128 wirings for Alice and 186624 for Bob, for a total of \(\approx \num{2.39e7}\). Both are much more manageable than the number of vertices of \(\Ls\) without causality constraints, but still a substantial computational workload.
+      For the case of two boxes in the QKD setting, there are 16384 marginal wiring functions for Alice, and \(\approx \num{8.06e7}\) for Bob, for a total of \(\approx \num{1.32e12}\). Fixing the AND gating as discussed above gives us 128 wirings for Alice and 186624 for Bob, for a total of \(\approx \num{2.39e7}\). Both are much more manageable than the number of vertices of \(\Ls\) without causality constraints, but still a substantial computational workload. Fortunately, there are still other techniques to decrease the number of possible deterministic wirings, for which we need to study the structure of these wirings in greater detail.
 
-      \subsection{Factorising the Transformations}
+      \subsection{Factorising Wirings}
 
       Inspired by the analysis of single-copy local transformations in~\cite{LocalTransformations}, another approach would be to view each marginal wiring map as a reversible symmetry operation on its source, followed by an irreversible mapping to a target, and then a reversible symmetry operation on the target. It is tempting to argue that reversible symmetry operations, which can be represented by unitary operators, cannot change the von Neumann entropy of a state, and therefore can be neglected. Unfortunately, these operators are applied a part of a long sequence of operators, some of which are not unitary, and therefore cannot be simply neglected (aside from the final symmetry operation).
 
@@ -832,9 +838,7 @@
       \[ S_{c+1}T_{c+1}R_{c+1} T_{c}R_{c} \cdots T_2R_2 T_1R_1 p, \]
       where we keep the final symmetry operation \(S_{c+1}\) since, while \(H(A|E)\) itself is not affected by symmetry operations, some methods for estimating \(H(A|E)\) might be.
 
-      Without this simplification, there will be a large number of generated wirings that are actually identical in effect. While these will correspond to identical vertices in the polytope and can therefore be removed during vertex enumeration, removing them pre-emptively would mitigate the combinatorial explosion of possible local transformations, resulting in a significant reduction in the number of vertices and improving the scalability of our methods.
-
-      We will formalise this by expressing the transformations in the language of linear algebra. Since the deterministic marginal wiring maps are local, they are entirely characterised by their effect on a single-player behaviour, with the transformation of the overall behaviour arising from the tensor product structure. We therefore now consider the case of a single player, whose box takes input \(x \in \dintv{1}{i_A}\) and gives output \(a \in \dintv{1}{o_A}\). Each wiring map is now viewed as a matrix \(\matrp{W}{_A^{(j)}}\), acting on the single-player behaviour represented as a vector \(\cvec{p}^{(j)}_A\).
+      We will formalise this by expressing the wirings as linear operators: that is, matrices. Since the deterministic marginal wirings are local, they are entirely characterised by their effect on a single-player behaviour, with the effect of a joint deterministic wiring being the tensor product of the marginal wirings. We therefore now consider the case of a single player, whose box takes input \(x \in \dintv{1}{i_A}\) and gives output \(a \in \dintv{1}{o_A}\). Each wiring map is now viewed as a matrix \(\matrp{W}{_A^{(j)}}\), acting on the single-player behaviour represented as a vector \(\cvec{p}^{(j)}_A\).
 
       We vectorise the behaviour by incrementing \(a\), then \(x\), that is
       \begin{equation}
@@ -858,25 +862,26 @@
         \matrp{W}{_A^{(j)}} = \matrp{\tilde{W}}{_A^{(j)}} \otimes \bigotimes_{l=1}^{c-j} I_{\sP} \, \forall j \in \dintv{1}{c}.
       \end{equation}
 
-      TODO the writeup below is mostly wrong; follow guidance from explicit example
+      The matrices \(\matrp{\tilde{W}}{_A^{(j)}}\), mapping from \(\R^{i_A} \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \sP\) to \(\R^{i_A} \otimes \bigotimes_{k=1}^{j} \R^{o_A}\), can then be factorised into a permutation map (i.e.\ a symmetry operation) followed by an application map, corresponding to \(R\) and \(T\) above, respectively. However, both maps must be a direct sum of \(i_A\) smaller submaps, in order to preserve the separation between the \(i_A\) possible values of the overall input \(x\). This separation must be preserved throughout for the final matrix \(\matrp{W}{_A^{(c+1)}}\) to be able to correctly assign the probabilities based on the overall input.
 
-      The matrices \(\matrp{\tilde{W}}{_A^{(j)}}\), mapping from \(\R^{i_A} \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \sP\) to \(\R^{i_A} \otimes \bigotimes_{k=1}^{j} \R^{o_A}\), can then be factorised into a permutation map (i.e.\ a symmetry operation) followed by an application map, corresponding to \(R\) and \(T\) above, respectively. The application map can be considered abstractly as dividing the source sequences \((\cvec{a}^{j-1}, x)\) into \(i_A\) bins, corresponding to the different values of \(x_{j}\), and multiplying the probability of the source sequence with \(\cvec{p}_{A|x_j}\). The enumeration of the application maps then reduces to a ``stars and bars'' combinatorics problem: each sequence of non-negative integers \({(n_k)}_{k=1}^{i_A}\) such that \( \sum_{k} n_k = i_A o_A^{j-1} \) corresponds to a unique application map. The canonical form is constructed by filling column 1 with \(n_1\) 1s, with other entries 0, then filling rows \(n_1 + 1\) to \(n_1 + n_2\) with 1s in column 2, and so on. Formally, we define the matrix \(\matrp{T}{_A^{(j)}}\) as
+      Each application submap can be considered abstractly as mapping each source sequence \(\cvec{a}^{j-1}\) to a specific value of \(x_j\), and multiplying the probability of the source sequence with \(\cvec{p}_{A|x_j}\). In order to operate on a copy of \(\cvec{p}_A\), the application submap \(\matrp{T}{_{A|x}^{(j)}}\) for a given \(x\) must take the following form:
       \begin{equation}
-        \matrp{T}{_A^{(j)}}_{kl} = \indic{\sum_{m=1}^{l-1} n_m + 1 \leq k \leq \sum_{m=1}^{l-1} n_m + n_l}
+        \matrp{T}{_{A|x}^{(j)}} = \left( \bigoplus_{l=1}^{n_1} \underbrace{\begin{bmatrix} 1 & 0 & 0 & \cdots \end{bmatrix}}_{i_A\text{ entries}}
+          \oplus \bigoplus_{l=1}^{n_2} \underbrace{\begin{bmatrix} 0 & 1 & 0 & \cdots \end{bmatrix}}_{i_A\text{ entries}} \oplus \cdots
+        \right) \otimes I_{o_A},
       \end{equation}
-      The permutation maps are similarly elementary to enumerate, consisting of all reorderings of the rows of the identity matrix.
+      where \(n_l\) is the number of source sequences \(\cvec{a}^{j-1}\) mapped to \(x_j = l\). The matrices in the direct sum of matrices identify a particular value of \(x\), and \(I_{o_A}\) maps the respective \(\cvec{p}_{A|x}\) to \(\R^{o_A}\). The enumeration of the application submaps then reduces to a ``stars and bars'' combinatorics problem: each tuple of non-negative integers \({(n_k)}_{k=1}^{i_A}\) such that \( \sum_{k} n_k = o_A^{j-1} \) corresponds to a unique application submap. This is equivalent to selecting \(i_A-1\) slots out of \(o_A^{j-1}+i_A-1\) as ``bars'', and placing the source sequences (the ``stars'') into the remaining \(o_A^{j-1}\) slots in a fixed order. The ``bars'' then divide the ``stars'' into \(i_A\) possibly empty bins, as required. Therefore, there are \(\binom{o_A^{j-1} + i_A-1}{i_A-1}\) possible application submaps.
 
-      For \(j = c+1\), the wiring map produces the final output behaviour, so
-      \begin{equation}
-        \matrp{W}{_A^{(c+1)}} \cvec{p}_A^{(c+1)} = \cvec{p}_A' \in \sP.
-      \end{equation}
+      While the application submap determines the multiplicity of each input, the permutation submap takes care of assigning the source sequences to those inputs. It is a permutation matrix, consisting of the identity matrix with its rows permuted, with a tensor product with \(I_{i_A o_A}\) in order to operate on the probabilities \(\cvec{p}\). However, there are degeneracies here as well. The number of permutations with different effects can be calculated by considering the combinatoric problem of assigning \(n_1\) inputs \(1\), \(n_2\) inputs \(2\), and so on, to \(o_A^{j-1}\) source sequences. There are therefore \(o_A^{j-1}/\prod_{k=1}^{i_A} n_k!\) possible permutation submaps.
 
-      For clarity, we provide an explicit example using the wiring characterised by \Cref{eqn:wiringeg}, and define \(\cvec{\tilde{p}}_A^{(j)}\) as the element of \(\R^{i_A} \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \sP\) that is acted on by \(\matrp{\tilde{W}}{_A^{(j)}}\). Then,
+      For \(j = c+1\), we are mapping from \(\R^{i_A} \otimes \bigotimes_{k=1}^{c} \R^{o_A}\) to \(\sP\). Analogous to the case with \(j \leq c\), the application submap provides the multiplicity of output values, while the permutation submap decides which probabilities are assigned to which output. This gives \(\binom{o_A^{j-1} + o_A-1}{o_A-1}\) application submaps and \(o_A^{j-1}/\prod_{k=1}^{o_A} n_k!\) permutation submaps. Note, however, that the final symmetry operation, corresponding to \(S_{c+1}\) in our informal notation, does not perform any transformation that the variation in the application and permutation submaps cannot (except for permutations of the different values of \(x\), but this effect would already have been generated by the variation in the application and permutation submaps). We therefore will not consider it.
+
+      For clarity, we provide an explicit example using the wiring characterised by \Cref{eqn:wiringeg}, and define \(\cvec{\tilde{p}}_A^{(j)}\) as the element of \(\R^{i_A} \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \sP\) that is acted on by \(\matrp{\tilde{W}}{_A^{(j)}}\). To improve readability, we have also factorised out tensor products with identity matrices. The wiring and its effects are then:
       \begin{align}
         \matrp{\tilde{W}}{_A^{(1)}} \cvec{\tilde{p}}{_A^{(1)}} &= \left( \left(
           \begin{bmatrix} 1 & 0 \\ \end{bmatrix} 
           \oplus \begin{bmatrix} 0 & 1 \\ \end{bmatrix} \right) \otimes I_2 \right)
-          \left( \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} \otimes I_{4} \right) 
+          \left( \left( \begin{bmatrix} 1 \end{bmatrix} \oplus \begin{bmatrix} 1 \end{bmatrix} \right) \otimes I_{4} \right) 
           \left( \begin{bmatrix} 1 \\ 1 \end{bmatrix} \otimes \cvec{p}_A \right) \\
                                                                &= \begin{bmatrix}
           I_2 & 0_{2\times 2} & 0_{2\times 2} & 0_{2\times 2} \\
@@ -890,13 +895,13 @@
           \cvec{p}_{A|0} \\
           \cvec{p}_{A|1} \\
           \end{bmatrix} \in \R^{i_A} \otimes \R^{o_A} \\
-        \matrp{\tilde{W}}{_A^{(2)}} \cvec{\tilde{p}}{_A^{(2)}} &=
+        \matrp{\tilde{W}}{_A^{(2)}} \cvec{\tilde{p}}{_A^{(2)}} &= \begin{gathered}
         \left( \left(
-          \begin{bmatrix} 1 & 0 \\ \end{bmatrix} 
-          \oplus \bigoplus_{k=1}^3 \begin{bmatrix} 0 & 1 \\ \end{bmatrix} \right) \otimes I_2 \right) 
-          \left( \begin{bmatrix} 0 & 1 & 0 & 0 \\ 1 & 0 & 0 & 0 \\
-          0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \\ \end{bmatrix} \otimes I_{4} \right)
-          \left( \begin{bmatrix} \cvec{p}_{A|0} \\ \cvec{p}_{A|1} \end{bmatrix} \otimes \cvec{p}_A \right) \\
+          \left( \begin{bmatrix} 1 & 0 \\ \end{bmatrix} \oplus \begin{bmatrix} 0 & 1 \\ \end{bmatrix} \right)
+          \oplus \bigoplus_{k=1}^2 \begin{bmatrix} 0 & 1 \\ \end{bmatrix} \right) \otimes I_2 \right) \\
+          \left( \left( \begin{bmatrix} 0 & 1 \\ 1 & 0 \\ \end{bmatrix} \oplus
+          \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ \end{bmatrix} \right) \otimes I_{4} \right)
+          \left( \begin{bmatrix} \cvec{p}_{A|0} \\ \cvec{p}_{A|1} \end{bmatrix} \otimes \cvec{p}_A \right) \end{gathered} \\
                                                                &=
         \begin{bmatrix}
           \begin{bmatrix} I_2 & 0_{2\times{2}} \\ \end{bmatrix} & 0_{2\times{4}} & 0_{2\times{4}} & 0_{2\times{4}} \\
@@ -913,29 +918,43 @@
           p(1|0) \cvec{p}_{A|0} \\ p(0|0) \cvec{p}_{A|1} \\
           p(0|1) \cvec{p}_{A|1} \\ p(1|1) \cvec{p}_{A|1} \\ 
         \end{bmatrix} \in \R^{i_A} \otimes \R^{o_A} \otimes \R^{o_A} \\
-              \matrp{W}{_A} \cvec{p}_A^{(3)} &= \begin{bmatrix}
-          1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 \\
-          0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
-          0 & 0 & 0 & 0 & 1 & 1 & 1 & 0 \\
-          0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
-          \end{bmatrix} \begin{bmatrix}
-          1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-          0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
-          0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
-          0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
-          0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
-          0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
-          0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
-          0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
-          \end{bmatrix}
+              \matrp{W}{_A} \cvec{p}_A^{(3)} &= \left( \matrp{T}{_{A|0}^{(3)}} \oplus \matrp{T}{_{A|1}^{(3)}} \right)
+                 \left(\begin{bmatrix}
+          1 & 0 & 0 & 0 \\
+          0 & 0 & 0 & 1 \\
+          0 & 0 & 1 & 0 \\
+          0 & 1 & 0 & 0 \\
+          \end{bmatrix} \oplus \begin{bmatrix}
+          0 & 0 & 0 & 1 \\
+          0 & 1 & 0 & 0 \\
+          0 & 0 & 1 & 0 \\
+          1 & 0 & 0 & 0 \\
+          \end{bmatrix}\right)
           \begin{bmatrix} 
             p(1|0) p(0|0) \\ p(1|0) p(1|0) \\ p(0|0) p(0|1) \\ p(0|0) p(1|1) \\
             p(0|1) p(0|1) \\ p(0|1) p(1|1) \\ p(1|1) p(0|1) \\ p(1|1) p(1|1) \\ 
+          \end{bmatrix} \\
+                                             &=
+          \left( \begin{bmatrix}
+          1 & 1 & 1 & 0 \\
+          0 & 0 & 0 & 1 \\
+          \end{bmatrix} \oplus \begin{bmatrix}
+          1 & 1 & 1 & 0 \\
+          0 & 0 & 0 & 1 \\
+          \end{bmatrix} \right)
+          \begin{bmatrix} 
+            p(1|0) p(0|0) \\ p(0|0) p(1|1) \\ p(0|0) p(0|1) \\ p(1|0) p(1|0) \\
+            p(1|1) p(1|1) \\ p(0|1) p(1|1) \\ p(1|1) p(0|1) \\ p(0|1) p(0|1) \\ 
+          \end{bmatrix} \\
+                                             &=
+          \begin{bmatrix}
+            p(1|0) p(0|0) + p(0|0) p(1|1) + p(0|0) p(0|1) \\ p(1|0) p(1|0) \\
+            p(1|1) p(1|1) + p(0|1) p(1|1) + p(1|1) p(0|1) \\ p(0|1) p(0|1) \\ 
           \end{bmatrix}
         \end{align}
         Note that, when \(j=c+1\), the versions of the objects with and without tildes are identical, i.e. \(\matrp{\tilde{W}}{_A^{(3)}} \cvec{\tilde{p}}_A^{(3)} = \matrp{{W}}{^{(3)}_A} \cvec{{p}}_A^{(3)} = \matrp{W}{_A} \cvec{p}_A^{(3)}\).
 
-        TODO final permutation matrix, degeneracies in permutation matrices
+        % TODO from here, compute number of QKD wirings
 
       However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a bounding function, it is possible to search for the wiring for each particular behaviour that produces the largest increase in the bound. However, without a convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Indeed, the underlying problem in our study of the space of wirings is summed up in the following question:
       \begin{funqn}\label{fqn:wir}
