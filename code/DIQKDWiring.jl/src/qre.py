@@ -71,7 +71,7 @@ def sdp_dual_vec(SDP):
     Would need to be modified if the number of moment constraints or their
     nature (equalities vs inequalities) changes.
     """
-    # TODO generalise: test 
+    # TODO generalise: test y_mat from solved instance
     raw_vec = SDP.y_mat[-16:]
     vec = [0 for _ in range(8)]
     for k in range(8):

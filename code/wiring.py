@@ -1,4 +1,5 @@
 from sympy import init_session
+from sympy.logic.boolalg import Xor
 
 init_session()
 
@@ -60,3 +61,19 @@ def pauli_to_sv(v):
 
 
 lambdap, lambdam = pauli_to_sv(reg_to_pauli(Ptld))
+
+# Twiriling
+def twirling_actions():
+    a, b, x, y, alp, bet, gam = symbols(r'a b x y \alpha \beta \gamma')
+    xp = x ^ alp
+    ap = a ^ (bet & x) ^ (alp & bet) ^ gam
+    yp = y ^ bet
+    bp = b ^ (alp & y) ^ gam
+
+    for tup in itprod(range(2), range(2), range(2)):
+        print(f"Alpha = {tup[0]}, Beta = {tup[1]}, Gamma = {tup[2]}")
+        print(latex((ap.subs({alp: tup[0], bet: tup[1], gam: tup[2]})))
+        print(latex((bp.subs({alp: tup[0], bet: tup[1], gam: tup[2]})))
+        print(latex((xp.subs({alp: tup[0], bet: tup[1], gam: tup[2]})))
+        print(latex((yp.subs({alp: tup[0], bet: tup[1], gam: tup[2]})))
+        print()
