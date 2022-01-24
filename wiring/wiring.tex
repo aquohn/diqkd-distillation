@@ -88,6 +88,7 @@
 {\end{tabular}\end{center}\vspace\belowdisplayskip}
 
 \newcommand{\tableline}[1]{\dimexpr #1\linewidth-2\tabcolsep}
+\newcommand{\lcaption}[2]{\caption[#1]{#1 #2}}
 
 % temporarily change margins
 \newenvironment{changemargin}[2]{% 
@@ -805,7 +806,7 @@
             \end{tabular}
           \end{center}
         \end{minipage}
-        \caption{Left: Lookup table for \(W_A^{(2)}\), giving \(x_2\). Right: Lookup table for \(W_A\), giving overall output \(a\). Entries forbidden by earlier wirings are marked with X (don't care). Both are written as Karnaugh maps, with the row and column labels in Gray code order.}\label{tab:wiring_lut}
+        \caption[Lookup tables for a specific wiring.]{Left: Lookup table for \(W_A^{(2)}\), giving \(x_2\). Right: Lookup table for \(W_A\), giving overall output \(a\). Entries forbidden by earlier wirings are marked with X (don't care). Both are written as Karnaugh maps, with the row and column labels in Gray code order.}\label{tab:wiring_lut}
       \end{table}
 
       Therefore, the number of possible \(W^{(j)}_{A,\lambda}\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(W_{A,\lambda}\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
@@ -814,7 +815,7 @@
       \end{equation}
       The same applies to Bob with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). 
 
-      A concrete example can help illustrate this degeneracy. Switching to the labels \(\{0, 1\}\) for both inputs and outputs, the wiring characterised by
+      A concrete example can help illustrate this degeneracy. The wiring characterised by
       \begin{equation}
         x_1 = x \qquad x_2 = \bar{a}_1 + x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2\label{eqn:wiringeg}
       \end{equation}
@@ -956,7 +957,7 @@
 
         % TODO from here, compute number of QKD wirings
 
-      Unfortunately, the exact number of wirings cannot be computed in closed form.
+      Unfortunately, the exact number of wirings does not seem easily computed in closed form, due to the dependence of the permutation maps on the application maps. Nonetheless, it is straightforward to compute numerically.
 
       However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a bounding function, it is possible to search for the wiring for each particular behaviour that produces the largest increase in the bound. However, without a convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Indeed, the underlying problem in our study of the space of wirings is summed up in the following question:
       \begin{funqn}\label{fqn:wir}
@@ -1091,7 +1092,7 @@
       \begin{figure}
         \centering
         \includegraphics[width=\linewidth]{new_plot.pdf}
-        \caption{\label{fig:genubound} Upper bounds based on \Cref{eqn:genubound} for a specific CHSH-based implementation, with either Bell-diagonal states or isotropic states used in the decomposition. The bounds from quantum intrinsic nonlocality~\cite{DIQKD_Limits}~\cite[Appendix B]{RevisedPeres} are plotted for comparison. (Source:~\cite{CCSquashedEntangle})}
+        \caption[Comparison of upper bounds.]{\label{fig:genubound} Upper bounds based on \Cref{eqn:genubound} for a specific CHSH-based implementation, with either Bell-diagonal states or isotropic states used in the decomposition. The bounds from quantum intrinsic nonlocality~\cite{DIQKD_Limits}~\cite[Appendix B]{RevisedPeres} are plotted for comparison. (Source:~\cite{CCSquashedEntangle})}
       \end{figure}
 
       Let \(\cP(\rho, \sM)\) be the behaviour when the state \(\rho = \rho_{AB}\) is measured according to \(\sM\). Then, for an arbitrary LOPC protocol, we have~\cite[Thm. 3]{CCSquashedEntangle}
