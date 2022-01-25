@@ -55,17 +55,17 @@ gchsh(s) = 1-phi(sqrt(s^2/4 - 1))
 
 QBER(C::Correlators) = (1 - C.Eabxy[1,3]) / 2
 CHSH(C::Correlators) = C.Eabxy[1,1] + C.Eabxy[1,2] + C.Eabxy[2,1] - C.Eabxy[2,2]
-function HAB_oneway(behav::Behaviour)
-  corrs = Correlators(behav)
+HAB_oneway(behav::Behaviour) = HAB_oneway(Correlators(behav))
+function HAB_oneway(corrs::Correlators)
   return h(QBER(corrs)), nothing
 end
-function HAE_CHSH(behav::Behaviour)
-  corrs = Correlators(behav)
+HAE_CHSH(behav::Behaviour) = HAE_CHSH(Correlators(behav))
+function HAE_CHSH(corrs::Correlators)
   S = CHSH(corrs)
   return gchsh(max(S, 2.0)), nothing
 end
-function HAE_CHSHa(behav::Behaviour)
-  corrs = Correlators(behav)
+HAE_CHSHa(behav::Behaviour) = HAE_CHSHa(Correlators(behav))
+function HAE_CHSHa(corrs::Correlators)
   Eabxy = corrs.Eabxy
   corrp = Eabxy[1,1] + Eabxy[1,2]
   corrm = Eabxy[2,1] + Eabxy[2,2]

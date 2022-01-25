@@ -30,6 +30,7 @@ Ptld = sqrt(PA) * PAB * sqrt(PB)
 lambdap, lambdam = Ptld |> reg_to_pauli |> pauli_to_sv
 =#
 
+maxcorrs(corrs::Correlators) = maxcorrs(Behaviour(corrs))
 function maxcorrs(behav::Behaviour)
   pax, pby, pabxy = behav
   oA, oB, iA, iB = size(pabxy)

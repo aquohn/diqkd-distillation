@@ -88,7 +88,7 @@ end
 
 function maxcorr_3ddata(is, js, HAB::Function, HAE::Function, corrf::Function;
     type::Type{T} = Float64, kwargs...) where {T <: Real}
-  pts, rhos = maxcorr_data(is, js, HAB, HAE, corrf, type=type, kwargs...)
+  pts, rhos = maxcorr_data(is, js, HAB, HAE, corrf, type=type; kwargs...)
   pts3d = Array{Tuple{T, T, T}}(undef, size(pts)...)
 
   for ii in eachindex(is), ji in eachindex(js)
@@ -326,17 +326,17 @@ end
 
 # %%
 # Top level plotting
-function qset_wiring_plot(QLDsamples = 100, boundsamples = 100, kwargs...)
+function qset_wiring_plot(QLDsamples = 100, boundsamples = 100; kwargs...)
   fIs = range(0,1,length=boundsamples) |> collect
   fLDs = range(0,1,length=QLDsamples) |> collect
-  return wiring_plot(fIs, fLDs, "Isotropic fraction", "Deterministic fraction", qset_corrf(), kwargs...)
+  return wiring_plot(fIs, fLDs, "Isotropic fraction", "Deterministic fraction", qset_corrf(); kwargs...)
 end
 
 function expt_wiring_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.925, ncstart=0.8, kwargs...)
   ncs = range(ncstart, stop=1, length=ncsamples)
   etas = range(etastart, stop=1, length=etasamples)
   corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
-  return wiring_plot(ncs, etas, L"n_c", L"\eta", corrf, kwargs...)
+  return wiring_plot(ncs, etas, L"n_c", L"\eta", corrf; kwargs...)
 end
 
 function qset_kr_plot(QLDsamples = 100, boundsamples = 100; type::Type{T} = Float64,  kwargs...) where {T <: Real}

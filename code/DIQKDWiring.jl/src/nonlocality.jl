@@ -84,26 +84,3 @@ function Behaviour(corrs::Correlators)
   return behav
 end
 
-
-struct Wiring
-  CA
-  CAj
-  CB
-  CBj
-end
-Base.iterate(W::Wiring) = W.CA, reverse([W.CAj, W.CB, W.CBj])
-Base.iterate(W::Wiring, state) = isempty(state) ? nothing : (pop!(state), state)
-
-struct EntropyData
-  HAE
-  HAB
-  HAEp
-  HABp
-end
-
-struct WiringData
-  wiring::Wiring
-  r::Real
-  rp::Real
-  Hdata # object holding additional details about the computed rates
-end
