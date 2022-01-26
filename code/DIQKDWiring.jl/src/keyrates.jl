@@ -15,6 +15,13 @@ pushfirst!(PyList(pysys.path), Py(@__DIR__))
 const qre = pyimport("qre")
 const optims = pyimport("optims")
 
+struct EntropyData
+  HAE
+  HAB
+  HAEp
+  HABp
+end
+
 h(x) = (x == 0 || x == 1) ? 0.0 : -x*log2(x) - (1-x)*log2(1-x)
 r(Q,S) = 1-h((1+sqrt((S/2)^2 - 1))/2)-h(Q)
 

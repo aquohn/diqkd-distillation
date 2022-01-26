@@ -145,29 +145,32 @@ Base.length(cwmit::CondWiringMapIter) = length(cwmit._valit)
 Base.iterate(cwmit::CondWiringMapIter) = _iterate(cwmit, iterate(cwmit._valit))
 Base.iterate(cwmit::CondWiringMapIter, state) = _iterate(cwmit, iterate(cwmit._valit, state))
 
-struct MapWiringIter{T <: Integer}
+struct WiringMapIter{T <: Integer}
   c::T
   o::T
   i::T
   fix::Vector{Tuple{Array{T}, T, T}}
-  _mapit
-  function MapWiringIter(c::Integer, o::Integer, i::Integer, fix::Vector)
+  _prodwmit
+  function WiringMapIter(c::Integer, o::Integer, i::Integer, fix::Vector)
     T = promote_type(typeof(c), typeof(o), typeof(i))
     its = [
            repeat([CondWiringMapIter(c, o, i, j)], i) for j in 1:c+1
     ]
-    for (W, x, j) in fix
+    for (cWmap, x, j) in fix
       # TODO check for validity
-      its[j][x] = [W]
+      its[j][x] = [cWmap]
     end
-    mapit = itprod([itprod(itj...) for itj in its]...)
-    new{T}(c, o, i, fix, mapit)
+    prodwmit = itprod([itprod(itj...) for itj in its]...)
+    new{T}(c, o, i, fix, prodwmit)
   end
-  MapWiringIter(c, o, i) = MapWiringIter(c, o, i, [])
+  WiringMapIter(c, o, i) = WiringMapIter(c, o, i, [])
 end
-Base.iterate(mwit::MapWiringIter) = iterate(mwit._mapit)
-Base.iterate(mwit::MapWiringIter, state) = iterate(mwit._mapit, state)
+Base.length(wmit::WiringMapIter) = length(wmit._prodwmit)
+Base.iterate(wmit::WiringMapIter) = iterate(wmit._prodwmit)
+Base.iterate(wmit::WiringMapIter, state) = iterate(wmit._prodwmit, state)
 # NOTE: returns tuple of tuple of arrays
+# for c=2, o=2, i=3 we need 200GB of RAM; I think we should write this out and
+# solve slowly using lrs
 
 # Approach 3: Decompose into application and permutation maps
 struct Wiring{Ti <: Integer, Tp <: Real}
@@ -176,6 +179,7 @@ struct Wiring{Ti <: Integer, Tp <: Real}
   i::Ti
   W::SparseMatrixCSC{Tp}
 end
+Wiring(c::Integer, o::Integer, i::Integer, Wmap) = Wiring(Float64, c, o, i, Wmap)
 function Wiring(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where Tp <: Real
   Ti = promote_type(typeof(c), typeof(o), typeof(i))
   W = I
@@ -184,13 +188,46 @@ function Wiring(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where Tp <
     condmaps = []
     for x in 1:i
       Wmapcurr = Wmap[j][x]
-      condWtld = cat((sparsevec([Wmapcurr[s...]], Tp[1], i) for s in sit)...;
+      condWtld = cat((sparsevec([Wmapcurr[s...]], Tp[1], i)' for s in sit)...;
                     dims=(1,2))
       push!(condmaps, condWtld)
     end
-    W *= kron(cat(condmaps...; dims=(1,2)), I((o*i)^(c-j)))
+    Wj = kron(cat(condmaps...; dims=(1,2)), I(i))
+    W = kron(Wj, I((o*i)^(c-j))) * W
   end
-  # TODO j = c+1
+  sit = itprod(repeat([1:o], c)...)
+  scount = length(sit)
+  Wfinal = cat((sparse([(Wmap[c+1][x][s...] for s in sit)...], 1:scount, ones(Tp, scount), o, scount) for x in 1:i)...; dims=(1,2))
+  return Wiring{Ti, Tp}(c, o, i, Wfinal * W)
+end
+
+struct BehaviourVec{Ti <: Integer, Tp <: Real}
+  os::Vector{Ti}
+  is::Vector{Ti}
+  p::Vector{Tp}
+end
+function BehaviourVec(os::Vector{Ti}, is::Vector{Ti}, parr::AbstractArray{Tp}) where {Ti <: Integer, Tp <: Real}
+    n = length(os)
+    argit = itprod(vcat(([1:is[j], 1:os[j]] for j in 1:n)...)...)
+    p = Vector{Tp}(undef, length(argit))
+    for (pidx, argval) in zip(eachindex(p), argit)
+      arg = Vector{Ti}(undef, 2*n)
+      for j in 1:n
+        arg[j] = argval[j]
+        arg[j+n] = argval[j+1]
+      end
+      p[pidx] = parr[arg...]
+    end
+    return BehaviourVec{Ti, Tp}(os, is, p)
+end
+function BehaviourVec(behav::Behaviour)
+  oA, oB, iA, iB = size(behav.pabxy)
+  BehaviourVec([oA, oB], [iA, iB], behav.pabxy)
+end
+function apply_wiring(W::Wiring, bv::BehaviourVec)
+  # WARNING fix for n > 1
+  ivec = repeat([1], W.i)
+  pp = W.W * kron(ivec, repeat([bv.p], W.c)...)
 end
 
 # n stars separated by k bars
@@ -245,13 +282,6 @@ function num_wiring_matrices(c, o, i)
   return prod(mat_counts)^i
 end
 
-struct EntropyData
-  HAE
-  HAB
-  HAEp
-  HABp
-end
-
 struct WiringData
   wiring::Wiring
   r::Real
@@ -261,6 +291,17 @@ end
 
 # %%
 # Specific wirings
+const eg_Wmap = ((fill(1), fill(2)), ([2, 1], [2, 2]), ([1 1; 1 2], [2 1; 1 1]))
+function and_Wmap(c::Integer, i::Integer)
+  Ti = promote_type(typeof(c), typeof(i))
+  Wmap = [[fill(Ti(x), repeat([2], j-1)...) for x in 1:i] for j in 1:c]
+  push!(Wmap, [ones(Ti, repeat([2], c)...) for x in 1:i])
+  for x in 1:i
+    Wmap[c+1][x][repeat([2], c)...] = 2
+  end
+  return Wmap
+end
+# and_Wmap = ((fill(1), fill(2)), ([1, 1], [2, 2]), ([1 1; 1 2], [1 1; 1 2]))
 
 function and_corrs(N, corrs::Correlators)
   Eax, Eby, Eabxy = corrs
@@ -274,17 +315,5 @@ function and_corrs(N, corrs::Correlators)
 end
 
 function sel_and_behav(N, behav::Behaviour, xs, ys)
-  p = behav.pabxy
-  pN = Array(p)
-  oA, oB, iA, iB = size(p)
-  for x in 1:iA, y in 1:iB
-    if x in xs && y in ys
-      pN[2,2,x,y] = p[2,2,x,y]^N
-      pN[1,2,x,y] = p[1,2,x,y] * (p[2,2,x,y]+p[1,2,x,y])^(N-1)
-      pN[2,1,x,y] = p[2,1,x,y] * (p[2,2,x,y]+p[2,1,x,y])^(N-1)
-      pN[1,1,x,y] = 1 - pN[1,2,x,y] - pN[2,1,x,y] - pN[2,2,x,y]
-    elseif x in xs
-    elseif y in ys
-    end
-  end
+  # TODO use wiring formalism
 end
