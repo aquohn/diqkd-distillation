@@ -173,16 +173,16 @@ Base.iterate(wmit::WiringMapIter, state) = iterate(wmit._prodwmit, state)
 # solve slowly using lrs
 
 # Approach 3: Decompose into application and permutation maps
-struct Wiring{Ti <: Integer, Tp <: Real}
+struct MargWiring{Ti <: Integer, Tp <: Real}
   c::Ti
   o::Ti
   i::Ti
   W::SparseMatrixCSC{Tp}
 end
-Wiring(c::Integer, o::Integer, i::Integer, Wmap) = Wiring(Float64, c, o, i, Wmap)
-function Wiring(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where Tp <: Real
+MargWiring(c::Integer, o::Integer, i::Integer, Wmap) = MargWiring(Float64, c, o, i, Wmap)
+function MargWiring(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where Tp <: Real
   Ti = promote_type(typeof(c), typeof(o), typeof(i))
-  W = I
+  W = vcat(repeat([I((o*i)^c)], i)...)
   for j in 1:c
     sit = itprod(repeat([1:o], j-1)...)
     condmaps = []
@@ -198,23 +198,42 @@ function Wiring(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where Tp <
   sit = itprod(repeat([1:o], c)...)
   scount = length(sit)
   Wfinal = cat((sparse([(Wmap[c+1][x][s...] for s in sit)...], 1:scount, ones(Tp, scount), o, scount) for x in 1:i)...; dims=(1,2))
-  return Wiring{Ti, Tp}(c, o, i, Wfinal * W)
+  return MargWiring{Ti, Tp}(c, o, i, Wfinal * W)
 end
 
+struct Wiring{Ti <: Integer, Tp <: Real}
+  c::Ti
+  os::Vector{Ti}
+  is::Vector{Ti}
+  W::SparseMatrixCSC{Tp}
+end
+function Wiring(margWs::AbstractVector{MargWiring{Ti, Tp}}) where {Ti, Tp}
+  cs = [margW.c for margW in margWs]
+  if !(all(c -> c == first(cs), cs))
+    throw(ArgumentError("Marginal wirings take different numbers of boxes!"))
+  end
+  os = [margW.o for margW in margWs]
+  is = [margW.i for margW in margWs]
+  # WARNING THIS IS WRONG
+  W = kron((margW.W for margW in margWs)...)
+  return Wiring(first(cs), os, is, W)
+end
+
+# TODO implement AbstractVector iface
 struct BehaviourVec{Ti <: Integer, Tp <: Real}
   os::Vector{Ti}
   is::Vector{Ti}
   p::Vector{Tp}
 end
 function BehaviourVec(os::Vector{Ti}, is::Vector{Ti}, parr::AbstractArray{Tp}) where {Ti <: Integer, Tp <: Real}
-    n = length(os)
-    argit = itprod(vcat(([1:is[j], 1:os[j]] for j in 1:n)...)...)
+    n = length(os)  # TODO check value
+    argit = itprod(vcat(([1:os[j], 1:is[j]] for j in n:-1:1)...)...)
     p = Vector{Tp}(undef, length(argit))
     for (pidx, argval) in zip(eachindex(p), argit)
       arg = Vector{Ti}(undef, 2*n)
       for j in 1:n
-        arg[j] = argval[j]
-        arg[j+n] = argval[j+1]
+        arg[j] = argval[2*(n-j)+1]
+        arg[j+n] = argval[2*(n-j)+2]
       end
       p[pidx] = parr[arg...]
     end
@@ -224,10 +243,24 @@ function BehaviourVec(behav::Behaviour)
   oA, oB, iA, iB = size(behav.pabxy)
   BehaviourVec([oA, oB], [iA, iB], behav.pabxy)
 end
-function apply_wiring(W::Wiring, bv::BehaviourVec)
-  # WARNING fix for n > 1
-  ivec = repeat([1], W.i)
-  pp = W.W * kron(ivec, repeat([bv.p], W.c)...)
+function BehaviourVec(mat::AbstractMatrix)
+  o, i = size(mat)
+  BehaviourVec([o], [i], mat)
+end
+function Array(bvec::BehaviourVec{Ti, Tp}) where {Ti, Tp}
+  os, is, p = bvec.os, bvec.is, bvec.p
+  n = length(os)  # TODO check value
+  parr = Array{Tp}(undef, os..., is...)
+  argit = itprod(vcat(([1:os[j], 1:is[j]] for j in n:-1:1)...)...)
+  for (pval, argval) in zip(p, argit)
+    arg = Vector{Ti}(undef, 2*n)
+    for j in 1:n
+      arg[j] = argval[2*(n-j)+1]
+      arg[j+n] = argval[2*(n-j)+2]
+    end
+    parr[arg...] = pval
+  end
+  return parr
 end
 
 # n stars separated by k bars
@@ -301,7 +334,6 @@ function and_Wmap(c::Integer, i::Integer)
   end
   return Wmap
 end
-# and_Wmap = ((fill(1), fill(2)), ([1, 1], [2, 2]), ([1 1; 1 2], [1 1; 1 2]))
 
 function and_corrs(N, corrs::Correlators)
   Eax, Eby, Eabxy = corrs
@@ -316,4 +348,55 @@ end
 
 function sel_and_behav(N, behav::Behaviour, xs, ys)
   # TODO use wiring formalism
+end
+
+# Testing zone
+using Symbolics
+Symbolics.@variables PA[1:2, 1:2] PB[1:2, 1:2] PC[1:3, 1:2] PD[1:2, 1:3]
+PAvec = BehaviourVec(PA); PBvec = BehaviourVec(PB)
+PCvec = BehaviourVec(PC); PDvec = BehaviourVec(PD)
+PABp = kron(PAvec.p, PBvec.p)
+PBAp = kron(PBvec.p, PAvec.p)
+permPABp = permutesystems(PABp, [4, 4], [2, 1])
+PABAB = kron(PABp, PABp)
+permPAABB = permutesystems(PABAB, [4, 4, 4, 4], [1, 3, 2, 4])
+PAABB = kron(PAvec.p, PAvec.p, PBvec.p, PBvec.p)
+PABCD = kron(PAvec.p, PBvec.p, PCvec.p, PDvec.p)
+PDACB = kron(PDvec.p, PAvec.p, PCvec.p, PBvec.p)
+permPDACB = permutesystems(PABCD, [4, 4, 6, 6], [4, 1, 3, 2])
+
+Symbolics.@variables PAB1[1:2, 1:2, 1:2, 1:2] PAB2[1:2, 1:2, 1:2, 1:2]
+PAB1vec = BehaviourVec([2,2], [2,2], PAB1)
+PAB2vec = BehaviourVec([2,2], [2,2], PAB2)
+Pand2 = zeros(Num, 2, 2, 2, 2)
+for (a1, b1, a2, b2, x, y) in itprod(repeat([1:2], 6)...)
+   a = (a1 + a2 == 4) ? 2 : 1
+   b = (b1 + b2 == 4) ? 2 : 1
+   Pand2[a, b, x, y] += PAB1[a1, b1, x, y] * PAB2[a2, b2, x, y]
+end
+margWand222 = MargWiring(2, 2, 2, and_Wmap(2,2))
+permPABc = permutesystems(PABc, [4,4,4,4], [1, 3, 2, 4])^C
+PABc = kron(PAB1vec.p, PAB2vec.p)
+
+# TODO make this the primary implementation for MargWiring?
+function submatrices(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where Tp <: Real
+  Ti = promote_type(typeof(c), typeof(o), typeof(i))
+  Ws = []
+  W = vcat(repeat([I((o*i)^c)], i)...)
+  for j in 1:c
+    sit = itprod(repeat([1:o], j-1)...)
+    condmaps = []
+    for x in 1:i
+      Wmapcurr = Wmap[j][x]
+      condWtld = cat((sparsevec([Wmapcurr[s...]], Tp[1], i)' for s in sit)...;
+                    dims=(1,2))
+      push!(condmaps, condWtld)
+    end
+    push!(Ws, condmaps)
+  end
+  sit = itprod(repeat([1:o], c)...)
+  scount = length(sit)
+  Wfinal = [(sparse([(Wmap[c+1][x][s...] for s in sit)...], 1:scount, ones(Tp, scount), o, scount) for x in 1:i)...]
+  push!(Ws, Wfinal)
+  return Ws
 end

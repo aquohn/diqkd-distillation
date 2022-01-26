@@ -963,6 +963,92 @@
 
       Nonetheless, this perspective allows us to express a wiring as a vector of coefficients, enabling polytope computations, but with fewer coefficients than would be required from 
 
+      \subsection{Multi-Party Wirings}
+      \begin{align}
+        \matrp{\tilde{W}}{_{{AB}}^{(1)}} \cvec{\tilde{p}}{_{{AB}}^{(1)}} &= \left( \begin{aligned}
+                                                               & \left( \matrp{\tilde{W}}{^{(1)}_{A|0}} \otimes \matrp{\tilde{W}}{^{(1)}_{B|0}} \right) \oplus
+                                                                 \left( \matrp{\tilde{W}}{^{(1)}_{A|0}} \otimes \matrp{\tilde{W}}{^{(1)}_{B|1}} \right) \\
+                                                        \oplus & \left( \matrp{\tilde{W}}{^{(1)}_{A|1}} \otimes \matrp{\tilde{W}}{^{(1)}_{B|0}} \right) \oplus
+                                                                 \left( \matrp{\tilde{W}}{^{(1)}_{A|1}} \otimes \matrp{\tilde{W}}{^{(1)}_{B|1}} \right) \\
+                                                               \end{aligned} \right) \otimes I_4
+          \left( \begin{bmatrix} 1 \\ 1 \end{bmatrix} \otimes \begin{bmatrix} 1 \\ 1 \end{bmatrix} \otimes \cvec{p}_{AB} \right) \\
+                                                               &= \left( \begin{aligned}
+                                                               & \begin{bmatrix} 1 & 0 & 0 & 0 \\ \end{bmatrix} \oplus
+                                                               \begin{bmatrix} 0 & 1 & 0 & 0 \\ \end{bmatrix} \\
+                                                               \oplus & \begin{bmatrix} 0 & 0 & 1 & 0 \\ \end{bmatrix} \oplus
+                                                               \begin{bmatrix} 0 & 0 & 0 & 1 \\ \end{bmatrix} 
+                                                               \end{aligned} \right) \otimes I_4
+          \begin{bmatrix}
+          \cvec{p}_{{AB}} \\
+          \cvec{p}_{{AB}} \\
+          \cvec{p}_{{AB}} \\
+          \cvec{p}_{{AB}} \\
+          \end{bmatrix} \\
+                                                               &= \begin{bmatrix}
+          \cvec{p}_{{AB}|00} \\
+          \cvec{p}_{{AB}|01} \\
+          \cvec{p}_{{AB}|10} \\
+          \cvec{p}_{{AB}|11} \\
+          \end{bmatrix} \in \R^{i_{A}i_{B}} \otimes \R^{o_{A}o_{B}} \\
+        \matrp{\tilde{W}}{_{AB}^{(2)}} \cvec{\tilde{p}}{_{AB}^{(2)}} &= \begin{gathered}
+        \left( \left(
+          \left( \begin{bmatrix} 1 & 0 \\ \end{bmatrix} \oplus \begin{bmatrix} 0 & 1 \\ \end{bmatrix} \right)
+          \oplus \bigoplus_{k=1}^2 \begin{bmatrix} 0 & 1 \\ \end{bmatrix} \right) \otimes I_2 \right) \\
+          \left( \left( \begin{bmatrix} 0 & 1 \\ 1 & 0 \\ \end{bmatrix} \oplus
+          \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ \end{bmatrix} \right) \otimes I_{4} \right)
+          \left( \begin{bmatrix} \cvec{p}_{{AB}|0} \\ \cvec{p}_{{AB}|1} \end{bmatrix} \otimes \cvec{p}_{AB} \right) \end{gathered} \\
+                                                               &=
+        \begin{bmatrix}
+          \begin{bmatrix} I_2 & 0_{2\times{2}} \\ \end{bmatrix} & 0_{2\times{4}} & 0_{2\times{4}} & 0_{2\times{4}} \\
+          0_{2\times{4}} & \begin{bmatrix} 0_{2\times{2}} & I_2 \\ \end{bmatrix} & 0_{2\times{4}} & 0_{2\times{4}} \\
+          0_{2\times{4}} & 0_{2\times{4}} & \begin{bmatrix} 0_{2\times{2}} & I_2 \\ \end{bmatrix} & 0_{2\times{4}} \\
+          0_{2\times{4}} & 0_{2\times{4}} & 0_{2\times{4}} & \begin{bmatrix} 0_{2\times{2}} & I_2 \\ \end{bmatrix} \\
+        \end{bmatrix}
+        \begin{bmatrix} 
+          p(1|0) \cvec{p}_{AB} \\ p(0|0) \cvec{p}_{AB} \\
+          p(0|1) \cvec{p}_{AB} \\ p(1|1) \cvec{p}_{AB} \\ 
+        \end{bmatrix} \\
+                                                               &=
+        \begin{bmatrix} 
+          p(1|0) \cvec{p}_{{AB}|0} \\ p(0|0) \cvec{p}_{{AB}|1} \\
+          p(0|1) \cvec{p}_{{AB}|1} \\ p(1|1) \cvec{p}_{{AB}|1} \\ 
+        \end{bmatrix} \in \R^{i_{AB}} \otimes \R^{o_{AB}} \otimes \R^{o_{AB}} \\
+              \matrp{W}{_{AB}} \cvec{p}_{AB}^{(3)} &= \left( \matrp{T}{_{{AB}|0}^{(3)}} \oplus \matrp{T}{_{{AB}|1}^{(3)}} \right)
+                 \left(\begin{bmatrix}
+          1 & 0 & 0 & 0 \\
+          0 & 0 & 0 & 1 \\
+          0 & 0 & 1 & 0 \\
+          0 & 1 & 0 & 0 \\
+          \end{bmatrix} \oplus \begin{bmatrix}
+          0 & 0 & 0 & 1 \\
+          0 & 1 & 0 & 0 \\
+          0 & 0 & 1 & 0 \\
+          1 & 0 & 0 & 0 \\
+          \end{bmatrix}\right)
+          \begin{bmatrix} 
+            p(1|0) p(0|0) \\ p(1|0) p(1|0) \\ p(0|0) p(0|1) \\ p(0|0) p(1|1) \\
+            p(0|1) p(0|1) \\ p(0|1) p(1|1) \\ p(1|1) p(0|1) \\ p(1|1) p(1|1) \\ 
+          \end{bmatrix} \\
+                                             &=
+          \left( \begin{bmatrix}
+          1 & 1 & 1 & 0 \\
+          0 & 0 & 0 & 1 \\
+          \end{bmatrix} \oplus \begin{bmatrix}
+          1 & 1 & 1 & 0 \\
+          0 & 0 & 0 & 1 \\
+          \end{bmatrix} \right)
+          \begin{bmatrix} 
+            p(1|0) p(0|0) \\ p(0|0) p(1|1) \\ p(0|0) p(0|1) \\ p(1|0) p(1|0) \\
+            p(1|1) p(1|1) \\ p(0|1) p(1|1) \\ p(1|1) p(0|1) \\ p(0|1) p(0|1) \\ 
+          \end{bmatrix} \\
+                                             &=
+          \begin{bmatrix}
+            p(1|0) p(0|0) + p(0|0) p(1|1) + p(0|0) p(0|1) \\ p(1|0) p(1|0) \\
+            p(1|1) p(1|1) + p(0|1) p(1|1) + p(1|1) p(0|1) \\ p(0|1) p(0|1) \\ 
+          \end{bmatrix} \in \sP
+        \end{align}
+
+
       However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a bounding function, it is possible to search for the wiring for each particular behaviour that produces the largest increase in the bound. However, without a convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Indeed, the underlying problem in our study of the space of wirings is summed up in the following question:
       \begin{funqn}\label{fqn:wir}
         What is the structure of the space of wirings? How does it interact with the structure of the space of behaviours? How does the secret key capacity vary over these structures?
