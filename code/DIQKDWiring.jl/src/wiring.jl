@@ -202,6 +202,7 @@ function MargWiring(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where 
 end
 
 struct Wiring{Ti <: Integer, Tp <: Real}
+  n::Ti
   c::Ti
   os::Vector{Ti}
   is::Vector{Ti}
@@ -214,19 +215,23 @@ function Wiring(margWs::AbstractVector{MargWiring{Ti, Tp}}) where {Ti, Tp}
   end
   os = [margW.o for margW in margWs]
   is = [margW.i for margW in margWs]
-  # WARNING THIS IS WRONG
   W = kron((margW.W for margW in margWs)...)
-  return Wiring(first(cs), os, is, W)
+  return Wiring(length(margWs), first(cs), os, is, W)
 end
 
-# TODO implement AbstractVector iface
+# TODO implement AbstractVector iface, maybe value as type parameter?
 struct BehaviourVec{Ti <: Integer, Tp <: Real}
+  n::Ti
   os::Vector{Ti}
   is::Vector{Ti}
   p::Vector{Tp}
 end
-function BehaviourVec(os::Vector{Ti}, is::Vector{Ti}, parr::AbstractArray{Tp}) where {Ti <: Integer, Tp <: Real}
-    n = length(os)  # TODO check value
+function BehaviourVec(parr::AbstractArray{Tp}) where {Tp <: Real}
+    dims = size(parr)
+    Ti = eltype(dims)
+    n = Ti(length(dims) // 2)
+    dimvec = Ti[dims...]
+    os, is = dimvec[1:n], dimvec[n+1:2*n]
     argit = itprod(vcat(([1:os[j], 1:is[j]] for j in n:-1:1)...)...)
     p = Vector{Tp}(undef, length(argit))
     for (pidx, argval) in zip(eachindex(p), argit)
@@ -237,7 +242,7 @@ function BehaviourVec(os::Vector{Ti}, is::Vector{Ti}, parr::AbstractArray{Tp}) w
       end
       p[pidx] = parr[arg...]
     end
-    return BehaviourVec{Ti, Tp}(os, is, p)
+    return BehaviourVec{Ti, Tp}(n, os, is, p)
 end
 function BehaviourVec(behav::Behaviour)
   oA, oB, iA, iB = size(behav.pabxy)
@@ -262,6 +267,27 @@ function Array(bvec::BehaviourVec{Ti, Tp}) where {Ti, Tp}
   end
   return parr
 end
+
+Base.:*(margwir::MargWiring, b::BehaviourVec) = Wiring([margwir]) * b
+function Base.:*(wiring::Wiring{Tiw, Tpw}, b::BehaviourVec{Tib, Tpb}) where {Tiw, Tpw, Tib, Tpb}
+  c, n, os, is = wiring.c, b.n, b.os, b.is
+  @assert wiring.n == n
+  @assert all(wiring.os .== os)
+  @assert all(wiring.is .== is)
+  Ti = promote_type(Tiw, Tib)
+  Tp = promote_type(Tpw, Tpb)
+  kronp = kron(repeat([b.p], c)...)
+  permvec = Vector{Ti}(undef, n*c)
+  for j in 1:n
+    permvec[((j-1)*n+1):j*n] = j:n:c*n
+  end
+  invpermvec = invperm(permvec)
+  dims = vcat((repeat([o*i], c) for (o, i) in zip(os, is))...)
+  permp = permutesystems(kronp, dims, permvec)
+  permpp = wiring.W * permp
+  return BehaviourVec{Ti, Tp}(n, os, is, permpp)
+end
+Base.:(==)(bv1::BehaviourVec, bv2::BehaviourVec) = all(iszero.(bv1.p - bv2.p))
 
 # n stars separated by k bars
 struct StarsBarsNN{T <: Integer}
@@ -361,47 +387,4 @@ end
 
 function sel_and_behav(N, behav::Behaviour, xs, ys)
   # TODO use wiring formalism
-end
-
-# Testing zone
-using Symbolics
-Symbolics.@variables PA[1:2, 1:2] PB[1:2, 1:2] PC[1:3, 1:2] PD[1:2, 1:3]
-PAvec = BehaviourVec(PA); PBvec = BehaviourVec(PB)
-PCvec = BehaviourVec(PC); PDvec = BehaviourVec(PD)
-PABp = kron(PAvec.p, PBvec.p)
-PBAp = kron(PBvec.p, PAvec.p)
-permPABp = permutesystems(PABp, [4, 4], [2, 1])
-PABAB = kron(PABp, PABp)
-permPAABB = permutesystems(PABAB, [4, 4, 4, 4], [1, 3, 2, 4])
-PAABB = kron(PAvec.p, PAvec.p, PBvec.p, PBvec.p)
-PABCD = kron(PAvec.p, PBvec.p, PCvec.p, PDvec.p)
-PDACB = kron(PDvec.p, PAvec.p, PCvec.p, PBvec.p)
-permPDACB = permutesystems(PABCD, [4, 4, 6, 6], [4, 1, 3, 2])
-
-Symbolics.@variables PAB1[1:2, 1:2, 1:2, 1:2] PAB2[1:2, 1:2, 1:2, 1:2]
-PAB1vec = BehaviourVec([2,2], [2,2], PAB1)
-PAB2vec = BehaviourVec([2,2], [2,2], PAB2)
-Pand2 = zeros(Num, 2, 2, 2, 2)
-for (a1, b1, a2, b2, x, y) in itprod(repeat([1:2], 6)...)
-   a = (a1 + a2 == 4) ? 2 : 1
-   b = (b1 + b2 == 4) ? 2 : 1
-   Pand2[a, b, x, y] += PAB1[a1, b1, x, y] * PAB2[a2, b2, x, y]
-end
-margWand222 = MargWiring(2, 2, 2, and_Wmap(2,2))
-margWfirst222 = MargWiring(2, 2, 2, first_Wmap(2,2,2))
-PABc = kron(PAB1vec.p, PAB2vec.p)
-permPABc = permutesystems(PABc, [4,4,4,4], [1, 3, 2, 4])
-
-function behaviourvec_from_perm(p::AbstractArray{Tp}) where {Tp <: Real}
-  dims = size(p)
-  n = Integer(length(dims) // 2)
-  os, is = dims[1:n], dims[n+1:2*n]
-  permdims = Vector{typeof(n)}(undef, 2*n)
-  for j in 1:n
-    permdims[2*(n-j)+1] = j
-    permdims[2*(n-j)+2] = j + n
-  end
-  println(permdims)
-  bvec = vec(permutedims(p, permdims))
-  return BehaviourVec(os, is, bvec)
 end
