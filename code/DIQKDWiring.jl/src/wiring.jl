@@ -325,12 +325,25 @@ end
 # %%
 # Specific wirings
 const eg_Wmap = ((fill(1), fill(2)), ([2, 1], [2, 2]), ([1 1; 1 2], [2 1; 1 1]))
+
+# binary AND (a = 1 unless all as = 2, then a = 2)
 function and_Wmap(c::Integer, i::Integer)
   Ti = promote_type(typeof(c), typeof(i))
   Wmap = [[fill(Ti(x), repeat([2], j-1)...) for x in 1:i] for j in 1:c]
   push!(Wmap, [ones(Ti, repeat([2], c)...) for x in 1:i])
   for x in 1:i
     Wmap[c+1][x][repeat([2], c)...] = 2
+  end
+  return Wmap
+end
+
+# take the first output and ignore the rest
+function first_Wmap(c::Integer, o::Integer, i::Integer)
+  Ti = promote_type(typeof(c), typeof(i))
+  Wmap = [[fill(Ti(x), repeat([o], j-1)...) for x in 1:i] for j in 1:c]
+  push!(Wmap, [Array{Ti}(undef, repeat([o], c)...) for x in 1:i])
+  for x in 1:i, a in 1:o
+      Wmap[c+1][x][a, repeat([:], c-1)...] .= a
   end
   return Wmap
 end
@@ -375,28 +388,20 @@ for (a1, b1, a2, b2, x, y) in itprod(repeat([1:2], 6)...)
    Pand2[a, b, x, y] += PAB1[a1, b1, x, y] * PAB2[a2, b2, x, y]
 end
 margWand222 = MargWiring(2, 2, 2, and_Wmap(2,2))
-permPABc = permutesystems(PABc, [4,4,4,4], [1, 3, 2, 4])^C
+margWfirst222 = MargWiring(2, 2, 2, first_Wmap(2,2,2))
 PABc = kron(PAB1vec.p, PAB2vec.p)
+permPABc = permutesystems(PABc, [4,4,4,4], [1, 3, 2, 4])
 
-# TODO make this the primary implementation for MargWiring?
-function submatrices(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where Tp <: Real
-  Ti = promote_type(typeof(c), typeof(o), typeof(i))
-  Ws = []
-  W = vcat(repeat([I((o*i)^c)], i)...)
-  for j in 1:c
-    sit = itprod(repeat([1:o], j-1)...)
-    condmaps = []
-    for x in 1:i
-      Wmapcurr = Wmap[j][x]
-      condWtld = cat((sparsevec([Wmapcurr[s...]], Tp[1], i)' for s in sit)...;
-                    dims=(1,2))
-      push!(condmaps, condWtld)
-    end
-    push!(Ws, condmaps)
+function behaviourvec_from_perm(p::AbstractArray{Tp}) where {Tp <: Real}
+  dims = size(p)
+  n = Integer(length(dims) // 2)
+  os, is = dims[1:n], dims[n+1:2*n]
+  permdims = Vector{typeof(n)}(undef, 2*n)
+  for j in 1:n
+    permdims[2*(n-j)+1] = j
+    permdims[2*(n-j)+2] = j + n
   end
-  sit = itprod(repeat([1:o], c)...)
-  scount = length(sit)
-  Wfinal = [(sparse([(Wmap[c+1][x][s...] for s in sit)...], 1:scount, ones(Tp, scount), o, scount) for x in 1:i)...]
-  push!(Ws, Wfinal)
-  return Ws
+  println(permdims)
+  bvec = vec(permutedims(p, permdims))
+  return BehaviourVec(os, is, bvec)
 end
