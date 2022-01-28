@@ -1,44 +1,127 @@
 using DataFrames
 using CSV
 includet("helpers.jl")
-includet("wiring.jl")
 
-function wiring_table(s::Setting{IdxT}, c::IdxT, ::Type{T} = Float32) where {T <: Real, IdxT <: Integer}
-  oA, oB, iA, iB = s...
-  probs = [Symbol("p($a,$b|$x,$y)") => T[] for a in 1:iA for b in 1:iB for x in 1:oA for y in 1:oB]
-  CAs = [Symbol("CA$seq") => IdxT[] for seq in
-         itprod(vcat(itrept(1:iA, c), itrept(1:oA, c))...)] |> vec
-  CAjs = vcat([[Symbol("CA$j$seq") => IdxT[] for seq in
-                itprod(vcat(itrept(1:iA, (j-1)), itrept(1:oA, (j-1)))...)] for j in 2:c]...) |> vec
-  CBs = [Symbol("CB$seq") => IdxT[] for seq in
-         itprod(vcat(itrept(1:iB, c), itrept(1:oB, c))...)] |> vec
-  CBjs = vcat([[Symbol("CB$j$seq") => IdxT[] for seq in
-                itprod(vcat(itrept(1:iB, (j-1)), itrept(1:oB, (j-1)))...)] for j in 2:c]...) |> vec
-  return DataFrame(vcat(probs, CAs, CAjs, CBs, CBjs))
+const MaybeMat = Union{AbstractMatrix, Nothing}
+const MaybeVec = Union{AbstractVector, Nothing}
+
+# writes all options after the end
+function write_lrs_vrep(name, options, verts::AbstractMatrix, rays::MaybeMat, lins::MaybeMat)
+  stat("$name.ext").inode == 0 || throw(ArgumentError("$name.ext already exists!"))
+  nverts, d = size(verts)
+  Ts = [eltype(verts)]
+  isnothing(rays) || push!(Ts, eltype(rays))
+  isnothing(lins) || push!(Ts, eltype(lins))
+  T = promote_type(Ts...)
+  if isnothing(rays)
+    rays = Matrix{T}(undef, 0, d)
+  end
+  if isnothing(lins)
+    lins = Matrix{T}(undef, 0, d)
+  end
+  write_lrs_vrep!(name, options, verts, rays, lins)
+end
+function write_lrs_vrep!(name, options, verts::AbstractMatrix, rays::AbstractMatrix, lins::AbstractMatrix)
+  Ts = [eltype(verts), eltype(rays), eltype(lins)]
+  T = promote_type(Ts...)
+  nverts, _ = size(verts)
+  nrays, _ = size(rays)
+  nlins, _ = size(lins)
+  vertmat = hcat(ones(T, nverts), verts)
+  raymat = hcat(zeros(T, nrays), rays)
+  linmat = hcat(zeros(T, nlins), lins)
+  Vmat = vcat(linmat, raymat, vertmat)
+  m, n = size(Vmat)
+
+  ios = open("$name.ext", "w")
+  println(ios, name, "\nV-representation")
+  if nlins > 0
+    print(ios, "linearity ")
+    for j in 1:nlins
+      print(ios, j, " ")
+    end
+    println(ios)
+  end
+  print(ios, "begin\n", m, " ", n, " rational\n")
+  write_lrs_mat(ios, Vmat)
+  println(ios, "end")
+  for op in options
+    println(ios, op)
+  end
+  close(ios)
 end
 
-function store_wiring(df, behav, wiring)
-  oA, oB, iA, iB = size(behav.pabxy)
-  c = length(wiring.CAj)
-  vals = Dict{Symbol, Union{eltype(pabxy), eltype(CA)}}()
+function write_lrs_hrep(name, options, ineqAs::MaybeMat, ineqbs::MaybeVec, eqAs::MaybeMat, eqbs::MaybeVec)
+  stat("$name.ine").inode == 0 || throw(ArgumentError("$name.ine already exists!"))
+  d = 0
+  Ts = Type[]
+  if !isnothing(eqAs)
+    meq, deq = size(eqAs)
+    meq == length(eqbs) || throw(ArgumentError("eqAs and eqbs dimensions do not match!"))
+    push!(Ts, eltype(eqAs), eltype(eqbs))
+    d = deq
+  end
+  if !isnothing(ineqAs)
+    mineq, dineq = size(ineqAs)
+    mineq == length(ineqbs) || throw(ArgumentError("ineqAs and ineqbs dimensions do not match!"))
+    (d != 0 && d != dineq) && throw(ArgumentError("Inconsistent dimensions!"))
+    push!(Ts, eltype(ineqAs), eltype(ineqbs))
+    d = dineq
+  end
+  d != 0 || throw(ArgumentError("Empty input!"))
+  T = promote_type(Ts...)
+  if isnothing(ineqAs)
+    ineqAs = Matrix{T}(undef, 0, d)
+    ineqbs = Vector{T}(undef, 0)
+  end
+  if isnothing(eqAs)
+    eqAs = Matrix{T}(undef, 0, d)
+    eqbs = Vector{T}(undef, 0)
+  end
+  write_lrs_hrep!(name, options, ineqAs, ineqbs, eqAs, eqbs)
+end
+# ineqAs[i,:] \dot x \leq ineqbs[i]; eqAs[i,:] \dot x = eqbs[i]
+function write_lrs_hrep!(name, options, ineqAs::AbstractMatrix, ineqbs::AbstractVector, eqAs::AbstractMatrix, eqbs::AbstractVector)
+  ineqmat = hcat(ineqbs, -ineqAs)
+  eqmat = hcat(eqbs, eqAs)
+  neqs = length(eqbs)
+  Hmat = vcat(eqmat, ineqmat)
+  m, n = size(Hmat)
 
-  for a in 1:iA, b in 1:iB, x in 1:oA, y in 1:oB
-    vals[Symbol("p($a,$b|$x,$y)")] = pabxy[a,b,x,y]
-  end
-  for seq in itprod(vcat(itrept(1:iA, c), itrept(1:oA, c))...)
-    vals[Symbol("CA$seq")] = CA[seq...]
-  end
-  for seq in itprod(vcat(itrept(1:iB, c), itrept(1:oB, c))...)
-    vals[Symbol("CB$seq")] = CB[seq...]
-  end
-  for j in 2:c
-    for seq in itprod(vcat(itrept(1:iA, (j-1)), itrept(1:oA, (j-1)))...)
-      vals[Symbol("CA$j$seq")] = CAj[j][seq...]
+  ios = open("$name.ine", "w")
+  println(ios, name, "\nH-representation")
+  if neqs > 0
+    print(ios, "linearity ")
+    for j in 1:neqs
+      print(ios, j, " ")
     end
-    for seq in itprod(vcat(itrept(1:iB, (j-1)), itrept(1:oB, (j-1)))...)
-      vals[Symbol("CB$j$seq")] = CBj[j][seq...]
-    end
+    println(ios)
   end
+  print(ios, "begin\n", m, " ", n, " rational\n")
+  write_lrs_mat(ios, Hmat)
+  println(ios, "end")
+  for op in options
+    println(ios, op)
+  end
+  close(ios)
 end
 
-# TODO dump to CSV
+function write_lrs_mat(ios::IOStream, mat::AbstractMatrix{Rational{T}}) where T
+  permmat = permutedims(mat)
+  for i in axes(permmat, 2)  # rows of mat
+    for j in axes(permmat, 1)  # cols of mat
+      x = permmat[j, i]
+      print(ios, x.num, "/", x.den, " ")
+    end
+    println(ios)
+  end
+end
+function write_lrs_mat(ios::IOStream, mat::AbstractMatrix{T}) where T <: Integer
+  permmat = permutedims(mat)
+  for i in axes(permmat, 2)  # rows of mat
+    for j in axes(permmat, 1)  # cols of mat
+      print(ios, permmat[j, i], " ")
+    end
+    println(ios)
+  end
+end

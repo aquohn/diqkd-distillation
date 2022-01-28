@@ -31,10 +31,10 @@ function func_vec(::Type{T}, ::Type{Ti}, tupranges) where {T <: Real, Ti <: Inte
 end
 
 full_polytope(sett::Setting, polylib=LRSLib.Library()) = full_polytope(n, [sett.iA, sett.iB], [sett.oA, sett.oB], polylib)
-full_polytope(n::Int, i::Int, o::Int, polylib=LRSLib.Library()) = full_polytope(n, [i], [o], polylib)
+full_polytope(n::Integer, i::Integer, o::Integer, polylib=LRSLib.Library()) = full_polytope(n, [i], [o], polylib)
 full_polytope(n, is, os, polylib=LRSLib.Library()) = full_polytope(Float64, n, is, os, polylib)
-full_polytope(::Type{T}, n::Int, i::Int, o::Int, polylib=LRSLib.Library()) where T = full_polytope(T, n, [i], [o], polylib)
-function full_polytope(::Type{T}, n::Int, is::AbstractVector{Int}, o::AbstractVector{Int}, polylib=LRSLib.Library()) where {T <: Real}
+full_polytope(::Type{T}, n::Integer, i::Integer, o::Integer, polylib=LRSLib.Library()) where T = full_polytope(T, n, [i], [o], polylib)
+function full_polytope(::Type{T}, n::Integer, is::AbstractVector{Integer}, o::AbstractVector{Integer}, polylib=LRSLib.Library()) where {T <: Real}
   # HalfSpace(a,b) => a \dot x \leq b
   # HyperPlane(a,b) => a \dot x = b
 
@@ -390,8 +390,8 @@ end
 function couplers_poly(sett::Setting=Setting(2,2,2,2), ::Type{T}=Rational{Int64}, polylib=LRSLib.Library()) where {T <: Real}
   hr = couplers_hrep(sett, T)
   poly = polyhedron(hr, polylib)
-  vr = vrep(poly)
-  return poly, vr
+  vrep(poly)
+  return poly
 end
 
 

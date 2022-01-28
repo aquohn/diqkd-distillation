@@ -175,13 +175,62 @@ Base.iterate(wmit::WiringMapIter, state) = iterate(wmit._prodwmit, state)
 # Approach 3: Interpret wirings as linear operators
 # TODO use RecursiveArrayTools?
 const MargWiringMap{Tp} = Vector{Vector{Array{Tp}}}
-const MargWiringComponents{Tp} = Vector{Union{Vector{SparseVector{Tp}}, Vector{ SparseMatrixCSC{Tp}}}
+const MargWiringComponents{Tp, Ti} = Vector{Union{Vector{SparseVector{Tp, Ti}}, Vector{ SparseMatrixCSC{Tp, Ti}}}}
+function Vector(mwcomp::MargWiringComponents{Tp, Ti}) where {Tp, Ti}
+  i = length(mwcomp[1])
+  # TODO precompute length
+  vcontent = SparseVector{Tp, Ti}[] 
+  for j in 1:c+1
+    for x in 1:i
+      push!(vcontent, vec(mwcomp[j][x]))
+    end
+  end
+  return vcat(vcontent...)
+end
+function MargWiringComponents(c::Integer, o::Integer, i::Integer, v::Vector{Tp}) where Tp <: Real
+  Ti = promote_type(typeof(c), typeof(o), typeof(i))
+  # TODO find formulas for lengths
+end
+
 struct MargWiringVec{Ti <: Integer, Tp <: Real}
   c::Ti
   o::Ti
   i::Ti
   v::Vector{Tp}
   Ws::MargWiringComponents{Tp}
+end
+MargWiringVec(c::Integer, o::Integer, i::Integer, Wmap) = MargWiring(Float64, c, o, i, Wmap)
+function MargWiringVec(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where Tp <: Real
+  Ti = promote_type(typeof(c), typeof(o), typeof(i))
+  Ws = []
+  vcontent = []
+  for j in 1:c
+    sit = itprod(repeat([1:o], j-1)...)
+    condmaps = []
+    for x in 1:i
+      Wmapcurr = Wmap[j][x]
+      condWtld = []
+      for s in sit
+        condWtld_component = sparsevec([Wmapcurr[s...]], Tp[1], i)'
+        push!(vcontent, condWtld_component)
+        push!(condWtld, condWtld_component)
+      end
+      push!(condmaps, condWtld)
+    end
+    push!(Ws, condmaps)
+  end
+  sit = itprod(repeat([1:o], c)...)
+  scount = length(sit)
+  Wfinal = []
+  for x in 1:i
+    Wmapcurr = Wmap[j][x]
+    condWfinal = sparse([(Wmap[c+1][x][s...] for s in sit)...], 1:scount, ones(Tp, scount), o, scount)
+    push!(vcontent, vec(condWfinal))
+    push!(Wfinal, condWfinal)
+  end
+  push!(Ws, Wfinal)
+  v = vcat(vcontent...)
+  return MargWiringVec{Ti, Tp}(c, o, i, v, Ws)
 end
 
 struct MargWiring{Ti <: Integer, Tp <: Real}
@@ -271,6 +320,7 @@ function Array(bvec::BehaviourVec{Ti, Tp}) where {Ti, Tp}
   end
   return parr
 end
+Behaviour(bv::BehaviourVec) = Behaviour(Array(bv))
 
 Base.:*(margwir::MargWiring, b::BehaviourVec) = Wiring([margwir]) * b
 function Base.:*(wiring::Wiring{Tiw, Tpw}, b::BehaviourVec{Tib, Tpb}) where {Tiw, Tpw, Tib, Tpb}
@@ -367,16 +417,19 @@ function and_Wmap(c::Integer, i::Integer)
   return Wmap
 end
 
-# take the first output and ignore the rest
-function first_Wmap(c::Integer, o::Integer, i::Integer)
-  Ti = promote_type(typeof(c), typeof(i))
+# take the jth output and ignore the rest
+function jth_Wmap(c::Integer, o::Integer, i::Integer, j::Integer)
+  Ti = promote_type(typeof(c), typeof(o), typeof(i))
   Wmap::MargWiringMap{Ti} = [[fill(Ti(x), repeat([o], j-1)...) for x in 1:i] for j in 1:c]
   push!(Wmap, [Array{Ti}(undef, repeat([o], c)...) for x in 1:i])
+  idx = repeat([:], c)
   for x in 1:i, a in 1:o
-      Wmap[c+1][x][a, repeat([:], c-1)...] .= a
+      idx[j] = a
+      Wmap[c+1][x][idx...] .= a
   end
   return Wmap
 end
+first_Wmap(c, o, i) = jth_Wmap(c, o, i, 1)
 
 function and_corrs(N, corrs::Correlators)
   Eax, Eby, Eabxy = corrs
@@ -390,5 +443,23 @@ function and_corrs(N, corrs::Correlators)
 end
 
 function sel_and_behav(N, behav::Behaviour, xs, ys)
-  # TODO use wiring formalism
+  bv = BehaviourVec(behav)
+  A_Wmap = and_Wmap(N, behav.iA)
+  B_Wmap = and_Wmap(N, behav.iB)
+  firstA_Wmap = first_Wmap(N, behav.oA, behav.iA)
+  firstB_Wmap = first_Wmap(N, behav.oB, behav.iB)
+
+  for j in 1:c+1
+    for x in xs
+      A_Wmap[c+1][x][:] = firstA_Wmap[x][:]
+    end
+    for y in ys
+      B_Wmap[c+1][y][:] = firstB_Wmap[y][:]
+    end
+  end
+
+  margWA = MargWiring(N, oA, iA, A_Wmap)
+  margWB = MargWiring(N, oB, iB, B_Wmap)
+  Wtot = Wiring([margWA, margWB])
+  return Behaviour(Wtot * bv)
 end
