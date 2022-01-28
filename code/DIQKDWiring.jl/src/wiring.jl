@@ -172,7 +172,18 @@ Base.iterate(wmit::WiringMapIter, state) = iterate(wmit._prodwmit, state)
 # for c=2, o=2, i=3 we need 200GB of RAM; I think we should write this out and
 # solve slowly using lrs
 
-# Approach 3: Decompose into application and permutation maps
+# Approach 3: Interpret wirings as linear operators
+# TODO use RecursiveArrayTools?
+const MargWiringMap{Tp} = Vector{Vector{Array{Tp}}}
+const MargWiringComponents{Tp} = Vector{Union{Vector{SparseVector{Tp}}, Vector{ SparseMatrixCSC{Tp}}}
+struct MargWiringVec{Ti <: Integer, Tp <: Real}
+  c::Ti
+  o::Ti
+  i::Ti
+  v::Vector{Tp}
+  Ws::MargWiringComponents{Tp}
+end
+
 struct MargWiring{Ti <: Integer, Tp <: Real}
   c::Ti
   o::Ti
@@ -219,7 +230,7 @@ function Wiring(margWs::AbstractVector{MargWiring{Ti, Tp}}) where {Ti, Tp}
   return Wiring(length(margWs), first(cs), os, is, W)
 end
 
-# TODO implement AbstractVector iface, maybe value as type parameter?
+# TODO implement AbstractVector iface
 struct BehaviourVec{Ti <: Integer, Tp <: Real}
   n::Ti
   os::Vector{Ti}
@@ -244,14 +255,7 @@ function BehaviourVec(parr::AbstractArray{Tp}) where {Tp <: Real}
     end
     return BehaviourVec{Ti, Tp}(n, os, is, p)
 end
-function BehaviourVec(behav::Behaviour)
-  oA, oB, iA, iB = size(behav.pabxy)
-  BehaviourVec([oA, oB], [iA, iB], behav.pabxy)
-end
-function BehaviourVec(mat::AbstractMatrix)
-  o, i = size(mat)
-  BehaviourVec([o], [i], mat)
-end
+BehaviourVec(behav::Behaviour) = BehaviourVec(behav.pabxy)
 function Array(bvec::BehaviourVec{Ti, Tp}) where {Ti, Tp}
   os, is, p = bvec.os, bvec.is, bvec.p
   n = length(os)  # TODO check value
@@ -355,7 +359,7 @@ const eg_Wmap = ((fill(1), fill(2)), ([2, 1], [2, 2]), ([1 1; 1 2], [2 1; 1 1]))
 # binary AND (a = 1 unless all as = 2, then a = 2)
 function and_Wmap(c::Integer, i::Integer)
   Ti = promote_type(typeof(c), typeof(i))
-  Wmap = [[fill(Ti(x), repeat([2], j-1)...) for x in 1:i] for j in 1:c]
+  Wmap::MargWiringMap{Ti} = [[fill(Ti(x), repeat([2], j-1)...) for x in 1:i] for j in 1:c]
   push!(Wmap, [ones(Ti, repeat([2], c)...) for x in 1:i])
   for x in 1:i
     Wmap[c+1][x][repeat([2], c)...] = 2
@@ -366,7 +370,7 @@ end
 # take the first output and ignore the rest
 function first_Wmap(c::Integer, o::Integer, i::Integer)
   Ti = promote_type(typeof(c), typeof(i))
-  Wmap = [[fill(Ti(x), repeat([o], j-1)...) for x in 1:i] for j in 1:c]
+  Wmap::MargWiringMap{Ti} = [[fill(Ti(x), repeat([o], j-1)...) for x in 1:i] for j in 1:c]
   push!(Wmap, [Array{Ti}(undef, repeat([o], c)...) for x in 1:i])
   for x in 1:i, a in 1:o
       Wmap[c+1][x][a, repeat([:], c-1)...] .= a

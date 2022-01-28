@@ -1,4 +1,4 @@
-using Permutations
+using Permutations, QuantumInformation
 
 macro printvals(syms...)
   l = length(syms)
