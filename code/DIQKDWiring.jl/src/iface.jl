@@ -36,7 +36,7 @@ function write_lrs_vrep!(name, options, verts::AbstractMatrix, rays::AbstractMat
   ios = open("$name.ext", "w")
   println(ios, name, "\nV-representation")
   if nlins > 0
-    print(ios, "linearity ")
+    print(ios, "linearity ", nlins, " ")
     for j in 1:nlins
       print(ios, j, " ")
     end
@@ -83,7 +83,7 @@ end
 # ineqAs[i,:] \dot x \leq ineqbs[i]; eqAs[i,:] \dot x = eqbs[i]
 function write_lrs_hrep!(name, options, ineqAs::AbstractMatrix, ineqbs::AbstractVector, eqAs::AbstractMatrix, eqbs::AbstractVector)
   ineqmat = hcat(ineqbs, -ineqAs)
-  eqmat = hcat(eqbs, eqAs)
+  eqmat = hcat(eqbs, -eqAs)
   neqs = length(eqbs)
   Hmat = vcat(eqmat, ineqmat)
   m, n = size(Hmat)
@@ -91,7 +91,7 @@ function write_lrs_hrep!(name, options, ineqAs::AbstractMatrix, ineqbs::Abstract
   ios = open("$name.ine", "w")
   println(ios, name, "\nH-representation")
   if neqs > 0
-    print(ios, "linearity ")
+    print(ios, "linearity ", neqs, " ")
     for j in 1:neqs
       print(ios, j, " ")
     end
@@ -124,4 +124,40 @@ function write_lrs_mat(ios::IOStream, mat::AbstractMatrix{T}) where T <: Integer
     end
     println(ios)
   end
+end
+
+# TODO read back in
+function read_lrs_ratint_mat(ios::IOStream, n::Integer)
+  start = false
+  valre = r"(?<sign>-)?(?<num>\d+)(?<den>/\d+)?"
+  skipre = r"^[*#$%^&@!]"
+  stopre = r"end"
+  maxint = typemax(Int)
+
+  mat = Array{Int}(0, n)
+  for line in eachline(ios)
+    isnothing(match(skipre, line)) || continue
+    isnothing(match(stopre, line)) || break
+    row = []
+    curridx = 1
+    while true
+      m = match(valre, line, curridx)
+      isnothing(currmatch) && break
+      sign = isnothing(m[:sign]) ? 1 : -1
+      num = sign * parse(BigInt, m[:num])
+      (num > maxint) || num = Int(num)
+      den = isnothing(m[:den]) ? 1 : parse(BigInt, m[:den][2:end])
+
+      if den == 1
+        push!(row, num)
+      else
+        (den > maxint) || den = Int(den)
+        push!(row, num // den)
+      end
+      curridx = length(currmatch.match) + currmatch.offset
+    end
+    mat = vcat(mat, row)
+  end
+
+  return mat
 end

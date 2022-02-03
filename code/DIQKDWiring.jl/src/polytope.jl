@@ -30,21 +30,21 @@ function func_vec(::Type{T}, ::Type{Ti}, tupranges) where {T <: Real, Ti <: Inte
   return F, ntups
 end
 
-full_polytope(sett::Setting, polylib=LRSLib.Library()) = full_polytope(n, [sett.iA, sett.iB], [sett.oA, sett.oB], polylib)
+full_polytope(sett::Setting, polylib=LRSLib.Library()) = full_polytope(2, [sett.iA, sett.iB], [sett.oA, sett.oB], polylib)
 full_polytope(n::Integer, i::Integer, o::Integer, polylib=LRSLib.Library()) = full_polytope(n, [i], [o], polylib)
-full_polytope(n, is, os, polylib=LRSLib.Library()) = full_polytope(Float64, n, is, os, polylib)
 full_polytope(::Type{T}, n::Integer, i::Integer, o::Integer, polylib=LRSLib.Library()) where T = full_polytope(T, n, [i], [o], polylib)
-function full_polytope(::Type{T}, n::Integer, is::AbstractVector{Integer}, o::AbstractVector{Integer}, polylib=LRSLib.Library()) where {T <: Real}
+full_polytope(n, is, os, polylib=LRSLib.Library()) = full_polytope(Float64, n, is, os, polylib)
+function full_polytope(::Type{T}, n::Integer, is::AbstractVector{Ti}, os::AbstractVector{To}, polylib=LRSLib.Library()) where {T <: Real, Ti <: Integer, To <: Integer}
   # HalfSpace(a,b) => a \dot x \leq b
   # HyperPlane(a,b) => a \dot x = b
 
-  Ti = promote_type(eltype(is), eltype(os), typeof(n))
+  Tn = promote_type(Ti, To, typeof(n))
   # ranges for the tuples of indices specifying a probability
   otupranges = [1:i for i in is]
   itupranges = [1:o for o in os]
   tupranges  = vcat(otupranges, itupranges)
-  P, ntups = func_vec(T, Ti, tupranges)
-  SV = SparseVector{T, Ti}
+  P, ntups = func_vec(T, Tn, tupranges)
+  SV = SparseVector{T, Tn}
 
   lnormconstrs = vec([-P[tup...] for tup in itprod(tupranges...)])
   unormconstrs = vec([sum([P[otup..., itup...] for otup in itprod(otupranges...)]) for itup in itprod(itupranges...)])
@@ -54,7 +54,7 @@ function full_polytope(::Type{T}, n::Integer, is::AbstractVector{Integer}, o::Ab
     currtups = deepcopy(tupranges)
     currtups[p] = 0:0
     currtups[n + p] = 0:0
-    o = os[p], i = is[p]
+    o = os[p]; i = is[p]
     icombs = collect(combinations(1:i, 2))
 
     # choose two different inputs for player p and sum over all his outputs
@@ -171,10 +171,10 @@ end
 # printing
 function print_full(pax, pby, pabxy)
   oA, oB, iA, iB = size(pabxy)
-  w = maximum([ceil(log10(d)) for d in [oA, oB, iA, iB]]) |> Int64
+  w = maximum([ceil(log10(d)) for d in [oA, oB, iA, iB]]) |> Int
   cw = w + 2 + w + 1
   corner = "a, b/x, y|"
-  fw = max(length(corner), cw) |> Int64
+  fw = max(length(corner), cw) |> Int
   l = fw + (iA * iB) * cw
 
   # P(w, w|w, w) -> 8 + 4w chars
@@ -370,7 +370,7 @@ end
 # and Gisin
 
 # hrep for polytope of couplers for two binary-output boxes
-function couplers_hrep(sett::Setting=Setting(2,2,2,2), ::Type{T}=Rational{Int64}) where {T <: Real}
+function couplers_hrep(sett::Setting=Setting(2,2,2,2), ::Type{T}=Rational{Int}) where {T <: Real}
   if sett.oA != 2 || sett.oB != 2
     throw(ArgumentError("Setting must be binary-output!"))
   end
@@ -387,7 +387,7 @@ function couplers_hrep(sett::Setting=Setting(2,2,2,2), ::Type{T}=Rational{Int64}
   return hrep(hss)
 end
 
-function couplers_poly(sett::Setting=Setting(2,2,2,2), ::Type{T}=Rational{Int64}, polylib=LRSLib.Library()) where {T <: Real}
+function couplers_poly(sett::Setting=Setting(2,2,2,2), ::Type{T}=Rational{Int}, polylib=LRSLib.Library()) where {T <: Real}
   hr = couplers_hrep(sett, T)
   poly = polyhedron(hr, polylib)
   vrep(poly)
@@ -422,7 +422,7 @@ function indep_rounds_couplers(::Type{T}, c::Integer, o::Integer, i::Integer) wh
   ineqconstrs = vcat([Polyhedra.HalfSpace(constr, 0) for constr in lnormconstrs], [Polyhedra.HalfSpace(constr, 1) for constr in unormconstrs])
   return hrep(ineqconstrs)
 end
-indep_rounds_couplers(c, o, i) = indep_rounds_couplers(Rational{Int64}, c, o, i)
+indep_rounds_couplers(c, o, i) = indep_rounds_couplers(Rational{Int}, c, o, i)
 
 const chsh_poly = cg_polytope(chshsett)
 const chsh_v = vertices_list(chsh_poly)
