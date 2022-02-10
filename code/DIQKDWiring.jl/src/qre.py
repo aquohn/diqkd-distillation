@@ -103,7 +103,7 @@ class BFFProblem(object):
         self.op_ineqs = []  # operator inequalities
         self.extra_monos = self.get_extra_monomials()  # extra monomials
 
-    def objective(self, ti, q):
+    def HAgEx_objective(self, ti, q):
         """
         Returns the objective function for the faster computations.
             Key generation on X=0
@@ -153,7 +153,7 @@ class BFFProblem(object):
             ck = self.W[k] / (self.T[k] * log(2))
 
             # Get the k-th objective function
-            new_objective = self.objective(self.T[k], q)
+            new_objective = self.HAgEx_objective(self.T[k], q)
 
             SDP.set_objective(new_objective)
             self.solvef(SDP)
@@ -195,7 +195,7 @@ class BFFProblem(object):
             ck = self.W[k] / (self.T[k] * log(2))
 
             # Get the k-th objective function
-            new_objective = self.objective(self.T[k], q)
+            new_objective = self.HAgEx_objective(self.T[k], q)
 
             # Set the objective and solve
             SDP.set_objective(new_objective)
@@ -215,12 +215,15 @@ class BFFProblem(object):
 
         return dual_vec, ent
 
-    def behav_analysis(self, pabxy):
+    def behav_analysis(self, pabxy, objective_ops):
         """
-        Returns the moment equality constraints for the distribution specified by the
-        observed p(ab|xy).
+        Generates the moment equality constraints for the distribution specified
+        by the observed p(ab|xy), and searches through them to find all those that
+        are relevant to the operators in objective_ops. Returns the relevant constraints
+        and operators.
 
-            pabxy  --     4D numpy array such that p[a, b, x, y] = p(ab|xy)
+            pabxy          --     4D numpy array such that p[a, b, x, y] = p(ab|xy)
+            objective_ops  --     list of operators in the objective
         """
 
         constraints = []
@@ -244,7 +247,7 @@ class BFFProblem(object):
         constr_set = set(constraints)
         keep_constraints = set()
         keep_ops = set()
-        constr_ops = self.objective_ops[:]  # TODO define this
+        constr_ops = objective_ops[:]
         i = 0
         while i < len(constr_ops):
             curr_op = constr_ops[i]
@@ -256,7 +259,7 @@ class BFFProblem(object):
                 except KeyError:
                     continue
                 new_ops = thisconstr_ops - keep_ops
-                keep_ops += new_ops
+                keep_ops = keep_ops.union(new_ops)
                 constr_ops += list(new_ops)
                 keep_constraints.update({constr})
                 curr_constrs.update({constr})
@@ -389,6 +392,7 @@ class BFFProblem(object):
         return subs
 
     # TODO generalise to extract from objective
+    '''
     def get_extra_monomials(self):
         """
         Returns additional monomials to add to sdp relaxation.
@@ -406,6 +410,19 @@ class BFFProblem(object):
         monos += [self.A[0][0] * Dagger(z) * z for z in self.Z]
 
         return monos
+    '''
+
+    def get_extra_monomials(self):
+        monos = []
+
+        # It should be sufficient to consider words of length at most 2 in the Z ops
+        Z2 = [z for z in ncp.nc_utils.get_monomials(self.Z,2) if ncp.nc_utils.ncdegree(z)>=2]
+        AB = ncp.flatten([self.A,self.B])
+        for a in AB:
+            for z in Z2:
+                monos += [a*z]
+        return monos[:]
+
 
 # TODO add scalar variables, either as diagonal entries in the variable matrix,
 # or as identity operators

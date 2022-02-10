@@ -71,7 +71,8 @@ try:
 
     # WARNING seems quite unreliable
     def MOSEK_SOLVEF(sdp):
-        sdp.solve("mosek", solverparameters={"num_threads": int(NUM_SUBWORKERS)})
+        # sdp.solve("mosek", solverparameters={"num_threads": int(NUM_SUBWORKERS)})
+        sdp.solve("mosek")
 
 except ModuleNotFoundError:
     MOSEK_SOLVEF = None
@@ -103,9 +104,12 @@ def behav_problem(p=None, **kwargs):
     if p is None:
         print("No behaviour provided; using a fixed test behaviour.")
         p = TEST_P
-
     prob = BFFProblem(**kwargs)
-    behav_constrs, behav_ops = prob.behav_analysis(p)
+    obj = kwargs.get("objective", None)
+    if obj is None:
+        print("No objective provided, using H(A|E,x*)")
+        obj = prob.HAgEx_objective(1, 0.5)
+    behav_constrs, behav_ops = prob.behav_analysis(p, list(obj.free_symbols))
     prob.moment_eqs += behav_constrs
 
     sdp = ncp.SdpRelaxation(behav_ops, verbose=VERBOSE - 1, normalized=True, parallel=0)
@@ -115,7 +119,7 @@ def behav_problem(p=None, **kwargs):
         inequalities=prob.op_ineqs[:],
         momentequalities=prob.moment_eqs[:],
         momentinequalities=prob.moment_ineqs[:],
-        objective=prob.objective,
+        objective=obj,
         substitutions=prob.substitutions,
         extramonomials=prob.extra_monos,
     )
