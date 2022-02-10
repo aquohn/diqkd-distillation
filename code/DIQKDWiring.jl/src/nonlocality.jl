@@ -66,15 +66,15 @@ function Correlators(behav::Behaviour)
 
   return Correlators(Eax, Eby, Eabxy)
 end
-function Behaviour(corrs::Correlators)
+function Behaviour(corrs::Correlators{Sax, Sby, Sabxy, T}) where {Sax, Sby, Sabxy, T}
   # assumes binary outcomes
   # let outcome 1 be associated with eigenvalue -1 or logical 0
   Eax, Eby, Eabxy = corrs
-  invcorr = 0.25 * [-1.0 -1.0 1.0 1.0; -1.0 1.0 -1.0 1.0; 1.0 -1.0 -1.0 1.0; 1.0 1.0 1.0 1.0]
+  invcorr = [-1 -1 1 1; -1 1 -1 1; 1 -1 -1 1; 1 1 1 1] .// 4
 
   oA, oB = 2, 2
   iA, iB = [length(Eax), length(Eby)]
-  pabxy = Array{Float64}(undef, oA, oB, iA, iB)
+  pabxy = Array{T}(undef, oA, oB, iA, iB)
 
   for x in 1:iA, y in 1:iB
     pabxy[:, :, x, y] = invcorr * [Eax[x]; Eby[y]; Eabxy[x,y]; 1]

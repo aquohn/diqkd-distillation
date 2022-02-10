@@ -20,6 +20,7 @@
 using Revise
 using Combinatorics
 using QuantumInformation, LinearAlgebra
+using Reduce
 
 includet("helpers.jl")
 includet("nonlocality.jl")
@@ -248,16 +249,17 @@ function MargWiring(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where 
     condmaps = []
     for x in 1:i
       Wmapcurr = Wmap[j][x]
-      condWtld = cat((sparsevec([Wmapcurr[s...]], Tp[1], i)' for s in sit)...;
-                    dims=(1,2))
+      condWit = (sparsevec([Wmapcurr[s...]], Tp[1], i)' for s in sit)
+      condWtld = cat(condWit...; dims=(1,2))
       push!(condmaps, condWtld)
     end
-    Wj = kron(cat(condmaps...; dims=(1,2)), I(i))
+    Wj = kron(cat(condmaps...; dims=(1,2)), I(o))
     W = kron(Wj, I((o*i)^(c-j))) * W
   end
   sit = itprod(repeat([1:o], c)...)
   scount = length(sit)
-  Wfinal = cat((sparse([(Wmap[c+1][x][s...] for s in sit)...], 1:scount, ones(Tp, scount), o, scount) for x in 1:i)...; dims=(1,2))
+  Wfinalit = (sparse([(Wmap[c+1][x][s...] for s in sit)...], 1:scount, ones(Tp, scount), o, scount) for x in 1:i)
+  Wfinal = cat(Wfinalit...; dims=(1,2))
   return MargWiring{Ti, Tp}(c, o, i, Wfinal * W)
 end
 
@@ -273,10 +275,20 @@ function Wiring(margWs::AbstractVector{MargWiring{Ti, Tp}}) where {Ti, Tp}
   if !(all(c -> c == first(cs), cs))
     throw(ArgumentError("Marginal wirings take different numbers of boxes!"))
   end
+  n = length(margWs)
   os = [margW.o for margW in margWs]
   is = [margW.i for margW in margWs]
-  W = kron((margW.W for margW in margWs)...)
-  return Wiring(length(margWs), first(cs), os, is, W)
+  W = (n == 1) ? first(margWs).W : kron((margW.W for margW in margWs)...)
+  return Wiring(n, first(cs), os, is, W)
+end
+function Array(w::Wiring{Ti, Tp}) where {Ti, Tp}
+  c, os, is = w.c, w.os, w.is
+  ics = vcat(repeat([i], c) for i in is)
+  ocs = vcat(repeat([o], c) for o in os)
+  dims = [os..., is..., ics..., ocs..., is...]
+  arr = Array{Tp}(undef, dims...)
+
+  # TODO
 end
 
 # TODO implement AbstractVector iface
@@ -292,35 +304,40 @@ function BehaviourVec(parr::AbstractArray{Tp}) where {Tp <: Real}
     n = Ti(length(dims) // 2)
     dimvec = Ti[dims...]
     os, is = dimvec[1:n], dimvec[n+1:2*n]
-    argit = itprod(vcat(([1:os[j], 1:is[j]] for j in n:-1:1)...)...)
+    # nth system's index changes fastest as we go down the vector
+    # so start from nth system
+    argit = itprod(vcat(([1:os[k], 1:is[k]] for k in n:-1:1)...)...)
     p = Vector{Tp}(undef, length(argit))
     for (pidx, argval) in zip(eachindex(p), argit)
       arg = Vector{Ti}(undef, 2*n)
-      for j in 1:n
-        arg[j] = argval[2*(n-j)+1]
-        arg[j+n] = argval[2*(n-j)+2]
+      for k in 1:n
+        arg[k] = argval[2*(n-k)+1]
+        arg[k+n] = argval[2*(n-k)+2]
       end
       p[pidx] = parr[arg...]
     end
     return BehaviourVec{Ti, Tp}(n, os, is, p)
 end
+BehaviourVec(corrs::Correlators) = BehaviourVec(Behaviour(corrs))
 BehaviourVec(behav::Behaviour) = BehaviourVec(behav.pabxy)
 function Array(bvec::BehaviourVec{Ti, Tp}) where {Ti, Tp}
   os, is, p = bvec.os, bvec.is, bvec.p
-  n = length(os)  # TODO check value
+  n = length(os)
+  @assert length(is) == n
   parr = Array{Tp}(undef, os..., is...)
-  argit = itprod(vcat(([1:os[j], 1:is[j]] for j in n:-1:1)...)...)
+  argit = itprod(vcat(([1:os[k], 1:is[k]] for k in n:-1:1)...)...)
   for (pval, argval) in zip(p, argit)
     arg = Vector{Ti}(undef, 2*n)
-    for j in 1:n
-      arg[j] = argval[2*(n-j)+1]
-      arg[j+n] = argval[2*(n-j)+2]
+    for k in 1:n
+      arg[k] = argval[2*(n-k)+1]
+      arg[k+n] = argval[2*(n-k)+2]
     end
     parr[arg...] = pval
   end
   return parr
 end
 Behaviour(bv::BehaviourVec) = Behaviour(Array(bv))
+Correlators(bv::BehaviourVec) = Correlators(Behaviour(Array(bv)))
 
 Base.:*(margwir::MargWiring, b::BehaviourVec) = Wiring([margwir]) * b
 function Base.:*(wiring::Wiring{Tiw, Tpw}, b::BehaviourVec{Tib, Tpb}) where {Tiw, Tpw, Tib, Tpb}
@@ -333,13 +350,12 @@ function Base.:*(wiring::Wiring{Tiw, Tpw}, b::BehaviourVec{Tib, Tpb}) where {Tiw
   kronp = kron(repeat([b.p], c)...)
   permvec = Vector{Ti}(undef, n*c)
   for j in 1:n
-    permvec[((j-1)*n+1):j*n] = j:n:c*n
+    permvec[((j-1)*c+1):j*c] = j:n:c*n
   end
-  invpermvec = invperm(permvec)
-  dims = vcat((repeat([o*i], c) for (o, i) in zip(os, is))...)
+  dims = vcat((repeat([o*i for (o, i) in zip(os, is)], c))...)
   permp = permutesystems(kronp, dims, permvec)
-  permpp = wiring.W * permp
-  return BehaviourVec{Ti, Tp}(n, os, is, permpp)
+  finalp = wiring.W * permp
+  return BehaviourVec{Ti, Tp}(n, os, is, finalp)
 end
 Base.:(==)(bv1::BehaviourVec, bv2::BehaviourVec) = all(iszero.(bv1.p - bv2.p))
 
@@ -417,12 +433,29 @@ function and_Wmap(c::Integer, i::Integer)
   return Wmap
 end
 
+# binary XOR
+function xor_Wmap(c::Integer, i::Integer)
+  Ti = promote_type(typeof(c), typeof(i))
+  Wmap::MargWiringMap{Ti} = [[fill(Ti(x), repeat([2], j-1)...) for x in 1:i] for j in 1:c]
+  Wfinal = [Array{Ti}(undef, repeat([2], c)...) for x in 1:i]
+  asitr = itprod(repeat([1:2], c)...)
+  for as in asitr
+    binas = as .- 1
+    a = foldl(xor, binas) + 1
+    for x in 1:i
+      Wfinal[x][as...] = a
+    end
+  end
+  push!(Wmap, Wfinal)
+  return Wmap
+end
+
 # take the jth output and ignore the rest
 function jth_Wmap(c::Integer, o::Integer, i::Integer, j::Integer)
   Ti = promote_type(typeof(c), typeof(o), typeof(i))
   Wmap::MargWiringMap{Ti} = [[fill(Ti(x), repeat([o], j-1)...) for x in 1:i] for j in 1:c]
   push!(Wmap, [Array{Ti}(undef, repeat([o], c)...) for x in 1:i])
-  idx = repeat([:], c)
+  idx = repeat(Union{Colon, Ti}[:], c)
   for x in 1:i, a in 1:o
       idx[j] = a
       Wmap[c+1][x][idx...] .= a
@@ -431,7 +464,7 @@ function jth_Wmap(c::Integer, o::Integer, i::Integer, j::Integer)
 end
 first_Wmap(c, o, i) = jth_Wmap(c, o, i, 1)
 
-function and_corrs(N, corrs::Correlators)
+function and_corrs(N::Integer, corrs::Correlators)
   Eax, Eby, Eabxy = corrs
   iA, iB = length(Eax), length(Eby)
 
@@ -442,21 +475,40 @@ function and_corrs(N, corrs::Correlators)
   return Correlators(EaxN, EbyN, EabxyN)
 end
 
-function sel_and_behav(N, behav::Behaviour, xs, ys)
-  bv = BehaviourVec(behav)
-  A_Wmap = and_Wmap(N, behav.iA)
-  B_Wmap = and_Wmap(N, behav.iB)
-  firstA_Wmap = first_Wmap(N, behav.oA, behav.iA)
-  firstB_Wmap = first_Wmap(N, behav.oB, behav.iB)
+function sel_and_wiring(sett::Setting, N, xs, ys)
+  iA, oA, iB, oB = sett
+  A_Wmap = and_Wmap(N, iA)
+  B_Wmap = and_Wmap(N, iB)
+  firstA_Wmap = first_Wmap(N, oA, iA)
+  firstB_Wmap = first_Wmap(N, oB, iB)
 
-  for j in 1:c+1
+  for j in 1:N+1
     for x in xs
-      A_Wmap[c+1][x][:] = firstA_Wmap[x][:]
+      A_Wmap[j][x][:] = firstA_Wmap[j][x][:]
     end
     for y in ys
-      B_Wmap[c+1][y][:] = firstB_Wmap[y][:]
+      B_Wmap[j][y][:] = firstB_Wmap[j][y][:]
     end
   end
+
+  margWA = MargWiring(N, oA, iA, A_Wmap)
+  margWB = MargWiring(N, oB, iB, B_Wmap)
+  Wtot = Wiring([margWA, margWB])
+end
+
+and_behav(N::Integer, behav::Behaviour) = sel_and_behav(N, behav, [], [])
+function sel_and_behav(N::Integer, behav::Behaviour, xs, ys)
+  oA, oB, iA, iB = size(behav.pabxy)
+  Wtot = sel_and_wiring(Setting(iA, oA, iB, oB), N, xs, ys)
+  bv = BehaviourVec(behav)
+  return Behaviour(Wtot * bv)
+end
+
+function parity_behav(N::Integer, behav::Behaviour)
+  oA, oB, iA, iB = size(behav.pabxy)
+  bv = BehaviourVec(behav)
+  A_Wmap = xor_Wmap(N, iA)
+  B_Wmap = xor_Wmap(N, iB)
 
   margWA = MargWiring(N, oA, iA, A_Wmap)
   margWB = MargWiring(N, oB, iB, B_Wmap)

@@ -1,4 +1,4 @@
-channels = ["mosek", "aquohn"]
+channels = ["mosek", "aquohn", "picos"]
 
 [deps]
 cvxpy = ""
@@ -9,3 +9,5 @@ scs = ""
 numpy = ""
 sympy = ""
 ncpol2sdpa = ""
+cvxopt = ""
+picos = ""

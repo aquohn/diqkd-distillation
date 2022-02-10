@@ -75,9 +75,9 @@ function meas_corrs(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi
   rhoB = ptrace(rhov, [2,2], 1)
 
   # mus for A, nus for B
-  Atlds = Float64[E(Mtld(mu), rhoA) for mu in mus]
-  Btlds = Float64[E(Mtld(nu), rhoB) for nu in nus]
-  ABtlds = Float64[E(kron(Mtld(mu), Mtld(nu)), rhov) for mu in mus, nu in nus]
+  Atlds = real.([E(Mtld(mu), rhoA) for mu in mus])
+  Btlds = real.([E(Mtld(nu), rhoB) for nu in nus])
+  ABtlds = real.([E(kron(Mtld(mu), Mtld(nu)), rhov) for mu in mus, nu in nus])
 
   return Correlators(Atlds, Btlds, ABtlds)
 end
@@ -85,16 +85,16 @@ end
 function expt_corrs(nc, eta, tldcorrs)
   Atlds, Btlds, ABtlds = tldcorrs 
   iA, iB = length(Atlds), length(Btlds)
-  Eax = Float64[-nc-(1-nc)*((1-eta)-eta*Atlds[x]) for x in 1:iA]
-  Eby = Float64[-nc-(1-nc)*((1-eta)-eta*Btlds[y]) for y in 1:iB]
-  Eabxy = Float64[nc + (1-nc)*(eta^2 * ABtlds[x,y] - eta*(1-eta)*(Atlds[x] + Btlds[y]) + (1-eta)^2) for x in 1:iA, y in 1:iB]
+  Eax = [-nc-(1-nc)*((1-eta)-eta*Atlds[x]) for x in 1:iA]
+  Eby = [-nc-(1-nc)*((1-eta)-eta*Btlds[y]) for y in 1:iB]
+  Eabxy = [nc + (1-nc)*(eta^2 * ABtlds[x,y] - eta*(1-eta)*(Atlds[x] + Btlds[y]) + (1-eta)^2) for x in 1:iA, y in 1:iB]
   return Correlators(Eax, Eby, Eabxy)
 end
 
 function expt_grads(nc, eta, Atlds, Btlds, ABtlds)
   iA, iB = length(Atlds), length(Btlds)
-  etagrad = Float64[ (1-nc)*((1-2*eta)*(Atlds[x] + Btlds[y]) - 2*eta*ABtlds[x,y] + 2 - 2*eta) for x in 1:iA, y in 1:iB ] 
-  ncgrad = Float64[ eta*((1-eta)*(Atlds[x] + Btlds[y]) - eta*ABtlds[x,y] + 2 - eta) for x in 1:iA, y in 1:iB ]
+  etagrad = [ (1-nc)*((1-2*eta)*(Atlds[x] + Btlds[y]) - 2*eta*ABtlds[x,y] + 2 - 2*eta) for x in 1:iA, y in 1:iB ] 
+  ncgrad = [ eta*((1-eta)*(Atlds[x] + Btlds[y]) - eta*ABtlds[x,y] + 2 - eta) for x in 1:iA, y in 1:iB ]
   return ncgrad, etagrad
 end
 

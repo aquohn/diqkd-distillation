@@ -1,6 +1,7 @@
 using Revise
 using Plots, LaTeXStrings, ColorSchemes, Printf; # plotlyjs()
 using Mux, Interact, WebIO
+using Symbolics # TODO remove
 import Contour: contours, levels, level, lines, coordinates
 default(:size, (1200,800))
 
@@ -338,6 +339,13 @@ function expt_wiring_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*
   corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
   return wiring_plot(ncs, etas, L"n_c", L"\eta", corrf; kwargs...)
 end
+
+function expt_seland_wiring_plot()
+  sett = Setting(2,2,3,2)
+  Ws = [sel_and_wiring(sett, N, [2], [2]) for N in 2:5]
+  return expt_wiring_plot(wirings = [((corrs) -> Ws[N-1] * BehaviourVec(corrs) |> Correlators, "Selective $N-AND") for N in 2:5])
+end
+
 
 function qset_kr_plot(QLDsamples = 100, boundsamples = 100; type::Type{T} = Float64,  kwargs...) where {T <: Real}
   fIs = range(0,1,length=boundsamples) |> collect

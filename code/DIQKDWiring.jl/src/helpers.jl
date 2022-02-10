@@ -63,10 +63,10 @@ function permutesystems(v::AbstractVector, dims::Vector{Int}, P::Permutation)
   @assert prod(dims) == length(v)
   @assert length(P) == length(dims)
 
-  # WARNING something seems wrong here
-  # if v = kron(V[1], V[2], ...), length(V[j]) == dims[j]
+  # v = kron(V[1], V[2], ...), length(V[j]) == dims[j]
   reversed_indices = tuple(collect(length(P):-1:1)...)
   tensor = reshape(v, reverse(dims)...)
+  # tensor[..., j2, j1] = V[1][j1] * V[2][j2] * ...
 
   # reverse tensor to match dims and P
   reversed_tensor = permutedims(tensor, reversed_indices)
