@@ -723,7 +723,7 @@
         C_{\sk}(\rho_{A B E}) \leq I{(A : B \downarrow E)}_{\rho}.
       \end{equation}
 
-      However, this bound is not tight, because the classical intrinsic information is \emph{\(E\)-lockable}: it can increase by arbitrarily much if Eve loses a single bit, while the secret key capacity is not \(E\)-lockable. This motivates the definition of the \emph{reduced intrinsic information}
+      However, this bound is not tight, because the classical intrinsic information is \emph{\(E\)-lockable}: it can increase by arbitrarily much if Eve loses a single bit, while the device-dependent secret key capacity is not \(E\)-lockable. This motivates the definition of the \emph{reduced intrinsic information}
       \begin{equation}\label{eqn:red_intr_info}
         I{(A : B \downarrow\downarrow E)}_{\rho} = \inf_{%
         \substack{\rho_{A B EE'} : \\ 
@@ -763,7 +763,14 @@
         E_{R}^{\infty}(\rho) = \limsup_{n\to\infty} \frac{E_R(\rho^{\otimes n})}{n}.
       \end{equation}
 
-        TODO What role does E/AB-lockability play? There is a gap between DIQKD and QKD rates---does this change its lockability?
+        However, the proof of non-lockability does not extend to the DIQKD setting, because if Eve knows that she will receive the data, she may prepare \(\rho'_{ABE}\) such that the final state \(\rho'_{ABEE'}\) may give \(\Tr_{E'}[\rho'_{ABEE'}] \neq \rho_{ABE}\), even if the observed statistics are the same. Exhibiting an explicit counterexample could be done by showing that a dependent joint distribution \(p(x,y)\), which can only be achieved through pre-shared data, can give a higher entropy than any independent distribution, e.g.\ by exhibiting a behaviour such that it is upper bounded for all protocols when using independent distributions, but the lower bound using all inputs exceeds the upper bound.
+
+        FIXME probably wronng. Non-lockability proof applies to information that is given after the state is distributed---that is, after the measurement is completed. Announcing the measurement input for a round therefore can reduce the entropy generated in that round by at most the entropy of the input. However, this means that if the entropy of the input is lower than the entropy of the output, revealing the inputs cannot reduce the secret key capacity to 0 unless it was already 0. That is,
+      \begin{gather}
+        H(X) \leq \log\abs{\sX} \\
+        S(A,B||E) \leq H(A|E) \leq H(A) \leq \log\abs{\sA} \\
+        S(A,B||E) \leq H(X) \land \log\abs{\sX} \leq \log\abs{\sA} 
+      \end{gather}
 
       \subsection{Upper Bounds for Behaviours}
 
@@ -942,14 +949,14 @@
       The \(t_i \in \ocintv{0}{1}\) are referred to as \emph{nodes}, while the \(w_i > 0\) are \emph{weights}. These nodes and weights are special in that equality is achieved if \(g(t)\) is a polynomial of degree less than \(2m-2\).
 
       The key insight of this method is in observing that this sum can be commuted with the sum over the eigenvalues to obtain
-      \begin{align}
-        D(\rho||\sigma) &= - \sum_{i=1}^{m} \frac{w_i}{\ln 2} \underbrace{\Tr\left[ \sum_{x,y} y \frac{x-y}{t_i(x-y)+y} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} \right]}_{D_{F_{t_i}}(\rho||\sigma)},
-      \end{align}
+      \begin{equation}
+        D(\rho||\sigma) = - \sum_{i=1}^{m} \frac{w_i}{\ln 2} \underbrace{\Tr\left[ \sum_{x,y} y \frac{x-y}{t_i(x-y)+y} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} \right]}_{\eqqcolon D_{F_{t_i}}(\rho||\sigma)},\label{eqn:re_from_qre}
+      \end{equation}
       and that the \emph{quasi-relative entropy} \(D_{F_{t}}(\rho||\sigma)\) can be characterised variationally as
       \begin{equation}
-        D_{F_{t}}(\rho||\sigma) = \frac{1}{t} \inf_Z \Tr\left[ \rho + \rho(Z + Z^{\dagger}) + (1-t)\rho{}Z^{\dagger}Z + t\sigma{}ZZ^{\dagger}. \right]
+        D_{F_{t}}(\rho||\sigma) = \frac{1}{t} \inf_Z \Tr\left[ \rho + \rho(Z + Z^{\dagger}) + (1-t)\rho{}Z^{\dagger}Z + t\sigma{}ZZ^{\dagger}. \right]\label{eqn:qre_var}
       \end{equation}
-      This variational expression is of the form \(\Tr[\rho P]\), where \(P\) is a polynomial in some operators. As will be seen later, optimisations of this form can be efficiently approximated (with some technical caveats).
+      This variational expression is of the form \(\Tr[\rho P]\), where \(P\) is a polynomial of operators. As will be seen later, optimisations of this form can be efficiently approximated (with some technical caveats).
 
       Putting all these results together, and with some additional effort to prove convergence and boundedness of the operators, we have, for trace-class operators \(\rho, \sigma \in \mathcal{L}(\Hs)\), where \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R^+\),
       \begin{equation}
@@ -1436,9 +1443,9 @@
 
     In order to sidestep the complexity of dealing with quantum attacks, we can upper-bound the secret key capacity of a behaviour by considering only classical attacks. This is a problem that has been well-studied in classical information theory, and would still yield valid, although possibly loose, upper bounds, since the adversary is free to perform classical attacks as well.
 
-    Stepping for a moment into the generic setting of an arbitrary number of players \(m\), \(u\) of whom transmit information while establishing the key, we define the classical random variable \(\crv{Z}_j\) as the input and output provided by the \(j\)th player, and the classical random variable \(\crv{E}\) as Eve's classical side information. Then, given a classical joint distribution \(p_{\cvec{\crv{Z}}^m\crv{E}}\), the expression
+    Stepping for a moment into the generic setting of an arbitrary number of players \(m\), \(u\) of whom transmit information while establishing the key, we define the classical random variable \(\crv{V}_j\) as the input and output provided by the \(j\)th player, and the classical random variable \(\crv{E}\) as Eve's classical side information. Then, given a classical joint distribution \(P_{\cvec{\crv{V}}^m\crv{E}}\), the expression
     \begin{equation}
-      S(\crv{Z}_1, \crv{Z}_2, \ldots, \crv{Z}_{u}, \crv{Z}_{u+1}^{(s)}, \ldots, \crv{Z}_{m}^{(s)} || \crv{E})
+      S(\crv{V}_1, \crv{V}_2, \ldots, \crv{V}_{u}, \crv{V}_{u+1}^{(s)}, \ldots, \crv{V}_{m}^{(s)} || \crv{E})
     \end{equation}
     is the \emph{classical secret key capacity} of the \(m\) honest players against the adversary holding \(\crv{E}\), where the superscript \((s)\), for \emph{silent}, indicates the players that do not broadcast anything while establishing the key. To apply bounds on this quantity to DIQKD protocols, we must optimise over all joint distributions compatible with the observed behaviour.
 
@@ -1448,34 +1455,82 @@
 
     Focusing on the case \(m = u = 2\), that is, the simple case of two communicating parties trying to establish a secret key from some joint distribution, this bound specialises to
     \begin{align}
-      S(\crv{Z}_1, \crv{Z}_2||\crv{E}) &\leq \inf_\crv{J} S(\crv{Z}_1, \crv{Z}_2||\crv{J}) + S(\crv{Z}_1\crv{Z}_2, \crv{J}^{(s)}||\crv{E}) \\
-                     &\leq \inf_\crv{J} S(\crv{Z}_1\crv{J}, \crv{Z}_2\crv{J}||\crv{J}) + S(\crv{Z}_1\crv{Z}_2, \crv{J}^{(s)}||\crv{E}) \\
-                     &= \inf_\crv{J} I(\crv{Z}_1 : \crv{Z}_2|\crv{J}) + S(\crv{Z}_1\crv{Z}_2, \crv{J}^{(s)}||\crv{E}) \\
-                     &\leq \inf_\crv{J} I(\crv{Z}_1 : \crv{Z}_2|\crv{J}) + I(\crv{Z}_1\crv{Z}_2 : \crv{J}|\crv{E}) \eqqcolon \inf_{\crv{J}} \splitkey{\crv{Z}_1,\crv{Z}_2}{\crv{E}},
+      S(\crv{V}_1, \crv{V}_2||\crv{E}) &\leq \inf_\crv{J} S(\crv{V}_1, \crv{V}_2||\crv{J}) + S(\crv{V}_1\crv{V}_2, \crv{J}^{(s)}||\crv{E}) \\
+                     &\leq \inf_\crv{J} S(\crv{V}_1\crv{J}, \crv{V}_2\crv{J}||\crv{J}) + S(\crv{V}_1\crv{V}_2, \crv{J}^{(s)}||\crv{E}) \\
+                     &= \inf_\crv{J} I(\crv{V}_1 : \crv{V}_2|\crv{J}) + S(\crv{V}_1\crv{V}_2, \crv{J}^{(s)}||\crv{E}) \\
+                     &\leq \inf_\crv{J} I(\crv{V}_1 : \crv{V}_2|\crv{J}) + I(\crv{V}_1\crv{V}_2 : \crv{J}|\crv{E}) \eqqcolon \inf_{\crv{J}} \splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}},
     \end{align}
-    where \(\crv{J}\) can have an arbitrary joint distribution with \(\crv{Z}_1\), \(\crv{Z}_2\) and \(\crv{E}\), and the last bound is strictly better than the reduced intrinsic information (\Cref{eqn:red_intr_info}).
+    where \(\crv{J}\) can have an arbitrary joint distribution with \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\), and the last bound is strictly better than the reduced intrinsic information (\Cref{eqn:red_intr_info}).
 
-    Let us attempt to express this bound as a quasi-relative entropy. It is known that, for classical random variables \(\{\crv{X}, \crv{Y}, \crv{Z}\}\) with joint pmf \(P_{\crv{XYZ}}\),
-    \[ I(\crv{X}:\crv{Y}|\crv{Z}) = H(\crv{X}|\crv{Z}) - H(\crv{X}|\crv{YZ}) = D\left(P_{\crv{XYZ}}||P_{\crv{X}|\crv{Z}} P_{\crv{Y}|\crv{Z}} P_{\crv{Z}}\right). \]
-    However, expressing the conditional entropies as relative entropies, the method of quasi-relative entropies gives us a value that may be larger or smaller than the upper bound
+    We will now express this bound as a quasi-relative entropy. It is known that, for classical random variables \(\{\crv{X}, \crv{Y}, \crv{Z}\}\) with joint pmf \(P_{\crv{XYZ}}\),
+    \[ I(\crv{X}:\crv{Y}|\crv{Z}) = D\left(P_{\crv{XYZ}}||P_{\crv{X}|\crv{Z}} P_{\crv{Y}|\crv{Z}} P_{\crv{Z}}\right). \]
+    Rewriting \(\splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}}\) in terms of relative entropies and using \Cref{eqn:re_from_qre} and \Cref{eqn:qre_var}, we obtain the following variational expression, a convergent upper bound as \(m\to\infty\):
     \begin{align}
-      \splitkey{\crv{Z}_1,\crv{Z}_2}{\crv{E}} &= H(\crv{Z}_1|\crv{J}) - H(\crv{Z}_1|\crv{Z}_2\crv{J}) + H(\crv{Z}_1\crv{Z}_2|\crv{E}) - H(\crv{Z}_1\crv{Z}_2|\crv{J}\crv{E}) \\
-                 &= \begin{aligned}[c]
-                   - & D(\rho_{\crv{Z}_1\crv{J}}||I_{\crv{Z}_1}\rho_\crv{J}) + D(\rho_{\crv{Z}_1\crv{Z}_2\crv{J}}||I_{\crv{Z}_1}\rho_{\crv{Z}_2\crv{J}}) \\
-                   - & D(\rho_{\crv{Z}_1\crv{Z}_2\crv{E}}||I_{\crv{Z}_1\crv{Z}_2}\rho_{\crv{E}}) + D(\rho_{\crv{Z}_1\crv{Z}_2\crv{JE}}||I_{\crv{Z}_1\crv{Z}_2\crv{J}}\rho_{\crv{E}})
-                 \end{aligned}
+      \splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}} &=  D(\rho_{\crv{V}_1\crv{V}_2\crv{J}}||\rho'_{\crv{V}_1\crv{V}_2\crv{J}})
+      + D(\rho_{\crv{V}_1\crv{V}_2\crv{JE}}||\rho''_{\crv{V}_1\crv{V}_2\crv{JE}}) \\
+                                              &\leq \begin{aligned}
+    - & \sum_{i=1}^m  \frac{w_i}{t_i\ln{2}}  \inf_{Z} \left\{ \begin{gathered}
+    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}}]
+    + \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z + Z^{\dagger})] \\
+    + (1-t_i) \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z^{\dagger}Z)] 
+    + t_i \Tr[\rho'_{\crv{V}_1\crv{V}_2\crv{J}} (ZZ^{\dagger})]
+    \end{gathered} \right\} \\
+    - & \sum_{i=1}^m \frac{w_i}{t_i\ln{2}} \inf_Z \left\{ \begin{gathered}
+    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}}]
+    + \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z + Z^{\dagger})] \\
+    + (1-t_i) \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z^{\dagger}Z)]
+    + t_i \Tr[\rho''_{\crv{V}_1\crv{V}_2\crv{JE}} (ZZ^{\dagger})]
+    \end{gathered} \right\}
+    \end{aligned},
     \end{align}
+    where \(\rho'_{\crv{V}_1\crv{V}_2\crv{J}}\) and \(\rho''_{\crv{V}_1\crv{V}_2\crv{JE}}\) are the classical states corresponding to the classical distributions \(P_{\crv{V_1|V_2}} P_{\crv{V}_2|\crv{J}} P_{\crv{J}}\) and \(P_{\crv{V_1V_2|E}} P_{\crv{J|E}} P_{\crv{E}}\) respectively.
 
-    On the other hand, using the relative entropy formulation leads to a nonlinear function of moments.
+    We can express these classical states in terms of the quantum state \(\rho_{ABE}\):
     \begin{align}
-      \splitkey{\crv{Z}_1,\crv{Z}_2}{\crv{E}} &= D(\rho_{\crv{Z}_1\crv{Z}_2\crv{JE}}||\rho'_{\crv{Z}_1\crv{Z}_2\crv{JE}}) + D(\rho_{\crv{Z}_1\crv{Z}_2\crv{J}}||\rho''_{\crv{Z}_1\crv{Z}_2\crv{J}}) \\
-      \rho'_{\crv{Z}_1\crv{Z}_2\crv{JE}} &= \sum_{z_1 z_2 j e} P_{\crv{Z_1Z_2|E}}(z_1z_2|e) P_{\crv{J|E}}(j|e) P_{\crv{E}}(e) \proj{z_1z_2je} \\
-                                         &= \sum_{z_1 z_2 j e} P_{\crv{Z_1Z_2E}}(z_1z_2e) P_{\crv{J|Z_1Z_2E}}(j|z_1z_2e) P_{\crv{Z_1Z_2}}(z_1z_2)\proj{z_1z_2je} \\
-                                         &= \sum_{z_1 z_2 j e} \Tr\left[\rho_{ABE} \left(M_{z_1} \otimes N_{z_2} \otimes O_e\right)\right] P_{\crv{J|Z_1Z_2E}}(j|z_1z_2e) P_{\crv{Z_1Z_2}}(z_1z_2)\proj{z_1z_2je} \\
-      \rho''_{\crv{Z}_1\crv{Z}_2\crv{J}} &= \sum_{z_1 z_2 j} P_{\crv{Z_1|Z_2}}(z_1|z_2) P_{\crv{Z}_2|\crv{J}}(z_2|j) P_{\crv{J}}(j) \proj{z_1z_2j} \\
-                                         &= \sum_{z_1 z_2 j} P_{\crv{Z_1|Z_2}}(z_1|z_2) P_{\crv{Z_2J}}(z_2j) \proj{z_1z_2je} \\
-                                         &= \sum_{z_1 z_2 j e} P_{\crv{Z_1|Z_2}}(z_1|z_2) \Tr\left[\rho_{ABE} \left(M_{z_1} \otimes N_{z_2} \otimes O_e\right)\right] P_{\crv{J|Z_1Z_2E}}(j|z_1z_2e) \proj{z_1z_2je}.
+      \rho_{\crv{V}_1\crv{V}_2\crv{J}} &= \sum_{v_1 v_2 j} P_{\crv{V_1V_2J}}(v_1v_2j) \proj{v_1v_2j} \\
+                                         &= \sum_{v_1 v_2 j e}  P_{\crv{V_1V_2E}}(v_1v_2e) P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \proj{v_1v_2j} \\
+                                         &= \sum_{v_1 v_2 j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \proj{v_1v_2j} \\
+      \rho'_{\crv{V}_1\crv{V}_2\crv{J}} &= \sum_{v_1 v_2 j} P_{\crv{V_1|V_2}}(v_1|v_2) P_{\crv{V}_2|\crv{J}}(v_2|j) P_{\crv{J}}(j) \proj{v_1v_2j} \\
+                                         &= \sum_{v_1 v_2 j} P_{\crv{V_1|V_2}}(v_1|v_2) P_{\crv{V_2J}}(v_2j) \proj{v_1v_2j} \\
+                                         &= \sum_{v_1 v_2 j v_1' e} P_{\crv{V_1|V_2}}(v_1|v_2) \Tr\left[\rho_{ABE} \left(M_{v_1'} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1'v_2e) \proj{v_1v_2j} \\
+      \rho_{\crv{V}_1\crv{V}_2\crv{JE}} &= \sum_{v_1 v_2 j e} P_{\crv{V_1V_2JE}}(v_1v_2je) \proj{v_1v_2je} \\
+                                         &= \sum_{v_1 v_2 j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \proj{v_1v_2je} \\
+      \rho''_{\crv{V}_1\crv{V}_2\crv{JE}} &= \sum_{v_1 v_2 j e} P_{\crv{V_1V_2|E}}(v_1v_2|e) P_{\crv{J|E}}(j|e) P_{\crv{E}}(e) \proj{v_1v_2je} \\
+                                         &= \sum_{v_1 v_2 j v_1' v_2' e} P_{\crv{V_1V_2E}}(v_1v_2e) P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e) P_{\crv{V_1V_2}}(v_1'v_2')\proj{v_1v_2je} \\
+                                         &= \sum_{v_1 v_2 v_1' v_2' j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e) P_{\crv{V_1V_2}}(v_1'v_2')\proj{v_1v_2je},
     \end{align}
+    where \(O_e\) is Eve's measurement operator for outcome \(e\), \(\crv{V}_1 = (\crv{A,X})\) and \(\crv{V}_2 = (\crv{B,Y})\). In this most general setting, we assume that Alice and Bob do not announce their measurement settings, and Eve's measurement operator is hence independent of \(x\) and \(y\). 
+
+    Although we cannot bound the cardinality of \(\crv{E}\), we will have to fix it to some finite number in order to specify the number of measurement operators \(O_e\). This will still provide a valid upper bound, but we lose some tightness. The joint probability \(P_{\crv{V_1V_2}}(v_1v_2) = p_{\rm in}(x,y)p(ab|xy)\) can be directly computed from experimental statistics, allowing conditional probabilities to be computed too. Finally, The cardinality of \(\crv{J}\) can be upper bounded by the product of the cardinalities of \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\). Can \(P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e)\) be considered an operator that commutes with everyone else? Or must it be manually selected? TODO
+
+    Note that since \(Z\) is defined on the finite-dimensional Hilbert spaces \(\crv{V}_1\crv{V}_2\crv{J}\) or \(\crv{V}_1\crv{V}_2\crv{JE}\), \(Z = \sum_{i} z_{i;i'} \ket{i}\bra{i'}\), where \(i\) and \(i'\) are indices of the classical basis states in those Hilbert spaces and \(z_{i;i'} \in \C\). Further, since the states \(\rho\) are classical, it suffices to consider the action of \(Z\) on the projectors. Therefore, representing the probability of outcome \(i\) with \(p_i\), we can expand the traces with \(Z\) generically as
+  \begin{align}
+    \Tr\left[\left(\sum_i p_i \proj{i}\right) (Z + Z^{\dagger})\right] &= 
+    \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} \ket{i}\bra{i'} + {z_{i';i}}^* \ket{i}\bra{i'} \right] \\
+                                                            &= 
+    \sum_i p_i z_{i;i} \ket{i}\bra{i} + {z_{i;i}}^* \ket{i}\bra{i} \\
+    \Tr\left[\left(\sum_i p_i \proj{i}\right) (Z^{\dagger}Z)\right] &=
+    \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} {z_{i';i}}^* \ket{i}\bra{i'} \right] \\
+                                                            &\geq 
+    \sum_i p_i \abs{z_{i;i}}^2 \ket{i}\bra{i} \\
+    \Tr\left[\left(\sum_i p_i \proj{i}\right) (ZZ^{\dagger})\right] &= 
+    \Tr\left[ \sum_i p_i \sum_{i'} {z_{i;i'}}^* z_{i';i} \ket{i}\bra{i'} \right] \\
+                                                            &\geq 
+    \sum_i p_i \abs{z_{i;i}}^2 \ket{i}\bra{i}
+  \end{align}
+  where the upper bounds hold because \(\abs{z_{i;i}}^2 \geq 0\), and since they do not occur in the expansion of trace with \(Z + Z^{\dagger}\), are minimised by being set to 0. Further, since \(z_{i;i}\) only occurs as \(\abs{z_{i;i}}^2\) or \(z_{i;i} + {z_{i;i}}^*\), it can be generically assumed to be real, and \(Z\) can therefore be assumed to be Hermitian.
+
+  \begin{align}
+    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z + Z^{\dagger})] &= \\
+    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z^{\dagger}Z)] &= \\
+    \Tr[\rho'_{\crv{V}_1\crv{V}_2\crv{J}} (ZZ^{\dagger})] &= \\
+    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z + Z^{\dagger})] &= \Tr\left[ \begin{gathered} \sum_{v_1 v_2 j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\ \sum_{i'} z_{i;i'} \ket{i}\bra{i'} + {z_{i';i}}^* \ket{i}\bra{i'} \end{gathered} \right] \\
+                                                             &= \begin{gathered} \sum_{v_1 v_2 j e} \Tr\left[ \rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \left( z_{i;i} + {z_{i;i}}^* \right) \end{gathered} \\
+    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z^{\dagger}Z)] &= \Tr\left[ \begin{gathered} \sum_{v_1 v_2 j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\ \sum_{i'} z_{i;i'}{z_{i;i'}}^*  \ket{i}\bra{i'} \end{gathered} \right] \\
+                                                             &\geq \Tr\left[ \begin{gathered} \sum_{v_1 v_2 j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\ \abs{z_{i;i}}^2  \ket{i}\bra{i} \end{gathered} \right] \\
+                                                             &= \begin{gathered} \sum_{v_1 v_2 j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \abs{z_{i;i}}^2  \end{gathered} \\
+    \Tr[\rho''_{\crv{V}_1\crv{V}_2\crv{JE}} (ZZ^{\dagger})] &= \sum_{v_1 v_2 v_1' v_2' j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e) P_{\crv{V_1V_2}}(v_1'v_2')\proj{v_1v_2je} \\
+  \end{align}
 
     \section{Nonlocality Monotones}\label{sec:nlmono}
 
@@ -1501,7 +1556,7 @@
                   & \text{s.t.} & \E[f(\crv{A})] = \E[g(\crv{B})] = 0 \\
                   &             & \E[f(\crv{A})^2] = \E[g(\crv{B})^2] = 1,
     \end{Array}
-    where the equivalent description essentially enforces normalisation on the functions to simplify the expression.
+    where the equivalent description essentially enforces normalisation on the functions to simplify the expression. Further, it is know that \(\rho(\crv{A},\crv{B}) = 0\) iff \(\crv{A}\) and \(\crv{B}\) are independent, while \(\rho(\crv{A},\crv{B}) = 1\) iff \(\crv{A}\) and \(\crv{B}\) have a positive Gacs-Korner common information, or equivalently, if the ranges \(\sA\) and \(\sB\) of \(\crv{A}\) and \(\crv{B}\) respectively can be decomposed into mutually exclusive subsets \(\sA_1 \cup \sA_2 = \sA\) and \(\sB_1 \cup \sB_2 = \sB\) such that \(\Pr(A \in \sA_1, B \in \sB_2) = 0\) and \(\Pr(A \in \sA_2, B \in \sB_1) = 0\), that is, the output of each random variable is sufficient to determine which subset the output of the other variable is in.
 
     The maximal correlation is a nonlocality monotone because it possesses the \emph{tensorisation} property: if rvs \((\crv{A}_1, \crv{B}_1)\) are statistically independent of \((\crv{A}_2,\crv{B}_2)\), that is, their pmfs obey \(P_{\crv{A}_1\crv{A}_2\crv{B}_1\crv{B}_2} = P_{\crv{A}_1\crv{B}_1}P_{\crv{A}_2\crv{B}_2}\), then
     \begin{equation}
