@@ -39,15 +39,16 @@ TEST_P = np.array(
 SINGLET_P = np.array(
     [
         [
-            [[0.4267767, 0.4267767, 0.5], [0.4267767, 0.0732233, 0.25]],
-            [[0.0732233, 0.0732233, 0.0], [0.0732233, 0.4267767, 0.25]],
+            [[0.5, 0.4267767, 0.4267767], [0.25, 0.4267767, 0.0732233]]
+            [[0, 0.0732233, 0.0732233], [0.25, 0.0732233, 0.4267767]]
         ],
         [
-            [[0.0732233, 0.0732233, 0.0], [0.0732233, 0.4267767, 0.25]],
-            [[0.4267767, 0.4267767, 0.5], [0.4267767, 0.0732233, 0.25]],
-        ],
+            [[0, 0.0732233, 0.0732233], [0.25, 0.0732233, 0.4267767]]
+            [[0.5, 0.4267767, 0.4267767], [0.25, 0.4267767, 0.0732233]]
+        ]
     ]
 )
+
 WERNER_P = np.array(
     [
         [
@@ -109,12 +110,13 @@ def behav_problem(p=None, **kwargs):
     if obj is None:
         print("No objective provided, using H(A|E,x*)")
         obj = prob.HAgEx_objective(1, 0.5)
+    npa = kwargs.get("npa", NPA_LEVEL)
     behav_constrs, behav_ops = prob.behav_analysis(p, list(obj.free_symbols))
     prob.moment_eqs += behav_constrs
 
     sdp = ncp.SdpRelaxation(behav_ops, verbose=VERBOSE - 1, normalized=True, parallel=0)
     sdp.get_relaxation(
-        level=NPA_LEVEL,
+        level=npa,
         equalities=prob.op_eqs[:],
         inequalities=prob.op_ineqs[:],
         momentequalities=prob.moment_eqs[:],

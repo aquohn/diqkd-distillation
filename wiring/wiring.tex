@@ -1501,36 +1501,40 @@
     \end{align}
     where \(O_e\) is Eve's measurement operator for outcome \(e\), \(\crv{V}_1 = (\crv{A,X})\) and \(\crv{V}_2 = (\crv{B,Y})\). In this most general setting, we assume that Alice and Bob do not announce their measurement settings, and Eve's measurement operator is hence independent of \(x\) and \(y\). 
 
-    Although we cannot bound the cardinality of \(\crv{E}\), we will have to fix it to some finite number in order to specify the number of measurement operators \(O_e\). This will still provide a valid upper bound, but we lose some tightness. The joint probability \(P_{\crv{V_1V_2}}(v_1v_2) = p_{\rm in}(x,y)p(ab|xy)\) can be directly computed from experimental statistics, allowing conditional probabilities to be computed too. Finally, The cardinality of \(\crv{J}\) can be upper bounded by the product of the cardinalities of \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\). Can \(P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e)\) be considered an operator that commutes with everyone else? Or must it be manually selected? TODO
+    Although we cannot bound the cardinality of \(\crv{E}\), we will have to fix it to some finite number in order to specify the number of measurement operators \(O_e\). This will still provide a valid upper bound, but we lose some tightness. The joint probability \(P_{\crv{V_1V_2}}(v_1v_2) = p_{\rm in}(x,y)p(ab|xy)\) can be directly computed from experimental statistics, allowing conditional probabilities to be computed too. Finally, the cardinality of \(\crv{J}\) can be upper bounded by the product of the cardinalities of \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\).
 
     Note that since \(Z\) is defined on the finite-dimensional Hilbert spaces \(\crv{V}_1\crv{V}_2\crv{J}\) or \(\crv{V}_1\crv{V}_2\crv{JE}\), \(Z = \sum_{i} z_{i;i'} \ket{i}\bra{i'}\), where \(i\) and \(i'\) are indices of the classical basis states in those Hilbert spaces and \(z_{i;i'} \in \C\). Further, since the states \(\rho\) are classical, it suffices to consider the action of \(Z\) on the projectors. Therefore, representing the probability of outcome \(i\) with \(p_i\), we can expand the traces with \(Z\) generically as
   \begin{align}
-    \Tr\left[\left(\sum_i p_i \proj{i}\right) (Z + Z^{\dagger})\right] &= 
-    \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} \ket{i}\bra{i'} + {z_{i';i}}^* \ket{i}\bra{i'} \right] \\
+    \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (Z + Z^{\dagger})\right] &= 
+    \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} \ket{i}\bra{i'} + {z_{i';i}^*} \ket{i}\bra{i'} \right] \\
                                                             &= 
-    \sum_i p_i z_{i;i} \ket{i}\bra{i} + {z_{i;i}}^* \ket{i}\bra{i} \\
-    \Tr\left[\left(\sum_i p_i \proj{i}\right) (Z^{\dagger}Z)\right] &=
-    \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} {z_{i';i}}^* \ket{i}\bra{i'} \right] \\
+    \sum_i p_i z_{i;i} + {z_{i;i}^*} \\
+    \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (Z^{\dagger}Z)\right] &=
+    \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} {z_{i';i}^*} \ket{i}\bra{i'} \right] \\
                                                             &\geq 
-    \sum_i p_i \abs{z_{i;i}}^2 \ket{i}\bra{i} \\
-    \Tr\left[\left(\sum_i p_i \proj{i}\right) (ZZ^{\dagger})\right] &= 
-    \Tr\left[ \sum_i p_i \sum_{i'} {z_{i;i'}}^* z_{i';i} \ket{i}\bra{i'} \right] \\
+    \sum_i p_i \abs{z_{i;i}}^2 \\
+    \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (ZZ^{\dagger})\right] &= 
+    \Tr\left[ \sum_i p_i \sum_{i'} {z_{i;i'}^*} z_{i';i} \ket{i}\bra{i'} \right] \\
                                                             &\geq 
-    \sum_i p_i \abs{z_{i;i}}^2 \ket{i}\bra{i}
+    \sum_i p_i \abs{z_{i;i}}^2
   \end{align}
-  where the upper bounds hold because \(\abs{z_{i;i}}^2 \geq 0\), and since they do not occur in the expansion of trace with \(Z + Z^{\dagger}\), are minimised by being set to 0. Further, since \(z_{i;i}\) only occurs as \(\abs{z_{i;i}}^2\) or \(z_{i;i} + {z_{i;i}}^*\), it can be generically assumed to be real, and \(Z\) can therefore be assumed to be Hermitian.
+  where the upper bounds hold because \(\abs{z_{i;i'}}^2 \geq 0\), and since terms with \(i \neq i'\) do not occur in the expansion of the trace with \(Z + Z^{\dagger}\), they will be set to 0 in the minimisation. Further, since \(z_{i;i}\) only occurs as \(\abs{z_{i;i}}^2\) or \(z_{i;i} + {z_{i;i}^*}\), and if \(\abs{z_{i;i}}^2\) is restricted to a fixed value \(w\), \(z_{i;i} + {z_{i;i}^*}\) is minimised by setting \(z_{i;i}\) to the real number \(-w\). \(Z\) can therefore be assumed to be Hermitian, diagonal, and negative-semidefinite.
 
+  Finally, in order to include \(\crv{J}\) and \(Z\) into the optimisation over the measurement operators and states, we introduce operators \(\{J_j\}\) and \(Z\) on the Hilbert space \(ABE\) that commute with all operators \(\{M_{v_1} \otimes N_{v_2} \otimes O_e\}\), and the additional constraint that
+  \begin{align*}
+    \sum_j p(z_1z_2je) &= p(z_1z_2e) \\
+    \sum_j \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right) J_j\right] &= \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] \\
+    \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right) \left( \sum_j J_j \right)\right] &= \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right]
+  \end{align*}
+  Replacing this constraint with the sufficient condition \(\sum_j J_j = I\) simplifies the optimisation while still providing a valid upper bound.
+
+  Representing \(Z\) as a Hermitian operator on \(ABE\) that commutes with all measurement operators does not relax the problem. Without loss of generality, the minimisation is achieved by an operator which assigns the same eigenvalue to all states that are assigned to a particular set of measurement outcomes, which is the same behaviour that would be expected from a scalar conditional probability. This can be seen by considering each term in the sum over the indices \((v_1, v_2, e)\) individually. Since the operators \(\{Z, M_{v_1}, N_{v_2}, O_e\}\) are Hermitian and mutually commuting, they can be simultaneously diagonalised. Then, indexing the \(n\) eigenstates assigned to outcome \((v_1, v_2, e)\) by \(i\), the term for one relative entropy can be written generically as
   \begin{align}
-    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z + Z^{\dagger})] &= \\
-    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z^{\dagger}Z)] &= \\
-    \Tr[\rho'_{\crv{V}_1\crv{V}_2\crv{J}} (ZZ^{\dagger})] &= \\
-    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z + Z^{\dagger})] &= \Tr\left[ \begin{gathered} \sum_{v_1 v_2 j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\ \sum_{i'} z_{i;i'} \ket{i}\bra{i'} + {z_{i';i}}^* \ket{i}\bra{i'} \end{gathered} \right] \\
-                                                             &= \begin{gathered} \sum_{v_1 v_2 j e} \Tr\left[ \rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \left( z_{i;i} + {z_{i;i}}^* \right) \end{gathered} \\
-    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z^{\dagger}Z)] &= \Tr\left[ \begin{gathered} \sum_{v_1 v_2 j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\ \sum_{i'} z_{i;i'}{z_{i;i'}}^*  \ket{i}\bra{i'} \end{gathered} \right] \\
-                                                             &\geq \Tr\left[ \begin{gathered} \sum_{v_1 v_2 j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\ \abs{z_{i;i}}^2  \ket{i}\bra{i} \end{gathered} \right] \\
-                                                             &= \begin{gathered} \sum_{v_1 v_2 j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \abs{z_{i;i}}^2  \end{gathered} \\
-    \Tr[\rho''_{\crv{V}_1\crv{V}_2\crv{JE}} (ZZ^{\dagger})] &= \sum_{v_1 v_2 v_1' v_2' j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e) P_{\crv{V_1V_2}}(v_1'v_2')\proj{v_1v_2je} \\
+    & 2c_1 \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right) Z\right] + \left[ (1-t) c_1 + tc_2 \right]  \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right) Z^2\right] \\
+    &= 2c_1 p(v_1v_2e) \Tr\left[\sum_i \ket{i}\bra{i}_{ABE} Z\right] + \left[ (1-t) c_1 + tc_2 \right]  p(v_1v_2e) \Tr\left[\sum_i \ket{i}\bra{i}_{ABE} Z^2\right] \\
+    &= 2c_1' \left[\sum_i z_i\right] + \left[ (1-t) c_1' + tc_2' \right]  \left[\sum_i z_i^2\right],
   \end{align}
+  where \(c_1\) and \(c_2\) are fixed as a result of fixing the other optimisation variables and their primed versions are the result of absorbing the probability \(p(v_1v_2e)\) into them. Then, for a fixed value \(w = \sum_i z_i\), this expression is minimised by \(\forall i : z_i = w/n\), by the convexity of the function \(f(x) = x^2\) and Jensen's inequality.
 
     \section{Nonlocality Monotones}\label{sec:nlmono}
 

@@ -392,7 +392,6 @@ class BFFProblem(object):
         return subs
 
     # TODO generalise to extract from objective
-    '''
     def get_extra_monomials(self):
         """
         Returns additional monomials to add to sdp relaxation.
@@ -422,6 +421,7 @@ class BFFProblem(object):
             for z in Z2:
                 monos += [a*z]
         return monos[:]
+    '''
 
 
 # TODO add scalar variables, either as diagonal entries in the variable matrix,
