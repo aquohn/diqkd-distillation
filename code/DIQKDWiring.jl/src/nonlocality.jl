@@ -5,6 +5,10 @@ struct Setting{T <: Integer}
   oA::T
   iB::T
   oB::T
+  function Setting(iA::Integer, oA::Integer, iB::Integer, oB::Integer)
+    T = promote_type(typeof(iA), typeof(oA), typeof(iB), typeof(iB))
+    new{T}(iA, oA, iB, oB)
+  end
 end
 Base.iterate(s::Setting) = s.iA, reverse([s.oA, s.iB, s.oB])
 Base.iterate(s::Setting, state) = isempty(state) ? nothing : (pop!(state), state)
