@@ -1443,6 +1443,8 @@
 
     In order to sidestep the complexity of dealing with quantum attacks, we can upper-bound the secret key capacity of a behaviour by considering only classical attacks. This is a problem that has been well-studied in classical information theory, and would still yield valid, although possibly loose, upper bounds, since the adversary is free to perform classical attacks as well.
 
+    \subsection{Secret Key Capacity of a Classical Joint Distribution}
+
     Stepping for a moment into the generic setting of an arbitrary number of players \(m\), \(u\) of whom transmit information while establishing the key, we define the classical random variable \(\crv{V}_j\) as the input and output provided by the \(j\)th player, and the classical random variable \(\crv{E}\) as Eve's classical side information. Then, given a classical joint distribution \(P_{\cvec{\crv{V}}^m\crv{E}}\), the expression
     \begin{equation}
       S(\crv{V}_1, \crv{V}_2, \ldots, \crv{V}_{u}, \crv{V}_{u+1}^{(s)}, \ldots, \crv{V}_{m}^{(s)} || \crv{E})
@@ -1462,7 +1464,11 @@
     \end{align}
     where \(\crv{J}\) can have an arbitrary joint distribution with \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\), and the last bound is strictly better than the reduced intrinsic information (\Cref{eqn:red_intr_info}).
 
-    We will now express this bound as a quasi-relative entropy. It is known that, for classical random variables \(\{\crv{X}, \crv{Y}, \crv{Z}\}\) with joint pmf \(P_{\crv{XYZ}}\),
+    \subsection{Computing an Upper Bound}
+
+    An immediate temptation is to express this bound in terms of relative entropies and use the method of quasi-relative entropies to approximate it, while accounting for Eve's possible quantum attacks. However, the NPA hierarchy, used in~\cite{BFF_QRE} to lower bound the key rate, provides a seequence of \emph{outer approximations}, giving Eve \emph{more} power than she would actually have. Hence, upper bounds derived by this route will not be valid, as they could be lower than the true upper bound. We will instead provide an \emph{inner approximation} by considering fixed dimensions \(d_A\), \(d_B\) and \(d_E\) for the Hilbert space \(A\), \(B\) and \(E\) respectively, exploiting this approximation to the logarithm to simplify the optimisation and increase its scalability.
+
+    We begin by formulating a variational expression that is an upper bound to \(\splitkey{\crv{V}_1, \crv{V}_2}{\crv{E}}\). It is known that, for classical random variables \(\{\crv{X}, \crv{Y}, \crv{Z}\}\) with joint pmf \(P_{\crv{XYZ}}\),
     \[ I(\crv{X}:\crv{Y}|\crv{Z}) = D\left(P_{\crv{XYZ}}||P_{\crv{X}|\crv{Z}} P_{\crv{Y}|\crv{Z}} P_{\crv{Z}}\right). \]
     Rewriting \(\splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}}\) in terms of relative entropies and using \Cref{eqn:re_from_qre} and \Cref{eqn:qre_var}, we obtain the following variational expression, a convergent upper bound as \(m\to\infty\):
     \begin{align}
@@ -1520,21 +1526,50 @@
   \end{align}
   where the upper bounds hold because \(\abs{z_{i;i'}}^2 \geq 0\), and since terms with \(i \neq i'\) do not occur in the expansion of the trace with \(Z + Z^{\dagger}\), they will be set to 0 in the minimisation. Further, since \(z_{i;i}\) only occurs as \(\abs{z_{i;i}}^2\) or \(z_{i;i} + {z_{i;i}^*}\), and if \(\abs{z_{i;i}}^2\) is restricted to a fixed value \(w\), \(z_{i;i} + {z_{i;i}^*}\) is minimised by setting \(z_{i;i}\) to the real number \(-w\). \(Z\) can therefore be assumed to be Hermitian, diagonal, and negative-semidefinite.
 
-  Finally, in order to include \(\crv{J}\) and \(Z\) into the optimisation over the measurement operators and states, we introduce operators \(\{J_j\}\) and \(Z\) on the Hilbert space \(ABE\) that commute with all operators \(\{M_{v_1} \otimes N_{v_2} \otimes O_e\}\), and the additional constraint that
-  \begin{align*}
-    \sum_j p(z_1z_2je) &= p(z_1z_2e) \\
-    \sum_j \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right) J_j\right] &= \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] \\
-    \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right) \left( \sum_j J_j \right)\right] &= \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right]
-  \end{align*}
-  Replacing this constraint with the sufficient condition \(\sum_j J_j = I\) simplifies the optimisation while still providing a valid upper bound.
+    Let us parametrise the achievable measurement probabilities. We first observe that, for Hermitian operators \(G\) and \(H\) on the same Hilbert space of dimension \(d\), we can diagonalise them as
+    \[ G = \sum_g \gamma_g \ket{g}\bra{g} \qquad H = \sum_h \mu_h \ket{h}\bra{h}, \]
+    and relating their eigenbases, we obtain
+    \begin{align*}
+      \ket{h} &= \sum_g h_g \ket{g} \Rightarrow H = \sum_h \mu_h \left(\sum_{gg'} h_g h_{g'}^* \ket{g}\bra{g'}\right) \\
+      \Tr[GH] &= \Tr\left[ \sum_h \mu_h \left( \sum_{gg'} \gamma_g h_g h_{g'}^* \ket{g}\bra{g'} \right) \right] \\
+      &= \sum_{hg} \mu_h \gamma_g \abs{h_g}^2.
+    \end{align*}
+    However, if we consider instead the operator \(\tilde{H} = \sum_g \nu_{g} \ket{g}\bra{g}\), with \(\nu_{g} = \sum_h \abs{g_h}^2 \mu_h\), we obtain
+    \begin{align*}
+      \Tr[G\tilde{H}] &= \Tr\left[ \sum_g \nu_{g} \ket{g}\bra{g} \left(\sum_{g'} \gamma_{g'} \ket{g'}\bra{g'} \right) \right] \\
+      &= \Tr\left[ \sum_{g} \nu_{g}\gamma_{g}\ket{g}\bra{g} \right] = \sum_{g} \nu_{g}\gamma_{g} \\
+      &= \sum_{g} \left(\sum_{h} \mu_h \abs{h_g}^2\right) \gamma_{g} = \Tr[GH]
+    \end{align*}
+    which means the trace is fully parametrised by the \(2d\) real numbers \(\{\gamma_g, \nu_{g}\}\).
 
-  Representing \(Z\) as a Hermitian operator on \(ABE\) that commutes with all measurement operators does not relax the problem. Without loss of generality, the minimisation is achieved by an operator which assigns the same eigenvalue to all states that are assigned to a particular set of measurement outcomes, which is the same behaviour that would be expected from a scalar conditional probability. This can be seen by considering each term in the sum over the indices \((v_1, v_2, e)\) individually. Since the operators \(\{Z, M_{v_1}, N_{v_2}, O_e\}\) are Hermitian and mutually commuting, they can be simultaneously diagonalised. Then, indexing the \(n\) eigenstates assigned to outcome \((v_1, v_2, e)\) by \(i\), the term for one relative entropy can be written generically as
-  \begin{align}
-    & 2c_1 \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right) Z\right] + \left[ (1-t) c_1 + tc_2 \right]  \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right) Z^2\right] \\
-    &= 2c_1 p(v_1v_2e) \Tr\left[\sum_i \ket{i}\bra{i}_{ABE} Z\right] + \left[ (1-t) c_1 + tc_2 \right]  p(v_1v_2e) \Tr\left[\sum_i \ket{i}\bra{i}_{ABE} Z^2\right] \\
-    &= 2c_1' \left[\sum_i z_i\right] + \left[ (1-t) c_1' + tc_2' \right]  \left[\sum_i z_i^2\right],
-  \end{align}
-  where \(c_1\) and \(c_2\) are fixed as a result of fixing the other optimisation variables and their primed versions are the result of absorbing the probability \(p(v_1v_2e)\) into them. Then, for a fixed value \(w = \sum_i z_i\), this expression is minimised by \(\forall i : z_i = w/n\), by the convexity of the function \(f(x) = x^2\) and Jensen's inequality.
+    Now, consider a POVM \(\{H_i\}\), which consists of positive semidefinite operators such that
+    \begin{gather*}
+      \sum_i H_i = I \\
+      \sum_i \sum_{h^{(i)}} \mu_{h^{(i)}} \ket{h^{(i)}}\bra{h^{(i)}} = \sum_g \ket{g}\bra{g} \\
+      \sum_i \sum_{h^{(i)}} \mu_{h^{(i)}} \left(\sum_{gg'} h^{(i)}_g {h^{(i)}_{g'}}^* \ket{g}\bra{g'}\right) = \sum_g \ket{g}\bra{g} \\
+      \sum_{g} \sum_i \underbrace{\sum_{h^{(i)}} \mu_{h^{(i)}} \abs{h^{(i)}_g}^2}_{\nu_g^{(i)}} \ket{g}\bra{g} + \sum_{g \neq g'} \underbrace{ \sum_i \sum_{h^{(i)}} \mu_{h^{(i)}} h^{(i)}_g {h^{(i)}_{g'}}^* }_{=0} \ket{g}\bra{g'} = \sum_g \ket{g}\bra{g}.
+    \end{gather*}
+    Clearly, the coefficients of the operators \(\ket{g}\bra{g'}\) with \(g \neq g'\) must each sum to 0, since the operators do not appear on the left hand side. Therefore, the POVM constraint is simply that \(\sum_i \nu_{g}^{(i)} = 1\) for all \(g\), where \(\nu_g^{(i)}\) is real for all \(i\) and \(g\).
+
+    If \(G\) is a density matrix, and we are only considering the probability distribution that is obtained from measuring \(G\) with a POVM \(\{H_i\}\), then the POVM elements can be considered to take the form \(\sum_g \nu_g^{(i)} \ket{g}\bra{g} \) without any loss of generality. As shown above, the coefficients \(\{\nu_g^{(i)}\}\) are sufficient to fully characterise the trace. Further, since the exact POVM conditions can be verified using only these coefficients, these coefficients parametrise the space of correlations achievable from a POVM of these dimensions exactly, neither admitting any correlations that cannot be achieved nor excluding any that can. In \(d\) dimensions and with \(m\) POVM elements, the space of quantum correlations is parametrised by the \((m+1)d\) real numbers \(\{\gamma_g, \nu^{(i)}_g\}\), all of which lie in \(\ccintv{0}{1}\).
+
+    We now apply this characterisation in order to obtain an expression for \(\splitkey{\crv{V}_1, \crv{V}_2}{E}\). We switch back to the explicit notation \(\{a, b, x, y\}\) rather than \(v_1\) and \(v_2\). Since the POVM elements are positive-semidefinite, they admit the following spectral decompositions:
+    \begin{equation}
+      M_{a|x} = \sum_{k_A} m_{a|x}^{(k_A)} \proj{\psi_A^{(k_A)}} \qquad N_{b|y} = \sum_{k_B} n_{b|y}^{(k_B)} \proj{\psi_B^{(k_B)}} \qquad O_{e} = \sum_{e} o_{e}^{(k_E)} \proj{\psi_E^{(k_E)}},
+    \end{equation}
+    where each \(k_U \in \dintv{1}{d_U}\) for \(U = A,B,E\). 
+    The tensor product of these eigenvectors forms a basis for the Hilbert space \(ABE\), such that the state \(\rho_{ABE}\) can be written as
+    \begin{equation}
+      \rho_{ABE} = \sum_{k_A k_B k_E} p^{(k_A k_B k_E)} \proj{\psi_A^{(k_A)} \psi_B^{(k_B)} \psi_E^{(k_E)}} = \sum_{k} p^{(k)} \proj{\psi^{(k)}},
+    \end{equation}
+    with \(k \coloneqq (k_A, k_B, k_E)\) and \(\ket{\psi^{(k)}} \coloneqq \ket{\psi_A^{(k_A)}} \otimes \ket{\psi_B^{(k_B)}} \otimes \ket{\psi_E^{(k_E)}}\). Then,
+    \begin{align}
+      \Tr\left[\rho_{ABE} \left(M_{a|x} \otimes N_{b|y} \otimes O_e\right)\right] &= 
+    \end{align}
+
+    Now, although we are unable to use the NPA hierarchy of relaxations, it may be possible to use a different hierarchy of approximations. TODO
+
+
 
     \section{Nonlocality Monotones}\label{sec:nlmono}
 
