@@ -1,4 +1,24 @@
-using DynamicPolynomials, TSSOS
+using FastGaussQuadrature, DynamicPolynomials, TSSOS
+
+includet("nonlocality.jl")
+
+function reparam_gaussradau_generic(ts, ws, a, b, c, d, flip = false)
+  v = flip ? b : a
+  k = flip ? -1 : 1
+  q = (b - a)//(d - c)
+  newts = [k * (t - c) * q for t in ts] .+ v
+  newws = abs(k * q) .* ws
+  if flip
+    return reverse(newts), reverse(newws)
+  else
+    return newts, newws
+  end
+end
+function reparam_gaussradau(m, a, b, flip = false)
+  t, w = gaussradau(m)
+  return reparam_gaussradau_generic(t, w, a, b, -1, 1, flip)
+end
+z_min_term(p1, p2, t) = -p1^2/(p1*(1-t) + p2*t) 
 
 struct UpperSetting{T <: Integer}
   sett::Setting{T}
@@ -25,7 +45,7 @@ Base.iterate(us::UpperSetting, state) = isempty(state) ? nothing : (pop!(state),
 
 function logvar_vars(us::UpperSetting)
   sett, oE, dA, dB, dE = us
- iA, oA, iB, oB = sett
+  iA, oA, iB, oB = sett
   oJ = oA*iA*oB*iB*oE
   pJ_V1V2E_count = oJ * oA*iA*oB*iB*oE 
   pk_count = dA * dB * dE

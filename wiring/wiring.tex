@@ -1529,7 +1529,7 @@
   where the lower bounds hold because \(\abs{z_{i;i'}}^2 \geq 0\), and since terms with \(i \neq i'\) do not occur in the expansion of the trace with \(Z + Z^{\dagger}\), they will be set to 0 in the minimisation. Further, since \(z_{i;i}\) only occurs as \(\abs{z_{i;i}}^2\) or \(z_{i;i} + {z_{i;i}^*}\), if \(\abs{z_{i;i}}^2\) is restricted to a fixed value \(w\), \(z_{i;i} + {z_{i;i}^*}\) is minimised by setting \(z_{i;i}\) to the real number \(-w\). We can therefore consider each \(z_i \coloneqq \Tr[\ket{i}\bra{i} Z] = z_{i;i}\) as a real, negative, scalar optimisation variable, yielding \(o_{\crv{J}} i_A o_A i_B o_B\) variables for \(I(\crv{V}_1 : \crv{V}_2|\crv{J})\) and \(o_{\crv{J}} i_A o_A i_B o_B o_E\) for \(I(\crv{V}_1\crv{V}_2 : \crv{J}|\crv{E})\). In order to bound \(\abs{z_i} \leq \norm{Z}\), we use \Cref{eqn:qre_bound}, which requires us to identify a positive constants \(\lambda'\), \(\lambda''\) such that
       \[ \rho_{\crv{V}_1\crv{V}_2\crv{J}} \leq \lambda' \rho'_{\crv{V}_1\crv{V}_2\crv{J}} \qquad \rho_{\crv{V}_1\crv{V}_2\crv{JE}} \leq \lambda'' \rho''_{\crv{V}_1\crv{V}_2\crv{JE}}. \]
 
-      Comparing the diagonal terms and using \(p(\cdot)\) generically instead of the proper symbols for the pmfs, we obtain the following computable upper bounds:
+    Comparing the diagonal terms and using \(p(\cdot)\) generically instead of the proper symbols for the pmfs, we obtain the following computable upper bounds:
     \begin{align}
       \sum_{e} p(v_1v_2e) p(j|v_1v_2e) &\leq \lambda' \sum_{v_1' e} p(v_1|v_2) p(v_1'v_2e) p(j|v_1'v_2e) \\
       \Leftarrow \lambda' &\leq \max_{v_1,v_2} \frac{1}{p(v_1|v_2)} \\
@@ -1761,6 +1761,23 @@
 
     \begin{appendices}
       \section{Technicalities for Quasi-Relative Entropies}\label{sec:qretech}
+
+      \subsection{Gauss-Radau Quadrature}
+
+      The canonical definition of the Gauss-Radau quadrature is an approximation for
+      \[ \int_{-1}^{1} f(x) \dif{x}, \]
+      with the fixed point at \(x = -1\). In order to convert this quadrature to an approximation to an integral over \(\ccintv{a}{b}\), we need to perform a change of variables. To generalise our expressions, let us consider the nodes and weights for an integral over \(\ccintv{c}{d}\). We define
+      \[ y(x) = k(x - c)\frac{b - a}{d - c} + v, \]
+      where \(k = -1, v = b\) if we want to flip the fixed point, and \(k = 1, v = a\) otherwise, and both settings can be verified to map \(\ccintv{c}{d}\) to \(\ccintv{a}{b}\). Then,
+      \begin{align*}
+        \int_{c}^{d} f(x) \dif{x} &= \int_{a}^{b} f(x(y)) \abs{\diff{x}{y}} \dif{y} \\
+        \sum_{i=1}^m w_i f(t_i) &\approx \int_{a}^{b} f(x(y)) \abs{\diff{x}{y}} \dif{y} \\
+        \sum_{i=1}^m w_i \abs{\diff{y}{x}} f(t_i) &\approx \int_{a}^{b} \underbrace{f(x(y))}_{\coloneqq g(y)} \dif{y} \\
+        \sum_{i=1}^m w_i \abs{\diff{y}{x}} g(y(t_i)) &\approx \int_{a}^{b} g(y) \dif{y}
+      \end{align*}
+      and therefore we transform \(t_i \mapsto y(t_i), w_i \mapsto \abs{\diff{y}{x}} w_i\).
+
+      \subsection{Bivariate Functional Calculus for Operators}
 
       For an operator \(A \in \mathcal{L}(\Hs)\), its \emph{spectrum} \(\sigma(A)\) is the subset of \(\C\) such that, for all \(\lambda \in \sigma(A)\), \(A - \lambda I\) does not have a \emph{bounded inverse}: there does not exist an operator \(S\) such that \(S\left( A - \lambda I \right) = \left( A - \lambda I \right)S =  I\) and \(S \in \mathcal{B}(\Hs)\).
 
