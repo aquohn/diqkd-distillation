@@ -1526,9 +1526,24 @@
                                                             &\geq 
     \sum_i p_i \abs{z_{i;i}}^2
   \end{align}
-  where the lower bounds hold because \(\abs{z_{i;i'}}^2 \geq 0\), and since terms with \(i \neq i'\) do not occur in the expansion of the trace with \(Z + Z^{\dagger}\), they will be set to 0 in the minimisation. Further, since \(z_{i;i}\) only occurs as \(\abs{z_{i;i}}^2\) or \(z_{i;i} + {z_{i;i}^*}\), if \(\abs{z_{i;i}}^2\) is restricted to a fixed value \(w\), \(z_{i;i} + {z_{i;i}^*}\) is minimised by setting \(z_{i;i}\) to the real number \(-w\). We can therefore consider each \(z_i \coloneqq \Tr[\ket{i}\bra{i} Z] = z_{i;i}\) as a real, negative, scalar optimisation variable, yielding \(o_{\crv{J}} i_A o_A i_B o_B\) variables for \(I(\crv{V}_1 : \crv{V}_2|\crv{J})\) and \(o_{\crv{J}} i_A o_A i_B o_B o_E\) for \(I(\crv{V}_1\crv{V}_2 : \crv{J}|\crv{E})\). In order to bound \(\abs{z_i} \leq \norm{Z}\), we use \Cref{eqn:qre_bound}, which requires us to identify a positive constants \(\lambda'\), \(\lambda''\) such that
-      \[ \rho_{\crv{V}_1\crv{V}_2\crv{J}} \leq \lambda' \rho'_{\crv{V}_1\crv{V}_2\crv{J}} \qquad \rho_{\crv{V}_1\crv{V}_2\crv{JE}} \leq \lambda'' \rho''_{\crv{V}_1\crv{V}_2\crv{JE}}. \]
+  where the lower bounds hold because \(\abs{z_{i;i'}}^2 \geq 0\), and since terms with \(i \neq i'\) do not occur in the expansion of the trace with \(Z + Z^{\dagger}\), they will be set to 0 in the minimisation. Further, since \(z_{i;i}\) only occurs as \(\abs{z_{i;i}}^2\) or \(z_{i;i} + {z_{i;i}^*}\), if \(\abs{z_{i;i}}^2\) is restricted to a fixed value \(w\), \(z_{i;i} + {z_{i;i}^*}\) is minimised by setting \(z_{i;i}\) to the real number \(-w\). We can therefore consider each \(z_i \coloneqq \Tr[\ket{i}\bra{i} Z] = z_{i;i}\) as a real, negative, scalar optimisation variable, yielding \(o_{\crv{J}} i_A o_A i_B o_B\) variables for \(I(\crv{V}_1 : \crv{V}_2|\crv{J})\) and \(o_{\crv{J}} i_A o_A i_B o_B o_E\) for \(I(\crv{V}_1\crv{V}_2 : \crv{J}|\crv{E})\).
 
+    In fact, since \(z_i\) is a scalar, we can compute the optimal value analytically if we hold the other values fixed. The optimisation problems are of the form
+    \begin{equation}
+      \inf_z f(p_1, p_2, z) = \inf_z p_1(2z) + (1-t) p_1 z^2 + t p_2 z^2,
+    \end{equation}
+    so if the infimum is attained at \(z=z^{\star}\), we have
+    \begin{align}
+      \left. \diff{f}{z} \right|_{z=z^{\star}} &= 0 \\
+      2p_1 + 2(1-t) p_1 z^{\star} + 2t p_2 z^{\star} &= 0 \\
+      z^{\star} &= -\frac{p_1}{(1-t)p_1 + tp_2} \\
+      \therefore \inf_z f(p_1, p_2, z) &= -\frac{2p_1^2}{(1-t)p_1 + tp_2} + \frac{p_1^2 \left( (1-t)p_1 + tp_2 \right)}{{\left((1-t)p_1 + tp_2\right)}^2} \\
+                                       &= -\frac{p_1^2}{(1-t)p_1 + tp_2}.
+    \end{align}
+    Although this eliminates all the optimisation variables \(z\), the resulting expression is no longer polynomial. Nonetheless, it may be simpler to optimise this than the logarithm function.
+
+    In order to bound \(\abs{z_i} \leq \norm{Z}\), we use \Cref{eqn:qre_bound}, which requires us to identify a positive constants \(\lambda'\), \(\lambda''\) such that
+      \[ \rho_{\crv{V}_1\crv{V}_2\crv{J}} \leq \lambda' \rho'_{\crv{V}_1\crv{V}_2\crv{J}} \qquad \rho_{\crv{V}_1\crv{V}_2\crv{JE}} \leq \lambda'' \rho''_{\crv{V}_1\crv{V}_2\crv{JE}}. \]
     Comparing the diagonal terms and using \(p(\cdot)\) generically instead of the proper symbols for the pmfs, we obtain the following computable upper bounds:
     \begin{align}
       \sum_{e} p(v_1v_2e) p(j|v_1v_2e) &\leq \lambda' \sum_{v_1' e} p(v_1|v_2) p(v_1'v_2e) p(j|v_1'v_2e) \\
@@ -1537,9 +1552,6 @@
       \Leftarrow \lambda'' &\leq \max_{v_1,v_2} \frac{1}{p(v_1 v_2)}.
     \end{align}
     Tightening these bounds further might help make the optimisation more efficient.
-
-    TODO Find explicit expression for \(z_i\) from
-    \[ p_1(2z) + (1-t) p_1 z^2 + t p_2 z^2 \]
 
     Next, let us parametrise the achievable joint distributions for Alice, Bob and Eve. We first observe that, for Hermitian operators \(G\) and \(H\) on the same Hilbert space of dimension \(d\), we can diagonalise them as
     \[ G = \sum_g \gamma_g \ket{g}\bra{g} \qquad H = \sum_h \mu_h \ket{h}\bra{h}, \]
