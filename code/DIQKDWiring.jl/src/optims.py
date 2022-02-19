@@ -6,6 +6,7 @@ import qre
 from qre import BFFProblem
 import datetime
 from math import prod
+from sympy import symbols
 
 VERBOSE = 2
 qre.VERBOSE = VERBOSE
@@ -36,15 +37,16 @@ TEST_P = np.array(
         ],
     ]
 )
+
 SINGLET_P = np.array(
     [
         [
-            [[0.5, 0.4267767, 0.4267767], [0.25, 0.4267767, 0.0732233]]
-            [[0, 0.0732233, 0.0732233], [0.25, 0.0732233, 0.4267767]]
+            [[0.5, 0.426776695296637, 0.426776695296637], [0.25, 0.426776695296637, 0.0732233047033631]],
+            [[0, 0.0732233047033631, 0.0732233047033631], [0.25, 0.0732233047033631, 0.426776695296637]]
         ],
         [
-            [[0, 0.0732233, 0.0732233], [0.25, 0.0732233, 0.4267767]]
-            [[0.5, 0.4267767, 0.4267767], [0.25, 0.4267767, 0.0732233]]
+            [[0, 0.0732233047033631, 0.0732233047033631], [0.25, 0.0732233047033631, 0.426776695296637]],
+            [[0.5, 0.426776695296637, 0.426776695296637], [0.25, 0.426776695296637, 0.0732233047033631]]
         ]
     ]
 )
@@ -72,8 +74,7 @@ try:
 
     # WARNING seems quite unreliable
     def MOSEK_SOLVEF(sdp):
-        # sdp.solve("mosek", solverparameters={"num_threads": int(NUM_SUBWORKERS)})
-        sdp.solve("mosek")
+        sdp.solve("mosek", solverparameters={"num_threads": int(NUM_SUBWORKERS)})
 
 except ModuleNotFoundError:
     MOSEK_SOLVEF = None
@@ -99,34 +100,44 @@ def compute_entropy(prob, sdp, q=0):
 
 
 def behav_problem(p=None, **kwargs):
+    verbose = kwargs.get("verbose", VERBOSE)
     starttime = datetime.datetime.now()
-    print(f"Start: {starttime}")
+    if verbose > 1:
+        print(f"Start: {starttime}")
 
     if p is None:
-        print("No behaviour provided; using a fixed test behaviour.")
+        if verbose > 0:
+            print("No behaviour provided; using a fixed test behaviour.")
         p = TEST_P
     prob = BFFProblem(**kwargs)
     obj = kwargs.get("objective", None)
     if obj is None:
-        print("No objective provided, using H(A|E,x*)")
-        obj = prob.HAgEx_objective(1, 0.5)
+        if verbose > 0:
+            print("No objective provided, using H(A|E,x*=0)")
+        t, q = symbols(r't q', nonnegative=True)
+        extra_monos = prob.get_extra_monomials(prob.HAgEx_objective(t, q))
+        obj = 0
+    else:
+        extra_monos = prob.get_extra_monomials(obj)
     npa = kwargs.get("npa", NPA_LEVEL)
-    behav_constrs, behav_ops = prob.behav_analysis(p, list(obj.free_symbols))
-    prob.moment_eqs += behav_constrs
+    parallel = kwargs.get("parallel", 0)
+    moment_eqs = prob.analyse_behav(p)
 
-    sdp = ncp.SdpRelaxation(behav_ops, verbose=VERBOSE - 1, normalized=True, parallel=0)
+    sdp = ncp.SdpRelaxation(list(prob.op_set), verbose=verbose, normalized=True, parallel=parallel)
     sdp.get_relaxation(
         level=npa,
-        equalities=prob.op_eqs[:],
-        inequalities=prob.op_ineqs[:],
-        momentequalities=prob.moment_eqs[:],
-        momentinequalities=prob.moment_ineqs[:],
+        equalities=[],
+        inequalities=[],
+        momentequalities=moment_eqs,
+        momentinequalities=[],
         objective=obj,
         substitutions=prob.substitutions,
-        extramonomials=prob.extra_monos,
+        extramonomials=extra_monos,
     )
+    sdp.process_constraints(moment_equalities=moment_eqs)
     setuptime = datetime.datetime.now()
-    print(f"Setup Done At: {setuptime}, Delta: {setuptime - starttime}")
+    if verbose > 1:
+        print(f"Setup Done At: {setuptime}, Delta: {setuptime - starttime}")
     return prob, sdp
 
 

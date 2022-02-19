@@ -1,4 +1,5 @@
 using Revise
+using DataFrames, CSV
 using Plots, LaTeXStrings, ColorSchemes, Printf; # plotlyjs()
 using Mux, Interact, WebIO
 using Symbolics # TODO remove
@@ -9,6 +10,7 @@ includet("helpers.jl")
 includet("nonlocality.jl")
 includet("keyrates.jl")
 includet("wiring.jl")
+includet("quantum.jl")
 includet("maxcorr.jl")
 
 # %%
@@ -171,10 +173,9 @@ function expt_corrf(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi
 end
 
 # %%
-# Given i, minimum j req'd for r > 0
-function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname, corrf::Function; kwargs...) where T <: Real
+# Given i, minimum j req'd for r > 0. Assumes dr/dj >=
+function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname, corrf::Function; tol=1e-4, kwargs...) where T <: Real
   kwargs = Dict(kwargs)
-  tol = get(kwargs, :tol, 1e-2)
   krf = get(kwargs, :krf, (corrs) -> gchsh(max(2.0, CHSH(corrs))) - h(QBER(corrs)))
   wirings = get(kwargs, :wirings, 
                 [((corrs) -> and_corrs(N, corrs), "$N-AND") for N in 2:6])
@@ -185,6 +186,9 @@ function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname,
     # find elements close to 0
     jis = filter(ji -> abs(rs[ii, ji]) < tol, eachindex(js))
     if isempty(jis)
+      if maximum(rs[ii, :]) < 0
+        push!(basezeros, (is[ii], js[end]))
+      end
       continue
     end
     # find maximum of these elements
@@ -200,6 +204,9 @@ function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname,
     for ii in eachindex(is)
       jis = filter(ji -> abs(rps[ii, ji]) < tol, eachindex(js))
       if isempty(jis)
+        if maximum(rps[ii, :]) < 0
+          push!(wirpts, (is[ii], js[end]))
+        end
         continue
       end
       maxj = map(ji -> js[ji], jis) |> maximum
@@ -209,6 +216,77 @@ function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname,
   end
 
   return plt
+end
+
+function BFF_wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname, corrf::Function; tol=1e-4,
+    q=0, keep_m=true, safe=false, half_m=2, verbose=0, solvef=optims.MOSEK_SOLVEF,
+    kwargs...) where T <: Real
+  kwargs = Dict(kwargs)
+  krf = get(kwargs, :krf, (corrs) -> gchsh(max(2.0, CHSH(corrs))) - h(QBER(corrs)))
+  wirings = get(kwargs, :wirings, 
+                [((corrs) -> and_corrs(N, corrs), "$N-AND") for N in 2:6])
+
+  rs = T[corrf(i, j) |> krf for i in is, j in js]
+  test_corrs = corrf(first(is), first(js))
+  base_corrss = typeof(test_corrs)[]
+  bff_base = Tuple{T,T}[]
+  prob, sdp = optims.behav_problem(Behaviour(test_corrs).pabxy, keep_m=keep_m, safe=safe, half_m=half_m, solvef=solvef, verbose=verbose)
+  df = DataFrame()
+  df[!, iname] = is
+
+  for ii in eachindex(is)
+    # find elements close to 0 for each i
+    jis = filter(ji -> abs(rs[ii, ji]) < tol, eachindex(js))
+    if isempty(jis)
+        if maximum(rs[ii, :]) < 0
+          push!(bff_base, (is[ii], 0))
+          push!(base_corrss, corrf(is[ii], last(js)))
+        else
+          push!(bff_base, (is[ii], minimum(rs[ii, :])))
+          push!(base_corrss, corrf(is[ii], first(js)))
+        end
+        continue
+    end
+    # find maximum of these elements
+    maxj = map(ji -> js[ji], jis) |> maximum
+    corrs = corrf(is[ii], maxj)
+    behav = Behaviour(corrs)
+    behav_eqs = prob.analyse_behav(behav.pabxy)
+    sdp.process_constraints(momentequalities = behav_eqs)
+    HAE = pyconvert(T, prob.compute_entropy(sdp, q))
+    HAB = HAB_oneway(behav)[1]
+    r = max(HAE - HAB, 0)
+
+    push!(bff_base, (is[ii], r))
+    push!(base_corrss, corrs)
+  end
+  df[!, "No wiring"] = [pt[2] for pt in bff_base]
+
+  plt = plot(bff_base, xlabel=iname, ylabel="Key rate", label="No wiring, tighter bound", xlims=(is[1], is[end]), ylims=(0, 1), legend=:topleft, size=(800,600), st=:scatter)
+
+  for wiring in wirings
+    wirf, wirname = wiring
+    bff_wirpts = Tuple{T,T}[]
+    wirpts = Tuple{T,T}[]
+    for ii in eachindex(is)
+      corrs = wirf(base_corrss[ii])
+      behav = Behaviour(corrs)
+      behav_eqs = prob.analyse_behav(behav.pabxy)
+      sdp.process_constraints(momentequalities = behav_eqs)
+      HAE = pyconvert(T, prob.compute_entropy(sdp, q))
+      HAB = HAB_oneway(behav)[1]
+      r = max(HAE - HAB, 0)
+
+      push!(wirpts, (is[ii], krf(corrs)))
+      push!(bff_wirpts, (is[ii], r))
+    end
+    df[!, wirname] = [pt[2] for pt in wirpts]
+    df[!, "$wirname, tighter bound"] = [pt[2] for pt in bff_wirpts]
+    plot!(plt, wirpts, label = wirname)
+    plot!(plt, bff_wirpts, label = "$wirname, tighter bound", st=:scatter)
+  end
+
+  return plt, df
 end
 
 # %%
@@ -338,6 +416,13 @@ function expt_wiring_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*
   etas = range(etastart, stop=1, length=etasamples)
   corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
   return wiring_plot(ncs, etas, L"n_c", L"\eta", corrf; kwargs...)
+end
+
+function expt_BFF_wiring_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=10, etasamples=100, etastart=0.925, ncstart=0.8, kwargs...)
+  ncs = range(ncstart, stop=1, length=ncsamples)
+  etas = range(etastart, stop=1, length=etasamples)
+  corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
+  return BFF_wiring_plot(ncs, etas, L"n_c", L"\eta", corrf; kwargs...)
 end
 
 function expt_seland_wiring_plot()

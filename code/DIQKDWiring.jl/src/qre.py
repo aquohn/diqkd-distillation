@@ -16,13 +16,12 @@ third input for key generation and doesn't bin his no-click when generating key.
 
 import numpy as np
 from itertools import product as itprod
-from math import log2, log, pi, cos, sin
+from math import log2, log, pi, cos, sin, prod
 import ncpol2sdpa as ncp
 from sympy.physics.quantum.dagger import Dagger
 import chaospy
 
-DEFAULT_M = 6  # Number of nodes / 2 in gaussian quadrature
-KEEP_M = False  # Optimizing mth objective function?
+DEFAULT_HALF_M = 6  # Number of nodes / 2 in gaussian quadrature
 VERBOSE = 0  # If > 1 then ncpol2sdpa will also be verbose
 EPS_M, EPS_A = 1e-4, 1e-4  # Multiplicative/Additive epsilon in iterative optimization
 
@@ -62,31 +61,13 @@ def cond_ent(joint, marg):
     return hab - hb
 
 
-def sdp_dual_vec(SDP):
-    """
-    Extracts the dual vector from the solved sdp by ncpol2sdpa
-
-        SDP -- sdp relaxation object
-
-    Would need to be modified if the number of moment constraints or their
-    nature (equalities vs inequalities) changes.
-    """
-    # TODO generalise: test y_mat from solved instance
-    raw_vec = SDP.y_mat[-16:]
-    vec = [0 for _ in range(8)]
-    for k in range(8):
-        vec[k] = raw_vec[2 * k][0][0] - raw_vec[2 * k + 1][0][0]
-    return np.array(vec[:])
-
-
 # TODO generalise beyond x* = 0 (zero-based indexing)
 class BFFProblem(object):
     def __init__(self, **kwargs):
         # number of outputs for each input of Alice's / Bob's devices
         self.A_config = kwargs.get("A_config", [2, 2])
         self.B_config = kwargs.get("B_config", [2, 2, 2])
-        self.M = kwargs.get("M", DEFAULT_M)
-        self.T, self.W = generate_quadrature(self.M)  # Nodes, weights of quadrature
+        self.update_half_m(kwargs.get("half_m", DEFAULT_HALF_M))
 
         # Operators in problem (only o-1 for o outputs, because the last
         # operator is enforced by normalisation). Here, A and B are measurement
@@ -94,14 +75,18 @@ class BFFProblem(object):
         self.A = [Ai for Ai in ncp.generate_measurements(self.A_config, "A")]
         self.B = [Bj for Bj in ncp.generate_measurements(self.B_config, "B")]
         self.Z = ncp.generate_operators("Z", max(self.A_config), hermitian=0)
+        self.op_set = set(ncp.flatten([self.A, self.B, self.Z]))
 
         self.solvef = kwargs.get("solvef", lambda sdp: sdp.solve())
+        self.verbose = kwargs.get("verbose", VERBOSE)
+        self.safe = kwargs.get("safe", True)  # accept non-optimal solutions
         self.substitutions = self.get_subs()  # substitutions used in ncpol2sdpa
-        self.moment_ineqs = []  # moment inequalities
-        self.moment_eqs = []  # moment equalities
-        self.op_eqs = []  # operator equalities
-        self.op_ineqs = []  # operator inequalities
-        self.extra_monos = self.get_extra_monomials()  # extra monomials
+
+    def update_half_m(self, half_m):
+        self.m = 2 * half_m
+        self.T, self.W = generate_quadrature(
+            half_m
+        )  # Nodes, weights of quadrature
 
     def HAgEx_objective(self, ti, q):
         """
@@ -123,19 +108,13 @@ class BFFProblem(object):
 
         return obj
 
-    def compute_entropy(self, SDP, q):
+    def compute_entropy(self, sdp, q=0):
         """
         Computes lower bound on H(A|X=0,E) using the fast (but less tight) method
 
-            SDP   --   sdp relaxation object
+            sdp   --   sdp relaxation object
             q     --   probability of bitflip
         """
-        SDP.process_constraints(
-            equalities=self.op_eqs,
-            inequalities=self.op_ineqs,
-            momentequalities=self.moment_eqs,
-            momentinequalities=self.moment_ineqs,
-        )
         ck = 0.0  # kth coefficient
         ent = 0.0  # lower bound on H(A|X=0,E)
 
@@ -143,79 +122,40 @@ class BFFProblem(object):
         # or bound it trivially. Best to keep it unless running into numerical problems
         # with it. Added a nontrivial bound when removing the final term
         # (WARNING: proof is not yet in the associated paper).
-        if KEEP_M:
-            num_opt = len(self.T)
-        else:
-            num_opt = len(self.T) - 1
-            ent = 2 * q * (1 - q) * self.W[-1] / log(2)
 
-        for k in range(num_opt):
+        bound_on_last = 2 * q * (1 - q) * self.W[-1] / log(2)
+        m = len(self.T)
+        for k in range(m):
             ck = self.W[k] / (self.T[k] * log(2))
 
             # Get the k-th objective function
             new_objective = self.HAgEx_objective(self.T[k], q)
 
-            SDP.set_objective(new_objective)
-            self.solvef(SDP)
+            sdp.set_objective(new_objective)
+            self.solvef(sdp)
 
-            if SDP.status == "optimal":
+            if self.verbose > 0:
+                print("Status for i = ", k, ":", sdp.status)
+            if not self.safe:  # ignore status and just add to entropy
+                ent += ck * (1 + sdp.dual)
+                continue
+
+            if sdp.status == "optimal":
                 # 1 contributes to the constant term
-                ent += ck * (1 + SDP.dual)
+                ent += ck * (1 + sdp.dual)
+            elif k == m:
+                ent += bound_on_last
+                if self.verbose > 0:
+                    print("Could not solve last sdp, bounding its value")
             else:
-                # If we didn't solve the SDP well enough then just bound the entropy
+                # If we didn't solve the sdp well enough then just bound the entropy
                 # trivially
                 ent = 0
-                if VERBOSE > 0:
-                    print("Bad solve for m = ", k, ":", SDP.status)
                 break
 
         return ent
 
-    def compute_dual_vector(self, SDP, q):
-        """
-        Extracts the vector from the dual problem(s) that builds into the affine function
-        of the constraints that lower bounds H(A|X=0,E)
-
-            SDP    --     sdp relaxation object
-            q      --     probability of bitflip
-        """
-
-        dual_vec = np.zeros(8)  # dual vector
-        ck = 0.0  # kth coefficient
-        ent = 0.0  # lower bound on H(A|X=0,E)
-
-        if KEEP_M:
-            num_opt = len(self.T)
-        else:
-            num_opt = len(self.T) - 1
-            ent = 2 * q * (1 - q) * self.W[-1] / log(2)
-
-        # Compute entropy and build dual vector from each sdp solved
-        for k in range(num_opt):
-            ck = self.W[k] / (self.T[k] * log(2))
-
-            # Get the k-th objective function
-            new_objective = self.HAgEx_objective(self.T[k], q)
-
-            # Set the objective and solve
-            SDP.set_objective(new_objective)
-            self.solvef(SDP)
-
-            # Check solution status
-            if SDP.status == "optimal":
-                ent += ck * (1 + SDP.dual)
-                # Extract the dual vector from the solved sdp
-                d = sdp_dual_vec(SDP)
-                # Add the dual vector to the total dual vector
-                dual_vec = dual_vec + ck * d
-            else:
-                ent = 0
-                dual_vec = np.zeros(8)
-                break
-
-        return dual_vec, ent
-
-    def behav_analysis(self, pabxy, objective_ops):
+    def analyse_behav(self, pabxy):
         """
         Generates the moment equality constraints for the distribution specified
         by the observed p(ab|xy), and searches through them to find all those that
@@ -231,48 +171,22 @@ class BFFProblem(object):
         idx_ranges = [range(idx) for idx in [oA - 1, oB - 1, iA, iB]]
         for (a, b, x, y) in itprod(*idx_ranges):
             constraints.append(self.A[x][a] * self.B[y][b] - pabxy[a, b, x, y])
+        # for marginals, select only input 0
         for (a, x) in itprod(range(oA - 1), range(iA)):
-            for y in range(iB):
-                constraints.append(
-                    self.A[x][a]
-                    - sum([pabxy[a, b, x, y] for b in range(oB)])
-                )
+            constraints.append(
+                self.A[x][a] - sum([pabxy[a, b, x, 0] for b in range(oB)])
+            )
         for (b, y) in itprod(range(oB - 1), range(iB)):
-            for x in range(iA):
-                constraints.append(
-                    self.B[y][b]
-                    - sum([pabxy[a, b, x, y] for a in range(oA)])
-                )
+            constraints.append(
+                self.B[y][b] - sum([pabxy[a, b, 0, y] for a in range(oA)])
+            )
+        return constraints
 
-        constr_set = set(constraints)
-        keep_constraints = set()
-        keep_ops = set()
-        constr_ops = objective_ops[:]
-        i = 0
-        while i < len(constr_ops):
-            curr_op = constr_ops[i]
-            curr_constrs = set()  # constrs to add from processing this op
-            for constr in constr_set:
-                thisconstr_ops = constr.free_symbols
-                try:  # check if constr contains curr_op
-                    thisconstr_ops.remove(curr_op)
-                except KeyError:
-                    continue
-                new_ops = thisconstr_ops - keep_ops
-                keep_ops = keep_ops.union(new_ops)
-                constr_ops += list(new_ops)
-                keep_constraints.update({constr})
-                curr_constrs.update({constr})
-            constr_set -= curr_constrs
-            i += 1
-
-        return list(keep_constraints), constr_ops
-
-    def optimise_q(self, SDP, sys, eta, q):
+    def optimise_q(self, sdp, sys, eta, q):
         """
         Optimizes the choice of q.
 
-            SDP    --    sdp relaxation object
+            sdp    --    sdp relaxation object
             sys    --    parameters of system that are optimized
             eta --     detection efficiency
             q     --     bitflip probability
@@ -283,18 +197,18 @@ class BFFProblem(object):
         q_eps_min = 0.001
 
         opt_q = q
-        rate = self.compute_rate(SDP, sys, eta, q)  # Computes rate for given q
+        rate = self.compute_rate(sdp, sys, eta, q)  # Computes rate for given q
         starting_rate = rate
 
         # We check if we improve going left
         if q - q_eps < 0:
             LEFT = 0
         else:
-            new_rate = self.compute_rate(SDP, sys, eta, opt_q - q_eps)
+            new_rate = self.compute_rate(sdp, sys, eta, opt_q - q_eps)
             if new_rate > rate:
                 opt_q = opt_q - q_eps
                 rate = new_rate
-                if VERBOSE > 0:
+                if self.verbose > 0:
                     print(
                         "Optimizing q (eta,q) =",
                         (eta, opt_q),
@@ -325,12 +239,12 @@ class BFFProblem(object):
                 break
 
             # compute the rate
-            new_rate = self.compute_rate(SDP, sys, eta, new_q)
+            new_rate = self.compute_rate(sdp, sys, eta, new_q)
 
             if new_rate > rate:
                 opt_q = new_q
                 rate = new_rate
-                if VERBOSE > 0:
+                if self.verbose > 0:
                     print(
                         "Optimizing q (eta,q) =",
                         (eta, opt_q),
@@ -347,20 +261,20 @@ class BFFProblem(object):
 
         return rate, opt_q
 
-    def optimise_rate(self, SDP, sys, eta, q):
+    def optimise_rate(self, sdp, sys, eta, q):
         """
         Iterates between optimizing sys and optimizing q in order to optimize overall rate.
         """
 
         STILL_OPTIMIZING = 1
 
-        best_rate = self.compute_rate(SDP, sys, eta, q)
+        best_rate = self.compute_rate(sdp, sys, eta, q)
         best_sys = sys[:]
         best_q = q
 
         while STILL_OPTIMIZING:
-            _, new_sys = self.optimise_sys(SDP, best_sys[:], eta, best_q)
-            new_rate, new_q = self.optimise_q(SDP, new_sys[:], eta, best_q)
+            _, new_sys = self.optimise_sys(sdp, best_sys[:], eta, best_q)
+            new_rate, new_q = self.optimise_q(sdp, new_sys[:], eta, best_q)
 
             if (new_rate < best_rate + best_rate * EPS_M) or (
                 new_rate < best_rate + EPS_A
@@ -391,10 +305,9 @@ class BFFProblem(object):
 
         return subs
 
-    # TODO generalise to extract from objective
-    def get_extra_monomials(self):
+    def get_extra_monomials(self, objective):
         """
-        Returns additional monomials to add to sdp relaxation.
+        Additional monos: Alice-Bob-Eve products and monos in objective function
         """
 
         monos = []
@@ -406,22 +319,26 @@ class BFFProblem(object):
         monos += [a * b * z for (a, b, z) in itprod(Aflat, Bflat, ZZ)]
 
         # Add monos appearing in objective function
-        monos += [self.A[0][0] * Dagger(z) * z for z in self.Z]
+        add_args = objective.expand().args
+        monos += [prod([a in self.op_set for a in aargs.args]) for aargs in add_args]
 
         return monos
-    '''
 
-    def get_extra_monomials(self):
+    def get_extra_z_monomials(self, zs=2):
+        """
+        Returns additional monomials to add to sdp relaxation.
+        """
         monos = []
-
-        # It should be sufficient to consider words of length at most 2 in the Z ops
-        Z2 = [z for z in ncp.nc_utils.get_monomials(self.Z,2) if ncp.nc_utils.ncdegree(z)>=2]
-        AB = ncp.flatten([self.A,self.B])
+        ZS = [
+            z
+            for z in ncp.nc_utils.get_monomials(self.Z, zs)
+            if ncp.nc_utils.ncdegree(z) >= 2
+        ]
+        AB = ncp.flatten([self.A, self.B])
         for a in AB:
-            for z in Z2:
-                monos += [a*z]
+            for z in ZS:
+                monos += [a * z]
         return monos[:]
-    '''
 
 
 # TODO add scalar variables, either as diagonal entries in the variable matrix,
