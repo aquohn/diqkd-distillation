@@ -115,7 +115,6 @@ class BFFProblem(object):
             sdp   --   sdp relaxation object
             q     --   probability of bitflip
         """
-        ck = 0.0  # kth coefficient
         ent = 0.0  # lower bound on H(A|X=0,E)
 
         # We can also decide whether to perform the final optimization in the sequence
@@ -125,25 +124,25 @@ class BFFProblem(object):
 
         bound_on_last = 2 * q * (1 - q) * self.W[-1] / log(2)
         m = len(self.T)
-        for k in range(m):
-            ck = self.W[k] / (self.T[k] * log(2))
+        for i in range(m):
+            ci = self.W[i] / (self.T[i] * log(2))
 
-            # Get the k-th objective function
-            new_objective = self.HAgEx_objective(self.T[k], q)
+            # Get the i-th objective function
+            new_objective = self.HAgEx_objective(self.T[i], q)
 
             sdp.set_objective(new_objective)
             self.solvef(sdp)
 
             if self.verbose > 0:
-                print("Status for i = ", k, ":", sdp.status)
+                print("Status for i = ", i + 1, ":", sdp.status)
             if not self.safe:  # ignore status and just add to entropy
-                ent += ck * (1 + sdp.dual)
+                ent += ci * (1 + sdp.dual)
                 continue
 
             if sdp.status == "optimal":
                 # 1 contributes to the constant term
-                ent += ck * (1 + sdp.dual)
-            elif k == m:
+                ent += ci * (1 + sdp.dual)
+            elif i == m:
                 ent += bound_on_last
                 if self.verbose > 0:
                     print("Could not solve last sdp, bounding its value")

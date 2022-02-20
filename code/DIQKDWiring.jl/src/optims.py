@@ -38,16 +38,53 @@ TEST_P = np.array(
     ]
 )
 
+REVIVAL_P = np.array(
+    [
+        [
+            [
+                [0.95939617, 0.95628008, 0.96954558],
+                [0.9321242, 0.89989456, 0.92203276]],
+            [
+                [0.00442781, 0.00518686, 0.00194679],
+                [0.03169978, 0.06157238, 0.04945962],
+            ],
+        ],
+        [
+            [
+                [0.01209621, 0.01521229, 0.00194679],
+                [0.00335293, 0.03558257, 0.01344437],
+            ],
+            [
+                [0.02407981, 0.02332076, 0.02656083],
+                [0.03282309, 0.00295049, 0.01506325],
+            ],
+        ],
+    ]
+)
+
+
 SINGLET_P = np.array(
     [
         [
-            [[0.5, 0.426776695296637, 0.426776695296637], [0.25, 0.426776695296637, 0.0732233047033631]],
-            [[0, 0.0732233047033631, 0.0732233047033631], [0.25, 0.0732233047033631, 0.426776695296637]]
+            [
+                [0.5, 0.426776695296637, 0.426776695296637],
+                [0.25, 0.426776695296637, 0.0732233047033631],
+            ],
+            [
+                [0, 0.0732233047033631, 0.0732233047033631],
+                [0.25, 0.0732233047033631, 0.426776695296637],
+            ],
         ],
         [
-            [[0, 0.0732233047033631, 0.0732233047033631], [0.25, 0.0732233047033631, 0.426776695296637]],
-            [[0.5, 0.426776695296637, 0.426776695296637], [0.25, 0.426776695296637, 0.0732233047033631]]
-        ]
+            [
+                [0, 0.0732233047033631, 0.0732233047033631],
+                [0.25, 0.0732233047033631, 0.426776695296637],
+            ],
+            [
+                [0.5, 0.426776695296637, 0.426776695296637],
+                [0.25, 0.426776695296637, 0.0732233047033631],
+            ],
+        ],
     ]
 )
 
@@ -114,7 +151,7 @@ def behav_problem(p=None, **kwargs):
     if obj is None:
         if verbose > 0:
             print("No objective provided, using H(A|E,x*=0)")
-        t, q = symbols(r't q', nonnegative=True)
+        t, q = symbols(r"t q", nonnegative=True)
         extra_monos = prob.get_extra_monomials(prob.HAgEx_objective(t, q))
         obj = 0
     else:
@@ -123,7 +160,9 @@ def behav_problem(p=None, **kwargs):
     parallel = kwargs.get("parallel", 0)
     moment_eqs = prob.analyse_behav(p)
 
-    sdp = ncp.SdpRelaxation(list(prob.op_set), verbose=verbose, normalized=True, parallel=parallel)
+    sdp = ncp.SdpRelaxation(
+        list(prob.op_set), verbose=verbose, normalized=True, parallel=parallel
+    )
     sdp.get_relaxation(
         level=npa,
         equalities=[],
@@ -134,7 +173,7 @@ def behav_problem(p=None, **kwargs):
         substitutions=prob.substitutions,
         extramonomials=extra_monos,
     )
-    sdp.process_constraints(moment_equalities=moment_eqs)
+    sdp.process_constraints(momentequalities=moment_eqs)
     setuptime = datetime.datetime.now()
     if verbose > 1:
         print(f"Setup Done At: {setuptime}, Delta: {setuptime - starttime}")

@@ -54,6 +54,7 @@ struct Behaviour{Sax, Sby, Sabxy, T <: Real}
 end
 Base.iterate(P::Behaviour) = P.pax, reverse([P.pby, P.pabxy])
 Base.iterate(P::Behaviour, state) = isempty(state) ? nothing : (pop!(state), state)
+Base.getindex(P::Behaviour, a, b, x, y) = P.pabxy[a, b, x, y]
 # TODO constructor that checks if pabxy is normalised?
 
 function convexsum(ws::AbstractVector{T}, Cs::AbstractVector{Tp}) where {T <: Real, Tp <: Behaviour}

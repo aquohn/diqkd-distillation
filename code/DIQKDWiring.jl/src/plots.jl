@@ -174,43 +174,54 @@ end
 
 # %%
 # Given i, minimum j req'd for r > 0. Assumes dr/dj >=
+function find_baseidxs(is::AbstractVector{T}, js::AbstractVector{T}, corrf::Function, krf::Function) where T <: Real
+  rs = T[corrf(i, j) |> krf for i in is, j in js]
+  Ti = eltype(eachindex(is))
+  baseidxs = Tuple{Ti,Ti}[]
+  for ii in eachindex(is)
+    # find negative r closest to 0, or smallest positive r
+    posjis = Ti[]; negjis = Ti[]
+    for ji in eachindex(js)
+      jis = (rs[ii, ji] < 0) ? negjis : posjis
+      push!(jis, ji)
+    end
+    if isempty(negjis)
+      ji = argmin(ji -> rs[ii, ji], posjis)
+    else
+      ji = argmax(ji -> rs[ii, ji], negjis)
+    end
+    push!(baseidxs, (ii, ji))
+  end
+  return baseidxs
+end
+
 function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname, corrf::Function; tol=1e-4, kwargs...) where T <: Real
   kwargs = Dict(kwargs)
-  krf = get(kwargs, :krf, (corrs) -> gchsh(max(2.0, CHSH(corrs))) - h(QBER(corrs)))
+  krf = get(kwargs, :krf, rstd)
   wirings = get(kwargs, :wirings, 
                 [((corrs) -> and_corrs(N, corrs), "$N-AND") for N in 2:6])
 
-  rs = T[corrf(i, j) |> krf for i in is, j in js]
-  basezeros = Tuple{T,T}[]
-  for ii in eachindex(is)
-    # find elements close to 0
-    jis = filter(ji -> abs(rs[ii, ji]) < tol, eachindex(js))
-    if isempty(jis)
-      if maximum(rs[ii, :]) < 0
-        push!(basezeros, (is[ii], js[end]))
-      end
-      continue
-    end
-    # find maximum of these elements
-    maxj = map(ji -> js[ji], jis) |> maximum
-    push!(basezeros, (is[ii], maxj))
-  end
-  plt = plot(basezeros, xlabel=iname, ylabel=jname, label="No wiring", xlims=(is[1], is[end]), ylims=(js[1], js[end]), legend=:topleft, size=(800,600))
+  Ti = eltype(eachindex(is))
+  baseidxs = find_baseidxs(is, js, corrf, krf)
+  basepts = [(is[ii], js[ji]) for (ii, ji) in baseidxs]
+  plt = plot(basepts, xlabel=iname, ylabel=jname, label="No wiring", xlims=(is[1], is[end]), ylims=(js[1], js[end]), legend=:topleft, size=(800,600))
 
   for wiring in wirings
     wirf, wirname = wiring
     rps = appwirf_data(is, js, corrf, krf, wirf)
     wirpts = Tuple{T,T}[]
     for ii in eachindex(is)
-      jis = filter(ji -> abs(rps[ii, ji]) < tol, eachindex(js))
-      if isempty(jis)
-        if maximum(rps[ii, :]) < 0
-          push!(wirpts, (is[ii], js[end]))
-        end
-        continue
+      posjis = Ti[]; negjis = Ti[]
+      for ji in eachindex(js)
+        jis = (rps[ii, ji] < 0) ? negjis : posjis
+        push!(jis, ji)
       end
-      maxj = map(ji -> js[ji], jis) |> maximum
-      push!(wirpts, (is[ii], maxj))
+      if isempty(negjis)
+        ji = argmin(ji -> rps[ii, ji], posjis)
+      else
+        ji = argmax(ji -> rps[ii, ji], negjis)
+      end
+      push!(wirpts, (is[ii], js[ji]))
     end
     plot!(plt, wirpts, label = wirname)
   end
@@ -233,23 +244,10 @@ function BFF_wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jn
   prob, sdp = optims.behav_problem(Behaviour(test_corrs).pabxy, keep_m=keep_m, safe=safe, half_m=half_m, solvef=solvef, verbose=verbose)
   df = DataFrame()
   df[!, iname] = is
+  baseidxs = find_baseidxs(is, js, corrf, krf)
 
-  for ii in eachindex(is)
-    # find elements close to 0 for each i
-    jis = filter(ji -> abs(rs[ii, ji]) < tol, eachindex(js))
-    if isempty(jis)
-        if maximum(rs[ii, :]) < 0
-          push!(bff_base, (is[ii], 0))
-          push!(base_corrss, corrf(is[ii], last(js)))
-        else
-          push!(bff_base, (is[ii], minimum(rs[ii, :])))
-          push!(base_corrss, corrf(is[ii], first(js)))
-        end
-        continue
-    end
-    # find maximum of these elements
-    maxj = map(ji -> js[ji], jis) |> maximum
-    corrs = corrf(is[ii], maxj)
+  for (ii, ji) in baseidxs
+    corrs = corrf(is[ii], js[ji])
     behav = Behaviour(corrs)
     behav_eqs = prob.analyse_behav(behav.pabxy)
     sdp.process_constraints(momentequalities = behav_eqs)

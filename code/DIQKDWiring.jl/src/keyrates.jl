@@ -10,10 +10,10 @@ includet("helpers.jl")
 includet("nonlocality.jl")
 
 using PythonCall
-const pysys = pyimport("sys")
+pysys = pyimport("sys")
 pushfirst!(PyList(pysys.path), Py(@__DIR__))
-const qre = pyimport("qre")
-const optims = pyimport("optims")
+qre = pyimport("qre")
+optims = pyimport("optims")
 
 struct EntropyData
   HAE
@@ -71,6 +71,8 @@ function HAE_CHSH(corrs::Correlators)
   S = CHSH(corrs)
   return gchsh(max(S, 2.0)), nothing
 end
+rstd(C::Correlators) = HAE_CHSH(C)[1] - HAB_oneway(C)[1]
+rstd(behav::Behaviour) = rstd(Correlators(behav))
 HAE_CHSHa(behav::Behaviour) = HAE_CHSHa(Correlators(behav))
 function HAE_CHSHa(corrs::Correlators)
   Eabxy = corrs.Eabxy
@@ -83,8 +85,8 @@ function HAE_CHSHa(corrs::Correlators)
   mdls = [star_mdl, nostar_mdl, bigalpha_mdl]
 
   optimize!.(mdls)
-  haes = [objective_value(mdl) for mdl in mdls]
-  return maximum(haes)
+  optmdl = argmax(mdl -> objective_value(mdl), mdls)
+  return objective_value(optmdl), (alpha=optmdl[:alpha], q=optmdl[:q])
 end
 
 nl_solver = optimizer_with_attributes(Ipopt.Optimizer)

@@ -1540,7 +1540,7 @@
       \therefore \inf_z f(p_1, p_2, z) &= -\frac{2p_1^2}{(1-t)p_1 + tp_2} + \frac{p_1^2 \left( (1-t)p_1 + tp_2 \right)}{{\left((1-t)p_1 + tp_2\right)}^2} \\
                                        &= -\frac{p_1^2}{(1-t)p_1 + tp_2}.
     \end{align}
-    Although this eliminates all the optimisation variables \(z\), the resulting expression is no longer polynomial. Nonetheless, it may be simpler to optimise this than the logarithm function.
+    Although this eliminates all the optimisation variables \(z\), the resulting expression is no longer polynomial. However, this difficulty can be eliminated by reformulating the problem, introducing a new variable \(R\) for each rational term \(P/Q\), with the polynomial constraint that \(P - QR = 0\). This is referred to as the \emph{epigraph approach} in TODO cite, and still allows us to perform a polynomial optimisation. Additionally, it may be simpler to optimise this than the logarithm function.
 
     In order to bound \(\abs{z_i} \leq \norm{Z}\), we use \Cref{eqn:qre_bound}, which requires us to identify a positive constants \(\lambda'\), \(\lambda''\) such that
       \[ \rho_{\crv{V}_1\crv{V}_2\crv{J}} \leq \lambda' \rho'_{\crv{V}_1\crv{V}_2\crv{J}} \qquad \rho_{\crv{V}_1\crv{V}_2\crv{JE}} \leq \lambda'' \rho''_{\crv{V}_1\crv{V}_2\crv{JE}}. \]
