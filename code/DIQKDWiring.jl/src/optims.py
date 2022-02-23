@@ -109,7 +109,6 @@ def SOLVEF(sdp):
 try:
     import mosek
 
-    # WARNING seems quite unreliable
     def MOSEK_SOLVEF(sdp):
         sdp.solve("mosek", solverparameters={"num_threads": int(NUM_SUBWORKERS)})
 
@@ -148,14 +147,17 @@ def behav_problem(p=None, **kwargs):
         p = TEST_P
     prob = BFFProblem(**kwargs)
     obj = kwargs.get("objective", None)
+    extra_monos = []
     if obj is None:
         if verbose > 0:
             print("No objective provided, using H(A|E,x*=0)")
         t, q = symbols(r"t q", nonnegative=True)
-        extra_monos = prob.get_extra_monomials(prob.HAgEx_objective(t, q))
+        extra_monos += prob.extract_monomials_from_obj(prob.HAgEx_objective(t, q))
         obj = 0
     else:
-        extra_monos = prob.get_extra_monomials(obj)
+        extra_monos += prob.extract_monomials_from_obj(obj)
+    extra_monos_f = kwargs.get("extra_monos_f", lambda prob: prob.generate_ABE_monomials())
+    extra_monos += extra_monos_f(prob)
     npa = kwargs.get("npa", NPA_LEVEL)
     parallel = kwargs.get("parallel", 0)
     moment_eqs = prob.analyse_behav(p)

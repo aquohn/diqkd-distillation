@@ -146,11 +146,8 @@ class BFFProblem(object):
                 ent += bound_on_last
                 if self.verbose > 0:
                     print("Could not solve last sdp, bounding its value")
-            else:
-                # If we didn't solve the sdp well enough then just bound the entropy
-                # trivially
-                ent = 0
-                break
+            # else give up on current i and move to next sdp without adding to
+            # entropy
 
         return ent
 
@@ -304,41 +301,31 @@ class BFFProblem(object):
 
         return subs
 
-    def get_extra_monomials(self, objective):
-        """
-        Additional monos: Alice-Bob-Eve products and monos in objective function
-        """
+    def extract_monomials_from_obj(self, objective):
+        add_args = objective.expand().args
+        return [prod([a in self.op_set for a in aargs.args]) for aargs in add_args]
 
-        monos = []
-
-        # Add ABZ
+    def generate_ABE_monomials(self):
+        """
+        Monomials that are Alice-Bob-Eve products
+        """
         ZZ = self.Z + [Dagger(z) for z in self.Z]
         Aflat = ncp.flatten(self.A)
         Bflat = ncp.flatten(self.B)
-        monos += [a * b * z for (a, b, z) in itprod(Aflat, Bflat, ZZ)]
+        return [a * b * z for (a, b, z) in itprod(Aflat, Bflat, ZZ)]
 
-        # Add monos appearing in objective function
-        add_args = objective.expand().args
-        monos += [prod([a in self.op_set for a in aargs.args]) for aargs in add_args]
-
-        return monos
-
-    def get_extra_z_monomials(self, zs=2):
+    def generate_UZs_monomials(self, zs=2):
         """
-        Returns additional monomials to add to sdp relaxation.
+        Monomials with Alice or Bob, followed by zs Eve operators
         """
-        monos = []
         ZS = [
             z
             for z in ncp.nc_utils.get_monomials(self.Z, zs)
-            if ncp.nc_utils.ncdegree(z) >= 2
+            if ncp.nc_utils.ncdegree(z) >= zs
         ]
-        AB = ncp.flatten([self.A, self.B])
-        for a in AB:
-            for z in ZS:
-                monos += [a * z]
-        return monos[:]
 
+        AB = ncp.flatten([self.A, self.B])
+        return [a * z for (a, z) in itprod(AB, ZS)]
 
 # TODO add scalar variables, either as diagonal entries in the variable matrix,
 # or as identity operators

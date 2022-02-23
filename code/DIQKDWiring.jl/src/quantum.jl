@@ -75,9 +75,9 @@ function meas_corrs(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi
   rhoB = ptrace(rhov, [2,2], 1)
 
   # mus for A, nus for B
-  Atlds = real.([E(Mtld(mu), rhoA) for mu in mus])
-  Btlds = real.([E(Mtld(nu), rhoB) for nu in nus])
-  ABtlds = real.([E(kron(Mtld(mu), Mtld(nu)), rhov) for mu in mus, nu in nus])
+  Atlds = [E(Mtld(mu), rhoA) |> real for mu in mus]
+  Btlds = [E(Mtld(nu), rhoB) |> real for nu in nus]
+  ABtlds = [E(kron(Mtld(mu), Mtld(nu)), rhov) |> real for mu in mus, nu in nus]
 
   return Correlators(Atlds, Btlds, ABtlds)
 end

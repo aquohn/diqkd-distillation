@@ -166,8 +166,7 @@ function qset_corrf()
 end
 
 function expt_corrf(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi])
-  Atlds, Btlds, ABtlds = meas_corrs(theta=theta, mus=mus, nus=nus)
-  tldcorrs = Correlators(Atlds, Btlds, ABtlds)
+  tldcorrs = meas_corrs(theta=theta, mus=mus, nus=nus)
   corrf = (nc, eta) -> expt_corrs(nc, eta, tldcorrs)
   return corrf
 end
@@ -179,16 +178,16 @@ function find_baseidxs(is::AbstractVector{T}, js::AbstractVector{T}, corrf::Func
   Ti = eltype(eachindex(is))
   baseidxs = Tuple{Ti,Ti}[]
   for ii in eachindex(is)
-    # find negative r closest to 0, or smallest positive r
+    # find smallest positive r, or else largest negative r
     posjis = Ti[]; negjis = Ti[]
     for ji in eachindex(js)
       jis = (rs[ii, ji] < 0) ? negjis : posjis
       push!(jis, ji)
     end
-    if isempty(negjis)
-      ji = argmin(ji -> rs[ii, ji], posjis)
-    else
+    if isempty(posjis)
       ji = argmax(ji -> rs[ii, ji], negjis)
+    else
+      ji = argmin(ji -> rs[ii, ji], posjis)
     end
     push!(baseidxs, (ii, ji))
   end
@@ -216,10 +215,10 @@ function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname,
         jis = (rps[ii, ji] < 0) ? negjis : posjis
         push!(jis, ji)
       end
-      if isempty(negjis)
-        ji = argmin(ji -> rps[ii, ji], posjis)
+      if isempty(posjis)
+        ji = argmax(ji -> rs[ii, ji], negjis)
       else
-        ji = argmax(ji -> rps[ii, ji], negjis)
+        ji = argmin(ji -> rs[ii, ji], posjis)
       end
       push!(wirpts, (is[ii], js[ji]))
     end

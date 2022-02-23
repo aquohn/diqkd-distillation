@@ -4,6 +4,7 @@ authors = ["John Khoo <john_khoo@u.nus.edu>"]
 version = "0.1.0"
 
 [deps]
+COSMO = "1e616198-aa4e-51ec-90a2-23f7fbd31d8d"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 Cbc = "9961bab8-2fa3-5c5a-9d89-47fab24efd76"
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
@@ -32,6 +33,7 @@ LazySets = "b4f0291d-fe17-52bc-9479-3d1a343d9043"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LinearAlgebraX = "9b3f67b0-2d00-526e-9884-9e4938f8fb88"
 MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
+MomentOpt = "5036cc39-ae6e-5f00-bcd6-dacb213bf05a"
 Mux = "a975b10e-0019-58db-a62f-e48ff68538c9"
 NLopt = "76087f3c-5699-56af-9a33-bf431cd00edd"
 NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
