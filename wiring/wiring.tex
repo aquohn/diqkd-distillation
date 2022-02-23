@@ -932,41 +932,41 @@
 
       The natural logarithm has the integral representation
       \begin{equation}
-        \ln\left(\frac{x}{y}\right) = -\int_{0}^{1} \frac{x-y}{t(x-y) + y} \dif{t}.
+        \ln\left(x\right) = \int_{0}^{1} \frac{x-1}{t(x-1) + 1} \dif{t}.\label{eqn:integral_log}
       \end{equation}
+      This integral can be approximated by the \(m\)-point \emph{Gauss-Radau quadrature}, which in this case\footnote{In the literature, this quadrature is often defined differently. See \Cref{sec:qretech_grq} for more details.} consists of values \(t_m = 1\), \(w_m = 1/m^2\), and
+      \begin{equation}
+        \int_{0}^{1} g(t) \dif{t} \approx \sum_{i=1}^m w_i g(t_i),
+      \end{equation}
+      for some \(g(t)\). The \(t_i \in \ocintv{0}{1}\) are referred to as \emph{nodes}, while the \(w_i > 0\) are \emph{weights}. These nodes and weights are special in that equality is achieved if \(g(t)\) is a polynomial of degree up to \(2m-2\). Notably, however, when applying this approximation to the integral representation in \Cref{eqn:integral_log}, we have an increasing sequence of lower bounds to it. That is,
+      \begin{equation}
+        r_m(x) \coloneqq \sum_{i=1}^m \frac{w_i(x-1)}{t_i(x-1) + 1} \leq r_{m+1}(x) \leq \ln\left(x\right) \;\forall m \geq 1.
+      \end{equation}
+
       Therefore, we can write the relative entropy as
       \begin{align}
         D(\rho||\sigma) &= \frac{1}{\ln 2} \Tr\left[\rho \left(\ln\rho - \ln\sigma\right) \right] \\
-                        &= \frac{1}{\ln 2} \Tr\left[ \sum_{x,y} y \ln\left(\frac{y}{x}\right) \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho}  \right]\label{eqn:finitedim_relent} \\ 
-                        &= -\frac{1}{\ln 2} \Tr\left[ \sum_{x,y} y \int_{0}^{1} \frac{x-y}{t(x-y)+y} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} \dif{t} \right],
+                        &= \frac{1}{\ln 2} \Tr\left[ \sum_{x,y} y \ln\left(\frac{y}{x}\right) \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho}  \right] \label{eqn:finitedim_relent} \\ 
+                        &= -\frac{1}{\ln 2} \Tr\left[ \sum_{x,y} y \underbrace{\ln\left(\frac{x}{y}\right)}_{\geq r_m(x/y)} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} \right] \\
+                        &\leq -\frac{1}{\ln 2} \Tr\left[ \sum_{x,y} y \frac{x-y}{t_i(x-y)+y} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} \right],
       \end{align}
-      where \(x\) and \(y\) are eigenvalues of \(\sigma\) and \(\rho\), and \(\Pi^{(x)}_{\sigma}\) and \(\Pi^{(y)}_{\rho}\) are their respective eigenprojectors.
+      where \(x\) and \(y\) are eigenvalues of \(\sigma\) and \(\rho\), and \(\Pi^{(x)}_{\sigma}\) and \(\Pi^{(y)}_{\rho}\) are their respective eigenprojectors, and the direction is flipped in the inequality since \(y\) is always positive, and so the logarithm is always being multiplied by a negative number.
 
-      This integral can be approximated by the \(m\)-point \emph{Gauss-Radau quadrature}, such that \(t_m = 1\), \(w_m = 1/m^2\), and
-      \begin{equation}
-        \int_{0}^{1} g(t) \dif{t} \geq \sum_{i=1}^m w_i g(t_i).
-      \end{equation}
-      The \(t_i \in \ocintv{0}{1}\) are referred to as \emph{nodes}, while the \(w_i > 0\) are \emph{weights}. These nodes and weights are special in that equality is achieved if \(g(t)\) is a polynomial of degree less than \(2m-2\).
-
-      The key insight of this method is in observing that this sum can be commuted with the sum over the eigenvalues to obtain the following inequality, which converges to equality as \(m\to\infty\):
+      The key insight of this method is in observing that this sum can be commuted with the sum over the eigenvalues to obtain the following inequality, which converges to equality as \(m\to\infty\)
       \begin{equation}
         D(\rho||\sigma) \leq - \sum_{i=1}^{m} \frac{w_i}{\ln 2} \underbrace{\Tr\left[ \sum_{x,y} y \frac{x-y}{t_i(x-y)+y} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} \right]}_{\eqqcolon D_{F_{t_i}}(\rho||\sigma)},\label{eqn:re_from_qre}
       \end{equation}
       and that the \emph{quasi-relative entropy} \(D_{F_{t}}(\rho||\sigma)\) can be characterised variationally as
       \begin{equation}
-        D_{F_{t}}(\rho||\sigma) = \frac{1}{t} \inf_Z \Tr\left[ \rho + \rho(Z + Z^{\dagger}) + (1-t)\rho{}Z^{\dagger}Z + t\sigma{}ZZ^{\dagger} \right]\label{eqn:qre_var}
+        D_{F_{t}}(\rho||\sigma) = \frac{1}{t} \inf_Z \Tr\left[ \rho + \rho(Z + Z^{\dagger}) + (1-t)\rho{}Z^{\dagger}Z + t\sigma{}ZZ^{\dagger} \right].\label{eqn:qre_var}
       \end{equation}
       This variational expression is of the form \(\Tr[\rho P]\), where \(P\) is a polynomial of operators. As will be seen later, optimisations of this form can be efficiently approximated (with some technical caveats).
 
-      If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R^+\), then we can define
+      If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R^+\), then the \(i=m\) optimisation can be solved analytically. We additionally collect the terms that are not multiplied with the optimisation variable \(Z\), removing the \(\Tr[\rho]\) terms from the optimisation and yielding the constant
       \begin{equation}
-        c_m = \frac{1}{m^2} \frac{\lambda \Tr[\rho]}{\ln 2} - \sum_{i=1}^m \frac{w_i \Tr[\rho]}{t_i \ln 2}
+        c_m = \frac{1}{m^2} \frac{\lambda \Tr[\rho]}{\ln 2} - \sum_{i=1}^m \frac{w_i \Tr[\rho]}{t_i \ln 2}.
       \end{equation}
-      and we have
-      \begin{equation}
-        D(\rho||\sigma) \leq c_m -\sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \inf_{\substack{Z \in \sB(\Hs): \\ \norm{Z} \leq \alpha_i}} \Tr\left[\rho\left(Z + Z^{\dagger}\right)\right] + (1-t_i)\Tr\left[\rho\left(Z^{\dagger}Z\right)\right] + t_i\Tr\left[\sigma\left(ZZ^{\dagger}\right)\right],
-      \end{equation}
-      where for each \(i\) we have
+      Further, we have \(\norm{Z} \leq \alpha_i\) in each optimisation, where
       \begin{equation}\label{eqn:qre_bound}
         \alpha_i = \frac{3}{2} \max\left\{\frac{1}{t_i}, \frac{\lambda}{1-t_i}\right\}.
       \end{equation}
@@ -978,7 +978,7 @@
                               &= \log d_A - \Tr\left[\rho_{\crv{A}E}(\log(\rho_{\crv{A}E}) - \log(I_{\crv{A}}\otimes\rho_{E}) + \log d_A)\right] \\
                               &= -\Tr\left[\rho_{\crv{A}E}(\log(\rho_{\crv{A}E}) - \log(I_{\crv{A}}\otimes\rho_{E}))\right] = -D(\rho_{\crv{A}E}||I_{\crv{A}}\otimes\rho_{E}),
       \end{align*}
-      where \(d_A\) is the dimension of Alice's system and \(I_A/d_A\) is the state representing a uniform distribution for Alice's system.
+      where \(d_A\) is the dimension of Alice's system and \(I_A/d_A\) is the state representing a uniform distribution for Alice's system. Further, \(\rho_{\crv{A}E} \leq I_{\crv{A}} \otimes \rho_{E}\), so we have \(\lambda = 1\).
 
       Then, with \(r\) arbitary linear constraints on the behaviour, indexed by \(j\)
       \[ \sum_{abxy} c^{(j)}_{abxy} p(ab|xy) \geq v_j, \]
@@ -1012,9 +1012,9 @@
 
       We can use Naimark's dilation theorem to construct a state \(\tilde{\rho}\) and projective measurement operators\footnote{These measurements project the state into orthogonal subspaces: \(\tilde{M}_{a|x}\tilde{M}_{a'|x} = \delta_{a,a'}\tilde{M}_{a|x}\), with the analogous relation for Bob.} \(\{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\) on a Hilbert space \(\Hs\), such that \(\Tr\left[\tilde{\rho}\tilde{M}_{a|x}\right] = \Tr\left[\rho M_{a|x}\right]\) and  \(\Tr\left[\tilde{\rho}\tilde{N}_{b|y}\right] = \Tr\left[\rho N_{b|y}\right]\): that is, the behaviour remains the same. These can be mapped to the original behaviour and states via local isometries. We can further assume that the state is pure, that is, \(\tilde{\rho} = {\ket{\psi}\bra{\psi}}_{\Hs}\), which can only help Eve (due to the data-processing inequality).
 
-      Additionally, instead of enforcing the tensor product explicitly, we can enforce that the operators \(Z_{a,i}\) commute with all \(\tilde{M}_{a|x}\) and \(\tilde{N}_{b|y}\), which in turn commute with each other.\footnote{This is equivalent to enforcing the tensor product structure in finite dimensions, but in infinite dimensions it leads to a looser bound for some problems.} Therefore, we can replace all instances of \(\Tr\left[\rho S\right]\) in our objective function with \(\braket{\psi|\tilde{S}|\psi}\) for all monomials \(S\) (individual operators and products of operators), where \(\tilde{S}\) is the monomial with all measurements replaced by their projective versions on \(\Hs\). 
+      Additionally, instead of enforcing the tensor product explicitly, we can enforce that the operators \(Z_{a,i}\) commute with all \(\tilde{M}_{a|x}\) and \(\tilde{N}_{b|y}\), which in turn commute with each other. Therefore, we can replace all instances of \(\Tr\left[\rho S\right]\) in our objective function with \(\braket{\psi|\tilde{S}|\psi}\) for all monomials \(S\) (individual operators and products of operators), where \(\tilde{S}\) is the monomial with all measurements replaced by their projective versions on \(\Hs\). 
 
-      These inner products can then be seen as elements of a Gram matrix for the vectors \(\{\ket{\psi}, \tilde{S}\ket{\psi}\}\), which must be positive semidefinite. In order to constrain \(\ket{\psi}\) to be a valid quantum state, we introduce more vectors of the form \(\prod M\ket{\psi}\) to our Gram matrix, where \(M \in \{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\). If these are valid states and measurements, the Gram matrix should still be positive semidefinite, even if we include vectors that result from an arbitrarily long sequence of measurement operators applied to \(\ket{\psi}\). This is the \emph{NPA hierarchy}, which is a converging hierarchy of outer approximations to the set of quantumly realisable states and measurements.\footnote{Recent results imply that the value converged to can be strictly larger than what is quantumly achievable in a Bell test, and that there is no algorithm that can converge to exactly to the quantum set from outside, since such an algorithm would allow one to solve the halting problem~\cite{MIPRE}.} Higher levels of the hierarchy involve monomials consisting of longer chains of measurement operators. The final expression for \(C_m\) then becomes
+      These inner products can then be seen as elements of a Gram matrix for the vectors \(\{\ket{\psi}, \tilde{S}\ket{\psi}\}\), which must be positive semidefinite. In order to constrain \(\ket{\psi}\) to be a valid quantum state, we introduce more vectors of the form \(\prod M\ket{\psi}\) to our Gram matrix, where \(M \in \{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\). If these are valid states and measurements, the Gram matrix should still be positive semidefinite, even if we include vectors that result from an arbitrarily long sequence of measurement operators applied to \(\ket{\psi}\). This is the \emph{NPA hierarchy}, which is a converging hierarchy of outer approximations to the set of quantumly realisable states and measurements.\footnote{Recent results imply that the value converged to can be strictly larger than what is quantumly achievable in a Bell test, and further that there is no algorithm that can converge to exactly to the quantum set from outside, since such an algorithm would allow one to solve the halting problem~\cite{MIPRE}. However, if all players use finite-dimensional systems, it converges exactly.} Higher levels of the hierarchy involve monomials consisting of longer chains of measurement operators. The final expression for \(C_m\) then becomes
       \begin{equation}
         \begin{aligned}[c]
           \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \angleb{\psi\left|
@@ -1785,7 +1785,7 @@
     \begin{appendices}
       \section{Technicalities for Quasi-Relative Entropies}\label{sec:qretech}
 
-      \subsection{Gauss-Radau Quadrature}
+      \subsection{Gauss-Radau Quadrature}\label{sec:qretech_grq}
 
       The canonical definition of the Gauss-Radau quadrature is an approximation for
       \[ \int_{-1}^{1} f(x) \dif{x}, \]

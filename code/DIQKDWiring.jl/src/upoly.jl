@@ -44,8 +44,9 @@ function generate_constrs(us, M, N, O, P, p, pJ = nothing)
 end
 
 # polynomial approximations
-function gauss_radau_objpolys(probs::Array{Tuple{T, T}}, m) where T
-  objpolys = Array{Tuple{T, T}}(undef, m, size(probs)...)
+function gauss_radau_objpolys(probs::Array{Tuple{Texp, Texp}}, m) where Texp
+  objpolys = Array{Tuple{Texp, Texp}}(undef, m, size(probs)...)
+  T, W = loglb_gaussradau(m)
   cs = [W[i]/(T[i]*log(2)) for i in 1:m]
   it = itprod((1:s for s in size(probs))...)
   for i in 1:m
@@ -57,34 +58,6 @@ function gauss_radau_objpolys(probs::Array{Tuple{T, T}}, m) where T
 
   return objpolys
 end
-
-function full_probs(us, pin, p, pJ, pvgv, M, N, O, P)
-  @expanduppersett us
-  pvve = [pin[x,y] * sum([M[kA, a, x] * N[kB, b, y] * O[kE, e] * P[kA, kB, kE]
-                          for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)])
-          for (a, x, b, y, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oE)]
-  pvv = [pin[x,y] * p[a, b, x, y]
-          for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)]
-  pvvje = [pJ[j, a, x, b, y, e] * pvve[a, x, b, y, e] 
-           for (a, x, b, y, j, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)]
-  pjge = [sum([pJ[j, a, x, b, y, e] * pvv[a, x, b, y]
-              for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)]) 
-         for (j, e) in itprod(1:oJ, 1:oE)]
-  pv2je = [sum(pvvje[:, :, b, y, j, e])
-         for (b, y, j, e) in itprod(1:oB, 1:iB, 1:oJ, 1:oE)]
-
-  Texp = promote_type(eltype.([pvve, pvv, pvvje, pjge, pv2je])...)
-  probs = Array{Tuple{Texp, Texp}}(undef, oA, iA, oB, iB, oJ, oE)
-  for idxs in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)
-    a, x, b, y, j, e = idxs
-    pvvje1 = pvvje[idxs...] * pJ[j, a, x, b, y, e]
-    pvvje2 = pvgv[a, x, b, y] * pjge[j, e] * pv2je[b, y, j, e]
-    probs[idxs...] = (pvvje1, pvvje2)
-  end
-
-  return objpolys
-end
-
 
 function poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer, pJ=nothing)
   @expanduppersett us
@@ -168,25 +141,6 @@ function simple_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m
 end
 
 # heuristic: minimise I(V1:V2|E) or H(V1|E) - H(V1|V2) first as a heuristic guess for ABE behaviour
-function CMI_probs(us, pin, pvgv, M, N, O, P)
-  @expanduppersett us
-  pvve = [pin[x,y] * sum([M[kA, a, x] * N[kB, b, y] * O[kE, e] * P[kA, kB, kE]
-                          for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)])
-          for (a, x, b, y, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oE)]
-  py = [sum(pin[:,y]) for y in 1:iB]
-  pv2e = [py[y] * sum([N[kB, b, y] * O[kE, e] * P[kA, kB, kE]
-                          for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)])
-          for (b, y, e) in itprod(1:oB, 1:iB, 1:oE)]
-
-  Texp = promote_type(eltype.([pvve, pv2e, px])...)
-  probs = Array{Tuple{Texp, Texp}}(undef, oA, iA, oB, iB, oE)
-  for idxs in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oE)
-    a, x, b, y, e = idxs
-    probs[idxs...] = (pvve[idxs...], pvgv[a, x, b, y] * pv2e[b, y, j, e])
-  end
-
-  return probs
-end
 
 function CMI_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer)
   @expanduppersett us
@@ -211,26 +165,6 @@ function CMI_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::I
   end
 
   return obj, ineqconstrs, eqconstrs, vars
-end
-
-function HAgE_probs(us, pin, M, N, O, P)
-  @expanduppersett us
-  px = [sum(pin[:,x]) for x in 1:iA]
-  pv1e = [px[x] * sum([M[kA, a, x] * O[kE, e] * P[kA, kB, kE]
-                          for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)])
-          for (a, x, e) in itprod(1:oA, 1:iA, 1:oE)]
-  pe = [sum([O[kE, e] * P[kA, kB, kE]
-                          for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)])
-          for e in 1:oE]
-
-  Texp = promote_type(eltype.([px, pv1e, pe])...)
-  probs = Array{Tuple{Texp, Texp}}(undef, oA, iA, oE)
-  for idxs in itprod(1:oA, 1:iA, 1:oE)
-    a, x, e = idxs
-    probs[idxs...] = (pv1e[idxs...], pe[e])
-  end
-
-  return probs
 end
 
 function HAgE_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer)

@@ -1,10 +1,10 @@
 using Revise
-using Zygote, JuMP
+using JuMP
 using IntervalArithmetic, IntervalRootFinding
 using NaNMath
 
 import MathOptInterface as MOI
-import Juniper, NLopt, Ipopt, Cbc
+import NLopt, Ipopt
 
 includet("helpers.jl")
 includet("nonlocality.jl")
@@ -89,10 +89,7 @@ function HAE_CHSHa(corrs::Correlators)
   return objective_value(optmdl), (alpha=optmdl[:alpha], q=optmdl[:q])
 end
 
-nl_solver = optimizer_with_attributes(Ipopt.Optimizer)
-mip_solver = optimizer_with_attributes(Cbc.Optimizer)
-uniper = optimizer_with_attributes(Juniper.Optimizer, "nl_solver" => nl_solver, "mip_solver" => mip_solver)
-
+ipopt = optimizer_with_attributes(Ipopt.Optimizer)
 isres = optimizer_with_attributes(NLopt.Optimizer, "algorithm"=>:GN_ISRES)
 direct = optimizer_with_attributes(NLopt.Optimizer, "algorithm"=>:GN_ORIG_DIRECT)
 directl = optimizer_with_attributes(NLopt.Optimizer, "algorithm"=>:GN_ORIG_DIRECT_L)
