@@ -122,12 +122,12 @@ function CMI_probs(us, pin, pvgv, M, N, O, P, mode=:arith)
   @expanduppersett us
   msum, mprod = modeops(mode)
 
-  pvve = [mprod(pin[x,y], msum([mprod(M[kA, a, x], N[kB, b, y], O[kE, e], P[kA, kB, kE])
-                                for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)]))
+  pvve = [mprod(pin[x,y], msum(mprod(M[kA, a, x], N[kB, b, y], O[kE, e], P[kA, kB, kE])
+                                for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)))
           for (a, x, b, y, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oE)]
   py = [msum(pin[:,y]) for y in 1:iB]
-  pv2e = [mprod(py[y], msum([mprod(N[kB, b, y], O[kE, e], P[kA, kB, kE])
-                          for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)])
+  pv2e = [mprod(py[y], msum(mprod(N[kB, b, y], O[kE, e], P[kA, kB, kE])
+                          for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE))
                 for (b, y, e) in itprod(1:oB, 1:iB, 1:oE))]
 
   Texp = promote_type(eltype.([pvve, pv2e, px])...)
@@ -150,8 +150,8 @@ function HAgE_probs(us, pin, M, N, O, P, mode=:arith)
                [mprod(M[kA, a, x], O[kE, e], P[kA, kB, kE])
                 for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)]...))
           for (a, x, e) in itprod(1:oA, 1:iA, 1:oE)]
-  pe = [msum([mprod(O[kE, e], P[kA, kB, kE])
-                          for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)])
+  pe = [msum(mprod(O[kE, e], P[kA, kB, kE])
+                          for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE))
           for e in 1:oE]
 
   Texp = promote_type(eltype.([px, pv1e, pe])...)
@@ -169,15 +169,15 @@ function full_probs(us, pin, p, pJ, pvgv, M, N, O, P, mode=:arith)
   @expanduppersett us
   msum, mprod = modeops(mode)
 
-  pvve = [mprod(pin[x,y], msum([mprod(M[kA, a, x], N[kB, b, y], O[kE, e], P[kA, kB, kE])
-                                for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)]))
+  pvve = [mprod(pin[x,y], msum(mprod(M[kA, a, x], N[kB, b, y], O[kE, e], P[kA, kB, kE])
+                                for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)))
           for (a, x, b, y, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oE)]
   pvv = [mprod(pin[x,y], p[a, b, x, y])
           for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)]
   pvvje = [mprod(pJ[j, a, x, b, y, e], pvve[a, x, b, y, e])
            for (a, x, b, y, j, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)]
-  pjge = [msum([mprod(pJ[j, a, x, b, y, e], pvv[a, x, b, y])
-              for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)]) 
+  pjge = [msum(mprod(pJ[j, a, x, b, y, e], pvv[a, x, b, y])
+              for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)) 
          for (j, e) in itprod(1:oJ, 1:oE)]
   pv2je = [msum(pvvje[:, :, b, y, j, e])
          for (b, y, j, e) in itprod(1:oB, 1:iB, 1:oJ, 1:oE)]

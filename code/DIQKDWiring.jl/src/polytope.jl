@@ -47,7 +47,7 @@ function full_polytope(::Type{T}, n::Integer, is::AbstractVector{Ti}, os::Abstra
   SV = SparseVector{T, Tn}
 
   lnormconstrs = vec([-P[tup...] for tup in itprod(tupranges...)])
-  unormconstrs = vec([sum([P[otup..., itup...] for otup in itprod(otupranges...)]) for itup in itprod(itupranges...)])
+  unormconstrs = vec([sum(P[otup..., itup...] for otup in itprod(otupranges...)) for itup in itprod(itupranges...)])
   nsconstrs = SV[]
   for p in 1:n  # create ns constrs for player p
     # iterate over everyone else's indices

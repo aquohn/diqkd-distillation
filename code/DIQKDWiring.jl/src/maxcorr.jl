@@ -15,8 +15,8 @@ function reg_to_pauli(M)
 end
 
 function pauli_to_sv(v)
-  p = sum([abs(z)^2 for z in v])
-  m = v[1]^2 - sum([z^2 for z in v[2:4]])
+  p = sum(abs(z)^2 for z in v)
+  m = v[1]^2 - sum(z^2 for z in v[2:4])
   pm = sqrt(abs(p)^2 - abs(m)^2)
   return sqrt(p + pm), sqrt(p - pm)
 end

@@ -104,7 +104,7 @@ function poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integ
     ineqconstrs, eqconstrs = generate_constrs(us, M, N, O, P, p)
   end
 
-  pby = [sum([pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA)])
+  pby = [sum(pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA))
           for (b, y) in itprod(1:oB, 1:iB)]
   pvgv = [pin[x,y] * p[a, b, x, y] / pby[b, y]
            for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)]
@@ -126,19 +126,19 @@ function simple_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m
   vars = [M..., N..., O..., P..., R...]
   ineqconstrs, eqconstrs = generate_constrs(us, M, N, O, P, p)
 
-  pby = [sum([pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA)])
+  pby = [sum(pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA))
           for (b, y) in itprod(1:oB, 1:iB)]
   pvv = [pin[x,y] * p[a, b, x, y]
           for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)]
   pvgv = [pvv[a, x, b, y] / pby[b, y]
            for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)]
-  pvve = [pin[x,y] * sum([M[kA, a, x] * N[kB, b, y] * O[kE, e] * P[kA, kB, kE]
-                          for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE)])
+  pvve = [pin[x,y] * sum(M[kA, a, x] * N[kB, b, y] * O[kE, e] * P[kA, kB, kE]
+                          for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE))
           for (a, x, b, y, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oE)]
   pvvje = [pJ[j, a, x, b, y, e] * pvve[a, x, b, y, e] 
            for (a, x, b, y, j, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)]
-  pjge = [sum([pJ[j, a, x, b, y, e] * pvv[a, x, b, y]
-              for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)]) 
+  pjge = [sum(pJ[j, a, x, b, y, e] * pvv[a, x, b, y]
+              for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)) 
          for (j, e) in itprod(1:oJ, 1:oE)]
   pv2je = [sum(pvvje[:, :, b, y, j, e])
          for (b, y, j, e) in itprod(1:oB, 1:iB, 1:oJ, 1:oE)]
@@ -146,8 +146,8 @@ function simple_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m
            for (a, x, b, y, j, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)]
 
   T, W = loglb_gaussradau(m)
-  obj = sum(R) + sum([pvvje[idxs...] * fvvje[idxs...]
-                      for idxs in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)])
+  obj = sum(R) + sum(pvvje[idxs...] * fvvje[idxs...]
+                      for idxs in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE))
 
   cs = [W[i]/(T[i]*log(2)) for i in 1:m]
   for idxs in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)
@@ -175,7 +175,7 @@ function CMI_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::I
 
   ineqconstrs, eqconstrs = generate_constrs(us, M, N, O, P, p)
 
-  pby = [sum([pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA)])
+  pby = [sum(pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA))
           for (b, y) in itprod(1:oB, 1:iB)]
   probs = CMI_probs(us, pin, M, N, O, P)
   objpolys, polypart = gauss_radau_objpolys(probs, m; kwargs...)
@@ -207,7 +207,7 @@ function HAgE_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::
 
   ineqconstrs, eqconstrs = generate_constrs(us, M, N, O, P, p)
 
-  pby = [sum([pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA)])
+  pby = [sum(pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA))
           for (b, y) in itprod(1:oB, 1:iB)]
   probs = HAgE_probs(us, pin, M, N, O, P)
   objpolys, polypart = gauss_radau_objpolys(probs, m; kwargs...)

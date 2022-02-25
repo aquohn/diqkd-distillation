@@ -58,7 +58,7 @@ function J_JuMP_init(us::UpperSetting, pin::AbstractArray, p::Behaviour, M, N, O
     @constraint mdl sum(pJ[:, idxs...]) == 1
   end
 
-  pby = [sum([pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA)])
+  pby = [sum(pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA))
           for (b, y) in itprod(1:oB, 1:iB)]
   pvgv = [pin[x,y] * p[a, b, x, y] / pby[b, y]
            for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)]
@@ -80,7 +80,7 @@ function CMI_JuMP_init(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::In
 
   leqconstrs = generate_leqconstrs(us, M, N, O, P, p)
   nleqconstr_exprs = generate_nleqconstr_exprs(us, M, N, O, P, p)
-  pby = [sum([pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA)])
+  pby = [sum(pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA))
           for (b, y) in itprod(1:oB, 1:iB)]
   prob_exprs = CMI_probs(us, pin, M, N, O, P, :sym)
 
@@ -133,7 +133,7 @@ function rat_JuMP_setup(mdl, leqconstrs, nleqconstr_exprs, prob_exprs, m, mode=:
     T, W = loglb_gaussradau(m)
   end
   cs = [W[i]/(T[i]*log(2)) for i in 1:m]
-  obj_terms = [ssum([sprod(cs[i], szmin_term(p1, p2, T[i])) for i in 1:m])
+  obj_terms = [ssum(sprod(cs[i], szmin_term(p1, p2, T[i])) for i in 1:m)
                for (p1, p2) in prob_exprs]
   obj_expr = sprod(1/log(2), ssum(obj_terms))
   set_NL_objective(mdl, MOI.MIN_SENSE, obj_expr)

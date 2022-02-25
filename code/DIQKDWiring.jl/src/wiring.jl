@@ -101,13 +101,13 @@ Base.iterate(ldwit::LDWiringIter, state) = _iterate(ldwit, iterate(ldwit._dtsit,
 
 # Approach 2: Enumerate possible wiring maps
 num_wiring_maps(c, sett::Setting) = num_wiring_maps(c, sett.oA, sett.iA) * num_wiring_maps(c, sett.oB, sett.iB)
-num_wiring_maps(c, o, i) = o^(i * o^c) * prod([i^(i * o^(j-1)) for j in 1:c])
+num_wiring_maps(c, o, i) = o^(i * o^c) * prod(i^(i * o^(j-1)) for j in 1:c)
 num_wiring_maps_fix(c, sett::Setting, fA, fB) = num_wiring_maps_fix(c, sett.oA, sett.iA, fA) * num_wiring_maps_fix(c, sett.oB, sett.iB, fB)
 function num_wiring_maps_fix(c, o, i, f)
   if f > i
     throw(ArgumentError("$f inputs to fix, but there are only $i inputs!"))
   end
-  o^((i-f) * o^c) * prod([i^((i-f) * o^(j-1)) for j in 1:c])
+  o^((i-f) * o^c) * prod(i^((i-f) * o^(j-1)) for j in 1:c)
 end
 struct CondWiringMapIter{T <: Integer}
   c::T
@@ -161,7 +161,7 @@ struct WiringMapIter{T <: Integer}
       # TODO check for validity
       its[j][x] = [cWmap]
     end
-    prodwmit = itprod([itprod(itj...) for itj in its]...)
+    prodwmit = itprod(itprod(itj...) for itj in its...)
     new{T}(c, o, i, fix, prodwmit)
   end
   WiringMapIter(c, o, i) = WiringMapIter(c, o, i, [])

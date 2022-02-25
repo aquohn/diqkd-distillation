@@ -26,7 +26,7 @@ function su_generators(n::Integer)
   end
   syms = [Emats[k,j] + Emats[j,k] for (j,k) in idxs]
   antisyms = [-im * (Emats[k,j] - Emats[j,k]) for (j,k) in idxs]
-  diags = [sqrt(2/(l*(l+1))) * sum([Emats[j,j] - l*Emats[l+1,l+1] for j in 1:l])
+  diags = [sqrt(2/(l*(l+1))) * sum(Emats[j,j] - l*Emats[l+1,l+1] for j in 1:l)
            for l in 1:n-1]
   return vcat(syms, antisyms, diags)
 end

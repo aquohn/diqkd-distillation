@@ -220,7 +220,7 @@ class Wiring(object):
                 vallists = [vals[(i * c) : ((i + 1) * c)] for i in range(4)]
                 xvals, yvals, avals, bvals = vallists
                 vallists_for_p = [avals, bvals, xvals, yvals]
-                p = prod([self.pabxy[(*args,)] for args in zip(*vallists_for_p)])
+                p = prod(self.pabxy[(*args,)] for args in zip(*vallists_for_p))
                 param = self.param_by_idx[(a, b) + sum(vallists, ()) + (x, y)]
                 self.ppabxy[a, b, x, y] += p * param
 

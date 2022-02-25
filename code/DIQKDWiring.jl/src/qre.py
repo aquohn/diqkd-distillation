@@ -170,11 +170,11 @@ class BFFProblem(object):
         # for marginals, select only input 0
         for (a, x) in itprod(range(oA - 1), range(iA)):
             constraints.append(
-                self.A[x][a] - sum([pabxy[a, b, x, 0] for b in range(oB)])
+                self.A[x][a] - sum(pabxy[a, b, x, 0] for b in range(oB))
             )
         for (b, y) in itprod(range(oB - 1), range(iB)):
             constraints.append(
-                self.B[y][b] - sum([pabxy[a, b, 0, y] for a in range(oA)])
+                self.B[y][b] - sum(pabxy[a, b, 0, y] for a in range(oA))
             )
         return constraints
 
@@ -303,7 +303,7 @@ class BFFProblem(object):
 
     def extract_monomials_from_obj(self, objective):
         add_args = objective.expand().args
-        return [prod([a in self.op_set for a in aargs.args]) for aargs in add_args]
+        return [prod(a in self.op_set for a in aargs.args) for aargs in add_args]
 
     def generate_ABE_monomials(self):
         """

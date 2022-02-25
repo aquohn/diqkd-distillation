@@ -67,7 +67,7 @@ function Correlators(behav::Behaviour)
   oA, oB, iA, iB = size(pabxy)
   Eax = [pax[2,x] - pax[1,x] for x in 1:iA]
   Eby = [pby[2,y] - pby[1,y] for y in 1:iB]
-  Eabxy = [sum([pabxy[a,b,x,y] * ((a == b) ? 1 : -1) for a in 1:oA, b in 1:iA]) for x in 1:iA, y in 1:iB]
+  Eabxy = [sum(pabxy[a,b,x,y] * ((a == b) ? 1 : -1) for a in 1:oA, b in 1:iA) for x in 1:iA, y in 1:iB]
 
   return Correlators(Eax, Eby, Eabxy)
 end
