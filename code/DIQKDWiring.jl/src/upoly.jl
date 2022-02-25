@@ -44,22 +44,48 @@ function generate_constrs(us, M, N, O, P, p, pJ = nothing)
 end
 
 # polynomial approximations
-function gauss_radau_objpolys(probs::Array{Tuple{Texp, Texp}}, m) where Texp
+function gauss_radau_objpolys(probs::Array{Tuple{T1, T2}}, m; grmode=:loglb, termmode=:zmin, kwargs...) where {T1, T2}
+  # NOTE logub + zmin blows up
+  if grmode == :logub
+    T, W = logub_gaussradau(m)
+  else  # default: loglb
+    T, W = loglb_gaussradau(m)
+  end
+  if termmode == :gr
+    numf = gr_num
+    denf = gr_den
+    cs = [W[i]/log(2) for i in 1:m]
+    polypart = 0
+  else  # default: zmin
+    numf = zmin_num
+    denf = zmin_den
+    cs = [W[i]/(T[i]*log(2)) for i in 1:m]
+    polypart = sum(cs)
+  end
+
+  Texp = promote_type(T1, T2, eltype(cs))
   objpolys = Array{Tuple{Texp, Texp}}(undef, m, size(probs)...)
-  T, W = loglb_gaussradau(m)
-  cs = [W[i]/(T[i]*log(2)) for i in 1:m]
   it = itprod((1:s for s in size(probs))...)
   for i in 1:m
     for idxs in it
       p1, p2 = probs[idxs...]
-      objpolys[i, idxs...] = (cs[i] * z_min_num(p1), z_min_den(p1, p2, T[i]))
+      objpolys[i, idxs...] = (cs[i] * numf(p1, p2, T[i]), denf(p1, p2, T[i]))
     end
   end
 
-  return objpolys
+  return objpolys, polypart
 end
 
-function poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer, pJ=nothing)
+function apply_epigraph!(eqconstrs, ratpolys, polypart, R, idxit)
+  obj = sum(R) + polypart
+  for idxs in idxit
+    poly = ratpolys[idxs...]
+    push!(eqconstrs, poly[1] - poly[2] * R[idxs...])
+  end
+  return obj
+end
+
+function poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer; pJ=nothing, kwargs...)
   @expanduppersett us
   @polyvar M[1:dA, 1:oA, 1:iA]
   @polyvar N[1:dB, 1:oB, 1:iB]
@@ -83,18 +109,14 @@ function poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integ
   pvgv = [pin[x,y] * p[a, b, x, y] / pby[b, y]
            for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)]
   probs = full_probs(us, pin, p, pJ, pvgv, M, N, O, P)
-  objpolys = gauss_radau_objpolys(probs, m)
-
-  obj = sum(R)
-  for idxs in itprod(1:m, 1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)
-    poly = objpolys[idxs...]
-    push!(eqconstrs, poly[1] - poly[2] * R[idxs...])
-  end
+  objpolys, polypart = gauss_radau_objpolys(probs, m; kwargs...)
+  idxit = itprod(1:m, 1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)
+  obj = apply_epigraph!(eqconstrs, objpolys, polypart, R, idxit) 
 
   return obj, ineqconstrs, eqconstrs, vars
 end
 
-function simple_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer, pJ)
+function simple_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer, pJ; kwargs...)
   @expanduppersett us
   @polyvar M[1:dA, 1:oA, 1:iA]
   @polyvar N[1:dB, 1:oB, 1:iB]
@@ -131,8 +153,8 @@ function simple_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m
   for idxs in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)
     a, x, b, y, j, e = idxs
     for i in 1:m
-      den = z_min_den(pvvje[idxs...], pv2je[b,y,j,e], T[i])
-      num = cs[i] * z_min_num(pvvje[idxs...])
+      den = zmin_den(pvvje[idxs...], pv2je[b,y,j,e], T[i])
+      num = cs[i] * zmin_num(pvvje[idxs...], pv2je[b,y,j,e], T[i])
       push!(eqconstrs, num - R[i, idxs...] * den)
     end
   end
@@ -142,7 +164,7 @@ end
 
 # heuristic: minimise I(V1:V2|E) or H(V1|E) - H(V1|V2) first as a heuristic guess for ABE behaviour
 
-function CMI_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer)
+function CMI_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer; kwargs...)
   @expanduppersett us
   @polyvar M[1:dA, 1:oA, 1:iA]
   @polyvar N[1:dB, 1:oB, 1:iB]
@@ -156,18 +178,25 @@ function CMI_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::I
   pby = [sum([pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA)])
           for (b, y) in itprod(1:oB, 1:iB)]
   probs = CMI_probs(us, pin, M, N, O, P)
-  objpolys = gauss_radau_objpolys(probs, m)
-
-  obj = sum(R)
-  for idxs in itprod(1:m, 1:oA, 1:iA, 1:oB, 1:iB, 1:oE)
-    poly = objpolys[idxs...]
-    push!(eqconstrs, poly[1] - poly[2] * R[idxs...])
-  end
+  objpolys, polypart = gauss_radau_objpolys(probs, m; kwargs...)
+  idxit = itprod(1:m, 1:oA, 1:iA, 1:oB, 1:iB, 1:oE)
+  obj = apply_epigraph!(eqconstrs, objpolys, polypart, R, idxit) 
 
   return obj, ineqconstrs, eqconstrs, vars
 end
 
-function HAgE_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer)
+function HAgE_symengine_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer; kwargs...)
+  @expanduppersett us
+  M = [symbols("M_{$(join(idxs, ';'))}") for idxs in itprod(1:dA, 1:oA, 1:iA)]
+  N = [symbols("N_{$(join(idxs, ';'))}") for idxs in itprod(1:dB, 1:oB, 1:iB)]
+  O = [symbols("O_{$(join(idxs, ';'))}") for idxs in itprod(1:dE, 1:oE)]
+  P = [symbols("P_{$(join(idxs, ';'))}") for idxs in itprod(1:dA, 1:dB, 1:dE)]
+  R = [symbols("R_{$(join(idxs, ';'))}") for idxs in itprod(1:m, 1:oA, 1:iA, 1:oE)]
+
+
+end
+
+function HAgE_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer; kwargs...)
   @expanduppersett us
   @polyvar M[1:dA, 1:oA, 1:iA]
   @polyvar N[1:dB, 1:oB, 1:iB]
@@ -180,14 +209,10 @@ function HAgE_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::
 
   pby = [sum([pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA)])
           for (b, y) in itprod(1:oB, 1:iB)]
-  HAgE_probs = HAgE_(us, pin, M, N, O, P)
-  objpolys = gauss_radau_objpolys(probs, m)
-
-  obj = sum(R)
-  for idxs in itprod(1:m, 1:oA, 1:iA, 1:oE)
-    poly = objpolys[idxs...]
-    push!(eqconstrs, poly[1] - poly[2] * R[idxs...])
-  end
+  probs = HAgE_probs(us, pin, M, N, O, P)
+  objpolys, polypart = gauss_radau_objpolys(probs, m; kwargs...)
+  idxit = itprod(1:m, 1:oA, 1:iA, 1:oE)
+  obj = apply_epigraph!(eqconstrs, objpolys, polypart, R, idxit) 
 
   return obj, ineqconstrs, eqconstrs, vars
 end

@@ -2,6 +2,26 @@ using Distributions, FastGaussQuadrature
 
 includet("nonlocality.jl")
 
+# symbolic operations
+sprod(args...) = Expr(:call, :*, args...)
+ssum(args...) = Expr(:call, :+, args...)
+sprod(args) = Expr(:call, :*, args...)
+ssum(args) = Expr(:call, :+, args...)
+
+# arithmetic operations
+aprod(args...) = prod(args)
+asum(args...) = sum(args)
+aprod(args) = prod(args)
+asum(args) = sum(args)
+
+function modeops(mode)
+  if mode == :arith
+    return asum, aprod
+  elseif mode == :sym
+    return ssum, sprod
+  end
+end
+
 function reparam_gaussradau_generic(ts, ws, a, b, c, d, flip = false)
   v = flip ? b : a
   k = flip ? -1 : 1
@@ -82,36 +102,22 @@ function uniform_pin(us::UpperSetting)
   return fill(1//iA * 1//iB, iA, iB)
 end
 
-z_min_term(p1, p2, t) = z_min_num(p1) / z_min_den(p1, p2, z)
-z_min_den(p1, p2, t) = p1*(1-t) + p2*t
-z_min_num(p1) = p1^2  # absorbed minus sign
+zmin_term(p1, p2, t) = zmin_num(p1, p2, t) / zmin_den(p1, p2, t)
+zmin_den(p1, p2, t) = p1*(1-t) + p2*t
+zmin_num(p1, p2, t) = -p1^2
 
-sz_min_term(p1, p2, t) = Expr(:call, :/, sz_min_num(p1), sz_min_den(p1, p2, z))
-sz_min_den(p1, p2, t) = ssum(sprod(p1, 1-t), sprod(p2, t))
-sz_min_num(p1) = sprod(p1, p1)  # absorbed minus sign
+szmin_term(p1, p2, t) = Expr(:call, :/, szmin_num(p1, p2, t), szmin_den(p1, p2, t))
+szmin_den(p1, p2, t) = ssum(sprod(p1, 1-t), sprod(p2, t))
+szmin_num(p1, p2, t) = sprod(-1, p1, p1)
+
+gr_term(p1, p2, t) = gr_num(p1, p2, t) / gr_den(p1, p2, t)
+gr_den(p1, p2, t) = t*(p1 - p2) + p2
+gr_num(p1, p2, t) = p1*(p1 - p2)
 
 # generate probability expressions
+# bound directions shown for zmin with loglb
 
-# symbolic operations
-sprod(args...) = Expr(:call, :*, args...)
-ssum(args...) = Expr(:call, :+, args...)
-sprod(args::AbstractArray) = Expr(:call, :*, args...)
-ssum(args::AbstractArray) = Expr(:call, :+, args...)
-
-# arithmetic operations
-aprod(args...) = prod(args)
-asum(args...) = sum(args)
-aprod(args::AbstractArray) = prod(args)
-asum(args::AbstractArray) = sum(args)
-
-function modeops(mode)
-  if mode == :arith
-    return asum, aprod
-  elseif mode == :sym
-    return ssum, sprod
-  end
-end
-
+# pvve log(pvve/pv1|e pv2e) <= pvve zmin(pvve/pv1|e pv2e)
 function CMI_probs(us, pin, pvgv, M, N, O, P, mode=:arith)
   @expanduppersett us
   msum, mprod = modeops(mode)
@@ -134,6 +140,7 @@ function CMI_probs(us, pin, pvgv, M, N, O, P, mode=:arith)
   return probs
 end
 
+# -pv1e log(pv1e/pe) >= pv1e zmin(pv1e/pe)
 function HAgE_probs(us, pin, M, N, O, P, mode=:arith)
   @expanduppersett us
   msum, mprod = modeops(mode)
@@ -157,6 +164,7 @@ function HAgE_probs(us, pin, M, N, O, P, mode=:arith)
   return probs
 end
 
+# pvve log(pvve/pv1|v2 pj|e pv2je) <= pvve zmin(pvve/pv1|e pv2e)
 function full_probs(us, pin, p, pJ, pvgv, M, N, O, P, mode=:arith)
   @expanduppersett us
   msum, mprod = modeops(mode)
@@ -183,7 +191,14 @@ function full_probs(us, pin, p, pJ, pvgv, M, N, O, P, mode=:arith)
     probs[idxs...] = (pvvje1, pvvje2)
   end
 
-  return objpolys
+  return probs
+end
+
+function min_lagrangian(obj, mus, ineqconstrs, lambdas, eqconstrs, vars, diff)
+  objvec = [diff(obj, var) for var in vars]
+  ineqvec = mus' * vcat([[diff(constr, var) for var in vars]' for constr in ineqconstrs])
+  eqvec = lambdas' * vcat([[diff(constr, var) for var in vars]' for constr in eqconstrs])
+  return objvec + ineqvec' + eqvec'
 end
 
 

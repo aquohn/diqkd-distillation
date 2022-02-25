@@ -119,7 +119,7 @@ function log_JuMP_setup(mdl, leqconstrs, nleqconstr_exprs, prob_exprs)
 end
 
 
-function rat_JuMP_setup(mdl, leqconstrs, nleqconstr_exprs, prob_exprs, m)
+function rat_JuMP_setup(mdl, leqconstrs, nleqconstr_exprs, prob_exprs, m, mode=:loglb)
   for constr in leqconstrs
     @constraint mdl constr == 0
   end
@@ -127,9 +127,13 @@ function rat_JuMP_setup(mdl, leqconstrs, nleqconstr_exprs, prob_exprs, m)
     add_NL_constraint(mdl, constrexpr)
   end
 
-  T, W = loglb_gaussradau(m)
+  if mode == :logub
+    T, W = logub_gaussradau(m)
+  else
+    T, W = loglb_gaussradau(m)
+  end
   cs = [W[i]/(T[i]*log(2)) for i in 1:m]
-  obj_terms = [ssum([sprod(cs[i], sz_min_term(p1, p2, T[i])) for i in 1:m])
+  obj_terms = [ssum([sprod(cs[i], szmin_term(p1, p2, T[i])) for i in 1:m])
                for (p1, p2) in prob_exprs]
   obj_expr = sprod(1/log(2), ssum(obj_terms))
   set_NL_objective(mdl, MOI.MIN_SENSE, obj_expr)

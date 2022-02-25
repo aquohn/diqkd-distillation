@@ -110,7 +110,7 @@ try:
     import mosek
 
     def MOSEK_SOLVEF(sdp):
-        sdp.solve("mosek", solverparameters={"num_threads": int(NUM_SUBWORKERS)})
+        sdp.solve("mosek", solverparameters={"num_threads": int(NUM_SUBWORKERS), "intpnt_co_tol_dfeas": 1.0e-6, "intpnt_co_tol_pfeas": 1.0e-6})
 
 except ModuleNotFoundError:
     MOSEK_SOLVEF = None

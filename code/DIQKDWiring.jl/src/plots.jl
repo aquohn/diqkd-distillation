@@ -44,6 +44,19 @@ function plot_sstar(q, alpha)
   plot(starfn, xlims=(starl, staru))
 end
 
+# %%
+# Comparing approximations of univariate functions
+function compare_approx(fns, fnnames, args)
+  fn1, restfns = Iterators.peel(fns)
+  name1, restnames = Iterators.peel(fnnames)
+
+  plt = plot(fn1.(args), label=name1)
+  for (fn, name) in zip(restfns, restnames)
+    plot!(plt, fn.(args), label=name)
+  end
+end
+
+
 # %% Plot data generators
 
 function maxcorrval_from_probs(behav::Behaviour, xysel, modesel)
