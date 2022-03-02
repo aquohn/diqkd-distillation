@@ -38,7 +38,7 @@ function convexsum(ws::AbstractVector{T}, Cs::AbstractVector{Tc}) where {T <: Re
   return Correlators(Eax, Eby, Eabxy)
 end
 
-struct Behaviour{Sax, Sby, Sabxy, T <: Real}
+struct Behaviour{Sax, Sby, Sabxy, T <: Real} <: AbstractArray{T, 4}
   pax::SArray{Sax, T}
   pby::SArray{Sby, T}
   pabxy::SArray{Sabxy, T}
@@ -54,7 +54,9 @@ struct Behaviour{Sax, Sby, Sabxy, T <: Real}
 end
 Base.iterate(P::Behaviour) = P.pax, reverse([P.pby, P.pabxy])
 Base.iterate(P::Behaviour, state) = isempty(state) ? nothing : (pop!(state), state)
-Base.getindex(P::Behaviour, a, b, x, y) = P.pabxy[a, b, x, y]
+Base.getindex(P::Behaviour, i::Integer) = P.pabxy[i]
+Base.getindex(P::Behaviour, i::Integer...) = P.pabxy[i...]
+Base.size(P::Behaviour) = Base.size(P.pabxy)
 # TODO constructor that checks if pabxy is normalised?
 
 function convexsum(ws::AbstractVector{T}, Cs::AbstractVector{Tp}) where {T <: Real, Tp <: Behaviour}

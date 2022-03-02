@@ -1511,18 +1511,18 @@
 
     Although we cannot bound the cardinality \(o_E\) of \(\crv{E}\), we will have to fix it to some finite number in order to specify the number of measurement operators \(O_e\). This will still provide a valid upper bound, but we lose some tightness. The cardinality \(o_{\crv{J}}\) of \(\crv{J}\) can be upper bounded by the product of the cardinalities of \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\), as explained in TODO cite, and the conditional distribution \(P_{\crv{J|V_1V_2E}}\) can then be parametrised by \(o_{\crv{J}} i_A o_A i_B o_B o_E = o_{\crv{J}}^2\) probabilities, with the corresponding normalisation conditions.
 
-    Now, since \(Z\) is defined on the finite-dimensional Hilbert spaces \(\crv{V}_1\crv{V}_2\crv{J}\) or \(\crv{V}_1\crv{V}_2\crv{JE}\), \(Z = \sum_{i} z_{i;i'} \ket{i}\bra{i'}\), where \(i\) and \(i'\) are indices of the classical basis states in those Hilbert spaces and \(z_{i;i'} \in \C\). Further, since the states \(\rho\) are classical, it suffices to consider the action of \(Z\) on the projectors. Therefore, representing the probability of outcome \(i\) with \(p_i\), we can expand the traces with \(Z\) generically as
+    Now, since \(Z\) is defined on the finite-dimensional Hilbert spaces \(\crv{V}_1\crv{V}_2\crv{J}\) or \(\crv{V}_1\crv{V}_2\crv{JE}\), \(Z = \sum_{i,i'} z_{i;i'} \ket{i}\bra{i'}\), where \(i\) and \(i'\) are indices of the classical basis states in those Hilbert spaces and \(z_{i;i'} \in \C\). Further, since the states \(\rho\) are classical, it suffices to consider the action of \(Z\) on the projectors. Therefore, representing the probability of outcome \(i\) with \(p_i\), we can expand the traces with \(Z\) generically as
   \begin{align}
     \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (Z + Z^{\dagger})\right] &= 
     \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} \ket{i}\bra{i'} + {z_{i';i}^*} \ket{i}\bra{i'} \right] \\
                                                             &= 
     \sum_i p_i z_{i;i} + {z_{i;i}^*} \\
     \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (Z^{\dagger}Z)\right] &=
-    \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} {z_{i';i}^*} \ket{i}\bra{i'} \right] \\
+    \Tr\left[ \sum_i p_i \sum_{i'} {z_{i;i'}^*} z_{i';i} \ket{i}\bra{i'} \right] \\
                                                             &\geq 
     \sum_i p_i \abs{z_{i;i}}^2 \\
     \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (ZZ^{\dagger})\right] &= 
-    \Tr\left[ \sum_i p_i \sum_{i'} {z_{i;i'}^*} z_{i';i} \ket{i}\bra{i'} \right] \\
+    \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} {z_{i';i}^*} \ket{i}\bra{i'} \right] \\
                                                             &\geq 
     \sum_i p_i \abs{z_{i;i}}^2
   \end{align}
@@ -1563,10 +1563,10 @@
       \Tr[GH] &= \Tr\left[ \sum_h \mu_h \left( \sum_{gg'} \gamma_g h_g h_{g'}^* \ket{g}\bra{g'} \right) \right] \\
       &= \sum_{hg} \mu_h \gamma_g \abs{h_g}^2.
     \end{align*}
-    However, if we consider instead the operator \(\tilde{H} = \sum_g \nu_{g} \ket{g}\bra{g}\), with \(\nu_{g} = \sum_h \abs{g_h}^2 \mu_h\), we obtain
+    However, if we consider instead the operator \(\tilde{H} = \sum_{g'} \nu_{g'} \ket{g'}\bra{g'}\), with \(\nu_{g'} = \sum_h \abs{g'_h}^2 \mu_h\), we obtain
     \begin{align*}
-      \Tr[G\tilde{H}] &= \Tr\left[ \sum_g \nu_{g} \ket{g}\bra{g} \left(\sum_{g'} \gamma_{g'} \ket{g'}\bra{g'} \right) \right] \\
-      &= \Tr\left[ \sum_{g} \nu_{g}\gamma_{g}\ket{g}\bra{g} \right] = \sum_{g} \nu_{g}\gamma_{g} \\
+      \Tr[G\tilde{H}] &= \Tr\left[ \sum_{g} \gamma_{g} \ket{g}\bra{g} \left( \sum_g \nu_{g'} \ket{g'}\bra{g'} \right) \right] \\
+      &= \Tr\left[ \sum_{g} \gamma_{g}\nu_{g}\ket{g}\bra{g} \right] = \sum_{g} \gamma_{g}\nu_{g} \\
       &= \sum_{g} \left(\sum_{h} \mu_h \abs{h_g}^2\right) \gamma_{g} = \Tr[GH]
     \end{align*}
     which means the trace is fully parametrised by the \(2d\) real numbers \({\{\gamma_g, \nu_{g}\}}_{g}\).
@@ -1608,6 +1608,9 @@
 
     Additionally, we have
     \begin{align}
+      P_{\crv{V_1V_2}}(v_1v_2) &= \sum_{e} p_{\rm in}(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
+                           &= p_{\rm in}(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} \sum_e o_e^{(k_E)} p^{(k)} \\
+                           &= p_{\rm in}(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} p^{(k)} \\
       P_{\crv{V_2E}}(v_2e) &= \sum_{ax} p_{\rm in}(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
                            &= \sum_{x} p_{\rm in}(x,y) \sum_k n_{b|y}^{(k_B)} o_e^{(k_E)} \sum_a m_{a|x}^{(k_A)} p^{(k)} \\
                            &= p_{\rm in}(y) \sum_k n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\

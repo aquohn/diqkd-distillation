@@ -1,5 +1,6 @@
 using Distributions, FastGaussQuadrature
 
+includet("helpers.jl")
 includet("nonlocality.jl")
 
 # symbolic operations
@@ -41,6 +42,11 @@ end
 loglb_gaussradau(m) = reparam_gaussradau(m, 0, 1, true)
 logub_gaussradau(m) = reparam_gaussradau(m, 0, 1, false)
 
+# ineqconstrs <= 0
+min_lagrangian(obj, mus, ineqconstrs, lambdas, eqconstrs) = obj + mus' * ineqconstrs + lambdas' * eqconstrs
+lagrangian_grad(L, vars, diff) = [diff(L, var) for var in vars]
+lagrangian_hessian(dL, vars, diff) = [diff(dvL, var) for dvL in dL, var in vars]
+
 struct UpperSetting{T <: Integer}
   sett::Setting{T}
   oE::T
@@ -78,7 +84,7 @@ macro expanduppersett(us)
 end
 
 # count number of variables
-function logvar_vars(us::UpperSetting)
+function logvar_varcount(us::UpperSetting)
   @expanduppersett us
   pJ_V1V2E_count = oJ * oA*iA*oB*iB*oE 
   pk_count = dA * dB * dE
@@ -102,6 +108,79 @@ function uniform_pin(us::UpperSetting)
   return fill(1//iA * 1//iB, iA, iB)
 end
 
+function generate_leqconstrs(us, M, N, O, P, pJ = nothing)
+  @expanduppersett us
+
+  # expr == 0
+  eqconstrs = []
+  # pJ normalisation
+  if !isnothing(pJ)
+    for (a, x, b, y, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oE)
+      push!(eqconstrs, sum(pJ[:, a, x, b, y, e]))
+    end
+  end
+  # P normalisation
+  push!(eqconstrs, sum(P) - 1)
+  # POVM normalisation
+  for kA in 1:dA, x in 1:iA
+    push!(eqconstrs, sum(M[kA, :, x]) - 1)
+  end
+  for kB in 1:dB, y in 1:iB
+    push!(eqconstrs, sum(N[kB, :, y]) - 1)
+  end
+  for kE in 1:dE
+    push!(eqconstrs, sum(O[kE, :]) - 1)
+  end
+
+  return eqconstrs
+end
+
+function generate_nleqconstr_exprs(us, M, N, O, P, p, pJ = nothing)
+  @expanduppersett us
+
+  # expr == 0
+  eqconstrs = Expr[]
+  # behaviour constrs
+  for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)
+    constrterms = Expr[]
+    for (kA, kB) in itprod(1:dA, 1:dB)
+      sumterm = sprod(M[kA, a, x], N[kB, b, y], sum(P[kA, kB, :]))
+      push!(constrterms, sumterm)
+    end
+    constr = ssum(constrterms..., -p[a,b,x,y])
+    push!(eqconstrs, constr)
+  end
+
+  return eqconstrs
+end
+
+
+function generate_constrs(us, M, N, O, P, p, pJ = nothing)
+  @expanduppersett us
+
+  # expr <= 0
+  ineqconstrs = -1 .* [M..., N..., O..., P...]
+  if !isnothing(pJ)
+    ineqconstrs = vcat(ineqconstrs, -1 .* vec(pJ))
+  end
+
+  # expr == 0
+  # linear constraints
+  eqconstrs = generate_leqconstrs(us, M, N, O, P, pJ)
+
+  # behaviour constrs
+  for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)
+    constr = 0
+    for (kA, kB) in itprod(1:dA, 1:dB)
+      constr += M[kA, a, x] * N[kB, b, y] * sum(P[kA, kB, :])
+    end
+    push!(eqconstrs, constr - p[a,b,x,y])
+  end
+
+  return ineqconstrs, eqconstrs
+end
+
+# Rational approximations
 zmin_term(p1, p2, t) = zmin_num(p1, p2, t) / zmin_den(p1, p2, t)
 zmin_den(p1, p2, t) = p1*(1-t) + p2*t
 zmin_num(p1, p2, t) = -p1^2
@@ -113,6 +192,48 @@ szmin_num(p1, p2, t) = sprod(-1, p1, p1)
 gr_term(p1, p2, t) = gr_num(p1, p2, t) / gr_den(p1, p2, t)
 gr_den(p1, p2, t) = t*(p1 - p2) + p2
 gr_num(p1, p2, t) = p1*(p1 - p2)
+
+function gr_relent_polypairs(probs::Array{Tuple{T1, T2}}, m; grmode=:logub, termmode=:gr, kwargs...) where {T1, T2}
+  # NOTE logub + zmin blows up
+  # TODO check lzmin
+  if grmode == :logub
+    T, W = logub_gaussradau(m)
+  else  # default: loglb
+    T, W = loglb_gaussradau(m)
+  end
+  if termmode == :gr
+    numf = gr_num
+    denf = gr_den
+    cs = [W[i]/log(2) for i in 1:m]
+    polypart = 0
+  else  # default: zmin
+    numf = zmin_num
+    denf = zmin_den
+    cs = [-W[i]/(T[i]*log(2)) for i in 1:m]
+    polypart = -sum(cs)
+  end
+
+  Texp = promote_type(T1, T2, eltype(cs))
+  polypairs = Array{Tuple{Texp, Texp}}(undef, m, size(probs)...)
+  it = itprod((1:s for s in size(probs))...)
+  for i in 1:m
+    for idxs in it
+      p1, p2 = probs[idxs...]
+      polypairs[i, idxs...] = (cs[i] * numf(p1, p2, T[i]), denf(p1, p2, T[i]))
+    end
+  end
+
+  return polypairs, polypart
+end
+
+function apply_epigraph!(eqconstrs, polypairs, polypart, R, idxit)
+  obj = sum(R) + polypart
+  for idxs in idxit
+    poly = polypairs[idxs...]
+    push!(eqconstrs, poly[1] - poly[2] * R[idxs...])
+  end
+  return obj
+end
 
 # generate probability expressions
 # bound directions shown for zmin with loglb
@@ -193,12 +314,4 @@ function full_probs(us, pin, p, pJ, pvgv, M, N, O, P, mode=:arith)
 
   return probs
 end
-
-function min_lagrangian(obj, mus, ineqconstrs, lambdas, eqconstrs, vars, diff)
-  objvec = [diff(obj, var) for var in vars]
-  ineqvec = mus' * vcat([[diff(constr, var) for var in vars]' for constr in ineqconstrs])
-  eqvec = lambdas' * vcat([[diff(constr, var) for var in vars]' for constr in eqconstrs])
-  return objvec + ineqvec' + eqvec'
-end
-
 

@@ -1,91 +1,11 @@
 using DynamicPolynomials, TSSOS
+using HomotopyContinuation, SemialgebraicSets
 
 includet("upper.jl")
-
-function generate_constrs(us, M, N, O, P, p, pJ = nothing)
-  @expanduppersett us
-
-  # expr >= 0
-  ineqconstrs = [M..., N..., O..., P...]
-  if !isnothing(pJ)
-    ineqconstrs = vcat(ineqconstrs, vec(pJ))
-  end
-
-  # expr == 0
-  eqconstrs = []
-  # pJ normalisation
-  if !isnothing(pJ)
-    for (a, x, b, y, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oE)
-      push!(eqconstrs, sum(pJ[:, a, x, b, y, e]))
-    end
-  end
-  # P normalisation
-  push!(eqconstrs, sum(P) - 1)
-  # POVM normalisation
-  for kA in 1:dA, x in 1:iA
-    push!(eqconstrs, sum(M[kA, :, x]) - 1)
-  end
-  for kB in 1:dB, y in 1:iB
-    push!(eqconstrs, sum(N[kB, :, y]) - 1)
-  end
-  for kE in 1:dE
-    push!(eqconstrs, sum(O[kE, :]) - 1)
-  end
-  # behaviour constrs
-  for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)
-    constr = 0
-    for (kA, kB) in itprod(1:dA, 1:dB)
-      constr += M[kA, a, x] * N[kB, b, y] * sum(P[kA, kB, :])
-    end
-    push!(eqconstrs, constr - p[a,b,x,y])
-  end
-
-  return ineqconstrs, eqconstrs
-end
+includet("quantum.jl")
 
 # polynomial approximations
-function gauss_radau_objpolys(probs::Array{Tuple{T1, T2}}, m; grmode=:loglb, termmode=:zmin, kwargs...) where {T1, T2}
-  # NOTE logub + zmin blows up
-  if grmode == :logub
-    T, W = logub_gaussradau(m)
-  else  # default: loglb
-    T, W = loglb_gaussradau(m)
-  end
-  if termmode == :gr
-    numf = gr_num
-    denf = gr_den
-    cs = [W[i]/log(2) for i in 1:m]
-    polypart = 0
-  else  # default: zmin
-    numf = zmin_num
-    denf = zmin_den
-    cs = [W[i]/(T[i]*log(2)) for i in 1:m]
-    polypart = sum(cs)
-  end
-
-  Texp = promote_type(T1, T2, eltype(cs))
-  objpolys = Array{Tuple{Texp, Texp}}(undef, m, size(probs)...)
-  it = itprod((1:s for s in size(probs))...)
-  for i in 1:m
-    for idxs in it
-      p1, p2 = probs[idxs...]
-      objpolys[i, idxs...] = (cs[i] * numf(p1, p2, T[i]), denf(p1, p2, T[i]))
-    end
-  end
-
-  return objpolys, polypart
-end
-
-function apply_epigraph!(eqconstrs, ratpolys, polypart, R, idxit)
-  obj = sum(R) + polypart
-  for idxs in idxit
-    poly = ratpolys[idxs...]
-    push!(eqconstrs, poly[1] - poly[2] * R[idxs...])
-  end
-  return obj
-end
-
-function poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer; pJ=nothing, kwargs...)
+function poly_setup(us::UpperSetting, pin::AbstractArray, p, m::Integer; pJ=nothing, kwargs...)
   @expanduppersett us
   @polyvar M[1:dA, 1:oA, 1:iA]
   @polyvar N[1:dB, 1:oB, 1:iB]
@@ -109,14 +29,14 @@ function poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integ
   pvgv = [pin[x,y] * p[a, b, x, y] / pby[b, y]
            for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)]
   probs = full_probs(us, pin, p, pJ, pvgv, M, N, O, P)
-  objpolys, polypart = gauss_radau_objpolys(probs, m; kwargs...)
+  polypairs, polypart = gr_relent_polypairs(probs, m; kwargs...)
   idxit = itprod(1:m, 1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)
-  obj = apply_epigraph!(eqconstrs, objpolys, polypart, R, idxit) 
+  obj = apply_epigraph!(eqconstrs, polypairs, polypart, R, idxit) 
 
   return obj, ineqconstrs, eqconstrs, vars
 end
 
-function simple_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer, pJ; kwargs...)
+function simple_poly_setup(us::UpperSetting, pin::AbstractArray, p, m::Integer, pJ; kwargs...)
   @expanduppersett us
   @polyvar M[1:dA, 1:oA, 1:iA]
   @polyvar N[1:dB, 1:oB, 1:iB]
@@ -164,7 +84,7 @@ end
 
 # heuristic: minimise I(V1:V2|E) or H(V1|E) - H(V1|V2) first as a heuristic guess for ABE behaviour
 
-function CMI_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer; kwargs...)
+function CMI_poly_setup(us::UpperSetting, pin::AbstractArray, p, m::Integer; kwargs...)
   @expanduppersett us
   @polyvar M[1:dA, 1:oA, 1:iA]
   @polyvar N[1:dB, 1:oB, 1:iB]
@@ -178,25 +98,14 @@ function CMI_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::I
   pby = [sum(pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA))
           for (b, y) in itprod(1:oB, 1:iB)]
   probs = CMI_probs(us, pin, M, N, O, P)
-  objpolys, polypart = gauss_radau_objpolys(probs, m; kwargs...)
+  polypairs, polypart = gr_relent_polypairs(probs, m; kwargs...)
   idxit = itprod(1:m, 1:oA, 1:iA, 1:oB, 1:iB, 1:oE)
-  obj = apply_epigraph!(eqconstrs, objpolys, polypart, R, idxit) 
+  obj = apply_epigraph!(eqconstrs, polypairs, polypart, R, idxit) 
 
   return obj, ineqconstrs, eqconstrs, vars
 end
 
-function HAgE_symengine_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer; kwargs...)
-  @expanduppersett us
-  M = [symbols("M_{$(join(idxs, ';'))}") for idxs in itprod(1:dA, 1:oA, 1:iA)]
-  N = [symbols("N_{$(join(idxs, ';'))}") for idxs in itprod(1:dB, 1:oB, 1:iB)]
-  O = [symbols("O_{$(join(idxs, ';'))}") for idxs in itprod(1:dE, 1:oE)]
-  P = [symbols("P_{$(join(idxs, ';'))}") for idxs in itprod(1:dA, 1:dB, 1:dE)]
-  R = [symbols("R_{$(join(idxs, ';'))}") for idxs in itprod(1:m, 1:oA, 1:iA, 1:oE)]
-
-
-end
-
-function HAgE_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::Integer; kwargs...)
+function HAgE_poly_setup(us::UpperSetting, pin::AbstractArray, p, m::Integer; kwargs...)
   @expanduppersett us
   @polyvar M[1:dA, 1:oA, 1:iA]
   @polyvar N[1:dB, 1:oB, 1:iB]
@@ -210,9 +119,9 @@ function HAgE_poly_setup(us::UpperSetting, pin::AbstractArray, p::Behaviour, m::
   pby = [sum(pin[x, y] * p[a, b, x, y] for (a, x) in itprod(1:oA, 1:iA))
           for (b, y) in itprod(1:oB, 1:iB)]
   probs = HAgE_probs(us, pin, M, N, O, P)
-  objpolys, polypart = gauss_radau_objpolys(probs, m; kwargs...)
+  polypairs, polypart = gr_relent_polypairs(probs, m; kwargs...)
   idxit = itprod(1:m, 1:oA, 1:iA, 1:oE)
-  obj = apply_epigraph!(eqconstrs, objpolys, polypart, R, idxit) 
+  obj = apply_epigraph!(eqconstrs, polypairs, polypart, R, idxit) 
 
   return obj, ineqconstrs, eqconstrs, vars
 end
@@ -222,3 +131,91 @@ function cs_tssos_minimal(setupf, TS, params...)
   poly_prob = [obj, ineqconstrs..., eqconstrs...]
   opt, sol, data = cs_tssos_first(poly_prob, vars, "min", numeq=length(eqconstrs), TS=TS)
 end
+
+# Polynomial systems of equations for behaviours
+extract_params(measAs::AbstractVector{<:POVMMeasurement}, measBs::AbstractVector{<:POVMMeasurement}, state::AbstractVector) = extract_params(measAs, measBs, proj(state))
+function extract_params(measAs::AbstractVector{<:POVMMeasurement}, measBs::AbstractVector{<:POVMMeasurement}, state::AbstractMatrix)
+  @assert all(ispovm.(measAs))
+  @assert all(ispovm.(measBs))
+  iA = length(meass)
+  oA = maximum([meas.odim for meas in measAs])
+  iB = length(meass)
+  oB = maximum([meas.odim for meas in measAs])
+  d = first(size(state))
+
+  decompA = first(measAs).matrices |> first |> eigen
+  decompB = first(measBs).matrices |> first |> eigen
+
+end
+
+function generic_behav_square_setup(us::UpperSetting)
+  @expanduppersett us
+  @polyvar rM[1:dA, 1:oA, 1:iA]
+  @polyvar rN[1:dB, 1:oB, 1:iB]
+  @polyvar rP[1:dA, 1:dB]
+  @polyvar rp[1:oA, 1:oB, 1:iA, 1:iB]
+  vars = [rM..., rN..., rP...]
+  params = [rp...]
+
+  ineqconstrs = []
+  M = rM .^ 2
+  N = rN .^ 2
+  P = rP .^ 2
+  p = rp .^ 2
+
+  eqconstrs = [sum(P) - 1]
+  for kA in 1:dA, x in 1:iA
+    push!(eqconstrs, sum(M[kA, :, x]) - 1)
+  end
+  for kB in 1:dB, y in 1:iB
+    push!(eqconstrs, sum(N[kB, :, y]) - 1)
+  end
+  for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)
+    constr = 0
+    for (kA, kB) in itprod(1:dA, 1:dB)
+      constr += M[kA, a, x] * N[kB, b, y] * sum(P[kA, kB, :])
+    end
+    push!(eqconstrs, constr - p[a,b,x,y])
+  end
+
+  M0 = [1//sqrt(oA) for i in 1:length(M)]
+  N0 = [1//sqrt(oB) for i in 1:length(N)]
+  P0 = [1//sqrt(dA*dB) for i in 1:length(P)]
+  p0 = [1//sqrt(oA*oB) for i in 1:length(p)]
+
+  return ineqconstrs, eqconstrs, vars, params, [M0; N0; P0], p0
+end
+
+function generic_behav_setup(us::UpperSetting)
+  @expanduppersett us
+  @polyvar M[1:dA, 1:oA, 1:iA]
+  @polyvar N[1:dB, 1:oB, 1:iB]
+  @polyvar P[1:dA, 1:dB]
+  @polyvar p[1:oA, 1:oB, 1:iA, 1:iB]
+  vars = [M..., N..., P...]
+  params = [p...]
+  ineqconstrs = -1 .* vars
+
+  eqconstrs = [sum(P) - 1]
+  for kA in 1:dA, x in 1:iA
+    push!(eqconstrs, sum(M[kA, :, x]) - 1)
+  end
+  for kB in 1:dB, y in 1:iB
+    push!(eqconstrs, sum(N[kB, :, y]) - 1)
+  end
+  for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)
+    constr = 0
+    for (kA, kB) in itprod(1:dA, 1:dB)
+      constr += M[kA, a, x] * N[kB, b, y] * sum(P[kA, kB, :])
+    end
+    push!(eqconstrs, constr - p[a,b,x,y])
+  end
+
+  M0 = [1//(oA) for i in 1:length(M)]
+  N0 = [1//(oB) for i in 1:length(N)]
+  P0 = [1//(dA*dB) for i in 1:length(P)]
+  p0 = [1//(oA*oB) for i in 1:length(p)]
+
+  return ineqconstrs, eqconstrs, vars, params, [M0; N0; P0], p0
+end
+

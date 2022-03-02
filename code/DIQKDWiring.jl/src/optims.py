@@ -106,6 +106,10 @@ def SOLVEF(sdp):
     sdp.solve()
 
 
+def GMP_SOLVEF(sdp):
+    sdp.solve("sdpa", solverparameters={"executable": "~/Software/sdpa_gmp/sdpa-gmp-7.1.3/sdpa_gmp"})
+
+
 try:
     import mosek
 

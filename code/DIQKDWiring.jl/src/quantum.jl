@@ -34,12 +34,12 @@ end
 # Impt states
 const singlet_corrs = Correlators([0, 0],
                                  [0, 0, 0],
-                                 [1/sqrt(2) 1/sqrt(2) 1
+                                 [1/sqrt(2) 1/sqrt(2) 1;
                                   1/sqrt(2) -1/sqrt(2) 0])
 
 const bound_corrs = Correlators([0, 0],
                          [0, 0, 0],
-                         [1//2 1//2 1//2
+                         [1//2 1//2 1//2;
                           1//2 -1//2 1//2])
 
 const PR_corrs = Correlators([0, 0],
@@ -49,16 +49,27 @@ const PR_corrs = Correlators([0, 0],
 
 const mix_corrs = Correlators([0, 0],
                        [0, 0, 0],
-                       [0 0 0
+                       [0 0 0;
                         0 0 0])
 
 const LD_corrs = Correlators([1, 1],
                       [1, 1, 1],
-                      [1 1 1
+                      [1 1 1;
                        1 1 1])
 
 werner_corrs(v) = convexsum([v, 1-v], [singlet_corrs, mix_corrs])
 const v_L = 0.6829; const v_NL = 0.6964; const v_crit = 0.7263
+function observable(M::POVMMeasurement, vals::AbstractVector{<:Number})
+  @assert length(vals) == M.odim
+  return vals' * M.matrices
+end
+function POVMMeasurement(obsv::T) where {T <: AbstractMatrix{<:Number}}
+  decomp = eigen(obsv)
+  d = first(size(obsv))
+  ops = [proj(decomp.vectors[i, :]) for i in 1:d]
+  return POVMMeasurement(ops)
+end
+
 
 # %%
 # Koon Tong's model
@@ -66,8 +77,9 @@ const v_L = 0.6829; const v_NL = 0.6964; const v_crit = 0.7263
 psi(theta) = cos(theta) * kron(ket(1,2), ket(1,2)) + sin(theta) * kron(ket(2,2), ket(2,2))
 rho(theta) = proj(psi(theta))
 Mtld(mu) = cos(mu) * sigmas[3] + sin(mu) * sigmas[1]
-mus = [0, pi/2]
-nus = [pi/2, 0, -pi/2]
+singlet_theta = pi/4
+singlet_mus = [0, pi/2]
+singlet_nus = [pi/4, -pi/4, 0]
 
 function meas_corrs(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi])
   rhov = rho(theta)
