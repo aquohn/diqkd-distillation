@@ -916,13 +916,9 @@
 
     \subsection{Lower Bounds from Quasi-Relative Entropies}\label{sec:diqkd_qre}
 
-    A recent approach to lower bounding the secret key uses semidefinite programming to directly compute lower bounds on \(H{(\crv{A}|E)}_{\rho}\), among all states \(\rho\) compatible with a given behaviour, by characterising the conditional entropy as a relative entropy
-    \begin{equation}
-      H{(\crv{A}|E)}_{\rho} = -D(\rho_{\crv{A}E}||I_\crv{A} \otimes \rho_{E}).
-    \end{equation}
-    Although it does not construct an explicit protocol or implementation, it is still a useful theoretical tool for identifying lower bounds.
+    A recent approach to lower bounding the secret key uses semidefinite programming to directly compute lower bounds on \(H{(\crv{A}|E)}_{\rho}\), among all states \(\rho\) compatible with a given behaviour, by directly computing (asymptotically) the conditional entropy \(H{(\crv{A}|E)}_{\rho}\). Although this technique does not construct an explicit protocol or implementation, it is still a useful theoretical tool for identifying lower bounds.
 
-    As the authors wanted to develop highly general tools that can be used to calculate a variety of quantities and that would work even for infinite-dimensional cases, they made use of the operator algebra approach to quantum mechanics and spectral theory, which are generally not covered in undergraduate treatments of quantum mechanics and quantum information. Some of these technicalities have been reviewed in \Cref{sec:qretech}, but for this section, we write the expressions in finite-dimensional form, where all spectra are discrete.
+    The full derivation of this result involves the use of the operator algebra approach to quantum mechanics and spectral theory, which is generally not covered in undergraduate treatments of quantum mechanics and quantum information. An important practical result from their general approach is the extension to bounded infinite-dimensional operators. This has been reviewed (using more elementary methods, without the generality of operator algebras) in \Cref{sec:qretech}, but for this section, we write the expressions in finite-dimensional form, where all spectra are discrete.
 
     The set of \emph{bounded operators} \(\mathcal{B}(\Hs)\) on the Hilbert space \(\Hs\) is the subset of \(\mathcal{L}(\Hs)\), the set of all linear operators on \(\Hs\), such that the \emph{operator norm} of \(X \in \mathcal{L}(\Hs)\)
       \[ \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}} \]
@@ -950,7 +946,7 @@
                         &= -\frac{1}{\ln 2} \Tr\left[ \sum_{x,y} y \underbrace{\ln\left(\frac{x}{y}\right)}_{\geq r_m(x/y)} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} \right] \\
                         &\leq -\frac{1}{\ln 2} \Tr\left[ \sum_{x,y} y \frac{x-y}{t_i(x-y)+y} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} \right],
       \end{align}
-      where \(x\) and \(y\) are eigenvalues of \(\sigma\) and \(\rho\), and \(\Pi^{(x)}_{\sigma}\) and \(\Pi^{(y)}_{\rho}\) are their respective eigenprojectors, and the direction is flipped in the inequality since \(y\) is always positive, and so the logarithm is always being multiplied by a negative number.
+      where \(x\) and \(y\) are eigenvalues of \(\sigma\) and \(\rho\), and \(\Pi^{(x)}_{\sigma}\) and \(\Pi^{(y)}_{\rho}\) are their respective eigenprojectors, and the inequality direction is flipped since \(y\) is always positive, and so the logarithm is always being multiplied by a negative number.
 
       The key insight of this method is in observing that this sum can be commuted with the sum over the eigenvalues to obtain the following inequality, which converges to equality as \(m\to\infty\)
       \begin{equation}
@@ -962,7 +958,7 @@
       \end{equation}
       This variational expression is of the form \(\Tr[\rho P]\), where \(P\) is a polynomial of operators. As will be seen later, optimisations of this form can be efficiently approximated (with some technical caveats).
 
-      If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R^+\), then the \(i=m\) optimisation can be solved analytically. We additionally collect the terms that are not multiplied with the optimisation variable \(Z\), removing the \(\Tr[\rho]\) terms from the optimisation and yielding the constant
+      If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R^+\), then the \(i=m\) optimisation can be bounded analytically. We additionally collect the terms that are not multiplied with the optimisation variable \(Z\), removing the \(\Tr[\rho]\) terms from the optimisation and yielding the constant
       \begin{equation}
         c_m = \frac{1}{m^2} \frac{\lambda \Tr[\rho]}{\ln 2} - \sum_{i=1}^m \frac{w_i \Tr[\rho]}{t_i \ln 2}.
       \end{equation}
@@ -1468,119 +1464,82 @@
 
     It is possible to perform this optimisation directly using a nonlinear constrained optimisation program, such as MATLAB's \verb`fmincon`. However, such an optimisation would generally only be able to find local minima, which would still be valid upper bounds but may be very loose. Although we are unable to use the NPA hierarchy of relaxations, the equivalent of the NPA hierarchy for commutative variables, the Lasserre hierarchy, has been used and studied extensively for the purpose of approximating the global minima of polynomials (TODO cite). Further, there is a related hierarchy of upper bounds on global minima from semidefinite programs (TODO cite). Therefore, if we are able to express these optimisations as polynomial optimisation problems, we could apply these techniques to tighten the achievable bounds. As it turns out, the variational approximation to the logarithm used in~\cite{BFF_QRE} allows us to transform all logarithms in the expression into multivariate polynomials, bringing us very close to this objective. Even if Lasserre-hierarchy based approaches turn out to be infeasible, the polynomial approximation may still be easier to optimise than the original formulation.
 
-    We begin by formulating a variational expression that is an upper bound to \(\splitkey{\crv{V}_1, \crv{V}_2}{\crv{E}}\). It is known that, for classical random variables \(\{\crv{X}, \crv{Y}, \crv{Z}\}\) with joint pmf \(P_{\crv{XYZ}}\),
+    It is known that, for classical random variables \(\{\crv{X}, \crv{Y}, \crv{Z}\}\) with joint pmf \(P_{\crv{XYZ}}\),
     \[ I(\crv{X}:\crv{Y}|\crv{Z}) = D\left(P_{\crv{XYZ}}||P_{\crv{X}|\crv{Z}} P_{\crv{Y}|\crv{Z}} P_{\crv{Z}}\right). \]
-    Rewriting \(\splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}}\) in terms of relative entropies and using \Cref{eqn:re_from_qre} and \Cref{eqn:qre_var}, we obtain the following variational expression, a convergent upper bound as \(m\to\infty\):
-    \begin{align}
-      \splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}} &=  D(\rho_{\crv{V}_1\crv{V}_2\crv{J}}||\rho'_{\crv{V}_1\crv{V}_2\crv{J}})
-      + D(\rho_{\crv{V}_1\crv{V}_2\crv{JE}}||\rho''_{\crv{V}_1\crv{V}_2\crv{JE}}) \\
-                                              &\leq \begin{aligned}
-    - & \sum_{i=1}^m  \frac{w_i}{t_i\ln{2}}  \inf_{Z} \left\{ \begin{gathered}
-    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}}]
-    + \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z + Z^{\dagger})] \\
-    + (1-t_i) \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z^{\dagger}Z)] 
-    + t_i \Tr[\rho'_{\crv{V}_1\crv{V}_2\crv{J}} (ZZ^{\dagger})]
-    \end{gathered} \right\} \\
-    - & \sum_{i=1}^m \frac{w_i}{t_i\ln{2}} \inf_Z \left\{ \begin{gathered}
-    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}}]
-    + \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z + Z^{\dagger})] \\
-    + (1-t_i) \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z^{\dagger}Z)]
-    + t_i \Tr[\rho''_{\crv{V}_1\crv{V}_2\crv{JE}} (ZZ^{\dagger})]
-    \end{gathered} \right\}
-    \end{aligned},
-    \end{align}
-    where \(\rho'_{\crv{V}_1\crv{V}_2\crv{J}}\) and \(\rho''_{\crv{V}_1\crv{V}_2\crv{JE}}\) are the classical states corresponding to the classical distributions \(P_{\crv{V_1|V_2}} P_{\crv{V}_2|\crv{J}} P_{\crv{J}}\) and \(P_{\crv{V_1V_2|E}} P_{\crv{J|E}} P_{\crv{E}}\) respectively.
+    Rewriting \(\splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}}\) in terms of relative entropies, we obtain
+    \begin{gather}
+      \splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}} =  D(P_{\crv{V}_1\crv{V}_2\crv{J}}||P'_{\crv{V}_1\crv{V}_2\crv{J}})
+      + D(P_{\crv{V}_1\crv{V}_2\crv{JE}}||P''_{\crv{V}_1\crv{V}_2\crv{JE}}) \\
+                                              = \sum_{v_1v_2j} P_{\crv{V}_1\crv{V}_2\crv{J}}(v_1v_2j) \log \frac{P_{\crv{V}_1\crv{V}_2\crv{J}}(v_1v_2j)}{P'_{\crv{V}_1\crv{V}_2\crv{J}}(v_1v_2j)} + \sum_{v_1v_2je} P_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je) \log \frac{P_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je)}{P''_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je)},
+    \end{gather}
+    where \(P'_{\crv{V}_1\crv{V}_2\crv{J}} = P_{\crv{V_1|V_2}} P_{\crv{V}_2|\crv{J}} P_{\crv{J}}\) and \(P''_{\crv{V}_1\crv{V}_2\crv{JE}} = P_{\crv{V_1V_2|E}} P_{\crv{J|E}} P_{\crv{E}}\).
 
-    We can express these classical states in terms of the quantum state \(\rho_{ABE}\):
+    Now, since these are logarithms of scalar values rather than operators, we can apply the Gauss-Radau approximation directly. Indeed, as mentioned in~\cite[Remark 2.10]{BFF_QRE}, the Gauss-Radau nodes and weights \({\{t'_i, w'_i\}}_{i=1}^m\) such that \(t'_1 = 0\), in contrast to \(t_m = 1\), can be used to provide upper bounds for the logarithms, and therefore the relative entropies. Writing \(p_1(x)\) and \(p_2(x)\) for two generic pmfs on an alphabet \(\{x\}\), we have
     \begin{align}
-      \rho_{\crv{V}_1\crv{V}_2\crv{J}} &= \sum_{v_1 v_2 j} P_{\crv{V_1V_2J}}(v_1v_2j) \proj{v_1v_2j} \\
-                                         &= \sum_{v_1 v_2 j e}  P_{\crv{V_1V_2E}}(v_1v_2e) P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \proj{v_1v_2j} \\
-                                         &= \sum_{v_1 v_2 j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \proj{v_1v_2j} \\
-      \rho'_{\crv{V}_1\crv{V}_2\crv{J}} &= \sum_{v_1 v_2 j} P_{\crv{V_1|V_2}}(v_1|v_2) P_{\crv{V}_2|\crv{J}}(v_2|j) P_{\crv{J}}(j) \proj{v_1v_2j} \\
-                                         &= \sum_{v_1 v_2 j} P_{\crv{V_1|V_2}}(v_1|v_2) P_{\crv{V_2J}}(v_2j) \proj{v_1v_2j} \\
-                                         &= \sum_{v_1 v_2 j v_1' e} P_{\crv{V_1|V_2}}(v_1|v_2) \Tr\left[\rho_{ABE} \left(M_{v_1'} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1'v_2e) \proj{v_1v_2j} \\
-      \rho_{\crv{V}_1\crv{V}_2\crv{JE}} &= \sum_{v_1 v_2 j e} P_{\crv{V_1V_2JE}}(v_1v_2je) \proj{v_1v_2je} \\
-                                         &= \sum_{v_1 v_2 j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \proj{v_1v_2je} \\
-      \rho''_{\crv{V}_1\crv{V}_2\crv{JE}} &= \sum_{v_1 v_2 j e} P_{\crv{V_1V_2|E}}(v_1v_2|e) P_{\crv{J|E}}(j|e) P_{\crv{E}}(e) \proj{v_1v_2je} \\
-                                         &= \sum_{v_1 v_2 j v_1' v_2' e} P_{\crv{V_1V_2E}}(v_1v_2e) P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e) P_{\crv{V_1V_2}}(v_1'v_2')\proj{v_1v_2je} \\
-                                         &= \sum_{v_1 v_2 v_1' v_2' j e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e) P_{\crv{V_1V_2}}(v_1'v_2')\proj{v_1v_2je},
+      D(p_1||p_2) &= \sum_x p_1(x) \log \frac{p_1(x)}{p_2(x)} \\
+                  &\leq \sum_x p_1(x) \sum_{i=1}^m \frac{w'_i}{\ln 2} \frac{p_1(x)/p_2(x) - 1}{t'_i (p_1(x)/p_2(x)-1) + 1} \\
+                  &= \sum_x \sum_{i=1}^m \frac{w'_i}{\ln 2} \frac{p_1(x)(p_1(x) - p_2(x))}{t'_i (p_1(x)- p_2(x)) + p_2(x)}.
     \end{align}
-    where \(O_e\) is Eve's measurement operator for outcome \(e\), \(\crv{V}_1 = (\crv{A,X})\) and \(\crv{V}_2 = (\crv{B,Y})\). In this most general setting, we assume that Alice and Bob do not announce their measurement settings, and Eve's measurement operator is hence independent of \(x\) and \(y\). 
+    However, we can also derive another approximation that may be simpler to optimise over, either through representing the pmfs as operators, as per \Cref{sec:logratbound}, or through simple manipulation of the approximation using the lower bound Gauss-Radau nodes and weights:
+    \begin{align}
+      p_1(p_2-p_1) &= p_1p_2 - p_1^2  = -\frac{1}{t} p_1^2 - \frac{t-1}{t} p_1^2 + \frac{t}{t} p_1p_2 \\
+                   &= -\frac{p_1^2}{t} + \frac{p_1((1-t)p_1+tp_2)}{t}  \\
+      \therefore D(p_1||p_2) &= -\sum_x p_1(x) \log \frac{p_2(x)}{p_1(x)} \\
+                  &\leq -\sum_x p_1(x) \sum_{i=1}^m \frac{w_i}{\ln 2} \frac{p_2(x)/p_1(x) - 1}{t_i (p_2(x)/p_1(x)-1) + 1} \\
+                  &= -\sum_x \sum_{i=1}^m \frac{w_i}{\ln 2} \frac{p_1(x) (p_2(x) - p_1(x))}{t_i p_2(x) - t_i p_1(x) + p_1(x)} \\
+                  &= -\sum_x \sum_{i=1}^m \frac{w_i}{\ln 2} \frac{-{p_1(x)}^2 + p_1(x)(t_i p_2(x) + (1-t_i) p_1(x))}{t_i (t_i p_2(x) + (1-t_i) p_1(x)) } \\
+                  &= -\sum_x \sum_{i=1}^m \frac{w_i}{t_i \ln 2}\left( \frac{-{p_1(x)}^2}{t_i p_2(x) + (1-t_i) p_1(x)} + p_1(x) \right)\\
+                  &= -\sum_{i=1}^m \frac{w_i}{t_i \ln 2}\left( \sum_x \frac{-{p_1(x)}^2}{t_i p_2(x) + (1-t_i) p_1(x)} + p_1(x) \right)~\label{eqn:logratbound},
+    \end{align}
+    where, of course, \(\sum_x p_1(x) = 1\) if \(p_1\) is normalised. This simplifies the numerator of each fraction considerably. 
 
-    However, observe that we require the full joint distribution \(P_{\crv{V_1V_2}}(v_1v_2) = p_{\rm in}(x,y)p(ab|xy)\). While \(p(ab|xy)\) is given, we cannot include the distribution \(p_{\rm in}(x,y)\) as a variable to be minimised, since, to provide a valid upper bound, Alice and Bob must be allowed to choose the best possible \(p_{\rm in}(x,y)\). Therefore, without involving ourselves in the complications of bilevel optimisation, we can only fix a distribution \(p_{\rm in}(x,y)\) and claim that our upper bound is valid for protocols and experiments using that distribution. Fortunately, this simplifies the optimisation somewhat by fixing the joint distribution \(P_{\crv{V_1V_2}}(v_1v_2)\), allowing conditional and marginal distributions to be easily calculated. The conditional distributions would otherwise have to be defined as complicated, non-polynomial terms, or constrained to the correct value using additional equality constraints.
+    However, both of these approximations give us rational objective functions. Nonetheless, we can use the methods of polynomial optimisation if we reformulate the problem, introducing a new variable \(R\) for each rational term \(P/Q\), with the polynomial constraint that \(P - QR = 0\). This is referred to as the \emph{epigraph approach} in TODO cite.
+
+    The pmfs are related to the quantum states and measurements by
+    \begin{align}
+      P_{\crv{V_1V_2J}}(v_1v_2j) &= \sum_{e}  P_{\crv{V_1V_2E}}(v_1v_2e) P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\
+                                 &= \sum_{e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\
+      P'_{\crv{V}_1\crv{V}_2\crv{J}}(v_1v_2j) &= P_{\crv{V_1|V_2}}(v_1|v_2) P_{\crv{V}_2|\crv{J}}(v_2|j) P_{\crv{J}}(j) \\
+                                     &= P_{\crv{V_1|V_2}}(v_1|v_2) P_{\crv{V_2J}}(v_2j) \\
+                                     &= \sum_{v_1' e} P_{\crv{V_1|V_2}}(v_1|v_2) \Tr\left[P_{ABE} \left(M_{v_1'} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1'v_2e) \\
+      P_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je) &= P_{\crv{V_1V_2JE}}(v_1v_2je) \\
+                                         &= \Tr\left[P_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\
+      P''_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je) &= P_{\crv{V_1V_2|E}}(v_1v_2|e) P_{\crv{J|E}}(j|e) P_{\crv{E}}(e) \\
+                                         &= \sum_{v_1' v_2'} P_{\crv{V_1V_2E}}(v_1v_2e) P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e) P_{\crv{V_1V_2}}(v_1'v_2') \\
+                                         &= \sum_{v_1' v_2'} \Tr\left[P_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e) P_{\crv{V_1V_2}}(v_1'v_2'),
+    \end{align}
+    where \(O_e\) is Eve's measurement operator for outcome \(e\), \(\crv{V}_1 = (\crv{A,X})\) and \(\crv{V}_2 = (\crv{B,Y})\). In this most general setting, we assume that Alice and Bob do not announce their measurement settings, and Eve's measurement operator is hence independent of \(x\) and \(y\).
+
+    However, observe that we require the full joint distribution \(P_{\crv{V_1V_2}}(v_1v_2) = p_{\rm in}(x,y)p(ab|xy)\). While \(p(ab|xy)\) is given, we cannot include the distribution \(p_{\rm in}(x,y)\) as a variable to be minimised, since, to provide a valid upper bound, Alice and Bob must be allowed to choose the best possible \(p_{\rm in}(x,y)\) (although we note that, unless their inputs are independent, they must have some pre-existing shared secret). Therefore, without involving ourselves in the complications of bilevel optimisation, we can only fix a distribution \(p_{\rm in}(x,y)\) and claim that our upper bound is valid for protocols and experiments using that distribution. Fortunately, this simplifies the optimisation somewhat by fixing the joint distribution \(P_{\crv{V_1V_2}}(v_1v_2)\), allowing conditional and marginal distributions to be easily calculated.
 
     Although we cannot bound the cardinality \(o_E\) of \(\crv{E}\), we will have to fix it to some finite number in order to specify the number of measurement operators \(O_e\). This will still provide a valid upper bound, but we lose some tightness. The cardinality \(o_{\crv{J}}\) of \(\crv{J}\) can be upper bounded by the product of the cardinalities of \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\), as explained in TODO cite, and the conditional distribution \(P_{\crv{J|V_1V_2E}}\) can then be parametrised by \(o_{\crv{J}} i_A o_A i_B o_B o_E = o_{\crv{J}}^2\) probabilities, with the corresponding normalisation conditions.
 
-    Now, since \(Z\) is defined on the finite-dimensional Hilbert spaces \(\crv{V}_1\crv{V}_2\crv{J}\) or \(\crv{V}_1\crv{V}_2\crv{JE}\), \(Z = \sum_{i,i'} z_{i;i'} \ket{i}\bra{i'}\), where \(i\) and \(i'\) are indices of the classical basis states in those Hilbert spaces and \(z_{i;i'} \in \C\). Further, since the states \(\rho\) are classical, it suffices to consider the action of \(Z\) on the projectors. Therefore, representing the probability of outcome \(i\) with \(p_i\), we can expand the traces with \(Z\) generically as
-  \begin{align}
-    \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (Z + Z^{\dagger})\right] &= 
-    \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} \ket{i}\bra{i'} + {z_{i';i}^*} \ket{i}\bra{i'} \right] \\
-                                                            &= 
-    \sum_i p_i z_{i;i} + {z_{i;i}^*} \\
-    \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (Z^{\dagger}Z)\right] &=
-    \Tr\left[ \sum_i p_i \sum_{i'} {z_{i;i'}^*} z_{i';i} \ket{i}\bra{i'} \right] \\
-                                                            &\geq 
-    \sum_i p_i \abs{z_{i;i}}^2 \\
-    \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (ZZ^{\dagger})\right] &= 
-    \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} {z_{i';i}^*} \ket{i}\bra{i'} \right] \\
-                                                            &\geq 
-    \sum_i p_i \abs{z_{i;i}}^2
-  \end{align}
-  where the lower bounds hold because \(\abs{z_{i;i'}}^2 \geq 0\), and since terms with \(i \neq i'\) do not occur in the expansion of the trace with \(Z + Z^{\dagger}\), they will be set to 0 in the minimisation. Further, since \(z_{i;i}\) only occurs as \(\abs{z_{i;i}}^2\) or \(z_{i;i} + {z_{i;i}^*}\), if \(\abs{z_{i;i}}^2\) is restricted to a fixed value \(w\), \(z_{i;i} + {z_{i;i}^*}\) is minimised by setting \(z_{i;i}\) to the real number \(-w\). We can therefore consider each \(z_i \coloneqq \Tr[\ket{i}\bra{i} Z] = z_{i;i}\) as a real, negative, scalar optimisation variable, yielding \(o_{\crv{J}} i_A o_A i_B o_B\) variables for \(I(\crv{V}_1 : \crv{V}_2|\crv{J})\) and \(o_{\crv{J}} i_A o_A i_B o_B o_E\) for \(I(\crv{V}_1\crv{V}_2 : \crv{J}|\crv{E})\).
-
-    In fact, since \(z_i\) is a scalar, we can compute the optimal value analytically if we hold the other values fixed. The optimisation problems are of the form
-    \begin{equation}
-      \inf_z f(p_1, p_2, z) = \inf_z p_1(2z) + (1-t) p_1 z^2 + t p_2 z^2,
-    \end{equation}
-    so if the infimum is attained at \(z=z^{\star}\), we have
-    \begin{align}
-      \left. \diff{f}{z} \right|_{z=z^{\star}} &= 0 \\
-      2p_1 + 2(1-t) p_1 z^{\star} + 2t p_2 z^{\star} &= 0 \\
-      z^{\star} &= -\frac{p_1}{(1-t)p_1 + tp_2} \\
-      \therefore \inf_z f(p_1, p_2, z) &= -\frac{2p_1^2}{(1-t)p_1 + tp_2} + \frac{p_1^2 \left( (1-t)p_1 + tp_2 \right)}{{\left((1-t)p_1 + tp_2\right)}^2} \\
-                                       &= -\frac{p_1^2}{(1-t)p_1 + tp_2}.
-    \end{align}
-    Although this eliminates all the optimisation variables \(z\), the resulting expression is no longer polynomial. However, this difficulty can be eliminated by reformulating the problem, introducing a new variable \(R\) for each rational term \(P/Q\), with the polynomial constraint that \(P - QR = 0\). This is referred to as the \emph{epigraph approach} in TODO cite, and still allows us to perform a polynomial optimisation.
-
-
-
-    In order to bound \(\abs{z_i} \leq \norm{Z}\), we use \Cref{eqn:qre_bound}, which requires us to identify a positive constants \(\lambda'\), \(\lambda''\) such that
-      \[ \rho_{\crv{V}_1\crv{V}_2\crv{J}} \leq \lambda' \rho'_{\crv{V}_1\crv{V}_2\crv{J}} \qquad \rho_{\crv{V}_1\crv{V}_2\crv{JE}} \leq \lambda'' \rho''_{\crv{V}_1\crv{V}_2\crv{JE}}. \]
-    Comparing the diagonal terms and using \(p(\cdot)\) generically instead of the proper symbols for the pmfs, we obtain the following computable upper bounds:
-    \begin{align}
-      \sum_{e} p(v_1v_2e) p(j|v_1v_2e) &\leq \lambda' \sum_{v_1' e} p(v_1|v_2) p(v_1'v_2e) p(j|v_1'v_2e) \\
-      \Leftarrow \lambda' &\leq \max_{v_1,v_2} \frac{1}{p(v_1|v_2)} \\
-      p(v_1v_2e) p(j|v_1v_2e) &\leq \lambda'' \sum_{v_1' v_2'} p(v_1v_2e) p(j|v_1'v_2'e) p(v_1'v_2') \\
-      \Leftarrow \lambda'' &\leq \max_{v_1,v_2} \frac{1}{p(v_1 v_2)}.
-    \end{align}
-    Tightening these bounds further might help make the optimisation more efficient.
-
     Next, let us parametrise the achievable joint distributions for Alice, Bob and Eve. We first observe that, for Hermitian operators \(G\) and \(H\) on the same Hilbert space of dimension \(d\), we can diagonalise them as
-    \[ G = \sum_g \gamma_g \ket{g}\bra{g} \qquad H = \sum_h \mu_h \ket{h}\bra{h}, \]
+    \[ G = \sum_g \gamma^{(g)} \ket{g}\bra{g} \qquad H = \sum_h \mu^{(h)} \ket{h}\bra{h}, \]
     and relating their eigenbases, we obtain
     \begin{align*}
-      \ket{h} &= \sum_g h_g \ket{g} \Rightarrow H = \sum_h \mu_h \left(\sum_{gg'} h_g h_{g'}^* \ket{g}\bra{g'}\right) \\
-      \Tr[GH] &= \Tr\left[ \sum_h \mu_h \left( \sum_{gg'} \gamma_g h_g h_{g'}^* \ket{g}\bra{g'} \right) \right] \\
-      &= \sum_{hg} \mu_h \gamma_g \abs{h_g}^2.
+      \ket{h} &= \sum_g h^{(g)} \ket{g} \Rightarrow H = \sum_h \mu^{(h)} \left(\sum_{gg'} h^{(g)} {h^{(g')}}^* \ket{g}\bra{g'}\right) \\
+      \Tr[GH] &= \Tr\left[ \sum_h \mu^{(h)} \left( \sum_{gg'} \gamma^{(g)} h^{(g)} {h^{(g')}}^* \ket{g}\bra{g'} \right) \right] \\
+      &= \sum_{hg} \mu^{(h)} \gamma^{(g)} \abs{h^{(g)}}^2.
     \end{align*}
     However, if we consider instead the operator \(\tilde{H} = \sum_{g'} \nu_{g'} \ket{g'}\bra{g'}\), with \(\nu_{g'} = \sum_h \abs{g'_h}^2 \mu_h\), we obtain
     \begin{align*}
-      \Tr[G\tilde{H}] &= \Tr\left[ \sum_{g} \gamma_{g} \ket{g}\bra{g} \left( \sum_g \nu_{g'} \ket{g'}\bra{g'} \right) \right] \\
-      &= \Tr\left[ \sum_{g} \gamma_{g}\nu_{g}\ket{g}\bra{g} \right] = \sum_{g} \gamma_{g}\nu_{g} \\
-      &= \sum_{g} \left(\sum_{h} \mu_h \abs{h_g}^2\right) \gamma_{g} = \Tr[GH]
+      \Tr[G\tilde{H}] &= \Tr\left[ \sum_{g} \gamma^{(g)} \ket{g}\bra{g} \left( \sum_g \nu^{(g')} \ket{g'}\bra{g'} \right) \right] \\
+      &= \Tr\left[ \sum_{g} \gamma^{(g)}\nu^{(g)}\ket{g}\bra{g} \right] = \sum_{g} \gamma^{(g)}\nu^{(g)} \\
+      &= \sum_{g} \gamma^{(g)} \left(\sum_{h} \mu^{(h)} \abs{h^{(g)}}^2\right) = \Tr[GH]
     \end{align*}
     which means the trace is fully parametrised by the \(2d\) real numbers \({\{\gamma_g, \nu_{g}\}}_{g}\).
 
-    Now, consider a POVM \(\{H_i\}\), which consists of positive semidefinite operators such that
+    Now, consider a POVM \(\{H_j\}\), which consists of \(o\) positive semidefinite operators such that
     \begin{gather*}
-      \sum_i H_i = I \\
-      \sum_i \sum_{h^{(i)}} \mu_{h^{(i)}} \ket{h^{(i)}}\bra{h^{(i)}} = \sum_g \ket{g}\bra{g} \\
-      \sum_i \sum_{h^{(i)}} \mu_{h^{(i)}} \left(\sum_{gg'} h^{(i)}_g {h^{(i)}_{g'}}^* \ket{g}\bra{g'}\right) = \sum_g \ket{g}\bra{g} \\
-      \sum_{g} \sum_i \underbrace{\sum_{h^{(i)}} \mu_{h^{(i)}} \abs{h^{(i)}_g}^2}_{\eqqcolon \nu_g^{(i)} \in \ccintv{0}{1}} \ket{g}\bra{g} + \sum_{g \neq g'} \underbrace{ \sum_i \sum_{h^{(i)}} \mu_{h^{(i)}} h^{(i)}_g {h^{(i)}_{g'}}^* }_{=0} \ket{g}\bra{g'} = \sum_g \ket{g}\bra{g}.
+      \sum_j H_j = I \\
+      \sum_j \sum_{h_j} \mu_{h_j} \ket{h_j}\bra{h_j} = \sum_g \ket{g}\bra{g} \\
+      \sum_j \sum_{h_j} \mu_{h_j} \left(\sum_{gg'} h_j^{(g)} {h_j^{(g')}}^* \ket{g}\bra{g'}\right) = \sum_g \ket{g}\bra{g} \\
+      \sum_{g} \sum_j \underbrace{\sum_{h_j} \mu_{h_j} \abs{h_j^{(g)}}^2}_{\eqqcolon \nu^{(g)}_j \in \ccintv{0}{1}} \ket{g}\bra{g} + \sum_{g \neq g'} \underbrace{ \sum_j \sum_{h_j} \mu_{h_j} h_j^{(g)} {h_j^{(g')}}^* }_{=0} \ket{g}\bra{g'} = \sum_g \ket{g}\bra{g}.
     \end{gather*}
-    Clearly, the coefficients of the operators \(\ket{g}\bra{g'}\) with \(g \neq g'\) must each sum to 0, since the operators do not appear on the left hand side, and we must have \(\sum_i \nu_g^{(i)} = 1\) for all \(g\).
+    Clearly, the coefficients of the operators \(\ket{g}\bra{g'}\) with \(g \neq g'\) must each sum to 0, since the operators do not appear on the left hand side, and we must have \(\sum_j \nu^{(g)}_j = 1\) for all \(g\).
 
-    If \(G\) is a density matrix, then \(\Tr[GH_i]\) is the probability of outcome \(i\) when measuring \(G\) using the POVM \(\{H_i\}\). If we are only concerned with the probability distribution over the outcomes \(i\), then as illustrated above, each probability is paramterised fully by \({\{\gamma_g, \nu_{g}^{(i)}\}}_{g}\). Indeed, since \(\{\gamma_g\}\) is the same for all the probabilities, the overall distribution is fully parametrised by the \((o+1)d\) real parameters \({\{\gamma_g, \nu_{g}^{(i)}\}}_{i,g}\). However, since the POVM conditions are satisfied by \(\{\tilde{H}_i \coloneqq \sum_g \nu_g^{(i)} \ket{g}\bra{g}\}\), which gives the same probability distribution, without loss of generality we can restrict ourselves to only POVM operators of this form.
+    If \(G\) is a density matrix, then \(\Tr[GH_j]\) is the probability of outcome \(i\) when measuring \(G\) using the POVM \(\{H_j\}\). If we are only concerned with the probability distribution over the outcomes \(j\), then as illustrated above, each probability is paramterised fully by \({\{\gamma^{(g)}, \nu^{(g)}_j\}}_{g}\). Indeed, since \(\{\gamma^{(g)}\}\) is the same for all the probabilities, the overall distribution across \(i\) POVMs of \(o\) outcomes each is fully parametrised by the \((io+1)d\) real parameters \({\{\gamma^{(g)}, {\{\nu^{(g)}_j\}}_j \}}_{g}\). However, since the POVM conditions are satisfied by \(\{\tilde{H}_j \coloneqq \sum_g \nu^{(g)}_j \ket{g}\bra{g}\}\), which gives the same probability distribution, without loss of generality we can restrict ourselves to only POVM operators of this form.
 
     We now apply this characterisation in order to obtain an expression for \(\splitkey{\crv{V}_1, \crv{V}_2}{E}\). We switch back to the explicit notation \(\{a, b, x, y\}\) rather than \(v_1\) and \(v_2\). We first express \(\rho_{ABE}\) in its eigenbasis:
     \begin{equation}
@@ -1792,13 +1751,13 @@
 
       The canonical definition of the Gauss-Radau quadrature is an approximation for
       \[ \int_{-1}^{1} f(x) \dif{x}, \]
-      with the fixed point at \(x = -1\). In order to convert this quadrature to an approximation to an integral over \(\ccintv{a}{b}\), we need to perform a change of variables. To generalise our expressions, let us consider the nodes and weights for an integral over \(\ccintv{c}{d}\). We define
+      with the fixed point at \(x = -1\). In order to convert this quadrature to an approximation to an integral over \(\ccintv{a}{b}\), we need to perform a change of variables. To generalise our expressions, let us start from the nodes and weights for an integral over \(\ccintv{c}{d}\), instead of \(\ccintv{-1}{1}\), where either end can be fixed. We define
       \[ y(x) = k(x - c)\frac{b - a}{d - c} + v, \]
-      where \(k = -1, v = b\) if we want to flip the fixed point, and \(k = 1, v = a\) otherwise, and both settings can be verified to map \(\ccintv{c}{d}\) to \(\ccintv{a}{b}\). Then,
+      where \(k = -1, v = b\) if we want to flip the fixed point, and \(k = 1, v = a\) otherwise, and both settings can be verified to map \(x\in\ccintv{c}{d}\) to \(y\in\ccintv{a}{b}\). Then,
       \begin{align*}
         \int_{c}^{d} f(x) \dif{x} &= \int_{a}^{b} f(x(y)) \abs{\diff{x}{y}} \dif{y} \\
         \sum_{i=1}^m w_i f(t_i) &\approx \int_{a}^{b} f(x(y)) \abs{\diff{x}{y}} \dif{y} \\
-        \sum_{i=1}^m w_i \abs{\diff{y}{x}} f(t_i) &\approx \int_{a}^{b} \underbrace{f(x(y))}_{\coloneqq g(y)} \dif{y} \\
+        \sum_{i=1}^m w_i \abs{\diff{y}{x}} f(t_i) &\approx \int_{a}^{b} \underbrace{f(x(y))}_{\eqqcolon g(y)} \dif{y} \\
         \sum_{i=1}^m w_i \abs{\diff{y}{x}} g(y(t_i)) &\approx \int_{a}^{b} g(y) \dif{y}
       \end{align*}
       and therefore we transform \(t_i \mapsto y(t_i), w_i \mapsto \abs{\diff{y}{x}} w_i\).
@@ -1807,8 +1766,8 @@
 
       For an operator \(A \in \mathcal{L}(\Hs)\), its \emph{spectrum} \(\sigma(A)\) is the subset of \(\C\) such that, for all \(\lambda \in \sigma(A)\), \(A - \lambda I\) does not have a \emph{bounded inverse}: there does not exist an operator \(S\) such that \(S\left( A - \lambda I \right) = \left( A - \lambda I \right)S =  I\) and \(S \in \mathcal{B}(\Hs)\).
 
-      Our objective is to establish a \emph{functional calculus} that will allow us to evaluate a function  \(f\) with scalar output on operators. In the finite-dimensional case this is straightforward for normal operators (obeying \(AA^{\dagger} = A^{\dagger}A\)): for an operator \(A\) with eigenvalues \(\{\lambda_i\}\) and corresponding eigenprojectors \(\{\Pi_{\lambda_i}\}\),
-      \[ A = \sum_i \lambda_i \Pi_{\lambda_i} \Rightarrow f(A) = \sum_i f(\lambda_{\lambda_i}) \Pi_i \dif{t}, \]
+      Our objective is to establish a \emph{functional calculus} that will allow us to evaluate a bivariate function  \(f\) with scalar output on operator arguments. In the finite-dimensional case this is straightforward for normal operators (obeying \(AA^{\dagger} = A^{\dagger}A\)): for an operator \(A\) with eigenvalues \(\{\lambda_i\}\) and corresponding eigenprojectors \(\{\Pi_{\lambda_i}\}\),
+      \[ A = \sum_i \lambda_i \Pi_{\lambda_i} \Rightarrow f(A) = \sum_i f(\lambda_{i}) \Pi_{\lambda{i}}, \]
       by the \emph{spectral theorem}.
 
       However, the approach of the paper generalises the spectral theorem to cases where the spectrum \(\sigma(A)\) is no longer a discrete set of eigenvalues, as it is in the finite-dimensional case, but a \emph{continuous spectrum}. This scenario arises in infinite-dimensional Hilbert spaces, such as those involving position and momentum operators. These particular operators are even more complex, since they are \emph{unbounded}. We will therefore sketch the standard statement of the spectral theorem, which applies to bounded normal operators and unbounded self-adjoint (\(A = A^{\dagger}\)) operators, although we leave aside technicalities regarding the domain of the operators and the functions involved in this generalisation.
@@ -1838,13 +1797,67 @@
 
       In finite-dimensional terms, then, this allows us to define a function of multiple operators as
       \[f(A_1, A_2, \ldots, A_n) = \sum_{\cvec{\lambda}} f(\lambda^{(1)}, \lambda^{(2)}, \ldots, \lambda^{(n)}) \prod_i \Pi^{(i)}_{\lambda^{(i)}}, \]
-      where \(\cvec{\lambda}\) ranges over all tuples of eigenvalues, \(\lambda^{(i)}\) is its \(i\)th element, an eigenvalue from \(A_i\), and \(\Pi^{(i)}_{\lambda}\) is the projector of \(A_i\) corresponding to eigenvalue \(\lambda\), and the analogies between the finite-dimensional and infinite-dimensional cases for a single spectral measure hold. In particular, the spectral integral against the scalar measure \(\dif{\nu_{\rho,\sigma}(x,y)}\) used to bound the logarithm operates on a Hilbert space of bounded operators, uses the Hilbert-Schmidt norm \(\angleb{A, B} = \Tr\left[A^{\dagger}B\right]\) and has \(\phi = I\), so that we have
+      where \(\cvec{\lambda}\) ranges over all tuples of eigenvalues, \(\lambda^{(i)}\) is its \(i\)th element, an eigenvalue from \(A_i\), and \(\Pi^{(i)}_{\lambda}\) is the projector of \(A_i\) corresponding to eigenvalue \(\lambda\), and the analogies between the finite-dimensional and infinite-dimensional cases for a single spectral measure hold. In particular, the integral against the scalar measure \(\dif{\nu_{\rho,\sigma}(x,y)}\) used to bound the logarithm operates on a Hilbert space of bounded operators, uses the Hilbert-Schmidt norm \(\angleb{A, B} = \Tr\left[A^{\dagger}B\right]\) and has \(\phi = I\), so that we have
       \begin{align*}
         \int_{\R_+^{2}} F(x,y) \dif{\nu_{\rho,\sigma}(x,y)} &= \angleb{I, \int_{\R_+^{2}} F(x,y) \dif{E_{\rho,\sigma}(x,y)} I} \\
                                                             &= \lim_{n\to\infty} \Tr\left[ \sum_{i=0}^{\infty}\sum_{j=0}^{\infty} F\left(\frac{j}{n}, \frac{i}{n}\right) E_{\rho}\left(\cointv*{\frac{j}{n}}{\frac{j+1}{n}}\right)
                                                             E_{\sigma}\left(\cointv*{\frac{i}{n}}{\frac{i+1}{n}}\right) \right],
       \end{align*}
-      from which we recover the finite-dimensional behaviour for a discrete spectrum in~\Cref{eqn:finitedim_relent}. Note that the first argument of \(F\) corresponds to the second state involved, namely \(\sigma\): this confusing ordering is unfortunately unavoidable, because \(\sigma\) is associated with left-multiplication and \(\rho\) with right-multiplication. We have elected to maintain the notation of~\cite{BFF_QRE} to avoid further confusion. The same results as discussed in~\Cref{sec:diqkd_qre} follow from this joint spectral measure for continuous spectra, justifying the validity of these results even in infinite dimensions. For simplicity, this exposition has sidestepped the entire operator algebra approach that generalises the technique of quasi-relative entropies even further. These details are not very relevant for our purposes, but can be found in~\cite{BFF_QRE}.
+      from which we recover the finite-dimensional behaviour for a discrete spectrum in~\Cref{eqn:finitedim_relent}. Note that the first argument of \(F\) corresponds to the second state involved, namely \(\sigma\): this confusing ordering is unfortunately unavoidable (without the cost of introducing more confusion elsewhere), because \(\sigma\) is associated with left-multiplication and \(\rho\) with right-multiplication in the proofs in~\cite{BFF_QRE}. The same results as discussed in~\Cref{sec:diqkd_qre} follow from this joint spectral measure for continuous spectra, justifying the validity of these results even in infinite dimensions. For simplicity, this exposition has sidestepped the entire operator algebra approach that generalises the technique of quasi-relative entropies even further. These details are not very relevant for our purposes, but can be found in~\cite{BFF_QRE}.
+
+    \section{Alternative Derivation for Logarithm Bound}\label{sec:logratbound}
+
+    Our original derivation of \Cref{eqn:logratbound} was based on the proof method of~\cite{BFF_QRE} for operators, and is included here for completeness. Instead of considering the relative entropies of the pmfs, we represent them as density matrices:
+    \begin{align}
+      \splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}} &=  D(\rho_{\crv{V}_1\crv{V}_2\crv{J}}||\rho'_{\crv{V}_1\crv{V}_2\crv{J}})
+      + D(\rho_{\crv{V}_1\crv{V}_2\crv{JE}}||\rho''_{\crv{V}_1\crv{V}_2\crv{JE}}) \\
+                                              &\leq \begin{aligned}
+    - & \sum_{i=1}^m  \frac{w_i}{t_i\ln{2}}  \inf_{Z} \left\{ \begin{gathered}
+    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}}]
+    + \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z + Z^{\dagger})] \\
+    + (1-t_i) \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z^{\dagger}Z)] 
+    + t_i \Tr[\rho'_{\crv{V}_1\crv{V}_2\crv{J}} (ZZ^{\dagger})]
+    \end{gathered} \right\} \\
+    - & \sum_{i=1}^m \frac{w_i}{t_i\ln{2}} \inf_Z \left\{ \begin{gathered}
+    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}}]
+    + \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z + Z^{\dagger})] \\
+    + (1-t_i) \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z^{\dagger}Z)]
+    + t_i \Tr[\rho''_{\crv{V}_1\crv{V}_2\crv{JE}} (ZZ^{\dagger})]
+    \end{gathered} \right\}
+    \end{aligned},
+    \end{align}
+    where \(\rho'_{\crv{V}_1\crv{V}_2\crv{J}}\) and \(\rho''_{\crv{V}_1\crv{V}_2\crv{JE}}\) are the density matrices corresponding to the classical distributions \(P_{\crv{V_1|V_2}} P_{\crv{V}_2|\crv{J}} P_{\crv{J}}\) and \(P_{\crv{V_1V_2|E}} P_{\crv{J|E}} P_{\crv{E}}\) respectively. These density matrices are of the form \(\sum_i p_i \ket{i}\bra{i}\), where \(p_i\) is the probability, under the represented pmf, of the outcome indexed by \(i\).
+
+    Since \(Z\) is defined on the finite-dimensional Hilbert spaces \(\crv{V}_1\crv{V}_2\crv{J}\) or \(\crv{V}_1\crv{V}_2\crv{JE}\), we can write \(Z = \sum_{i,i'} z_{i;i'} \ket{i}\bra{i'}\), where \(i\) and \(i'\) are indices of the classical basis states in those Hilbert spaces and \(z_{i;i'} \in \C\). Further, since the states \(\rho\) are classical, it suffices to consider the action of \(Z\) on the projectors. Therefore, we can expand the traces with \(Z\) generically as
+  \begin{align}
+    \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (Z + Z^{\dagger})\right] &= 
+    \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} \ket{i}\bra{i'} + {z_{i';i}^*} \ket{i}\bra{i'} \right] \\
+                                                            &= 
+    \sum_i p_i z_{i;i} + {z_{i;i}^*} \\
+    \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (Z^{\dagger}Z)\right] &=
+    \Tr\left[ \sum_i p_i \sum_{i'} {z_{i;i'}^*} z_{i';i} \ket{i}\bra{i'} \right] \\
+                                                            &\geq 
+    \sum_i p_i \abs{z_{i;i}}^2 \\
+    \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (ZZ^{\dagger})\right] &= 
+    \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} {z_{i';i}^*} \ket{i}\bra{i'} \right] \\
+                                                            &\geq 
+    \sum_i p_i \abs{z_{i;i}}^2
+  \end{align}
+  where the lower bounds hold because \(\abs{z_{i;i'}}^2 \geq 0\), and since terms with \(i \neq i'\) do not occur in the expansion of the trace with \(Z + Z^{\dagger}\), they will be set to 0 in the minimisation. Further, since \(z_{i;i}\) only occurs as \(\abs{z_{i;i}}^2\) or \(z_{i;i} + {z_{i;i}^*}\), if \(\abs{z_{i;i}}^2\) is restricted to a fixed value \(w\), \(z_{i;i} + {z_{i;i}^*}\) is minimised by setting \(z_{i;i}\) to the real number \(-w\). We can therefore consider each \(z_i \coloneqq \Tr[\ket{i}\bra{i} Z] = z_{i;i}\) as a real, negative, scalar optimisation variable, yielding \(o_{\crv{J}} i_A o_A i_B o_B\) variables for \(I(\crv{V}_1 : \crv{V}_2|\crv{J})\) and \(o_{\crv{J}} i_A o_A i_B o_B o_E\) for \(I(\crv{V}_1\crv{V}_2 : \crv{J}|\crv{E})\). This gives us a polynomial optimisation problem, which is, however, likely intractable due to the number of variables.
+
+    The connection to \Cref{eqn:logratbound} comes from observing that \(z_i\) is a scalar, and that we can therefore compute the optimal value analytically if we hold the other values fixed. The infimisation can be broken up into optimisation problems of the form
+    \begin{equation}
+      \inf_z f(p_1, p_2, z) = \inf_z p_1(2z) + (1-t) p_1 z^2 + t p_2 z^2,
+    \end{equation}
+    so if the infimum is attained at \(z=z^{\star}\), we have
+    \begin{align}
+      \left. \diff{f}{z} \right|_{z=z^{\star}} &= 0 \\
+      2p_1 + 2(1-t) p_1 z^{\star} + 2t p_2 z^{\star} &= 0 \\
+      z^{\star} &= -\frac{p_1}{(1-t)p_1 + tp_2} \\
+      \therefore \inf_z f(p_1, p_2, z) &= -\frac{2p_1^2}{(1-t)p_1 + tp_2} + \frac{p_1^2 \left( (1-t)p_1 + tp_2 \right)}{{\left((1-t)p_1 + tp_2\right)}^2} \\
+                                       &= -\frac{p_1^2}{(1-t)p_1 + tp_2},
+    \end{align}
+    which is the form of the terms in the sum in \Cref{eqn:logratbound}.
 
     \end{appendices}
 
