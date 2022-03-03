@@ -129,10 +129,10 @@ except ModuleNotFoundError:
     SCS_SOLVEF = None
 
 
-def compute_entropy(prob, sdp, q=0):
+def compute_entropy(prob, sdp, px, q=0):
     starttime = datetime.datetime.now()
     print(f"Start: {starttime}")
-    ent = prob.compute_entropy(sdp, q)
+    ent = prob.compute_entropy(sdp, px, q)
     print(f"Entropy: {ent}")
     endtime = datetime.datetime.now()
     print(f"End: {endtime}, Delta: {endtime - starttime}")
@@ -155,8 +155,8 @@ def behav_problem(p=None, **kwargs):
     if obj is None:
         if verbose > 0:
             print("No objective provided, using H(A|E,x*=0)")
-        t, q = symbols(r"t q", nonnegative=True)
-        extra_monos += prob.extract_monomials_from_obj(prob.HAgEx_objective(t, q))
+        t, q, p0, p1 = symbols(r"t q p0 p1", nonnegative=True)
+        extra_monos += prob.extract_monomials_from_obj(prob.binary_objective(t, [p0, p1], q))
         obj = 0
     else:
         extra_monos += prob.extract_monomials_from_obj(obj)

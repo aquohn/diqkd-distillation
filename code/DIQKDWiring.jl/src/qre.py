@@ -61,7 +61,6 @@ def cond_ent(joint, marg):
     return hab - hb
 
 
-# TODO generalise beyond x* = 0 (zero-based indexing)
 class BFFProblem(object):
     def __init__(self, **kwargs):
         # number of outputs for each input of Alice's / Bob's devices
@@ -72,9 +71,9 @@ class BFFProblem(object):
         # Operators in problem (only o-1 for o outputs, because the last
         # operator is enforced by normalisation). Here, A and B are measurement
         # operators
-        self.A = [Ai for Ai in ncp.generate_measurements(self.A_config, "A")]
-        self.B = [Bj for Bj in ncp.generate_measurements(self.B_config, "B")]
-        self.Z = ncp.generate_operators("Z", max(self.A_config), hermitian=0)
+        self.A = ncp.generate_measurements(self.A_config, "A")
+        self.B = ncp.generate_measurements(self.B_config, "B")
+        self.Z = [ncp.generate_operators("Z|" + str(x) + ";", max(self.A_config), hermitian=0) for x in range(len(self.A_config))]
         self.op_set = set(ncp.flatten([self.A, self.B, self.Z]))
 
         self.solvef = kwargs.get("solvef", lambda sdp: sdp.solve())
@@ -88,27 +87,28 @@ class BFFProblem(object):
             half_m
         )  # Nodes, weights of quadrature
 
-    def HAgEx_objective(self, ti, q):
+    def binary_objective(self, ti, px, q):
         """
         Returns the objective function for the faster computations.
-            Key generation on X=0
             Only two outcomes for Alice
+            px is the distribution over her inputs
 
             ti     --    i-th node
             q      --    bit flip probability
         """
         obj = 0.0
-        F = [self.A[0][0], 1 - self.A[0][0]]  # POVM for self.Alices key gen measurement
-        for a in range(self.A_config[0]):
-            b = (a + 1) % 2  # (a + 1 mod 2)
-            M = (1 - q) * F[a] + q * F[b]  # Noisy preprocessing povm element
-            obj += M * (
-                self.Z[a] + Dagger(self.Z[a]) + (1 - ti) * Dagger(self.Z[a]) * self.Z[a]
-            ) + ti * self.Z[a] * Dagger(self.Z[a])
+        for x in range(len(self.A_config)):
+            Ms = [self.A[x][0], 1 - self.A[x][0]]
+            for a in range(self.A_config[x]):
+                M = Ms[a]    # Measurement operator without noisy preprocessing
+                Meff = (1 - q) * M + q * (1 - M)  # Effective measurement
+                obj += px[x] * (Meff * (
+                    self.Z[x][a] + Dagger(self.Z[x][a]) + (1 - ti) * Dagger(self.Z[x][a]) * self.Z[x][a]
+                ) + ti * self.Z[x][a] * Dagger(self.Z[x][a]))
 
         return obj
 
-    def compute_entropy(self, sdp, q=0):
+    def compute_entropy(self, sdp, px, q=0):
         """
         Computes lower bound on H(A|X=0,E) using the fast (but less tight) method
 
@@ -128,17 +128,19 @@ class BFFProblem(object):
             ci = self.W[i] / (self.T[i] * log(2))
 
             # Get the i-th objective function
-            new_objective = self.HAgEx_objective(self.T[i], q)
+            new_objective = self.binary_objective(self.T[i], px, q)
 
             sdp.set_objective(new_objective)
             self.solvef(sdp)
 
             if self.verbose > 0:
-                print("Status for i = ", i + 1, ":", sdp.status)
+                print("Status for i =", i + 1, ":", sdp.status)
+                print("Dual value:", sdp.dual)
+                print("Contribution to entropy:", ci * (1 + sdp.dual))
+
             if not self.safe:  # ignore status and just add to entropy
                 ent += ci * (1 + sdp.dual)
                 continue
-
             if sdp.status == "optimal":
                 # 1 contributes to the constant term
                 ent += ci * (1 + sdp.dual)
@@ -294,9 +296,9 @@ class BFFProblem(object):
         # Get Alice and Bob's projective measurement constraints
         subs.update(ncp.projective_measurement_constraints(self.A, self.B))
 
-        # Finally we note that Alice and Bob's operators should All commute with Eve's ops
+        # Finally we note that Alice and Bob's operators should all commute with Eve's ops
         for a in ncp.flatten([self.A, self.B]):
-            for z in self.Z:
+            for z in ncp.flatten(self.Z):
                 subs.update({z * a: a * z, Dagger(z) * a: a * Dagger(z)})
 
         return subs
@@ -309,23 +311,20 @@ class BFFProblem(object):
         """
         Monomials that are Alice-Bob-Eve products
         """
-        ZZ = self.Z + [Dagger(z) for z in self.Z]
+        ZZ = ncp.flatten(self.Z) + [Dagger(z) for z in ncp.flatten(self.Z)]
         Aflat = ncp.flatten(self.A)
         Bflat = ncp.flatten(self.B)
         return [a * b * z for (a, b, z) in itprod(Aflat, Bflat, ZZ)]
 
     def generate_UZs_monomials(self, zs=2):
         """
-        Monomials with Alice or Bob, followed by zs Eve operators
+        Monomials with Alice or Bob, followed by `zs` Eve operators
         """
         ZS = [
             z
-            for z in ncp.nc_utils.get_monomials(self.Z, zs)
+            for z in ncp.nc_utils.get_monomials(ncp.flatten(self.Z), zs)
             if ncp.nc_utils.ncdegree(z) >= zs
         ]
 
         AB = ncp.flatten([self.A, self.B])
         return [a * z for (a, z) in itprod(AB, ZS)]
-
-# TODO add scalar variables, either as diagonal entries in the variable matrix,
-# or as identity operators
