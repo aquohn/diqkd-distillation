@@ -19,6 +19,7 @@ from itertools import product as itprod
 from math import log2, log, pi, cos, sin, prod
 import ncpol2sdpa as ncp
 from sympy.physics.quantum.dagger import Dagger
+from copy import deepcopy
 import chaospy
 
 DEFAULT_HALF_M = 6  # Number of nodes / 2 in gaussian quadrature
@@ -39,26 +40,38 @@ def generate_quadrature(m):
     return t, w
 
 
-def cond_ent(joint, marg):
+def HAgB(p):
     """
     Returns H(A|B) = H(AB) - H(B)
 
     Inputs:
-        joint    --     joint distribution on AB
-        marg     --     marginal distribution on B
+        p     --     numpy array such that p[a, b] = p(ab)
     """
 
     hab, hb = 0.0, 0.0
 
-    for prob in joint:
+    pvec = np.reshape(p, p.size)
+    for prob in pvec:
         if 0.0 < prob < 1.0:
             hab += -prob * log2(prob)
 
-    for prob in marg:
+    oB = p.shape[1]
+    margvec = [sum(p[:, b]) for b in range(oB)]
+    for prob in margvec:
         if 0.0 < prob < 1.0:
             hb += -prob * log2(prob)
 
     return hab - hb
+
+
+def noisy_preproc(p, q):
+    oA, oB, iA, iB = p.shape
+    pp = deepcopy(p)
+    for (b, x, y) in itprod(range(oB), range(iA), range(iB)):
+        delta = q * (p[1, b, x, y] - p[0, b, x, y])
+        pp[0, b, x, y] += delta
+        pp[1, b, x, y] -= delta
+    return pp
 
 
 class BFFProblem(object):
@@ -67,25 +80,35 @@ class BFFProblem(object):
         self.A_config = kwargs.get("A_config", [2, 2])
         self.B_config = kwargs.get("B_config", [2, 2, 2])
         self.update_half_m(kwargs.get("half_m", DEFAULT_HALF_M))
+        self.genx = kwargs.get("genx", None)
 
         # Operators in problem (only o-1 for o outputs, because the last
         # operator is enforced by normalisation). Here, A and B are measurement
         # operators
         self.A = ncp.generate_measurements(self.A_config, "A")
         self.B = ncp.generate_measurements(self.B_config, "B")
-        self.Z = [ncp.generate_operators("Z|" + str(x) + ";", max(self.A_config), hermitian=0) for x in range(len(self.A_config))]
+        if self.genx is not None:
+            self.Z = [[] for x in range(len(self.A_config))]
+            self.Z[self.genx] = ncp.generate_operators(
+                "Z", max(self.A_config), hermitian=0
+            )
+        else:
+            self.Z = [
+                ncp.generate_operators(
+                    "Z|" + str(x) + ";", max(self.A_config), hermitian=0
+                )
+                for x in range(len(self.A_config))
+            ]
         self.op_set = set(ncp.flatten([self.A, self.B, self.Z]))
 
         self.solvef = kwargs.get("solvef", lambda sdp: sdp.solve())
         self.verbose = kwargs.get("verbose", VERBOSE)
-        self.safe = kwargs.get("safe", True)  # accept non-optimal solutions
+        self.safe = kwargs.get("safe", True)  # accept only optimal solutions?
         self.substitutions = self.get_subs()  # substitutions used in ncpol2sdpa
 
     def update_half_m(self, half_m):
         self.m = 2 * half_m
-        self.T, self.W = generate_quadrature(
-            half_m
-        )  # Nodes, weights of quadrature
+        self.T, self.W = generate_quadrature(half_m)  # Nodes, weights of quadrature
 
     def binary_objective(self, ti, px, q):
         """
@@ -97,14 +120,26 @@ class BFFProblem(object):
             q      --    bit flip probability
         """
         obj = 0.0
-        for x in range(len(self.A_config)):
+        if self.genx is None:
+            xvals = range(len(self.A_config))
+        else:
+            xvals = [self.genx]
+            px = np.zeros(len(self.A_config))
+            px[self.genx] = 1
+        for x in xvals:
             Ms = [self.A[x][0], 1 - self.A[x][0]]
             for a in range(self.A_config[x]):
-                M = Ms[a]    # Measurement operator without noisy preprocessing
+                M = Ms[a]  # Measurement operator without noisy preprocessing
                 Meff = (1 - q) * M + q * (1 - M)  # Effective measurement
-                obj += px[x] * (Meff * (
-                    self.Z[x][a] + Dagger(self.Z[x][a]) + (1 - ti) * Dagger(self.Z[x][a]) * self.Z[x][a]
-                ) + ti * self.Z[x][a] * Dagger(self.Z[x][a]))
+                obj += px[x] * (
+                    Meff
+                    * (
+                        self.Z[x][a]
+                        + Dagger(self.Z[x][a])
+                        + (1 - ti) * Dagger(self.Z[x][a]) * self.Z[x][a]
+                    )
+                    + ti * self.Z[x][a] * Dagger(self.Z[x][a])
+                )
 
         return obj
 
@@ -171,13 +206,9 @@ class BFFProblem(object):
             constraints.append(self.A[x][a] * self.B[y][b] - pabxy[a, b, x, y])
         # for marginals, select only input 0
         for (a, x) in itprod(range(oA - 1), range(iA)):
-            constraints.append(
-                self.A[x][a] - sum(pabxy[a, b, x, 0] for b in range(oB))
-            )
+            constraints.append(self.A[x][a] - sum(pabxy[a, b, x, 0] for b in range(oB)))
         for (b, y) in itprod(range(oB - 1), range(iB)):
-            constraints.append(
-                self.B[y][b] - sum(pabxy[a, b, 0, y] for a in range(oA))
-            )
+            constraints.append(self.B[y][b] - sum(pabxy[a, b, 0, y] for a in range(oA)))
         return constraints
 
     def optimise_q(self, sdp, sys, eta, q):

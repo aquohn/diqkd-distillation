@@ -150,16 +150,17 @@ def behav_problem(p=None, **kwargs):
             print("No behaviour provided; using a fixed test behaviour.")
         p = TEST_P
     prob = BFFProblem(**kwargs)
-    obj = kwargs.get("objective", None)
+    objcons = kwargs.get("objective_constructor", None)
     extra_monos = []
-    if obj is None:
+    if objcons is None:
         if verbose > 0:
-            print("No objective provided, using H(A|E,x*=0)")
+            print("No objective provided, using H(A|E)")
         t, q, p0, p1 = symbols(r"t q p0 p1", nonnegative=True)
-        extra_monos += prob.extract_monomials_from_obj(prob.binary_objective(t, [p0, p1], q))
-        obj = 0
-    else:
-        extra_monos += prob.extract_monomials_from_obj(obj)
+
+        def objcons(prob):
+            return prob.binary_objective(t, [p0, p1], q)
+
+    extra_monos += prob.extract_monomials_from_obj(objcons(prob))
     extra_monos_f = kwargs.get("extra_monos_f", lambda prob: prob.generate_ABE_monomials())
     extra_monos += extra_monos_f(prob)
     npa = kwargs.get("npa", NPA_LEVEL)
@@ -175,11 +176,10 @@ def behav_problem(p=None, **kwargs):
         inequalities=[],
         momentequalities=moment_eqs,
         momentinequalities=[],
-        objective=obj,
         substitutions=prob.substitutions,
         extramonomials=extra_monos,
     )
-    sdp.process_constraints(momentequalities=moment_eqs)
+    # sdp.process_constraints(momentequalities=moment_eqs)
     setuptime = datetime.datetime.now()
     if verbose > 1:
         print(f"Setup Done At: {setuptime}, Delta: {setuptime - starttime}")
