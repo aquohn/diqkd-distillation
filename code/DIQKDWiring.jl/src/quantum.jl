@@ -1,5 +1,6 @@
 using Revise
-using LinearAlgebra, QuantumInformation
+using Combinatorics
+using LinearAlgebra, SparseArrays, QuantumInformation
 
 includet("helpers.jl")
 includet("maxcorr.jl")
@@ -59,17 +60,30 @@ const LD_corrs = Correlators([1, 1],
 
 werner_corrs(v) = convexsum([v, 1-v], [singlet_corrs, mix_corrs])
 const v_L = 0.6829; const v_NL = 0.6964; const v_crit = 0.7263
-function observable(M::POVMMeasurement, vals::AbstractVector{<:Number})
-  @assert length(vals) == M.odim
-  return vals' * M.matrices
-end
+observable(M::POVMMeasurement, vals::AbstractVector{<:Number}) = vals' * M.matrices
 function POVMMeasurement(obsv::T) where {T <: AbstractMatrix{<:Number}}
   decomp = eigen(obsv)
   d = first(size(obsv))
   ops = [proj(decomp.vectors[i, :]) for i in 1:d]
   return POVMMeasurement(ops)
 end
+function randPOVM(d, k, n=d)  # default to Lebesgue measure
+    T = promote_type(typeof(k), typeof(d), typeof(n)) |> float |> complex
+    S = zeros(d, d);
+    effects = Matrix{T}[]
 
+    for i in 1:k
+        Xi = (randn(d, n) + im*randn(d, n))/sqrt(2)
+        Wi = Xi*Xi'
+        push!(effects, Wi)
+        S += Wi;
+    end
+
+    Srinv = S^(-1/2)
+    effects = [Srinv * W * Srinv for W in effects]
+
+    return POVMMeasurement(effects)
+end
 
 # %%
 # Koon Tong's model
@@ -101,6 +115,28 @@ function expt_corrs(nc, eta, tldcorrs)
   Eby = [-nc-(1-nc)*((1-eta)-eta*Btlds[y]) for y in 1:iB]
   Eabxy = [nc + (1-nc)*(eta^2 * ABtlds[x,y] - eta*(1-eta)*(Atlds[x] + Btlds[y]) + (1-eta)^2) for x in 1:iA, y in 1:iB]
   return Correlators(Eax, Eby, Eabxy)
+end
+
+genTLM(p::Behaviour; kwargs...) = genTLM(Correlators(p); kwargs...)
+function genTLM(C::Correlators; tol=0)
+  Eax, Eby, Eabxy = C
+  Acheck = isapprox.(Eax.^2, 1, atol=tol)
+  Bcheck = isapprox.(Eby.^2, 1, atol=tol)
+  if any(Acheck) || any(Bcheck)
+    return true
+  end
+
+  iA, iB = length(Eax), length(Eby)
+  xsit = combinations(1:iA, 2)
+  ysit = combinations(1:iB, 2)
+
+  for (xs, ys) in itprod(xsit, ysit)
+    terms = [(Eabxy[x,y] - Eax[x]*Eby[y])/sqrt((1-Eax[x]^2)*(1-Eby[y]^2)) for x in xs, y in ys]
+    sumval = sum(asin.(terms))
+    tests = [abs(sumval - 2*asin(term)) <= pi for term in terms]
+    all(tests) || return false
+  end
+  return true
 end
 
 function expt_grads(nc, eta, Atlds, Btlds, ABtlds)

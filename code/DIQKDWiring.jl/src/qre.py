@@ -157,7 +157,9 @@ class BFFProblem(object):
         # with it. Added a nontrivial bound when removing the final term
         # (WARNING: proof is not yet in the associated paper).
 
-        bound_on_last = 2 * q * (1 - q) * self.W[-1] / log(2)
+        bound_on_last_op = ((-1 / self.m**2) + self.W[-1]) / log(2)
+        bound_on_last_noisy = 2 * q * (1 - q) * self.W[-1] / log(2)
+        bound_on_last = max(bound_on_last_noisy, bound_on_last_op)
         m = len(self.T)
         for i in range(m):
             ci = self.W[i] / (self.T[i] * log(2))

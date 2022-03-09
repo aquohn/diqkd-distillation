@@ -41,9 +41,7 @@ TEST_P = np.array(
 REVIVAL_P = np.array(
     [
         [
-            [
-                [0.95939617, 0.95628008, 0.96954558],
-                [0.9321242, 0.89989456, 0.92203276]],
+            [[0.95939617, 0.95628008, 0.96954558], [0.9321242, 0.89989456, 0.92203276]],
             [
                 [0.00442781, 0.00518686, 0.00194679],
                 [0.03169978, 0.06157238, 0.04945962],
@@ -102,19 +100,42 @@ WERNER_P = np.array(
 )
 
 
+def to_matlab(p):
+    oA, oB, iA, iB = p.shape
+    for (x, y) in itprod(range(iA), range(iB)):
+        print(f"Distribution for x = {x}, y = {y}")
+        print('[', end='')
+        for a in range(oA):
+            print(', '.join([str(val) for val in p[a, :, x, y]]), end=';\n')
+        print(']')
+        print()
+
+
 def SOLVEF(sdp):
     sdp.solve()
 
 
 def GMP_SOLVEF(sdp):
-    sdp.solve("sdpa", solverparameters={"executable": "~/Software/sdpa_gmp/sdpa-gmp-7.1.3/sdpa_gmp"})
+    sdp.solve(
+        "sdpa",
+        solverparameters={
+            "executable": "/home/aquohn/Software/sdpa_gmp/sdpa-gmp-7.1.3/sdpa_gmp"
+        },
+    )
 
 
 try:
     import mosek
 
     def MOSEK_SOLVEF(sdp):
-        sdp.solve("mosek", solverparameters={"num_threads": int(NUM_SUBWORKERS), "intpnt_co_tol_dfeas": 1.0e-6, "intpnt_co_tol_pfeas": 1.0e-6})
+        sdp.solve(
+            "mosek",
+            solverparameters={
+                "num_threads": int(NUM_SUBWORKERS),
+                "intpnt_co_tol_dfeas": 1.0e-6,
+                "intpnt_co_tol_pfeas": 1.0e-6,
+            },
+        )
 
 except ModuleNotFoundError:
     MOSEK_SOLVEF = None
@@ -161,7 +182,9 @@ def behav_problem(p=None, **kwargs):
             return prob.binary_objective(t, [p0, p1], q)
 
     extra_monos += prob.extract_monomials_from_obj(objcons(prob))
-    extra_monos_f = kwargs.get("extra_monos_f", lambda prob: prob.generate_ABE_monomials())
+    extra_monos_f = kwargs.get(
+        "extra_monos_f", lambda prob: prob.generate_ABE_monomials()
+    )
     extra_monos += extra_monos_f(prob)
     npa = kwargs.get("npa", NPA_LEVEL)
     parallel = kwargs.get("parallel", 0)
