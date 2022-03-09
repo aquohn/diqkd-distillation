@@ -960,7 +960,7 @@
 
       If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R^+\), then the \(i=m\) optimisation can be bounded analytically. We additionally collect the terms that are not multiplied with the optimisation variable \(Z\), removing the \(\Tr[\rho]\) terms from the optimisation and yielding the constant
       \begin{equation}
-        c_m = \frac{1}{m^2} \frac{\lambda \Tr[\rho]}{\ln 2} - \sum_{i=1}^m \frac{w_i \Tr[\rho]}{t_i \ln 2}.
+        c_m(\Tr[\rho]) = \frac{1}{m^2} \frac{\lambda \Tr[\rho]}{\ln 2} - \sum_{i=1}^m \frac{w_i \Tr[\rho]}{t_i \ln 2}.
       \end{equation}
       Further, we have \(\norm{Z} \leq \alpha_i\) in each optimisation, where
       \begin{equation}\label{eqn:qre_bound}
@@ -980,11 +980,11 @@
       \[ \sum_{abxy} c^{(j)}_{abxy} p(ab|xy) \geq v_j, \]
       and recalling that
       \[ p(ab|xy) = \Tr\left[\rho_{A B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right], \]
-      we can obtain lower bound:
+      we can obtain the lower bound:
       \begin{equation}
-        H{(\crv{A}|E, \crv{X}=x^{\star})}_{\rho} \geq c_m + C_m(\rho),
+        \inf_{\substack{\rho: \exists \sM : \\ \cP(\rho, \sM) = p}} H{(\crv{A}|E, \crv{X}=x^{\star})}_{\rho} \geq c_m(1) + q_m(p),
       \end{equation}
-      where \(C_m(\rho)\) is given by
+      where \(q_m(p)\) is given by
       \begin{equation}
         \begin{aligned}[c]
           \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \Tr\left[ 
@@ -1010,7 +1010,7 @@
 
       Additionally, instead of enforcing the tensor product explicitly, we can enforce that the operators \(Z_{a,i}\) commute with all \(\tilde{M}_{a|x}\) and \(\tilde{N}_{b|y}\), which in turn commute with each other. Therefore, we can replace all instances of \(\Tr\left[\rho S\right]\) in our objective function with \(\braket{\psi|\tilde{S}|\psi}\) for all monomials \(S\) (individual operators and products of operators), where \(\tilde{S}\) is the monomial with all measurements replaced by their projective versions on \(\Hs\). 
 
-      These inner products can then be seen as elements of a Gram matrix for the vectors \(\{\ket{\psi}, \tilde{S}\ket{\psi}\}\), which must be positive semidefinite. In order to constrain \(\ket{\psi}\) to be a valid quantum state, we introduce more vectors of the form \(\prod M\ket{\psi}\) to our Gram matrix, where \(M \in \{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\). If these are valid states and measurements, the Gram matrix should still be positive semidefinite, even if we include vectors that result from an arbitrarily long sequence of measurement operators applied to \(\ket{\psi}\). This is the \emph{NPA hierarchy}, which is a converging hierarchy of outer approximations to the set of quantumly realisable states and measurements.\footnote{Recent results imply that the value converged to can be strictly larger than what is quantumly achievable in a Bell test, and further that there is no algorithm that can converge to exactly to the quantum set from outside, since such an algorithm would allow one to solve the halting problem~\cite{MIPRE}. However, if all players use finite-dimensional systems, it converges exactly.} Higher levels of the hierarchy involve monomials consisting of longer chains of measurement operators. The final expression for \(C_m\) then becomes
+      These inner products can then be seen as elements of a Gram matrix for the vectors \(\{\ket{\psi}, \tilde{S}\ket{\psi}\}\), which must be positive semidefinite. In order to constrain \(\ket{\psi}\) to be a valid quantum state, we introduce more vectors of the form \(\prod M\ket{\psi}\) to our Gram matrix, where \(M \in \{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\). If these are valid states and measurements, the Gram matrix should still be positive semidefinite, even if we include vectors that result from an arbitrarily long sequence of measurement operators applied to \(\ket{\psi}\). This is the \emph{NPA hierarchy}, which is a converging hierarchy of outer approximations to the set of quantumly realisable states and measurements.\footnote{Recent results imply that the value converged to can be strictly larger than what is quantumly achievable in a Bell test, and further that there is no algorithm that can converge to exactly to the quantum set from outside, since such an algorithm would allow one to solve the halting problem~\cite{MIPRE}. However, if all players use finite-dimensional systems, it converges exactly.} Higher levels of the hierarchy involve monomials consisting of longer chains of measurement operators. The final expression for \(q_m(p)\) then becomes
       \begin{equation}
         \begin{aligned}[c]
           \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \angleb{\psi\left|
@@ -1026,7 +1026,7 @@
           & [\tilde{M}_{a|x}, Z_{b,i}^{\dagger}] = [\tilde{N}_{b|y}, Z_{a,i}^{\dagger}] = 0 & & \forall a, b, x, y, i \\
           & \ket{\psi} \text{ is a valid state} & & \\
             \end{aligned}
-        \end{aligned}
+        \end{aligned}\label{eqn:bff_npa}
       \end{equation}
 
       A few other simplifications are possible, which are discussed and implemented in~\cite{BFF_QRE}:
@@ -1044,31 +1044,26 @@
 
     \section{Preliminary Results}\label{sec:preres}
 
-    Our preliminary results found a revival of the standard protocol key rate for states that are generated according to a simple experimental model. We will be using it to illustrate the relevant issues and directions we wish to pursue in our analysis. In this model, we denote the density matrix of Alice's and Bob's quantum state as \(\rho_{AB}\) and observables as \(\tilde{A}_x\) and \(\tilde{B}_y\) for a perfect experimental setup, and let the dimensions of the Hilbert spaces of systems \(A\) and \(B\) be \(d_A\) and \(d_B\) respectively.
+    Our preliminary results found a revival of the standard protocol key rate for states that are generated according to a simple experimental model. We will be using it to illustrate the relevant issues and directions we wish to pursue in our analysis. In this model, we denote the density matrix of Alice's and Bob's quantum state as \(\rho_{AB}\), the dimensions of the Hilbert spaces of their systems \(A\) and \(B\) as \(d_A\) and \(d_B\), and the observables they measure given inputs \(x\) and \(y\) as \(A_x\) and \(B_y\).
 
-    We now model some possible experimental flaws. If our source of quantum states produces one state per time bin, then \(n_c\) is the probability that a state is not produced during a given time bin (where we assume this process to be i.i.d.). Further, Alice and Bob's detectors have efficiencies \(\eta_A\) and \(\eta_B\) respectively, which are the probabilities for them to detect a state given that one is produced. If nothing is detected, either due to no signal being produced or due to detector inefficiency, we assign the \(-1\) outcome. The detector failure events are independent, but if no signal is produced, both Alice and Bob will receive no signal. We can then express the new states and observables as follows:
+    We now model some possible experimental flaws. If our source of quantum states produces one state per time bin, then \(n_c\) is the probability that a state is not produced during a given time bin (where we assume this process to be i.i.d.). Further, Alice and Bob's detectors have efficiencies \(\eta_A\) and \(\eta_B\) respectively, which are the probabilities for them to detect a state given that one is produced. If nothing is detected, either due to no signal being produced or due to detector inefficiency, we assign the \(-1\) outcome. The detector failure events are independent, but if no signal is produced, both Alice and Bob will receive no signal.
+
+    We work in Hilbert spaces of dimension \(d_{A} = d_{\tilde{A}} + 1\) and \(d_{B} = d_{\tilde{B}} + 1\), where the states and measurements for a perfect experimental setup have support only on the subspaces of dimension \(d_{\tilde{A}}\) and \(d_{\tilde{B}}\), and the additional subspace is the support of the vacuum state \(\ket{\rm vac}\). We use tildes to denote the states and measurements in the ideal experimental case embedded in this larger Hilbert space. We can then express the overall states and observables as follows:
     \begin{align*}
-      A_x &= (1-\eta_A)\tilde{A}_x - \eta_A I_A \\
-      B_y &= (1-\eta_B)\tilde{B}_y - \eta_B I_B \\
-      \rho_{{A_x}{B_y}} &= (1-n_c)\tilde{\rho}_{{A_x}{B_y}} + \frac{n_c}{d^{(0)}_{A_x} d^{(0)}_{B_y}} \left( \Pi_{A_x}^{(0)} \otimes \Pi_{B_y}^{(0)} \right),
+      A_x &= (1-\eta_A)\tilde{A}_x - \eta_A I_{\tilde{A}} - \ket{\rm vac}\bra{\rm vac}_{A} \\
+      B_y &= (1-\eta_B)\tilde{B}_y - \eta_B I_{\tilde{B}} - \ket{\rm vac}\bra{\rm vac}_{B} \\
+      \rho_{AB} &= (1-n_c)\tilde{\rho}_{AB} + n_c \ket{\rm vac}\bra{\rm vac}_{A} \otimes \ket{\rm vac}\bra{\rm vac}_{B},
     \end{align*}
-    where \(I_A\) is the identity operator on Alice's Hilbert space, and \(d^{(0)}_{A_x}\) is the dimension of the subspace that \(\Pi_{A_x}^{(0)}\) projects onto, with the analogous definitions holding for \(B\).
+    where \(I_{\tilde{A}}\) and \(I_{\tilde{B}}\) are the projectors onto the ideal experiment subspaces.
 
     The marginals and correlators, then, are as follows:
     \begin{align*}
-      \angleb{A_x} &= -n_c + (1-n_c)(\eta_A\angleb{\tilde{A}_x} - (1-\eta_A)) \\
-      \angleb{B_y} &= -n_c + (1-n_c)(\eta_B\angleb{\tilde{B}_y} - (1-\eta_B)) \\
-      \angleb{A_x B_y} &= \begin{aligned}[c]
+      \angleb{A_x} &= \Tr[\rho_{AB} A_x \otimes I_A] = -n_c + (1-n_c)(\eta_A\angleb{\tilde{A}_x} - (1-\eta_A)) \\
+      \angleb{B_y} &= \Tr[\rho_{AB} I_A \otimes B_y] = -n_c + (1-n_c)(\eta_B\angleb{\tilde{B}_y} - (1-\eta_B)) \\
+      \angleb{A_x B_y} &= \Tr[\rho_{AB} A_x \otimes B_y] = \begin{aligned}[c]
       & n_c + (1-n_c)(\eta_A\eta_B\angleb{\tilde{A}_x\tilde{B}_y} - \eta_A(1-\eta_B)\angleb{\tilde{A}_x} \\
       & -\eta_B(1-\eta_A)\angleb{\tilde{B}_y} + (1-\eta_A\eta_B) )
       \end{aligned}
-      \end{align*}
-
-      For our purposes, we fix \(\eta_A = \eta_B = \eta\). We want to study the variation of the key rate with the variation of these parameters. Since \(S\) is a linear combination of the correlators, we only need to compute the variation of the correlators with \(\eta\) and \(n_c\). We connect this to the key rate by studying the variation of \(H_S(\crv{A}|E)\) with \(S\).
-      \begin{align*}
-        \diffp{}{{n_c}} \angleb{A_x B_y} &= \eta \left( \left(1-\eta\right) \left(\langle\tilde{A}_x\rangle + \langle\tilde{B}_y\rangle\right) - \eta \langle\tilde{A}_x\tilde{B}_y\rangle + \left(2 - \eta\right) \right) \\
-        \diffp{}{{\eta}} \angleb{A_x B_y} &= \left(1 - n_{c}\right) \left( \left(1-2\eta\right) \left(\langle\tilde{A}_x\rangle+\langle\tilde{B}_y\rangle\right) - 2\eta \langle\tilde{A}_x\tilde{B}_y\rangle + (2-2\eta) \right) \\
-        \diffp{}{S} H_S(\crv{A}|E) &= \frac{S}{4\sqrt{S^2-4}} \log_2 \left[ \frac{\sqrt{S^2-4}-2}{\sqrt{S^2-4}+2} \right].
       \end{align*}
 
     \begin{figure}
@@ -1077,7 +1072,7 @@
       \caption{\label{fig:exptplt} Minimum \(\eta\) required for \(r_{\std} > 0\), given \(n_c\).}
     \end{figure}
 
-      Consider the following simple wiring, the \emph{N-AND wiring}, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs. Clearly, this can only increase the correlations between Alice and Bob, since \(a \neq b\) only if all \(N\) boxes return different outputs to Alice and Bob. However, this means that if Eve knows that any of the boxes produced 0, she can conclude that the overall output is 0, increasing her correlation with Alice. If the increase in \(H(\crv{A}|\crv{B})\) can make up for the decrease in \(H(\crv{A}|E)\), then this wiring improves the key rate.
+      Consider the following simple wiring, the \emph{N-AND wiring}, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs. Clearly, this can only increase the correlation between Alice and Bob, since \(a \neq b\) only if all \(N\) boxes return different outputs to Alice and Bob. However, this means that if Eve knows that any of the boxes produced 0, she can conclude that the overall output is 0, increasing her correlation with Alice. If Alice's increase in correlation with Bob exceeds her increase in correlation with Eve, then this wiring improves the key rate.
 
       For \(N\) boxes, the correlators and marginals become
       \begin{gather}
@@ -1086,7 +1081,17 @@
       \end{gather}
       and we denote the resultant behaviour as \(p_N\).
 
-      Using the standard protocol key rate, we are able to find \emph{revival} in certain parameter regimes: behaviours with \(r_{\std}(p) = 0\), but which have \(r_{\std}(p_N) > 0\), as shown in \Cref{fig:exptplt}. However, since wiring no longer treats the individual rounds as i.i.d., it should not be used as part of a protocol for the purpose of computing \(C_{\sk}\). Therefore, it is possible that \(C_{\sk}(p_N) > C_{\sk}(p)\). However, it might just be that \(r_{\std}(p) < C_{\sk}(p)\), and that the wiring does not improve the secret key capacity. We can now state one of the aims of our research more precisely:
+      Using the standard protocol key rate, we are able to find \emph{revival} in certain parameter regimes: behaviours with \(r_{\std}(p) = 0\), but which have \(r_{\std}(p_N) > 0\), as shown in \Cref{fig:exptplt}. For this plot, we set \(\eta_A = \eta_B = \eta\) and use
+      \begin{align*}
+        \tilde{A}_x &= \left(\cos\mu_x \sigma_3 + \sin\mu_x \sigma_1\right) \oplus [0] \\
+        \tilde{B}_y &= \left(\cos\nu_y \sigma_3 + \sin\nu_y \sigma_1\right) \oplus [0] \\
+        \ket{\psi} &= \cos\theta \ket{00} + \sin\theta \ket{11},\,\tilde{\rho}_{AB} = \ket{\psi}\bra{\psi},
+      \end{align*}
+      where
+      \[ \sigma_1 = \begin{bmatrix} 0 & 1 \\ 1 &  0 \end{bmatrix} \qquad \sigma_3 = \begin{bmatrix} 1 & 0 \\ 0 & -1 \end{bmatrix} \]
+      are the \(X\) and \(Z\) Pauli matrices on the ideal experimental subspace spanned by \(\{\ket{0}, \ket{1}\}\), and \(\theta=0.15\pi\), \({(\mu_x)}_x = (\pi, 2.53\pi)\), \({(\nu_y)}_y = (2.8\pi, 1.23\pi, \pi)\).
+
+      However, since wiring no longer treats the individual rounds as i.i.d., it should not be used as part of a protocol for the purpose of computing \(C_{\sk}\). Therefore, it is possible that \(C_{\sk}(p_N) > C_{\sk}(p)\). However, it might just be that \(r_{\std}(p) < C_{\sk}(p)\), and that the wiring does not improve the secret key capacity. We can now state one of the aims of our research more precisely:
       \begin{funqn}\label{fqn:wircap}
         Can wiring increase the secret key capacity of a behaviour?
       \end{funqn}
@@ -1145,22 +1150,22 @@
         p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)\label{eqn:wiringprobdef} \\
         \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{\lambda} \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda) p_{\Lambda}(\lambda)\label{eqn:wiringfndef}
       \end{gather}
-      where \(\cvec{a}^c = {(a_1, a_2, \ldots, a_c)}^{\rm T}\) is the vector of all the outputs from Alice's boxes that are wired together, with analogous definitions for \(\cvec{b}^c\), \(\cvec{x}^c\) and \(\cvec{y}^c\). In this context, we refer to \(\chi\) as the \emph{joint wiring function}. The set of no-retrocausation conditions is more complex, since the later boxes can depend on the output of the earlier boxes. If Alice and Bob interact with their boxes in increasing order of the index \(j\), we have:
+      where \(\cvec{a}^c = {(a_1, a_2, \ldots, a_c)}^{\rm T}\) is the vector of all the outputs from Alice's boxes that are wired together, with analogous definitions for \(\cvec{b}^c\), \(\cvec{x}^c\) and \(\cvec{y}^c\). In this context, we refer to \(\chi\) as the \emph{joint wiring distribution}. The set of no-retrocausation conditions is more complex, since the later boxes can depend on the output of the earlier boxes. If Alice and Bob interact with their boxes in increasing order of the index \(j\), we have:
       \begin{equation}
         \begin{aligned}[c]
         \chi_A(a\cvec{x}^j|\cvec{a}^cx\lambda) &= \chi_A(a\cvec{x}^j|\cvec{a}^{j-1}x\lambda),\,\forall j \in \dintv{1}{c} \\
         \chi_B(b\cvec{y}^j|\cvec{b}^cy\lambda) &= \chi_B(b\cvec{y}^j|\cvec{b}^{j-1}y\lambda),\,\forall j \in \dintv{1}{c},
         \end{aligned}\label{eqn:wiringnoretro}
       \end{equation}
-      which we refer to as the \emph{marginal wiring functions}. If we focus only on \(j = c\), we can see these distributions as elements of \(\Ls\), with outputs \((a, \cvec{x}^c)\) and \((b, \cvec{y}^c)\), and inputs \((\cvec{a}^{c-1}, x)\) and \((\cvec{b}^{c-1}, y)\). These conditions will hopefully simplify the space of wirings, since without the conditions, we would have to processs \({(o_A i_A^c)}^{i_A^c o_A} {(o_B i_B^c)}^{i_B^c o_B}\) possible wirings (\(\approx \num{5.12e18}\) for the QKD setting). We will shortly turn our attention to characterising this space, but first briefly remark that, while the definitions and discussion thus far focus on the bipartite case, they generalise readily to the \(n\)-partite case, although we will not treat this case in detail here.
+      which we refer to as the \emph{marginal wiring distributions}. If we focus only on \(j = c\), we can see these distributions as elements of \(\Ls\), with outputs \((a, \cvec{x}^c)\) and \((b, \cvec{y}^c)\), and inputs \((\cvec{a}^{c-1}, x)\) and \((\cvec{b}^{c-1}, y)\). These conditions will hopefully simplify the space of wirings, since without the conditions, we would have to processs \({(o_A i_A^c)}^{i_A^c o_A} {(o_B i_B^c)}^{i_B^c o_B}\) possible wirings (\(\approx \num{5.12e18}\) for the QKD setting). We will shortly turn our attention to characterising this space, but first briefly remark that, while the definitions and discussion thus far focus on the bipartite case, they generalise readily to the \(n\)-partite case, although we will not treat this case in detail here.
 
       \subsection{Wirings as Functions}
 
-      Physically, a probabilistic wiring must actually execute some deterministic wiring, and its joint wiring function is then a probability distribution over the deterministic joint wiring functions, of which there are finitely many. This is the intuition behind the proof of Fine's theorem presented in~\cite{BellNonlocality}, which can be straightforwardly adapted to this polytope. Loosely speaking, given if there exists a decomposition of the behaviour into behaviours that obey the no-retrocausation conditions, these latter behaviours can be converted into deterministic behaviours obeying the conditions by offloading the indeterminism into an auxiliary random variable, and redefining \(\lambda\) to incorporate this auxliary variable.
+      Physically, a probabilistic wiring must actually execute some deterministic wiring, and its joint wiring distribution is then a convex combination of the deterministic joint wiring distributions, of which there are finitely many. This is the intuition behind the proof of Fine's theorem presented in~\cite{BellNonlocality}, which can be straightforwardly adapted to this polytope. Loosely speaking, given a decomposition of the behaviour into behaviours that obey the no-retrocausation conditions, these latter behaviours can be converted into deterministic behaviours obeying the conditions by offloading the indeterminism into an auxiliary random variable, and redefining \(\lambda\) to incorporate this auxliary variable.
 
-      Therefore, to determine the polytope of joint wiring functions, we can use the same approach as is typically used for \(\Ls\), where deterministic operations are taken as the vertices of the polytope, and the facet-defining inequalities derived from there using a facet-enumeration algorithm. In order to avoid the computational effort of simply enumerating all possible local deterministic behaviours and pruning them by removing those that violate the no-retrocausation conditions, we wish to explore the structure of these wirings, so that we can minimise the generation of wirings that will eventually be pruned. Indeed, this analysis reveals significant redundancies in the wirings that would be generated naively, with many of them corresponding to the same action on the behaviours. Removing them at an early stage rather than generating and then dealing with them will increase the scalability of our methods.
+      Therefore, to determine the polytope of joint wiring distributions, we can use the same approach as is typically used for \(\Ls\), where deterministic operations are taken as the vertices of the polytope, and the facet-defining inequalities derived from there using a facet-enumeration algorithm. In order to avoid the computational effort of simply enumerating all possible local deterministic behaviours and pruning them by removing those that violate the no-retrocausation conditions, we wish to explore the structure of these wirings, so that we can minimise the generation of wirings that will eventually be pruned. Indeed, this analysis reveals significant redundancies in the wirings that would be generated naively, with many of them corresponding to the same action on the behaviours. Removing them at an early stage rather than generating and then dealing with them will increase the scalability of our methods.
 
-      In order to illustrate one of the redundancies that emerges from the naive approach, we use a different, more operational description for deterministic wirings. Focusing on Alice's marginal wiring functions, we can decompose her marginal wiring function using Bayes' rule as
+      In order to illustrate one of the redundancies that emerges from the naive approach, we use a different, more operational description for deterministic wirings. We can decompose Alice's marginal wiring distributions using Bayes' rule as
       \begin{align}
         \chi_A(a\cvec{x}^c|\cvec{a}^cx\lambda) &= \chi_A(a|\cvec{x}^c\cvec{a}^cx\lambda) \chi_A(\cvec{x}^{c}|\cvec{a}^cx\lambda) \\
         &= \chi_A(a|\cvec{x}^c\cvec{a}^cx\lambda) \chi_A(x_c|\cvec{x}^{c-1}\cvec{a}^cx\lambda) \chi_A(\cvec{x}^{c-1}|\cvec{a}^cx\lambda) \\
@@ -1169,17 +1174,17 @@
       \end{align}
       where in the last line we have used the no-retrocausation condition. For deterministic wirings, we can consider her inputs \(\cvec{x}^c\) to her boxes as being computed by a sequence of \(c\) deterministic functions with range \(\dintv{1}{i_A}\):
       \begin{equation} x_j = W^{(j)}_{A,\lambda}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x),\,j \in \dintv{1}{c} \end{equation}
-      and a final output function with range \(\dintv{1}{o_A}\):
-      \begin{equation} a = W_{A,\lambda}(\cvec{x}^{c}, \cvec{a}^{c}, x). \end{equation}
-      We refer to each function \(W_{A,\lambda}\) as a \emph{marginal wiring map}. The corresponding marginal wiring function \(\chi_A\) is then
+      and an \emph{overall output} function with range \(\dintv{1}{o_A}\):
+      \begin{equation} a = W_{A,\lambda}^{(c+1)}(\cvec{x}^{c}, \cvec{a}^{c}, x). \end{equation}
+      We refer to each function \(W_{A,\lambda}^{(j)}\) as a \emph{marginal wiring function}. The corresponding marginal wiring distribution \(\chi_A\) is then
       \begin{equation}
         \chi_A(a\cvec{x}^c|\cvec{a}^cx\lambda) = \indic{a = W_{A,\lambda}(\cvec{x}^{c}, \cvec{a}^{c}, x)} \prod_{j=1}^c \indic{x_j = W^{(j)}_{A,\lambda}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x)}.
       \end{equation}
       The analogous definitions for Bob hold with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). Probabilistic wirings can then be described as convex combinations of such deterministic wirings.
 
-      We refer to the discrete set of deterministic marginal wiring functions that obey these relations as \(\sW_D\), and the polytope generated by them as vertices as \(\sW\). \(\sW^n\) is then the convex polytope with vertices \(\sW_D^n = \underbrace{\sW_D \times \sW_D \times \cdots \times \sW_D}_{n\text{ times}}\). We also define \(\sWB(p)\) as the set of behaviours generated by applying \(\sW^n\) to an \(n\)-partite behaviour \(p\) using \Cref{eqn:wiringprobdef}. In order to reduce ambiguity, we refer to wiring maps as mapping a \emph{source} to a \emph{target}, reserving ``input'' and ``output'' to describe the inputs and outputs of boxes.
+      We refer to the discrete set of deterministic marginal wirings that obey these relations as \(\sW_D\), and the polytope generated by them as vertices as \(\sW\). \(\sW^n\) is then the convex polytope with vertices \(\sW_D^n = \underbrace{\sW_D \times \sW_D \times \cdots \times \sW_D}_{n\text{ times}}\). We also define \(\sWB(p)\) as the set of behaviours generated by applying \(\sW^n\) to an \(n\)-partite behaviour \(p\) using \Cref{eqn:wiringprobdef}. In order to reduce ambiguity, we refer to wirings as mapping a \emph{source} to a \emph{target}, reserving ``input'' and ``output'' to describe the inputs and outputs of boxes.
 
-      Using our classification for \(\sW_D\), simple combinatorics gives us \(i_A^{j} o_A^{j-1}\) possible sources for \(W^{(j)}_{A,\lambda}\). However, since the wiring is deterministic, \(x_j\) is completely fixed by \(\cvec{x}^{j-1}\), \(\cvec{a}^{j-1}\) and \(x\). Therefore, when considering each map as part of the overall wiring, the only free choice in the source is \(x\), and so there are only \(i_A o_A^{j-1}\) valid sources.
+      Using our classification for \(\sW_D\), simple combinatorics gives us \(i_A^{j} o_A^{j-1}\) possible sources for \(W^{(j \leq c)}_{A,\lambda}\). However, since the wiring is deterministic, \(x_j\) is completely fixed by \(\cvec{x}^{j-1}\), \(\cvec{a}^{j-1}\) and \(x\). Therefore, when considering each map as part of the overall wiring, the only free choice in the source is \(x\), and so there are only \(i_A o_A^{j-1}\) valid sources.
 
       \begin{table}
         \begin{minipage}{0.5\linewidth}
@@ -1211,7 +1216,7 @@
         \caption[Lookup tables for a specific wiring.]{Left: Lookup table for \(W_A^{(2)}\), giving \(x_2\). Right: Lookup table for \(W_A\), giving overall output \(a\). Entries forbidden by earlier wirings are marked with X (don't care). Both are written as Karnaugh maps, with the row and column labels in Gray code order.}\label{tab:wiring_lut}
       \end{table}
 
-      Therefore, the number of possible \(W^{(j)}_{A,\lambda}\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(W_{A,\lambda}\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
+      Therefore, the number of possible \(W^{(j\leq c)}_{A,\lambda}\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible \(W_{A,\lambda}^{(c+1)}\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
       \begin{equation}
         \exp_{o_A}(i_A o_A^c) \prod_{j=1}^c \exp_{i_A}(i_A o_A^{j-1}).
       \end{equation}
@@ -1223,36 +1228,36 @@
       \end{equation}
       is represented by the lookup tables in~\Cref{tab:wiring_lut}, where juxtaposition is the Boolean AND, addition is the Boolean OR, and the overbar is the Boolean NOT.\ \(W_A^{(2)}\) and \(W_A\) are fully specified by 4 and 8 values respectively, instead of the full 8 and 32 values that would be needed to specify the target for each source sequence.
 
-      Another way to reduce the number of wirings would be to fix some input settings to use a given wiring. For example, if both parties apply the AND gating to specific inputs, the correlators involving those inputs will increase in value. Therefore, we can fix the key generating settings \(A_1\) and \(B_3\) to be AND-wired, so that all functions with \(x_1 = 1\) or \(y_1 = 3\) are fixed to the AND wiring. If we fix the wirings for \(f\) input settings, then we are free to choose the outputs for only \(i_A - f\) possible values of \(x_1\), so the number of possible wirings becomes
+      Another way to reduce the number of wirings would be to fix some input settings to use a given wiring. For example, if both parties apply the AND gating to specific inputs, the correlators involving those inputs will increase in value. Therefore, we can fix the key generating settings \(x = 1\) and \(y = 3\) to be AND-wired. If we fix the wirings for \(f\) input settings, then the number of possible sources for the \(j\)th function will be \((i_A - f) o_A^{j-1}\), so the number of possible wirings becomes
       \begin{equation}
         \exp_{o_A}((i_A-f) o_A^c) \prod_{j=1}^c \exp_{i_A}((i_A-f) o_A^{j-1})
       \end{equation}
       for Alice, with the analogous relabelling for Bob.
 
-      For the case of two boxes in the QKD setting, there are 16384 marginal wiring functions for Alice, and \(\approx \num{8.06e7}\) for Bob, for a total of \(\approx \num{1.32e12}\). Fixing the AND gating as discussed above gives us 128 wirings for Alice and 186624 for Bob, for a total of \(\approx \num{2.39e7}\). Both are much more manageable than the number of vertices of \(\Ls\) without causality constraints, but still a substantial computational workload. Nevertheless, there are still other techniques we can try to decrease the number of possible deterministic wirings, for which we need to study the structure of these wirings in greater detail.
+      For the case of two boxes in the QKD setting, there are 16384 marginal wiring functions for Alice, and \(\approx \num{8.06e7}\) for Bob, for a total of \(\approx \num{1.32e12}\). Fixing the AND gating as discussed above gives us 128 wirings for Alice and 186624 for Bob, for a total of \(\approx \num{2.39e7}\). Both are much more manageable than the number of vertices of \(\Ls\) without causality constraints, but still a substantial computational workload.
 
       \subsection{Wirings as Linear Operators}
 
-      Inspired by the analysis of single-copy local transformations in~\cite{LocalTransformations}, another approach would be to view each marginal wiring map as a reversible symmetry operation on its source, followed by an irreversible mapping to a target, and then a reversible symmetry operation on the target. It is tempting to argue that reversible symmetry operations, which can be represented by unitary operators, cannot change the von Neumann entropy of a state, and therefore can be neglected. Unfortunately, these operators are applied a part of a long sequence of operators, some of which are not unitary, and therefore cannot be simply neglected (aside from the final symmetry operation).
+      Inspired by the analysis of single-copy local transformations in~\cite{LocalTransformations}, another approach would be to view each marginal wiring function as a reversible symmetry operation on its source, followed by an irreversible mapping to a target, and then a reversible symmetry operation on the target. It is tempting to argue that reversible symmetry operations, which can be represented by unitary operators, cannot change the von Neumann entropy of a state, and therefore can be neglected. Unfortunately, these operators are applied a part of a long sequence of operators, some of which are not unitary, and therefore cannot be simply neglected (aside from the final symmetry operation).
 
-      Nonetheless, we can simplify our analysis using the observation that the symmetry operations on the target of one wiring map are of the same type as the symmetry operations on the source of the subsequent wiring map. Let \(R\) be a symmetry operation on the source of a wiring map, \(S\) the symmetry operation on the target of a map, and \(T\) the irreversible operation implemented by the wiring map. Then, the overall effect of a wiring on a behaviour \(p\) can be informally expressed as
-      \[ S_{c+1}T_{c+1}R_{c+1} \cdots S_2T_2R_2 S_1T_1R_1 p. \]
-      Our argument then is that \(R_{j+1}\) and \(S_{j}\) for any \(j\) are elements of the same group of transformations, and can therefore be combined when enumerating the possible deterministic transformations. The sequence of operations is then effectively
-      \[ S_{c+1}T_{c+1}R_{c+1} T_{c}R_{c} \cdots T_2R_2 T_1R_1 p, \]
-      where we keep the final symmetry operation \(S_{c+1}\) since, while \(H(\crv{A}|E)\) itself is not affected by symmetry operations, some methods for estimating \(H(\crv{A}|E)\) might be.
+      Nonetheless, we can simplify our analysis using the observation that the symmetry operations on the target of one wiring function are of the same type as the symmetry operations on the source of the subsequent wiring function. Let \(S\) be a symmetry operation on the source of a wiring function, \(T\) the symmetry operation on the target of a function, and \(R\) the irreversible operation implemented by the wiring function. Then, the overall effect of a wiring on a behaviour \(p\) can be informally expressed as
+      \[ T_{c+1}R_{c+1}S_{c+1} \cdots T_2R_2S_2 T_1R_1S_1 p. \]
+      Our argument then is that \(S_{j+1}\) and \(T_{j}\) for any \(j\) are elements of the same group of transformations, and can therefore be combined when enumerating the possible deterministic transformations. The sequence of operations is then effectively
+      \[ T_{c+1}R_{c+1}S_{c+1} \cdots R_2S_2 R_1S_1 p, \]
+      where we keep the final target symmetry operation \(T_{c+1}\) since, while \(H(\crv{A}|E)\) itself is not affected by local symmetry operations, some methods for estimating \(H(\crv{A}|E)\) might be.
 
-      We will formalise this by expressing the wirings as linear operators: that is, matrices. Since the deterministic marginal wirings are local, they are entirely characterised by their effect on a single-player behaviour, with the effect of a joint deterministic wiring being the tensor product of the marginal wirings. We therefore now consider the case of a single player, whose box takes input \(x \in \dintv{1}{i_A}\) and gives output \(a \in \dintv{1}{o_A}\). Each wiring map is now viewed as a matrix \(\matrp{W}{_A^{(j)}}\), acting on the single-player behaviour represented as a vector \(\cvec{p}^{(j)}_A\).
+      We will formalise this by expressing the wirings as linear operators: that is, matrices. We will use the terms \emph{matrix}, \emph{map} and \emph{operator} interchangeably. Since the deterministic marginal wirings are local, they are entirely characterised by their effect on a single-player behaviour, with the effect of a joint deterministic wiring being the tensor product of the marginal wirings. We therefore now consider the case of a single player, whose box takes input \(x \in \dintv{1}{i_A}\) and gives output \(a \in \dintv{1}{o_A}\). Each wiring function is now viewed as a matrix \(\matrp{W}{_A^{(j)}}\), acting on the single-player behaviour represented as a vector \(\cvec{p}^{(j)}_A\).
 
       We vectorise the behaviour by incrementing \(a\), then \(x\), that is
       \begin{equation}
         p_{A;k} = p(a|x) \Leftrightarrow k = (a-1) \times i_A + x,
       \end{equation}
-      which means that \(\cvec{p}_A\), the vector corresponding to the behaviour, is the direct sum of normalised probability vectors \(\cvec{p}_{A|x}\), each corresponding to the distribution obtained from input \(x\). We refer to the real vector space that \(\cvec{p}_A\) lives in as \(\sP_A \cong \R^{o_Ai_A}\): that is \(\sP\) is isomorphic to \(o_Ai_A\)-dimensional Euclidean space. However, to represent \(c\) independent boxes that are being wired together, and to represent the dependency on the overall input \(x\), the initial state of the system must be an element of \(\R^{i_A} \otimes \sP_A^{\otimes c}\). Therefore, we have
+      which means that \(\cvec{p}_A\), the vector corresponding to the behaviour, is the direct sum of normalised probability vectors \(\cvec{p}_{A|x}\), each corresponding to the distribution obtained from input \(x\). We refer to the real vector space that \(\cvec{p}_A\) lives in as \(\sP_A \cong \R^{o_Ai_A}\): that is \(\sP_A\) is isomorphic to \(o_Ai_A\)-dimensional Euclidean space. However, to represent \(c\) independent boxes that are being wired together, and to represent the dependency on the overall input \(x\), the initial state of the system must be an element of \(\R^{i_A} \otimes \sP_A^{\otimes c}\). Therefore, we have
       \begin{equation}
         \cvec{p}_A^{(1)} = \bigoplus_{l=1}^{i_A} 1 \otimes \bigotimes_{k=1}^c \cvec{p}_A.
       \end{equation}
 
-      Now, application of a wiring map, aside from the overall output map, corresponds to performing a wiring, inputting the wiring target into the next box, and then retrieving the box output. However, we do not need to record the wiring target, as argued above: we only need the box output. Therefore, we can have
+      Now, application of a wiring function, aside from the overall output function that gives \(a\), corresponds to performing a wiring, inputting the wiring function's target into the next nonlocal box, and then retrieving the nonlocal box output. However, we do not need to record the wiring function's target, as argued above: we only need the box output that will become part of the next wiring function's source. Therefore, we can have
       \begin{equation}
         \matrp{W}{_A^{(1)}} \cvec{p}_A^{(1)} = \cvec{p}_A^{(2)} \in \R^{i_A} \otimes \R^{o_A} \otimes \sP^{\otimes c-1}
       \end{equation}
@@ -1418,9 +1423,14 @@
 
       \section{Key Rates of Wired Behaviours}
 
+      Let \(C^{W}_{\sk}(p)\) be the secret key capacity of a behaviour with wiring, that is
+      \begin{equation}
+        C^{W}_{\sk}(p) = \sup_{\chi\in\sW^2} C_{\sk}(\chi(p)).
+      \end{equation}
+
       \subsection{Direct Optimisation}
 
-      A possible approach is to graft the joint wiring function \(\chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy)\) directly onto this semidefinite program, or more specifically \(\chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda)\) and \(\chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda)\), as defined in \Cref{eqn:wiringfndef}. Since \(\chi\) takes a discrete set of arguments, these can be added as optimisation variables, and constrained with the no-retrocausation conditions in \Cref{eqn:wiringnoretro}, and the appropriate normalisation:
+      A possible approach is to introduce the joint wiring distribution \(\chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy)\) as an optimisation variable into the semidefinite program in \Cref{eqn:bff_npa}, or more specifically \(\chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda)\) and \(\chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda)\), as defined in \Cref{eqn:wiringfndef}. Since \(\chi\) takes a discrete set of arguments, its value for every possible argument can be introduced as a variable, and constrained with the no-retrocausation conditions in \Cref{eqn:wiringnoretro}, and the appropriate normalisation:
       \begin{equation}
         \begin{aligned}[c]
           \sum_{a\cvec{x}^c} \chi_A(a\cvec{x}^c|\cvec{a}^cx) &= 1 \\
@@ -1432,6 +1442,30 @@
         n_{\chi} = o_A \times o_B \times i_A^c \times i_B^c \times o_A^c \times o_B^c \times i_A \times i_B
       \end{equation}
       optimisation variables.
+
+      TODO \(\sX\) depends on \(\chi(p)\), may not be able to commute!
+
+      Let \(Q(p, X)\) be the objective function of \Cref{eqn:bff_npa}, so that we can express this SDP as
+      \begin{equation}
+        q_m(p) = \inf_{X\in\sX} Q_m(p, X),
+      \end{equation}
+      where \(X\) consists of the decision variables in \Cref{eqn:bff_npa}, and \(\sX\) is the feasible set for \(X\). We then have, for any \(m\geq 1\),
+      \begin{align}
+        C^W_{\sk}(p) &\geq \sup_{\chi\in\sW^2} \left[ c_m(1) + \inf_{X\in\sX} Q_m(\chi(p), X) - H{(\crv{A}|\crv{B})}_{\chi(p)} \right] \\
+        &= c_m(1) + \sup_{\chi\in\sW^2} \left[ \inf_{X\in\sX} \left[ Q_m(\chi(p), X) - H{(\crv{A}|\crv{B})}_{\chi(p)} \right] \right].
+      \end{align}
+      This is an example of a \emph{bilevel optimisation}, in which some of the parameters of the \emph{outer} or \emph{upper} optimisation (in this case, \(\sup_{\chi\in\sW^2}\)) are set by an \emph{inner} or \emph{lower} optimisation (in this case, \(\inf_{X\in\sX}\)). In the most general setting considered in the literature, the objective function and constraints of the outer optimisation are functions of the \emph{optimal decision variables}. This results in ambiguity when the inner optimisation is achieved by multiple sets of optimal decision variables. The resolution of this ambiguity produces two variants of the problem: the \emph{pessimistic} variant, where the outer optimisation must use the most unfavourable choice of decision variables, and the \emph{optimistic} variant, where the outer optimisation is free to choose any set of decision variables that achieves the inner optimum (TODO cite). However, since the inner decision variables only appear through the inner optimisation's objective function, we can use techniques for either optimistic or pessimistic bilevel optimisation.
+
+      One approach to solving this problem is the \emph{max-min inequality} (TODO cite), which states that 
+      \begin{equation}
+        \sup_{X\in\sX} \inf_{Y\in\sY} f(X,Y) \leq \inf_{Y\in\sY} \sup_{X\in\sX} f(X,Y)
+      \end{equation}
+      for any sets \(\sX\) and \(\sY\), and any function \(f : \sX\times\sY \to \R\). Intuitively, the ``second mover'' (who performs the inner optimisation) always has the advantage, in being able to adapt his strategy to that of the ``first mover''. For the purpose of obtaining a lower bound, this does not help us, but using the \emph{minimax theorem} to strengthen this relation to an equality enables us to solve the optimisation.
+
+      \(C_{\sk}(p)\) is convex in \(p\), since if \(p\) can be expressed as a convex combination \(p = \sum_j w_j p_j\), it would be indistinguishable from such a probabilistic combination of behaviours, which has secret key capacity \(\sum_j w_j C_{\sk}(p_j)\). Therefore
+      \begin{equation}
+        C_{\sk}\left(\sum_j w_j p_j\right) \leq \sum_j w_j C_{\sk}(p_j) \Rightarrow C_{\sk}(p)\text{ convex in }p.
+      \end{equation}
 
     \section{Upper Bounds from Classical Attacks}
 

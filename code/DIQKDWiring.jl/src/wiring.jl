@@ -100,10 +100,10 @@ Base.iterate(ldwit::LDWiringIter) = _iterate(ldwit, iterate(ldwit._dtsit))
 Base.iterate(ldwit::LDWiringIter, state) = _iterate(ldwit, iterate(ldwit._dtsit, state))
 
 # Approach 2: Enumerate possible wiring maps
-num_wiring_maps(c, sett::Setting) = num_wiring_maps(c, sett.oA, sett.iA) * num_wiring_maps(c, sett.oB, sett.iB)
-num_wiring_maps(c, o, i) = o^(i * o^c) * prod(i^(i * o^(j-1)) for j in 1:c)
-num_wiring_maps_fix(c, sett::Setting, fA, fB) = num_wiring_maps_fix(c, sett.oA, sett.iA, fA) * num_wiring_maps_fix(c, sett.oB, sett.iB, fB)
-function num_wiring_maps_fix(c, o, i, f)
+num_wirings(c, sett::Setting) = num_wirings(c, sett.oA, sett.iA) * num_wirings(c, sett.oB, sett.iB)
+num_wirings(c, o, i) = o^(i * o^c) * prod(i^(i * o^(j-1)) for j in 1:c)
+num_wirings_fix(c, sett::Setting, fA, fB) = num_wirings_fix(c, sett.oA, sett.iA, fA) * num_wirings_fix(c, sett.oB, sett.iB, fB)
+function num_wirings_fix(c, o, i, f)
   if f > i
     throw(ArgumentError("$f inputs to fix, but there are only $i inputs!"))
   end
