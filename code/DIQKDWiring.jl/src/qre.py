@@ -104,6 +104,8 @@ class BFFProblem(object):
         self.solvef = kwargs.get("solvef", lambda sdp: sdp.solve())
         self.verbose = kwargs.get("verbose", VERBOSE)
         self.safe = kwargs.get("safe", True)  # accept only optimal solutions?
+        self.last_solve_status = []
+        self.last_solve_contribs = []
         self.substitutions = self.get_subs()  # substitutions used in ncpol2sdpa
 
     def update_half_m(self, half_m):
@@ -151,6 +153,9 @@ class BFFProblem(object):
             q     --   probability of bitflip
         """
         ent = 0.0  # lower bound on H(A|X=0,E)
+        # reset logs
+        self.last_solve_status = []
+        self.last_solve_contribs = []
 
         # We can also decide whether to perform the final optimization in the sequence
         # or bound it trivially. Best to keep it unless running into numerical problems
@@ -166,21 +171,24 @@ class BFFProblem(object):
 
             # Get the i-th objective function
             new_objective = self.binary_objective(self.T[i], px, q)
-
             sdp.set_objective(new_objective)
             self.solvef(sdp)
+
+            contrib = ci * (1 + sdp.dual)
+            self.last_solve_contribs.append(contrib)
+            self.last_solve_status.append(sdp.status)
 
             if self.verbose > 0:
                 print("Status for i =", i + 1, ":", sdp.status)
                 print("Dual value:", sdp.dual)
-                print("Contribution to entropy:", ci * (1 + sdp.dual))
+                print("Contribution to entropy:", contrib)
 
             if not self.safe:  # ignore status and just add to entropy
-                ent += ci * (1 + sdp.dual)
+                ent += contrib
                 continue
             if sdp.status == "optimal":
                 # 1 contributes to the constant term
-                ent += ci * (1 + sdp.dual)
+                ent += contrib
             elif i == m:
                 ent += bound_on_last
                 if self.verbose > 0:

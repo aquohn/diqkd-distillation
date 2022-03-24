@@ -1,4 +1,5 @@
 using StaticArrays, SparseArrays
+using Combinatorics
 
 struct Setting{T <: Integer}
   iA::T
@@ -12,6 +13,22 @@ struct Setting{T <: Integer}
 end
 Base.iterate(s::Setting) = s.iA, reverse([s.oA, s.iB, s.oB])
 Base.iterate(s::Setting, state) = isempty(state) ? nothing : (pop!(state), state)
+
+function is_ns(pabxy, tol=0)
+  oA, oB, iA, iB = size(pabxy)
+  paxs = [[sum(pabxy[a,:,x,y]) for a in 1:oA, x in 1:iA] for y in 1:iB]
+  pbys = [[sum(pabxy[:,b,x,y]) for b in 1:oB, y in 1:iB] for x in 1:iA]
+  fpax, rpaxs = Iterators.peel(paxs)
+  fpby, rpbys = Iterators.peel(pbys)
+
+  Acheck = [isapprox(fpax, pax, atol=tol) for pax in rpaxs]
+  Bcheck = [isapprox(fpby, pby, atol=tol) for pby in rpbys]
+  if all(Acheck) || all(Bcheck)
+    return true
+  else
+    return false
+  end
+end
 
 struct Correlators{Sax, Sby, Sabxy, T <: Real}
   Eax::SArray{Sax, T}
@@ -69,7 +86,7 @@ function Correlators(behav::Behaviour)
   oA, oB, iA, iB = size(pabxy)
   Eax = [pax[2,x] - pax[1,x] for x in 1:iA]
   Eby = [pby[2,y] - pby[1,y] for y in 1:iB]
-  Eabxy = [sum(pabxy[a,b,x,y] * ((a == b) ? 1 : -1) for a in 1:oA, b in 1:iA) for x in 1:iA, y in 1:iB]
+  Eabxy = [sum(pabxy[a,b,x,y] * ((a == b) ? 1 : -1) for a in 1:oA, b in 1:oB) for x in 1:iA, y in 1:iB]
 
   return Correlators(Eax, Eby, Eabxy)
 end
@@ -91,3 +108,38 @@ function Behaviour(corrs::Correlators{Sax, Sby, Sabxy, T}) where {Sax, Sby, Sabx
   return behav
 end
 
+maxchsh(p::Behaviour) = maxchsh(Correlators(p))
+function maxchsh(C::Correlators)
+  Eax, Eby, Eabxy = C
+  iA, iB = length(Eax), length(Eby)
+  iA, iB = length(Eax), length(Eby)
+  xsit = combinations(1:iA, 2)
+  ysit = combinations(1:iB, 2)
+
+  maxS = 0
+  for (xs, ys) in itprod(xsit, ysit)
+    Es = [Eabxy[x, y] for x in xs, y in ys]
+    Esum = sum(Es)
+    for E in Es
+      curr = abs(Esum - 2*E)
+      if curr > maxS
+        maxS = curr
+      end
+    end
+  end
+
+  return maxS
+end
+
+# TODO wrong
+function nl_extr_count(sett::Setting)
+  iA, oA, iB, oB = sett
+  count = 0
+  for (gx, gy) in itprod(2:iA, 2:iB)
+    detAs = max(1, 2 * (iA - gx))
+    detBs = max(1, 2 * (iB - gy))
+    choices = max(1, ((gx-1)*(gy-1) - 1))
+    count += detAs * detBs * choices * factorial(iA) * factorial(iB)
+  end
+  return count
+end

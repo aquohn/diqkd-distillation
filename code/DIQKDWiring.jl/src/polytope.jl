@@ -31,8 +31,8 @@ function func_vec(::Type{T}, ::Type{Ti}, tupranges) where {T <: Real, Ti <: Inte
 end
 
 full_polytope(sett::Setting, polylib=LRSLib.Library()) = full_polytope(2, [sett.iA, sett.iB], [sett.oA, sett.oB], polylib)
-full_polytope(n::Integer, i::Integer, o::Integer, polylib=LRSLib.Library()) = full_polytope(n, [i], [o], polylib)
-full_polytope(::Type{T}, n::Integer, i::Integer, o::Integer, polylib=LRSLib.Library()) where T = full_polytope(T, n, [i], [o], polylib)
+full_polytope(n::Integer, i::Integer, o::Integer, polylib=LRSLib.Library()) = full_polytope(n, repeat([i], n), repeat([o], n), polylib)
+full_polytope(::Type{T}, n::Integer, i::Integer, o::Integer, polylib=LRSLib.Library()) where T = full_polytope(T, n, repeat([i], n), repeat([o], n), polylib)
 full_polytope(n, is, os, polylib=LRSLib.Library()) = full_polytope(Float64, n, is, os, polylib)
 function full_polytope(::Type{T}, n::Integer, is::AbstractVector{Ti}, os::AbstractVector{To}, polylib=LRSLib.Library()) where {T <: Real, Ti <: Integer, To <: Integer}
   # HalfSpace(a,b) => a \dot x \leq b
