@@ -1203,7 +1203,7 @@
               that satisfies
               \begin{equation}
                 \begin{aligned}[c]
-                  \chi(abx_0y_0|a_0b_0xy) = \sum_{\lambda} \chi_A(ax_0|a_0x\lambda) \chi_B(by_0|b_0y\lambda) P_{\Lambda}(\lambda),
+                  \chi(abx_0y_0|a_0b_0xy) = \sum_{\lambda} P_{\Lambda}(\lambda) \chi_A(ax_0|a_0x\lambda) \chi_B(by_0|b_0y\lambda),
                 \end{aligned}
               \end{equation}
               where \(P_{\Lambda}\) is the distribution of the shared randomness, and \(\chi\) can be interpreted as a conditional probability within \(\Ls\)\footnote{Note that there are some articles which use a slightly different definition of LOSR, such that \(\chi\) is restricted to a nonconvex subset of \(\Ls\). One such paper is~\cite{DIQKD_Limits}, which defines quantum intrinsic nonlocality (\Cref{sec:diqkd_ubehav}) and proves it is monotone under LOSR using the different definition. Fortunately, the result still holds using the definition of LOSR we use. See~\cite[Sec A.2]{BellResourceTheory} for more details.}, with outputs \((a, x_0)\) and \((b, y_0)\), and inputs \((a_0, x)\) and \((b_0, y)\). \(\chi_A\) and \(\chi_B\) must also satisfy the \emph{no-retrocausation} conditions:
@@ -1216,7 +1216,7 @@
               However, since our wirings combine multiple boxes, their effect cannot be expressed in this form. Nonetheless, we can straightforwardly generalise the expressions for LOSR operations, for \(c\) boxes wired together, as:
               \begin{gather}
                 p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)\label{eqn:jwirdistdef} \\
-                \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{\lambda} \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda) P_{\Lambda}(\lambda)\label{eqn:mwirdistdef}
+                \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{\lambda} P_{\Lambda}(\lambda) \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda) \label{eqn:mwirdistdef}
               \end{gather}
               where \(\cvec{a}^c = {(a_1, a_2, \ldots, a_c)}^{\rm T}\) is the vector of all the outputs from Alice's boxes that are wired together, with analogous definitions for \(\cvec{b}^c\), \(\cvec{x}^c\) and \(\cvec{y}^c\). We refer to the function \(\chi\) as the \emph{joint wiring distribution}, and \(\chi_A\) and \(\chi_B\) as the as the \emph{marginal wiring distributions}. We additionally write \(p' = \chi[p]\) to indicate that \(p'\) is the result of applying the wiring \(\chi\) to the behaviour \(p\). Now, these distributions are clearly elements of \(\Ls\), with outputs \((a, \cvec{x}^c)\) and \((b, \cvec{y}^c)\), and inputs \((\cvec{a}^{c-1}, x)\) and \((\cvec{b}^{c-1}, y)\). However, not every element of \(\Ls\) is a valid wiring, since the wirings are also constrained by the no-retrocausation conditions.
 
@@ -1239,6 +1239,8 @@
                   \end{equation}
                   where \emph{ordered} refers to the fact that \(\pi\) is the identity permutation, and \emph{iid} to the fact that \(p_j = p\;\forall j\).
 
+                  TODO permutation doesn't affect general joint behaviours but we have to indicate the permutation between the order specified (followed by behaviour) and the order used (followed by wirings, required for no-retrocausation)
+
                   Lastly, note that, while we work with the full behaviour instead of the Collins-Gisin representation for ease of interpretation and analysis, one possible extension that could simplify computational search would be to find a way to express the wirings in terms of their action on the Collins-Gisin coefficients, which would provide a more minimal representation. We leave this to future work.
                   \begin{question}
                     How can wirings be expressed in terms of the Collins-Gisin representation?
@@ -1260,27 +1262,26 @@
               \begin{proof}
                 From \Cref{eqn:nooutputdep} and using \Cref{eqn:mwirdistdef}, for any given \(\cvec{a}^c\) and \(\cvec{b}^c\),
                 \begin{align}
-                  \chi(\cvec{x}^c\cvec{y}^c|xy) &= \sum_{ab} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) \\
-                                                &= \sum_{ab} \sum_{\lambda} \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda) P_{\Lambda}(\lambda) \\
-                                                &= \sum_{\lambda} \chi_A(\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(\cvec{y}^c|\cvec{b}^cy \lambda) P_{\Lambda}(\lambda) \\
-                                                &= \sum_{\lambda} \chi_A(\cvec{x}^c|x \lambda) \chi_B(\cvec{y}^c|y \lambda) P_{\Lambda}(\lambda),\label{eqn:nooutputmwir}
+                  \chi(\cvec{x}^c\cvec{y}^c|xy) &= \sum_{ab} P_{\Lambda}(\lambda) \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) \\
+                                                &= \sum_{ab} \sum_{\lambda} P_{\Lambda}(\lambda) \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\cvec{y}^c|\cvec{b}^cy \lambda) \\
+                                                &= \sum_{\lambda} P_{\Lambda}(\lambda) \chi_A(\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(\cvec{y}^c|\cvec{b}^cy \lambda)  \\
+                                                &= \sum_{\lambda} P_{\Lambda}(\lambda) \chi_A(\cvec{x}^c|x \lambda) \chi_B(\cvec{y}^c|y \lambda),\label{eqn:nooutputmwir}
                 \end{align}
-                that is, \(\cvec{x}^c\) and \(\cvec{y}^c\) can be locally generated with just access to \(x\) and \(y\), respectively, and the shared randomness \(\lambda\).
+                that is, \(\cvec{x}^c\) and \(\cvec{y}^c\) can be locally generated with just access to \(x\) and \(y\), respectively, and the shared randomness \(\Lambda\).
 
                 Then, if \(p'\) is observed, one implementation of the devices to produce \(p'\) is to generate vectors \(\cvec{x}^c\) and \(\cvec{y}^c\) from the inputs \(x\) and \(y\), run the process that generates \(p\) \(c\) times using the generated inputs \(\cvec{x}^c\) and \(\cvec{y}^c\), and then to consolidate \(\cvec{a}^c\) and \(\cvec{b}^c\) into outputs \(a\) and \(b\) based on the wiring distribution. In both cases, the underlying process, and the information Eve gains from it, is the same, and therefore the secret key capacity of \(p'\) cannot exceed that of \(p\).
 
                TODO remove iid joint assumption; not needed
 
-              More concretely, consider any iid joint behaviour \(p^c\) generated by a quantum process
+              More concretely, consider any joint behaviour \(p^c\) generated by a quantum process on Alice and Bob's joint Hilbert space \(AB = A \otimes B\):
               \begin{equation}
-                p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) = \prod_{j=1}^c p(a_j\pi(b_j)|x_j\pi(y_j)) = \prod_{j=1}^c \Tr\left[\rho \left(M_{a_j|x_j} \otimes N_{\pi(b_j)|\pi(y_j)}\right) \right],
+                p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) = \Tr\left[\rho_{AB} \left( M_{\cvec{a}^c|\cvec{x}^c} \otimes N_{\cvec{b}^c|\cvec{y}^c} \right) \right],
               \end{equation}
-              and let \(C_{\sk}(p) = r\). Then, for a behaviour \(p'\) that can be obtained from applying a wiring without output dependency to \(p^c\), and writing \(M_{\cvec{a}^c|\cvec{x}^c} = \bigotimes_{j=1}^c M_{a_j|x_j}\) and \(N_{\pi(\cvec{b}^c)|\pi(\cvec{y}^c)} = \bigotimes_{j=1}^c N_{\pi(b_j)|\pi(y_j)}\), we have
+              and let \(C_{\sk}(p) = r\). Then, for any behaviour \(p'\) that can be obtained from applying a wiring without output dependency \(\chi\) to \(p^c\), we have
               \begin{gather}
-                p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \sum_{\lambda} \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\pi(\cvec{y}^c)|\pi(\cvec{b}^c)y \lambda) P_{\Lambda}(\lambda) \prod_{j=1}^c p(a_j\pi(b_j)|x_j\pi(y_j)) \\
-                = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \sum_{\lambda} \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\pi(\cvec{y}^c)|\pi(\cvec{b}^c)y \lambda) P_{\Lambda}(\lambda) \prod_{j=1}^c \Tr\left[\rho \left(M_{a_j|x_j} \otimes N_{\pi(b_j)|\pi(y_j)}\right) \right], \\
-                = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \sum_{\lambda} \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\pi(\cvec{y}^c)|\pi(\cvec{b}^c)y \lambda) P_{\Lambda}(\lambda) \Tr\left[\rho^{\otimes c} \left( M_{\cvec{a}^c|\cvec{x}^c} \otimes N_{\pi(\cvec{b}^c)|\pi(\cvec{y}^c)} \right) \right], \\
-                = \sum_{\lambda} P_{\Lambda}(\lambda) \Tr\left[\rho^{\otimes c} \underbrace{\left( \sum_{\cvec{a}^c\cvec{x}^c} \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) M_{\cvec{a}^c|\cvec{x}^c} \right)}_{M'_{a|x\lambda}} \otimes \underbrace{\left(\sum_{\cvec{b}^c\cvec{y}^c} \chi_B(b\pi(\cvec{y}^c)|\pi(\cvec{b}^c)y \lambda) N_{\pi(\cvec{b}^c)|\pi(\cvec{y}^c)} \right)}_{N'_{b|y\lambda}} \right].
+                p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \sum_{\lambda} \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\pi(\cvec{y}^c)|\pi(\cvec{b}^c)y \lambda) P_{\Lambda}(\lambda) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \\
+                = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \sum_{\lambda} \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\pi(\cvec{y}^c)|\pi(\cvec{b}^c)y \lambda) P_{\Lambda}(\lambda) \Tr\left[\rho_{AB} \left( M_{\cvec{a}^c|\cvec{x}^c} \otimes N_{\cvec{b}^c|\cvec{y}^c} \right) \right], \\
+                = \sum_{\lambda} P_{\Lambda}(\lambda) \Tr\left[\rho_{AB} \underbrace{\left( \sum_{\cvec{a}^c\cvec{x}^c} \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) M_{\cvec{a}^c|\cvec{x}^c} \right)}_{M'_{a|x\lambda}} \otimes \underbrace{\left(\sum_{\cvec{b}^c\cvec{y}^c} \chi_B(b\pi(\cvec{y}^c)|\pi(\cvec{b}^c)y \lambda) N_{\pi(\cvec{b}^c)|\pi(\cvec{y}^c)} \right)}_{N'_{b|y\lambda}} \right].
               \end{gather}
               The operators \({\{M'_{a|x\lambda}\}}_a\) form a POVM, since the operators retain their positive-semidefiniteness from the positive-semidefiniteness of the underlying operators and the nonnegativity of the weights \(\chi_A\), and
               \begin{align}
@@ -1291,19 +1292,48 @@
 
                TODO define implementation as meas strat + state
 
-               TODO show, even giving honest parties best p(x,y), that a protocol for \(p'\) would imply a protocol for \(p\).  Write more formally
+               TODO explicitly construct expanded Hilbert space to avoid dealing with shared randomness
 
-               Let \(C_{\sk}(p') = r'\), and let \(\rho\) be the ccq state compatible with \(p\) with the best possible \(p_{\mathrm{in}}^c\) for Alice and Bob, and the best possible \(E\) for Eve for \(\rho\), while \(\rho'\) is the ccq state with the best possible \(p_{\mathrm{in}}\) for Alice and Bob and the implementation above on Eve's part, with the Hilbert space expanded to remove the shared randomness \(\lambda\). Then we can write these states as
+               Let \(C_{\sk}(p') = r'\), and let \(\rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E}\) be the qqq state compatible with \(p\) with the best possible \(p_{\mathrm{in}}^c\) for Alice and Bob, and the best possible \(E\) for Eve, while \(\rho'_{\crv{A}\crv{X} \crv{B}\crv{Y} E}\) is the ccq state with the best possible \(p_{\mathrm{in}}\) for Alice and Bob and the implementation above (hence the same Hilbert space \(E\) used in both), with the Hilbert space expanded to remove the shared randomness \(\lambda\). Then we can write these states as
       \begin{align}
         \rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E} &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c} \begin{aligned}[c]
-          & p^c_{\rm in}(\cvec{x}^c,\cvec{y}^c) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \proj[\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c]{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \\
+          & p^c_{\rm in}(\cvec{x}^c,\cvec{y}^c) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \proj[\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c]{\cvec{a}^c\cvec{x}^c\cvec{b}^c\cvec{y}^c} \\
           \otimes & \rho_{E|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c},
         \end{aligned} \\
-          \rho'_{\crv{A}\crv{X} \crv{B}\crv{Y} E} &= \sum_{abxy} p'_{\rm in}(x,y) \proj[\crv{A}\crv{X} \crv{B}\crv{Y}]{axby} \otimes \Tr_{AB} \left[ \rho^{\otimes c} \left(M_{a|x} \otimes N_{b|y} \otimes I_E\right) \right] \\
-          &= \sum_{abxy} p'_{\rm in}(x,y) p'(ab|xy) \proj[\crv{A}\crv{X} \crv{B}\crv{Y}]{axby} \otimes \rho_{E|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c},
+          \rho'_{\crv{A}\crv{X} \crv{B}\crv{Y} E} &= \sum_{abxy} p'_{\rm in}(x,y) \proj[\crv{A}\crv{X} \crv{B}\crv{Y}]{axby} \otimes \Tr_{AB} \left[ \rho_{ABE} \left(M'_{a|x} \otimes N'_{b|y} \otimes I_E\right) \right] \\
+                                                  &=
+                                                  \sum_{abxy} p'_{\rm in}(x,y) \proj[\crv{A}\crv{X} \crv{B}\crv{Y}]{axby} \otimes \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c\lambda}
+                                                  \begin{aligned}[c]
+          & P_{\Lambda}(\lambda) \chi_A(a\cvec{x}^c|\cvec{a}^cx \lambda) \chi_B(b\pi(\cvec{y}^c)|\pi(\cvec{b}^c)y \lambda) \\
+          &  p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)
+          \rho_{E|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c},
+                                                  \end{aligned} \\
+          &= 
+          \sum_{abxy} p'_{\rm in}(x,y) \proj[\crv{A}\crv{X} \crv{B}\crv{Y}]{axby} \otimes \begin{aligned}[c]
+          & P_{\Lambda}(\lambda) \chi(ab\cvec{x}^c\pi(\cvec{y}^c)|\cvec{a}^c\pi(\cvec{b}^c)xy) \\
+          & \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)
+          \rho_{E|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c},
+          \end{aligned} \\
       \end{align}
-      By assumption, there must exist an LOPC protocol \(\mathfrak{P}'_{\omega}\) that distills \(\rho'\) at a rate of at least \(r'\), since this specific implementation could be suboptimal for Eve. However, by choosing \(p^c_{\rm in}(\cvec{x}^c,\cvec{y}^c) = \chi(\cvec{x}^c\cvec{y}^c|xy)p'_{\rm in}(x,y)\), Alice and Bob can transform \(\rho\) to \(\rho'\) using LOPC operations and apply \(\mathfrak{P}'_{\omega}\) to distill key at a rate of at least \(r'\). Therefore, \(r \geq r'\).
-
+      By assumption, there must exist an LOPC protocol \(\mathfrak{P}'_{\omega}\) that distills \(\rho'\) at a rate of at least \(r'\), since this specific implementation could be suboptimal for Eve. However, by choosing 
+      \begin{equation}
+        p^c_{\rm in}(\cvec{x}^c,\cvec{y}^c) = \sum_{xy} \chi(\cvec{x}^c\cvec{y}^c|xy)p'_{\rm in}(x,y) = \sum_{xy} \chi(\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy)p'_{\rm in}(x,y),
+      \end{equation}
+      and local operators
+      \begin{align}
+        V_A &= \sum_{ax\cvec{a}^c\cvec{x}^c} \ket{ax}\bra{\cvec{a}^c\cvec{x}^c} \\
+        V_B &= \sum_{by\cvec{b}^c\cvec{y}^c} \ket{by}\bra{\cvec{b}^c\cvec{y}^c},
+      \end{align}
+      Alice and Bob can obtain
+      \begin{gather}
+        (V_A \otimes V_B \otimes I_E)\rho{(V_A \otimes V_B \otimes I_E)}^{\dagger} \\
+        =   \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c}
+          p^c_{\rm in}(\cvec{x}^c,\cvec{y}^c) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)
+          \sum_{abxy} \proj[\crv{A}\crv{X} \crv{B}\crv{Y}]{axby}
+          \otimes \rho_{E|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c}
+        \\
+      \end{gather}
+      using LOPC operations. They can then apply \(\mathfrak{P}'_{\omega}\) to distill key at a rate of at least \(r'\). Therefore, \(r \geq r'\).
               \end{proof}
 
                 Note that this result holds even if the order of the boxes is permuted, since there is no dependence on the outputs. In fact, given a wiring that satisfies \Cref{eqn:nooutputdep}, any wiring that results from permuting \(\cvec{x}^c\) and \(\cvec{y}^c\) would still satisfy \Cref{eqn:nooutputdep} and be subject to this lemma.
@@ -1335,7 +1365,12 @@
 
               Physically, a probabilistic wiring must actually execute some deterministic wiring, and its joint wiring distribution is then a convex combination of the deterministic joint wiring distributions, of which there are finitely many. This is the intuition behind the proof of Fine's theorem presented in~\cite{BellNonlocality}, which can be straightforwardly adapted to this polytope. Informally, given a decomposition of the behaviour into behaviours that obey the no-retrocausation conditions, these latter behaviours can be converted into deterministic behaviours obeying the conditions by offloading the indeterminism into an auxiliary random variable, and redefining \(\lambda\) to incorporate this auxliary variable.
 
-              TODO write proof properly
+              \begin{theorem}[Fine's Theorem for Wirings]
+                The set of marginal wirings \(\sW\) forms a polytope, whose vertices are the set of deterministic marginal wirings obeying the no-retrocausation relations \(\sW_D\). All \(n\)-partite wirings are then elements of the polytope generated by the vertices \(\sW_D^n\).
+              \end{theorem}
+              \begin{proof}
+                From \Cref{eqn:wiringnoretro}, any marginal wiring 
+              \end{proof}
 
               We refer to the discrete set of deterministic marginal wirings that obey these relations as \(\sW_D\), and the polytope generated by them as vertices as \(\sW\). \(\sW^n\) is then the convex polytope with vertices \(\sW_D^n = \underbrace{\sW_D \times \sW_D \times \cdots \times \sW_D}_{n\text{ times}}\). We also define \(\sWB(p)\) as the set of behaviours generated by applying \(\sW^n\) to an \(n\)-partite behaviour \(p\) using \Cref{eqn:jwirdistdef}.
 
@@ -2007,7 +2042,7 @@
                   \begin{equation}
                     R_1 \leadsto R_2 \Rightarrow \mu(R_1) \succeq \mu(R_2)
                   \end{equation}
-                  for some pre-order \(\succeq\) defined on the codomain of the monotone. As mentioned in \Cref{sec:locwir}, wirings are \emph{multiple-copy conversions}~\cite{BellResourceTheory}. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under a set of free actions that is a strict superset of \(\sW_D^c\) defined in \Cref{sec:locwir}. These wirings additionally allow the order in which the boxes are used to be permuted and for non-deterministic wirings. However, its monotonicity under wirings with shared randomness was not proved. Nonetheless, we will review these results to see how they can help us.
+                  for some pre-order \(\succeq\) defined on the codomain of the monotone. As mentioned in \Cref{sec:locwir}, wirings are \emph{multiple-copy conversions}~\cite{BellResourceTheory}. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under a set of free actions that is a strict superset of \(\sW_D^c\) defined in \Cref{sec:locwir}. However, its monotonicity under wirings with shared randomness was not proved. Nonetheless, we will review these results to see how they can help us.
 
                   \subsection{Maximal Correlation and Related Measures}\label{sec:nlmono_maxcorr}
 
