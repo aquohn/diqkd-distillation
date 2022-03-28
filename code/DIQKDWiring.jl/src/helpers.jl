@@ -1,4 +1,4 @@
-using Permutations, QuantumInformation
+using Permutations
 
 macro printvals(syms...)
   l = length(syms)
@@ -52,14 +52,30 @@ unzip(a) = map(x->getfield.(a, x), fieldnames(eltype(a)))
 const itprod = Iterators.product
 const itrept = Iterators.repeated
 
-#= function permutesystems(v::AbstractVector{T}, dims::Vector{Int}, P::Permutation) where T
-  @assert length(v) == prod(dims)
+# TODO PR to QuantumInformation.jl permutesystems
+permutespaces(D, dims, systems::AbstractVector{<:Integer}) = permutespaces(D, dims, Permutation(systems))
+permutespaces(M::AbstractMatrix, dims::AbstractVector{<:Integer}, P::Permutation) = permutespaces(M, [(d,d) for d in dims], P)
+function permutespaces(M::AbstractMatrix, dims::AbstractVector{<:Tuple{<:Integer, <:Integer}}, P::Permutation)
   @assert length(P) == length(dims)
-  
-end =#
+  rdims, cdims = zip(dims...) |> collect
+  @assert (prod(rdims), prod(cdims)) == size(M)
 
-permutesystems(v::AbstractVector, dims::Vector{Int}, systems::Vector{Int}) = permutesystems(v, dims, Permutation(systems))
-function permutesystems(v::AbstractVector, dims::Vector{Int}, P::Permutation)
+  n = length(P)
+  Pvec = P.data
+  fullP = [Pvec; Pvec .+ n]
+  reversed_indices = tuple(collect(2*n:-1:1)...)
+  rrdims = reverse(rdims)
+  rcdims = reverse(cdims)
+  tensor = reshape(M, [rrdims...; rcdims...]...)
+
+  # reverse tensor to match dims and P
+  reversed_tensor = permutedims(tensor, reversed_indices)
+  reversed_transposed_tensor = permutedims(reversed_tensor, fullP)
+  transposed_tensor = permutedims(reversed_transposed_tensor, reversed_indices)
+  return reshape(transposed_tensor, size(M))
+end
+
+function permutespaces(v::AbstractVector, dims::AbstractVector{<:Integer}, P::Permutation)
   @assert prod(dims) == length(v)
   @assert length(P) == length(dims)
 
@@ -70,7 +86,7 @@ function permutesystems(v::AbstractVector, dims::Vector{Int}, P::Permutation)
 
   # reverse tensor to match dims and P
   reversed_tensor = permutedims(tensor, reversed_indices)
-  reversed_transformed_tensor = permutedims(reversed_tensor, P.data)
-  transformed_tensor = permutedims(reversed_transformed_tensor, reversed_indices)
-  return reshape(transformed_tensor, size(v))
+  reversed_transposed_tensor = permutedims(reversed_tensor, P.data)
+  transposed_tensor = permutedims(reversed_transposed_tensor, reversed_indices)
+  return reshape(transposed_tensor, size(v))
 end

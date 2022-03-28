@@ -160,6 +160,7 @@ function cg_to_full(v::AbstractVector{T}, sett::Setting) where {T <: Real}
   return Behaviour(pabxy)
 end
 
+full_to_cg(p::Behaviour) = full_to_cg(p.pax, p.pby, p.pabxy)
 function full_to_cg(pax, pby, pabxy)
   oA, oB, iA, iB = size(pabxy)
   pax_vec = vec(pax[1:oA-1, 1:iA])

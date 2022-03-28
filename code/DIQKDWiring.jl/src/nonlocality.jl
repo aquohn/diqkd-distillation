@@ -74,6 +74,7 @@ Base.iterate(P::Behaviour, state) = isempty(state) ? nothing : (pop!(state), sta
 Base.getindex(P::Behaviour, i::Integer) = P.pabxy[i]
 Base.getindex(P::Behaviour, i::Integer...) = P.pabxy[i...]
 Base.size(P::Behaviour) = Base.size(P.pabxy)
+Base.:(==)(P1::Behaviour, P2::Behaviour) = all(iszero.(P1.pabxy - P2.pabxy))
 # TODO constructor that checks if pabxy is normalised?
 
 function convexsum(ws::AbstractVector{T}, Cs::AbstractVector{Tp}) where {T <: Real, Tp <: Behaviour}

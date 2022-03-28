@@ -174,7 +174,7 @@ Base.iterate(wmit::WiringMapIter, state) = iterate(wmit._prodwmit, state)
 # solve slowly using lrs
 
 # Approach 3: Interpret wirings as linear operators
-# TODO use RecursiveArrayTools?
+# TODO use RecursiveArrayTools/vec trick? kron(A, B) * vec(C) = vec(BCA')
 const MargWiringMap{Tp} = Vector{Vector{Array{Tp}}}
 const MargWiringComponents{Tp, Ti} = Vector{Union{Vector{SparseVector{Tp, Ti}}, Vector{ SparseMatrixCSC{Tp, Ti}}}}
 function Vector(mwcomp::MargWiringComponents{Tp, Ti}) where {Tp, Ti}
@@ -272,6 +272,7 @@ struct Wiring{Ti <: Integer, Tp <: Real}
 end
 function Wiring(margWs::AbstractVector{MargWiring{Ti, Tp}}) where {Ti, Tp}
   cs = [margW.c for margW in margWs]
+  c = first(cs)
   if !(all(c -> c == first(cs), cs))
     throw(ArgumentError("Marginal wirings take different numbers of boxes!"))
   end
@@ -279,7 +280,16 @@ function Wiring(margWs::AbstractVector{MargWiring{Ti, Tp}}) where {Ti, Tp}
   os = [margW.o for margW in margWs]
   is = [margW.i for margW in margWs]
   W = (n == 1) ? first(margWs).W : kron((margW.W for margW in margWs)...)
-  return Wiring(n, first(cs), os, is, W)
+  permvec = Vector{Ti}(undef, n*c)
+  for j in 1:n
+    currstart = (j-1)*c+1
+    permvec[currstart:j*c] = j:n:c*n
+  end
+
+  dims = vcat([[(o*i, o*i); repeat([(1, o*i)], c-1)] for (o, i) in zip(os, is)]...)
+  permW = permutespaces(W, dims, permvec) |> sparse
+
+  return Wiring(n, first(cs), os, is, permW)
 end
 function Array(w::Wiring{Ti, Tp}) where {Ti, Tp}
   c, os, is = w.c, w.os, w.is
@@ -305,7 +315,8 @@ function BehaviourVec(parr::AbstractArray{Tp}) where {Tp <: Real}
     dimvec = Ti[dims...]
     os, is = dimvec[1:n], dimvec[n+1:2*n]
     # nth system's index changes fastest as we go down the vector
-    # so start from nth system
+    # Julia's first index changes fastest
+    # so nth system has first index
     argit = itprod(vcat(([1:os[k], 1:is[k]] for k in n:-1:1)...)...)
     p = Vector{Tp}(undef, length(argit))
     for (pidx, argval) in zip(eachindex(p), argit)
@@ -348,13 +359,7 @@ function Base.:*(wiring::Wiring{Tiw, Tpw}, b::BehaviourVec{Tib, Tpb}) where {Tiw
   Ti = promote_type(Tiw, Tib)
   Tp = promote_type(Tpw, Tpb)
   kronp = kron(repeat([b.p], c)...)
-  permvec = Vector{Ti}(undef, n*c)
-  for j in 1:n
-    permvec[((j-1)*c+1):j*c] = j:n:c*n
-  end
-  dims = vcat((repeat([o*i for (o, i) in zip(os, is)], c))...)
-  permp = permutesystems(kronp, dims, permvec)
-  finalp = wiring.W * permp
+  finalp = wiring.W * kronp
   return BehaviourVec{Ti, Tp}(n, os, is, finalp)
 end
 Base.:(==)(bv1::BehaviourVec, bv2::BehaviourVec) = all(iszero.(bv1.p - bv2.p))
