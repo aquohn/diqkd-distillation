@@ -4,6 +4,7 @@ using LinearAlgebra, SparseArrays, QuantumInformation
 using SymEngine
 
 includet("helpers.jl")
+includet("nonlocality.jl")
 includet("maxcorr.jl")
 
 const vLl = 999 * 689 * 10^-6 * cos(pi/50)^4
@@ -13,6 +14,7 @@ vcrit(vL) = (vL+1)/(3-vL)
 kd(i,j) = (i == j) ? 1 : 0
 E(M, rho) = tr(M * rho)
 const sigmas = [[kd(j, 3) kd(j,1)-im*kd(j,2); kd(j,1)+im*kd(j,2) -kd(j,3)] for j in 1:3]
+const sigma_eigs = eigen.(sigmas)
 Emat(d, x, y) = sparse([x], [y], [1], d, d)
 # Generalised Gell-Mann matrices
 function tr0_herm_basis(n::Integer)
@@ -62,14 +64,77 @@ const LD_corrs = Correlators([1, 1],
 
 werner_corrs(v) = convexsum([v, 1-v], [singlet_corrs, mix_corrs])
 const v_L = 0.6829; const v_NL = 0.6964; const v_crit = 0.7263
+
+const ket0 = ket(1,2)
+const ket1 = ket(2,2)
+const ketp = (ket0 + ket1)/sqrt(2)
+const ketm = (ket0 - ket1)/sqrt(2)
+const phip = (kron(ket0, ket0) + kron(ket1, ket1)) / sqrt(2)
+const phim = (kron(ket0, ket0) - kron(ket1, ket1)) / sqrt(2)
+const psip = (kron(ket0, ket1) + kron(ket1, ket0)) / sqrt(2)
+const psim = (kron(ket0, ket1) - kron(ket1, ket0)) / sqrt(2)
+
+# measurements that saturate the bound on the standard protocol
+function bell_diag_corrs(C)
+  Zmul = 1/sqrt(1+C^2)
+  Xmul = C/sqrt(1+C^2)
+  As = [sigmas[3], sigmas[1]]
+  Bs = [Zmul * sigmas[3] + Xmul * sigmas[1],
+        Zmul * sigmas[3] - Xmul * sigmas[1],
+        sigmas[3]]
+  rho = ((1+C)/2) * proj(phip) + ((1-C)/2) * proj(phim)
+
+  return Correlators(rho, As, Bs)
+end
+
+# POVMs and observables
 observable(M::POVMMeasurement, vals::AbstractVector{<:Number}) = vals' * M.matrices
 function POVMMeasurement(obsv::T) where {T <: AbstractMatrix{<:Number}}
   decomp = eigen(obsv)
   d = first(size(obsv))
-  ops = [proj(decomp.vectors[i, :]) for i in 1:d]
+  ops = [proj(decomp.vectors[:, i]) for i in 1:d]
   return POVMMeasurement(ops)
 end
+function Behaviour(rho::AbstractMatrix{<:Number}, Ms::AbstractVector{<:POVMMeasurement}, Ns::AbstractVector{<:POVMMeasurement})
+  iA = length(Ms); iB = length(Ns)
+  dA = first(Ms).idim; dB = first(Ns).idim;
+  oA = first(Ms).odim; oB = first(Ns).odim;
+  @assert all([M.odim == oA && M.idim == dA for M in Ms])
+  @assert all([N.odim == oB && N.idim == dB for N in Ns])
+  types = [eltype(rho); 
+           [[eltype(Mmat) for Mmat in M.matrices] for M in Ms]...;
+           [[eltype(Nmat) for Nmat in N.matrices] for N in Ns]...]
+  T = promote_type(types...) |> real
 
+  p = Array{T}(undef, oA, oB, iA, iB)
+  # TODO use CG representation to reduce number of computations
+  for (x, y) in itprod(1:iA, 1:iB)
+    M = Ms[x]; N = Ns[y]
+    for (a, b) in itprod(1:oA, 1:oB)
+      Ma = M.matrices[a]; Nb = N.matrices[b]
+      p[a, b, x, y] = tr(rho * kron(Ma, Nb)) |> real
+    end
+  end
+  return Behaviour(p)
+end
+
+function Correlators(rho::AbstractMatrix{<:Number}, As::AbstractVector{<:AbstractMatrix}, Bs::AbstractVector{<:AbstractMatrix})
+  iA = length(As); iB = length(Bs)
+  dA = As |> first |> size |> first; dB = Bs |> first |> size |> first;
+  oA = 2; oB = 2;
+
+  rhoA = ptrace(rho, [dA, dB], 2)
+  rhoB = ptrace(rho, [dA, dB], 1)
+  Eabxy = [tr(rho * kron(As[x], Bs[y])) |> real for x in 1:iA, y in 1:iB]
+  Eax = [tr(rhoA * As[x]) |> real for x in 1:iA]
+  Eby = [tr(rhoB * Bs[y]) |> real for y in 1:iB]
+
+  return Correlators(Eax, Eby, Eabxy)
+end
+
+
+
+# operator parametrisations
 symbmat(d, sym) = [symbols("$(sym)_{$i;$j}") for i in 1:d, j in 1:d]
 diagmat(v::AbstractVector) = sparse(1:length(v), 1:length(v), v)
 diagmat(d, sym::AbstractString) = diagmat([symbols("$sym_{$i}") for i in 1:d])
@@ -156,6 +221,10 @@ Mtld(mu) = cos(mu) * sigmas[3] + sin(mu) * sigmas[1]
 singlet_theta = pi/4
 singlet_mus = [0, pi/2]
 singlet_nus = [pi/4, -pi/4, 0]
+singlet_As = [Mtld(mu) for mu in singlet_mus]
+singlet_Bs = [Mtld(nu) for nu in singlet_nus]
+singlet_Ms = [POVMMeasurement(A) for A in singlet_As]
+singlet_Ns = [POVMMeasurement(B) for B in singlet_Bs]
 
 nc_eta_bl = [0.85, 0.935]
 nc_eta_tl = [0.85, 0.938]
@@ -229,5 +298,3 @@ function expt_chsh_ncgrads(ncgrad, etagrad, S)
   Hncgrad = Sncgrad * HgradS
   return Qncgrad, Hncgrad
 end
-
-
