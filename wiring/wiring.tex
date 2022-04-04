@@ -231,8 +231,8 @@
     % analysis and calculus
     \DeclareMathOperator*{\argmin}{argmin}
     \DeclareMathOperator*{\argmax}{argmax}
-    \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
-    \newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+    \newcommand{\norm}[1]{\mathop{}\left\lVert#1\right\rVert}
+    \newcommand{\abs}[1]{\mathop{}\left\lvert#1\right\rvert}
     \newcommand{\indif}{{\mathop{}\!\mkern3mu\mathchar'26\mkern-12mu \mathrm{d}}}
     \newcommand{\Dif}{\mathop{}\!\mathrm{D}} % Difference operator
     \newcommand{\dif}{\mathop{}\!\mathrm{d}} % differential d
@@ -262,8 +262,7 @@
     \newcommand{\cvec}[1]{\boldsymbol{\mathbf{#1}}}    % column vectors
     \newcommand{\rvec}[1]{\boldsymbol{\mathbf{#1}}^\tpose} % row vectors (transposed from column vectors)
     \newcommand{\bvec}[1]{\hat{\boldsymbol{\mathbf{#1}}}} % basis vectors
-    \newcommand{\matr}[1]{\left[\mathbf{#1}\right]} % matrices
-    \newcommand{\matrp}[2]{\left[\mathbf{#1}#2\right]} % matrices with subscripts/superscripts
+    \newcommand{\matr}[2][]{\left[\mathbf{#2}#1\right]} % matrices
     \newcommand{\inner}[2]{\left\langle#1,#2\right\rangle} % inner product
     % \newcommand{\dim}{\rm dim} % dimension
 
@@ -601,7 +600,7 @@
     \end{defn}
     Note that, while the measurements are represented as the tensor product of operators in separate spaces, the state does not have to take this form (and indeed, it is easily verified that any state taking this form is \emph{separable} and can only give rise to correlations in \(\Ls\), as shown in e.g.\ in~\cite[Ax. 3]{FiniteDimNonconvex}).
 
-    A consequence of this definition that may not be immediately obvious is that \(\Qs\) is convex~\cite[Sec. V.C]{AllBellIneqs22}~\cite[Prop. 5.1.2]{CombNLContext}. We present a simple and explicit proof for the bipartite case based on~\cite[App. E]{FiniteDimNonconvex}.
+    A consequence of this definition that may not be immediately obvious is that \(\Qs\) is convex~\cites[Sec. V.C]{AllBellIneqs22}[Prop. 5.1.2]{CombNLContext}. We present a simple and explicit proof for the bipartite case based on~\cite[App. E]{FiniteDimNonconvex}.
     \begin{lemma}\label{thm:Qcvx}
       \(\Qs\) is convex: for any correlations \(p_1, p_2 \in \Qs\), and \(q\in\ccintv{0}{1}\), there exists a state and measurement strategy such that \(p = qp_1 + (1-q)p_2\) can be realised via \Cref{eqn:Qprob}.
     \end{lemma}
@@ -649,7 +648,7 @@
       Q_{xy} \coloneqq p(a \neq b|xy) = \frac{1-\angleb{A_x B_y}}{2} \\
       S_{x_0x_1y_0y_1} \coloneqq \angleb{A_{x_0} B_{y_0}} + \angleb{A_{x_1} B_{y_0}} + \angleb{A_{x_0} B_{y_1}} - \angleb{A_{x_1} B_{y_1}}.
     \end{gather}
-    The most commonly used version of \(S_{x_0x_1y_0y_1}\), simply referred to as \(S\), has \(x_0=0\), \(x_1=1\), \(y_0=0\) and \(y_1=1\). Behaviours with \(S > 2\) are not contained in \(\Ls\), while behaviours in \(\Qs\) are constrained to have \(S \leq 2\sqrt{2}\). Therefore, \(S \leq 2\) is referred to as the \emph{CHSH inequality}: violation of the inequality implies the presence of nonlocality. This is an example of a \emph{Bell inequality}: any inequality whose violation implies that a behaviour is outside of \(\Ls\)\footnote{Some authors reserve ``Bell inequality'' for only facet-defining/\emph{tight} inequalities; here we take a broader definition.}. Note that violation of any particular Bell inequality is a sufficient but not necessary condition for the behaviour to lie outside \(\Ls\): \(\abs{S_{x_0x_1y_0y_1}} \leq 2\) is a Bell inequality for any choice of parameters, but each behaviour in the \((2,2;2,2)\) setting can violate at most one such inequality~\cite{GeomDecomp}. It is, however, necessary that \emph{some} Bell inequality be violated.
+    The most commonly used version of \(S_{x_0x_1y_0y_1}\), simply referred to as \(S\), has \(x_0=0\), \(x_1=1\), \(y_0=0\) and \(y_1=1\). Behaviours with \(S > 2\) are not contained in \(\Ls\), while behaviours in \(\Qs\) are constrained to have \(S \leq 2\sqrt{2}\). Therefore, \(S \leq 2\) is referred to as the \emph{CHSH inequality}: violation of the inequality implies the presence of nonlocality. This is an example of a \emph{Bell inequality}: any inequality whose violation implies that a behaviour is outside of \(\Ls\)\footnote{Some authors reserve ``Bell inequality'' for only facet-defining/\emph{tight} inequalities; here we take a broader definition.}. Note that violation of any particular Bell inequality is a sufficient but not necessary condition for the behaviour to lie outside \(\Ls\): \(\abs{S_{x_0x_1y_0y_1}} \leq 2\) is a Bell inequality for any choice of parameters, but each behaviour in the \((2,2;2,2)\) setting can violate at most one such inequality~\cite{GeomDecomp}. It is, however, necessary that \emph{some} Bell inequality be violated if the behaviour is not in \(\Ls\).
 
     \section{Device-Independent Quantum Key Distribution}\label{sec:diqkd}
 
@@ -697,7 +696,7 @@
     \begin{defn}[LOPC Operations]
       Before executing the \(k\)th step of a protocol, let \(\crv{S}_A^{(k)}\), and \(\crv{D}_A^{(k)}\) represent Alice's private data and her local copy of the publicly transmitted data, and let \(\crv{T}^{(k)}_A\) be her transmitted public data. Define \(\crv{S}_B^{(k)}\), \(\crv{D}_B^{(k)}\) and \(\crv{T}_B^{(k)}\) analogously for Bob. Note that \(\crv{D}^{(0)}_A\) is a trivial system, and \(\crv{S}_A^{(1)}\) is \(\crv{A}^{n}\crv{X}^{n}\), likewise for Bob. Further, let \(\crv{D}^{(k)}\) be the public record of all data exchanged thus far. Then, if the \(k\)th step is an LOPC operation \(\Omega^{(k)}\), its overall effect can be described as the composition of the following maps:
       \begin{enumerate}
-        \item \(\Omega_A^{(k)}\) is a classical stochastic map (\Cref{def:classop}) from 
+        \item \(\Omega_A^{(k)}\) is a classical stochastic map (\Cref{def:classop})
       \begin{equation}
         \Omega_A^{(k)} : \crv{S}_A^{(k)}\crv{D}_A^{(k)} \to \crv{S}_A^{(k+1)}\crv{T}_A^{(k)}
       \end{equation}
@@ -723,7 +722,7 @@
         \crv{S}_A^{(k)}\crv{D}_A^{(k)}
         \crv{S}_B^{(k)}\crv{D}_B^{(k)}
         \crv{D}^{(k)}E^n \\
-        \Omega^{(k)} = \Omega_U^{(k)}\left[\left(\Omega_A^{(k)} \otimes \Omega_B^{(k)} \otimes I_{\crv{D}^{(k)}} \otimes I_{E^n}\right)\left[\rho\right] \right].
+        \Omega^{(k)} \coloneqq \Omega_U^{(k)}\left[\left(\Omega_A^{(k)} \otimes \Omega_B^{(k)} \otimes I_{\crv{D}^{(k)}} \otimes I_{E^n}\right)\left[\rho\right] \right].
       \end{gather}
     \end{defn}
 
@@ -1266,7 +1265,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
               \begin{figure}
                 \centering
-                \includegraphics[width=0.7\linewidth]{exptplt.pdf}
+                \includegraphics[width=0.9\linewidth]{exptplt.pdf}
                 \caption{\label{fig:exptplt} Minimum \(\eta\) required for \(r_{\std} > 0\), given \(n_c\).}
               \end{figure}
 
@@ -1322,7 +1321,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                 % TODO redo this, label the boxes accordingly
                 \centering
                 \includegraphics[width=0.7\linewidth]{losr.pdf}
-                \caption[Depiction of a generic LOSR operation.]{\label{fig:losr} A generic LOSR operation transforms an initial behaviour \(p(a_0 b_0|x_0 y_0)\), depicted in pink, into a new overall behaviour \(p'(ab|xy)\), using classical preprocessing and postprocessing, and shared randomness. The LOSR transformation is depicted in blue (Source:~\cite{BellResourceTheory})}
+                \caption[Depiction of a generic LOSR operation.]{\label{fig:losr} A generic LOSR operation transforms an initial behaviour \(p(a_0 b_0|x_0 y_0)\), depicted in pink, into a new overall behaviour \(p'(ab|xy)\), using classical preprocessing and postprocessing, and shared randomness. The LOSR transformation is depicted in blue. (Source:~\cite{BellResourceTheory})}
               \end{figure}
 
               Local operations involve each party locally preprocessing his inputs, sending the preprocessed input into the box, then postprocessing the received output to generate an overall output. The preprocessing and postprocessing steps can obviously only use data that is available at the point they are executed, so the most general local operations can be described as~\cite[Def. 4]{LocalTransformations}
@@ -1333,9 +1332,13 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
               \begin{equation}\label{eqn:opmap}
                 \chi(a x_0 | x a_0) \coloneqq p_o(a|x_0a_0x) p_i(x_0|x) = p_o(a|x_0a_0x) p_i(x_0|x a_0)
               \end{equation}
-              where the independence of \(p_i\) from \(a_0\) follows by causality: the production of the input \(x_0\) cannot depend on the value of the output \(a_0\), since the input must be produced before the output is received. We emphasise that these are \emph{maps}, not conditional distributions calculated from some joint distribution: the conditional distribution \(p'(x_0|x a_0)\) derived from the joint distribution \(p'(a a_0 x_0|x)\), obtained after applying the operation, will in general depend on \(a_0\). The maps can generally be treated as conditional probabilities, with the operations of summing over events and manipulations using Bayes' rule working similarly, but they are defined independently of the behaviours they act on, and hence an expression like \(\chi(a_0)\) would not be meaningful without specifying the input distribution \(\prin(x)\) and the behaviour acted on \(p(a|x)\).
+              where the independence of \(p_i\) from \(a_0\) follows by causality: the production of the input \(x_0\) cannot depend on the value of the output \(a_0\), since the input must be produced before the output is received.
 
-              LOSR operations\footnote{Note that there are some articles which use a slightly different definition of LOSR, such that \(\chi\) is restricted to a nonconvex subset of \(\Ls\). One such article is~\cite{DIQKD_Limits}, which defines quantum intrinsic nonlocality (\Cref{sec:diqkd_ubehav}) and proves it is monotone under LOSR using the different definition. Fortunately, the result still holds using the definition of LOSR we use. See~\cite[Sec A.2]{BellResourceTheory} for more details, and a justification for the choice of this definition.} are the extension of local operations to a multipartite setting, where each party applies a local operation, but the choice of local operations between different parties can be correlated via \emph{shared randomness}. Bipartite LOSR operations, for example, transform \(p(a_0 b_0|x_0 y_0) \mapsto p'(ab|xy)\) using a map \(\chi\):
+              We emphasise that these are \emph{maps}, not conditional distributions calculated from some joint distribution: the conditional distribution \(p'(x_0|x a_0)\) derived from the joint distribution \(p'(a a_0 x_0|x)\), obtained after applying the operation, will in general depend on \(a_0\). The maps can generally be treated as conditional probabilities, with the operations of summing over events and manipulations using Bayes' rule working similarly, but they are defined independently of the behaviours they act on, and hence an expression like \(\chi(a_0)\) would not be meaningful without specifying the input distribution \(\prin(x)\) and the behaviour acted on \(p(a|x)\).
+
+              Note also that each probability \(p'(a|x)\) is a linear function of the probabilities in the original behaviour \(p(a_0|x_0)\), and so a local operation is a linear map. It is easily verified that convex combinations of local operations are still local operations, and therefore the space of local operations is a convex subset of a vector space.
+
+              LOSR operations\footnote{Note that there are some articles which use a slightly different definition of LOSR, such that \(\chi\) is restricted to a nonconvex subset of \(\Ls\). One such article is~\cite{DIQKD_Limits}, which defines quantum intrinsic nonlocality (\Cref{sec:diqkd_ubehav}) and proves it is monotone under LOSR using the different definition. Fortunately, the result still holds using the definition of LOSR we use. See~\cite[Sec A.2]{BellResourceTheory} for more details, and a justification for the choice of this definition.} are the extension of local operations to a multipartite setting, where each party applies a local operation, but the choice of local operations between different parties can be correlated via \emph{shared randomness}. Formally, then, the set of \(n\)-partite LOSR operations is the convex hull of all possible \(n\)-times tensor products of \(n\) local operations~\cite{LocalTransformations}.\footnote{The spaces of local wiring distributions for different parties are not the same in general, although one could argue that all of them are subspaces of the version of the set of local operations with the maximal number of outputs and the maximal number of inputs, as per the argument in \Cref{sec:nl_ns}.} This tensor product of convex sets has been studied as the \emph{projective tensor product} in~\cite{AliceBobBanach}, but we do not require such a level of mathematical formality. As a concrete example, bipartite LOSR operations transform \(p(a_0 b_0|x_0 y_0) \mapsto p'(ab|xy)\) using a map \(\chi\)~\cite{BellResourceTheory}:
               \begin{equation}
                 p'(ab|xy) = \sum_{abxy} \chi(abx_0y_0|a_0b_0xy) p(a_0b_0|x_0y_0)
               \end{equation}
@@ -1354,9 +1357,9 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
               \end{equation}
               which is equivalent to enforcing that they can be decomposed into preprocessing and postprocessing maps as per \Cref{eqn:opmap}: that is, \(\chi_{A|\lambda}\) and \(\chi_{B|\lambda}\) must be local operations.
 
-              Applying the same analysis to the local operations that constitute a wiring, a wiring of \(c\) boxes would need to generate inputs for the \(c\) boxes, and combine the \(c\) outputs into one output.
+              Applying the same analysis to the local operations that constitute a wiring, a wiring of \(c\) boxes would need to generate inputs for the \(c\) boxes, and combine the \(c\) outputs into one output. Therefore, the effect of a \emph{\(c\)-box local operation} is fully specified by the \(c+1\) maps \(\chi(a|\cvec{x}^c\cvec{a}^{c}x)\) and \(\chi(x_j|\cvec{x}^{j-1}\cvec{a}^{j-1}x)\), for \(j \in \dintv{1}{c}\), where there are no constraints on maps besides their cardinalities. We term these \(c\)-box local operations \emph{marginal wirings} and denote the set of marginal wirings as \(\sW\).
 
-              However, since our wirings combine multiple boxes, their effect cannot be expressed in this form. Nonetheless, we can straightforwardly generalise the equations describing the action of an LOSR operation, and the locality condition, to the case of \(c\) boxes with an arbitrary joint behaviour \(p^c\) wired together:
+              The space of \(n\)-partite wirings, which we denote \(\sW^n\), is derived in a similar way to the derivation of LOSR operations, although some care needs to be taken in defining and applying the tensor product of marginal wirings to compute the actual behaviour (see \Cref{sec:locwir_mat}). A bipartite wiring would then produce a new behaviour from \(c\) boxes with an arbitrary joint behaviour \(p^c\) wired together:
               \begin{gather}
                 p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)\label{eqn:jwirdistdef} \\
                 \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) \label{eqn:mwirdistdef}
@@ -1387,60 +1390,41 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                   \chi_{B|\lambda}(\cvec{y}^j|\cvec{b}^cy) &= \chi_{B|\lambda}(\cvec{y}^j|\cvec{b}^{j-1}y),\,\forall j \in \dintv{1}{c}.
                 \end{aligned}\label{eqn:wiringnoretro}
               \end{equation}
-            These conditions will hopefully simplify the space of wirings, since without the conditions, we would have to handle \({(o_A i_A^c)}^{i_A^c o_A} {(o_B i_B^c)}^{i_B^c o_B}\) vertices in \(\Ls\) (\(\approx \num{5.12e18}\) for the QKD setting). We define the set of conditional probabilities of the appropriate cardinalities obeying the no-retrocausation conditions as \(\tilde{\sW}\). From this definition alone, the following result is immediate.
-            \begin{lemma}[Structure of the Space of Wiring Distributions]
-              \(\tilde{\sW}\) is convex, and the space of \(n\)-partite wiring distributions is the convex hull of the \(n\)-partite Cartesian product of \(\tilde{\sW}\).
-            \end{lemma}
-            \begin{proof}
-              The no-retrocausation conditions are a set of linear equalities, and any linear combination of their solutions (which are precisely the elements of \(\tilde{\sW}\)) will satisfy them. Since convex combinations are a subset of linear combinations, any convex combination of elements in \(\tilde{\sW}\) will satisfy the conditions and be an element of \(\sW\).
 
-            A joint wiring distribution for \(n\) parties is then the convex combination of \(n\)-tuples of marginal wirings, applied to behaviours as per \Cref{eqn:jwirdistdef}. We therefore abuse notation slightly by writing \(\tilde{\sW}^n\) to refer to the set of \(n\)-partite joint wiring distributions, even though this set is strictly richer than the simple Cartesian product of \(\tilde{\sW}\).\footnote{The spaces of marginal wiring distributions for different parties are not the same in general, making this even more of an abuse of notation, although one could argue that all of them are subspaces of the version of \(\tilde{\sW}\) with the maximal number of outputs and the maximal number of inputs, as per the argument in \Cref{sec:nl_ns}.} The convexity of \(\tilde{\sW}^n\) follows by definition.
-            \end{proof}
-
-            However, an important distinction to make is that the set of \emph{wiring distributions} is \emph{not} the set of \emph{wirings}: we have not proved that any conditional probability that obeys the locality and no-retrocausation conditions, that is, any \(n\)-partite wiring distribution, constructs a unique wiring, in the sense of an operation that maps one behaviour to another. As it turns out, there may be differences between wiring distributions that do not lead to any \emph{observable} difference: that is, we could have two wiring distributions \(\chi^{(1)}\) and \(\chi^{(2)}\) such that there are differences in their values, but \(\chi^{(1)}[p] = \chi^{(2)}[p]\) for all behaviours \(p\). We can therefore say that these wiring distributions describe the \emph{same} wiring, and, more generally, that the wiring distribution description contains some redundancy. Explicit examples illustrating such redundancy are provided in \Cref{sec:locwir_func}.
-
-              On the other hand, each wiring distribution describes \emph{some} physically realisable transformation between behaviours, and for any wiring, its effect on all behaviours can be described using a wiring distribution. We formalise the relationship between wiring distributions and wirings as follows.
-            \begin{theorem}[Sufficiency of Wiring Distributions]
-              There exists a natural surjective map from \(\tilde{\sW}\) to the space of marginal wirings \(\sW\), and the space of \(n\)-partite wirings \(\sW^n\) is the convex hull of the \(n\)-times Cartesian product of \(\sW\).
-            \end{theorem}
-            \begin{proof}
-                We can decompose a marginal wiring distribution using Bayes' rule as
+            We verify that conditional distributions obeying the no-retrocausation conditions can be decomposed as a sequence of maps using Bayes' rule:
                 \begin{align}
                   \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) &= \chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^cx) \chi_{A|\lambda}(\cvec{x}^{c}|\cvec{a}^cx) \\
                                                          &= \chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^cx) \chi_{A|\lambda}(x_c|\cvec{x}^{c-1}\cvec{a}^cx) \chi_{A|\lambda}(\cvec{x}^{c-1}|\cvec{a}^cx) \\
                                                          &= \chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^cx) \prod_{j=1}^c \chi_{A|\lambda}(x_j|\cvec{x}^{j-1}\cvec{a}^cx) \\
                                                          &= \chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^{c}x) \prod_{j=1}^c \chi_{A|\lambda}(x_j|\cvec{x}^{j-1}\cvec{a}^{j-1}x),
                 \end{align}
-                where in the last line we have used the no-retrocausation conditions in \Cref{eqn:wiringnoretro}. Conversely, any distribution of this form, which we term \emph{causal marginal distributions}, satisfies the no-retrocausation conditions
-                \begin{gather}
-                  \chi_{A|\lambda}(\cvec{x}^k|\cvec{a}^cx) = \sum_{a\cvec{x}^{k+1:c}} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \\
-                  \sum_{a\cvec{x}^{k+1:c}} \chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^{c}x) \prod_{j=1}^c \chi_{A|\lambda}(x_j|\cvec{x}^{j-1}\cvec{a}^{j-1}x) = \prod_{j=1}^k \chi_{A|\lambda}(x_j|\cvec{x}^{j-1}\cvec{a}^{j-1}x) \\
-                  = \chi_{A|\lambda}(a\cvec{x}^k|\cvec{a}^kx).
-                \end{gather}
-                The extension of this proof to the last no-retrocausation condition is straightforward. This tells us that the set of marginal wiring distributions is isomorphic to the set of causal marginal distributions, where, we note, there are no constraints on the conditional distributions that are multiplied together, other than them being valid probability distributions and having the correct input and output cardinalities.
+                where in the last line we have used the no-retrocausation conditions in \Cref{eqn:wiringnoretro}. That any such collection of probabilistic maps can be combined into a single distribution can be shown with a calculation similar to that in \Cref{eqn:opmap}.
 
-                Observe that this is simply the description of a sequence of probabilistic maps, generating the next input or output required based on existing data. Therefore, these represent the most general local operations possible, and are sufficient to characterise the space of marginal wirings \(\sW\), because expressing the effect of a marginal wiring in this way, which completely characterises the effect of the wiring, is sufficient to specify
-
-                The argument for 
-            \end{proof}
-
-              We can go even further than this. Physically, a probabilistic wiring must actually execute some deterministic wiring, and its joint wiring distribution is then a convex combination of the deterministic joint wiring distributions, of which there are finitely many. This is the intuition behind the proof of Fine's theorem presented in~\cite{BellNonlocality}, which can be straightforwardly adapted to \(\sW\). Informally, given a decomposition of the behaviour into behaviours that obey the no-retrocausation conditions, these latter behaviours can be converted into deterministic behaviours obeying the conditions by offloading the indeterminism into an auxiliary random variable, and redefining \(\lambda\) to incorporate this auxliary variable.
+              Physically, a probabilistic wiring must actually execute some deterministic wiring, and its joint wiring distribution is then a convex combination of the deterministic joint wiring distributions, of which there are finitely many. This is the intuition behind the proof of Fine's theorem presented in~\cite{BellNonlocality}, which can be straightforwardly adapted to \(\sW^n\). Informally, we can express a wiring distribution as a convex combination of marginal wiring distributions, and these marginal wirings can be decomposed further into convex combinations of ``more deterministic'' marginal wiring distributions, offloading the indeterminism they contain into an auxiliary random variable, and redefining \(\lambda\) to incorporate this auxliary variable.
               \begin{theorem}[Fine's Theorem for Wirings]
                 The set of marginal wirings \(\sW\) forms a polytope, whose vertices are the set of deterministic marginal wirings obeying the no-retrocausation relations \(\sW_D\). All \(n\)-partite wirings are then elements of the polytope generated by the vertices \(\sW_D^n\).
               \end{theorem}
               \begin{proof}
-                Consider now a given marginal wiring \(\chi_{A|\lambda}\), decomposed as a causal marginal distribution, and select one of the conditional distributions in the product, which we denote abstractly as \(\chi_{A|\lambda}(s|t)\). Select a particular \(\hat{s}\) and \(\hat{t}\) such that \(\chi_{A|\lambda}(\hat{s}|\hat{t}) = 0 < q < 1\). If no such values exist, the wiring is already deterministic, and we are done. Now, consider wirings \(\chi_{A|\lambda}^{(0)}\) and \(\chi_{A|\lambda}^{(1)}\), such that \(\chi_{A|\lambda}^{(0)} = \chi_{A|\lambda}^{(1)} = \chi_{A|\lambda}\) for all conditional distributions except the one we have identified. For the identified conditional distribution, \(\chi_{A|\lambda}^{(0)}(s|t) = \chi_{A|\lambda}^{(1)}(s|t) = \chi_{A|\lambda}(s|t)\) for all values of \(t\neq\hat{t}\), and for \(t = \hat{t}\), we have
+                Consider a marginal wiring \(\chi_{A|\lambda}\), decomposed into the maps that it applies:
+                \begin{equation}\label{eqn:mapdecomp}
+                  \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) = \chi_{A|\lambda}^{(c+1)}(a|\cvec{x}^c\cvec{a}^{c}x) \prod_{j=1}^c \chi_{A|\lambda}^{(j)}(x_j|\cvec{x}^{j-1}\cvec{a}^{j-1}x),
+                \end{equation}
+                and denote each map abstractly as \(\chi_{A|\lambda}^{(j)}(t^{(j)}|s^{(j)})\).
+                Select a particular \(k\in\dintv{1}{c+1}\), \(\hat{s}^{(k)}\) and \(\hat{t}^{(k)}\) such that \(\chi_{A|\lambda}^{(k)}(\hat{s}^{(k)}|\hat{t}^{(k)}) = 0 < q < 1\). If no such values exist, the wiring is already deterministic, and we are done.
+                Now, consider wirings \(\chi_{A|\lambda,0}\) and \(\chi_{A|\lambda,1}\), such that
                 \begin{align*}
-                  \chi_{A|\lambda}^{(0)}(s|\hat{t}) &= \begin{cases}
-                    0 & \text{ if } s = \hat{s} \\
-                    \frac{1}{1-q} \chi_{A|\lambda}(s|\hat{t}) & \text{ otherwise,} \\
+                  \chi^{(k)}_{A|\lambda,0}(s^{(k)}|\hat{t}^{(k)}) &= \begin{cases}
+                    0 & \text{ if } s^{(k)} = \hat{s}^{(k)} \\
+                    \frac{1}{1-q} \chi_{A|\lambda}^{(k)}(s^{(k)}|\hat{t}^{(k)}) & \text{ otherwise,} \\
                   \end{cases} \\
-                    \chi_{A|\lambda}^{(1)}(s|\hat{t}) &= \begin{cases}
-                      1 & \text{ if } s = \hat{s} \\
-                      0 & \text{ otherwise.} \\
-                    \end{cases}
+                      \chi^{(j)}_{A|\lambda,0}(s^{(j)}|\hat{t}^{(j)}) &= \chi_{A|\lambda}^{(j)}(s^{(j)}|\hat{t}^{(j)}) \text{ otherwise,} \\
+                    \chi^{(k)}_{A|\lambda,1}(s^{(k)}|\hat{t}^{(k)}) &= \begin{cases}
+                      1 & \text{ if } s^{(k)} = \hat{s}^{(k)} \\
+                      0 & \text{ otherwise,} \\
+                    \end{cases} \\
+                      \chi^{(j)}_{A|\lambda,1}(s^{(j)}|\hat{t}^{(j)}) &= \chi_{A|\lambda}^{(j)}(s^{(j)}|\hat{t}^{(j)}) \text{ otherwise.} \\
                     \end{align*}
-                    It is easily verified that both \(\chi_{A|\lambda}^{(0)}(s|t)\) and \(\chi_{A|\lambda}^{(1)}(s|t)\) are valid probability distributions, and hence \(\chi_{A|\lambda}^{(0)}\) and \(\chi_{A|\lambda}^{(1)}\) are valid causal marginal distributions and therefore valid wiring distributions. Then, we have \(\chi_{A|\lambda} = (1-q)\chi_{A|\lambda}^{(0)} + q\chi_{A|\lambda}^{(1)}\). We can repeat this process recursively on \(\chi_{A|\lambda}^{(0)}\) and \(\chi_{A|\lambda}^{(1)}\) until \(\chi_{A|\lambda}\) is decomposed completely into a weighted sum of deterministic wiring distributions
+                    It is easily verified that both \(\chi_{A|\lambda,0}^{(k)}(s|t)\) and \(\chi_{A|\lambda,1}^{(k)}(s|t)\) are valid maps, and hence \(\chi_{A|\lambda,0}\) and \(\chi_{A|\lambda,1}\) are valid marginal wiring distributions. Then, we have \(\chi_{A|\lambda} = (1-q)\chi_{A|\lambda,0} + q\chi_{A|\lambda,1}\). We can repeat this process recursively on \(\chi_{A|\lambda,0}\) and \(\chi_{A|\lambda,1}\) until \(\chi_{A|\lambda}\) is decomposed completely into a weighted sum of deterministic wiring distributions
                     \[ \chi_{A|\lambda} = \sum_{w=1}^m q_w \chi_{A|\lambda,w}. \]
 
                     Then, we define a discrete random variable \(\Lambda' = (\lambda, w)\), where \(w \in \dintv{1}{m}\), with pmf \(P_{\Lambda'}(\lambda, w) = q_w P_{\Lambda}(\lambda)\). Finally, we rewrite our joint wiring distribution\footnote{For concreteness and simplicity of notation, we restrict ourselves to \(n=2\). The proof generalises readily to \(n>2\).} as
@@ -1452,8 +1436,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                     This demonstrates the sufficiency of deterministic marginal wirings for generating all wirings. To see that all these wirings are necessary, note that, given two distinct deterministic wirings \(\chi_{A|1}\) and \(\chi_{A|2}\), there must be at least one \(s\) and one \(t\) for the wiring distributions, such that \(\chi_{A|1}(s|t) = 0\) and \(\chi_{A|2}(s|t) = 1\). Then, if attempting to express \(\chi_{A|1}\) as a convex combination, where \(\chi_{A|2}\) has a nonzero weight \(q\), and grouping all other distributions in the combination into \(\chi_{A|3}\), we will have \(\chi_{A|1}(s|t) = q\chi_{A|2}(s|t) + (1-q)\chi_{A|3}(s|t) \geq q > 0\), which is a contradiction.
                   \end{proof}
 
-              We refer to the discrete set of deterministic marginal wirings that obey these relations as \(\sW_D\), and the polytope generated by them as vertices as \(\sW\). \(\sW^n\) is then the convex polytope with vertices \(\sW_D^n = \underbrace{\sW_D \times \sW_D \times \cdots \times \sW_D}_{n\text{ times}}\). We also define \(\sWB(p)\) as the set of behaviours generated by applying \(\sW^n\) to an \(n\)-partite behaviour \(p\) using \Cref{eqn:jwirdistdef}.
-
+              We refer to the discrete set of deterministic marginal wirings as \(\sW_D\), which are therefore the vertices of the polytope \(\sW\). \(\sW^n\) is then the convex polytope with vertices \(\sW_D^n = \underbrace{\sW_D \times \sW_D \times \cdots \times \sW_D}_{n\text{ times}}\). We also define \(\sWB(p)\) as the set of behaviours generated by applying \(\sW^n\) to an \(n\)-partite behaviour \(p\) using \Cref{eqn:jwirdistdef}.
 
                   % NEXT bound the secret key capacity itself not the iid
                   % version
@@ -1551,6 +1534,8 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
     More generally, if the wiring produces a behaviour \(p'\) that can be produced by LOPC post-processing of Alice and Bob's Bell test data on \(p^c\), then by \Cref{def:seckeycapbehaviid}, we cannot have \(C_{\sk}^{\otimes}(p') \geq C_{\sk}^{\otimes}(p^c)\). On the other hand, if the wiring creates some correlation between the output of previous Bell test rounds and subsequent rounds, such an increase may be possible.
 
+    A direct application of this lemma to our project is to observe that, since the AND wiring in \Cref{sec:preres} simply broadcasts the input to all boxes, it is a wiring without output dependency, and therefore the increase in the key rate is not a fundamental increase in secret key capacity, but simply because the standard protocol key rate does not achieve the secret key capacity.
+
     Our description of wirings as LOSR operations naturally motivates the question if there is any benefit to be gained from using \emph{private} randomness, unknown to Eve, beyond its necessary role in providing an authenticated classical channel (\Cref{def:diqkdassump}) and possibly its role in generating the inputs (\Cref{sec:diqkd_proto}). We distinguish between \emph{shared} private randomness, known to both Alice and Bob (that is, a PSK), and \emph{local} private randomness known to only one of them.
 
               Local private randomness would result in both Bob and Eve being unable to tell which wiring Alice used. From their perspective, then, Alice's output is effectively randomise, and the use of local private randomness would therefore have the same effect as noisy preprocessing. However, analyses of noisy preprocessing typically treat it as \emph{trusted noise}, rather than part of the behaviour of the system that might be caused by Eve, e.g.\ in~\cite{BFF_QRE, AsymmetricCHSH, DIQKD_FiniteSize}. We therefore do not consider local private randomness in wirings, since the benefit that can be derived from it would be inferior to the benefit from noisy preprocessing, which can be performed at the same cost.
@@ -1571,19 +1556,19 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
               \subsection{Wiring Functions}\label{sec:locwir_func}
 
-              In order to determine the polytope of joint wirings, we can use the same approach as is typically used for \(\Ls\), where deterministic operations are taken as the vertices of the polytope, and the facet-defining inequalities derived from there using a facet-enumeration algorithm. In order to avoid the computational effort of simply enumerating all possible local deterministic behaviours and pruning them by removing those that violate the no-retrocausation conditions, we wish to explore the structure of these wirings, so that we can minimise the generation of wirings that will eventually be pruned. Indeed, this analysis reveals significant redundancies in the wirings that would be generated naively, with many of them corresponding to the same action on the behaviours. Removing them at an early stage rather than generating and then dealing with them will increase the scalability of our methods.
+              In order to determine the polytope of joint wirings, we can use the same approach as is typically used for \(\Ls\): enumerate \(\sW_D\), the vertices of \(\sW\), combinatorically, and find the facet-defining inequalities from that list using a facet-enumeration algorithm. The naive implementation would be to enumerate all possible LD behaviours of the correct cardinality and prune them by removing those that violate the no-retrocausation conditions. This brute-force enumeration is implemented in the \verb`LDWiringIter` type in \verb`wiring.jl`. Howwever, we would then have to process \({(o_A i_A^c)}^{i_A^c o_A} {(o_B i_B^c)}^{i_B^c o_B}\) LD behaviours (\(\approx \num{5.12e18}\) for the QKD setting), which is not scalable.
 
-              In order to illustrate one of the redundancies that emerges from the naive approach, we use a different, more operational description for deterministic wirings.  For deterministic wirings, we can consider her inputs \(\cvec{x}^c\) to her boxes as being computed by a sequence of \(c\) deterministic functions with range \(\dintv{1}{i_A}\):
-              \begin{equation} x_j = W^{(j)}_{A,\lambda}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x),\,j \in \dintv{1}{c} \end{equation}
+              An alternative approach would be to analyse the wirings in \(\sW_D\) to see if the wiring distribution description contains any redundancies. We use a different, more operational description for deterministic wirings, based on the decomposition into maps that describe the operation of the wiring in \Cref{eqn:mapdecomp}, in order to detect some of these redundancies.  For deterministic wirings, we can consider Alice's inputs \(\cvec{x}^c\) to her boxes as being computed by a sequence of \(c\) deterministic functions with range \(\dintv{1}{i_A}\):
+              \begin{equation} x_j = W^{(j)}_{A}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x),\,j \in \dintv{1}{c} \end{equation}
               and an output function with range \(\dintv{1}{o_A}\):
-              \begin{equation} a = T_{A,\lambda}(\cvec{x}^{c}, \cvec{a}^{c}, x). \end{equation}
-              We refer to each function \(W_{A,\lambda}^{(j)}\) as a \emph{marginal wiring input function}, and \(T_{A,\lambda}\) as the \emph{marginal wiring output function}, and all of these functions as \emph{marginal wiring functions}. The corresponding marginal wiring distribution \(\chi_{A|\lambda}\) is then
+              \begin{equation} a = T_{A}(\cvec{x}^{c}, \cvec{a}^{c}, x). \end{equation}
+              We refer to each function \(W_{A}^{(j)}\) as a \emph{wiring input function}, and \(T_{A}\) as the \emph{wiring output function}, all of these functions as \emph{wiring map functions}, and the overall function representing their composition as a \emph{wiring function}. The corresponding marginal wiring distribution \(\chi_{A}\) is then
               \begin{equation}
-                \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) = \indic{a = T_{A,\lambda}(\cvec{x}^{c}, \cvec{a}^{c}, x)} \prod_{j=1}^c \indic{x_j = W^{(j)}_{A,\lambda}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x)}.
+                \chi_{A}(a\cvec{x}^c|\cvec{a}^cx) = \indic{a = T_{A}(\cvec{x}^{c}, \cvec{a}^{c}, x)} \prod_{j=1}^c \indic{x_j = W^{(j)}_{A}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x)}.
               \end{equation}
               The analogous definitions for Bob hold with the appropriate changes of labels \(A \mapsto B\), \(x \mapsto y\), \(a \mapsto b\). Probabilistic wirings can then be described as convex combinations of such deterministic wirings.
 
-              In order to reduce ambiguity, we refer to each marginal wiring function as mapping a \emph{source}, its argument, to a \emph{target}, its value, reserving ``input'' and ``output'' to describe the inputs and outputs of boxes. Simple combinatorics gives us \(i_A^{j} o_A^{j-1}\) possible sources for \(W^{(j)}_{A,\lambda}\). However, since the wiring is deterministic, \(x_j\) is completely fixed by \(\cvec{x}^{j-1}\), \(\cvec{a}^{j-1}\) and \(x\). Therefore, when considering each map as part of the overall wiring, the only free choice in the source is \(x\), and so there are only \(i_A o_A^{j-1}\) valid sources.
+              In order to reduce ambiguity, we refer to each wiring map function as mapping a \emph{source}, its argument, to a \emph{target}, its value, reserving ``input'' and ``output'' to describe the inputs and outputs of boxes. Simple combinatorics gives us \(i_A^{j} o_A^{j-1}\) possible sources for \(W^{(j)}_{A}\). However, since the wiring is deterministic, \(x_j\) is completely fixed by \(\cvec{x}^{j-1}\), \(\cvec{a}^{j-1}\) and \(x\). Therefore, when considering each map as part of the overall wiring, the only free choice in the source is \(x\), and so there are only \(i_A o_A^{j-1}\) valid sources.
 
               \begin{table}
                 \begin{minipage}{0.5\linewidth}
@@ -1612,10 +1597,10 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                     \end{tabular}
                   \end{center}
                 \end{minipage}
-                \caption[Lookup tables for a specific wiring.]{Left: Lookup table for \(W_A^{(2)}\), giving \(x_2\). Right: Lookup table for \(T_A\), giving overall output \(a\). Entries forbidden by earlier wirings are marked with X (don't care). Both are written as Karnaugh maps, with the row and column labels in Gray code order.}\label{tab:wiring_lut}
+                \caption[Lookup tables for a specific wiring.]{Left: Lookup table for \(W_{A}^{(2)}\), giving \(x_2\). Right: Lookup table for \(T_{A}\), giving overall output \(a\). Entries forbidden by earlier wirings are marked with X (don't care). Both are written as Karnaugh maps, with the row and column labels in Gray code order.}\label{tab:wiring_lut}
               \end{table}
 
-              Therefore, the number of possibilities for the \(j\)th marginal wiring input function \(W^{(j)}_{A,\lambda}\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible marginal wiring output functions \(T_{A,\lambda}\) is \(\exp_{o_A}(i_A o_A^{c})\). The total number of wirings is then
+              Therefore, the number of possibilities for the \(j\)th wiring input function \(W^{(j)}_{A}\) is \(\exp_{i_A}(i_A o_A^{j-1})\). Similarly, the number of possible wiring output functions \(T_{A}\) is \(\exp_{o_A}(i_A o_A^{c})\). The number of distinct elements of \(\sW_D\) is then reduced to
               \begin{equation}
                 \exp_{o_A}(i_A o_A^c) \prod_{j=1}^c \exp_{i_A}(i_A o_A^{j-1}).
               \end{equation}
@@ -1625,7 +1610,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
               \begin{equation}
                 x_1 = x \qquad x_2 = \bar{a}_1 + x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2\label{eqn:wiringeg}
               \end{equation}
-              is represented by the lookup tables in~\Cref{tab:wiring_lut}, where juxtaposition is the Boolean AND, addition is the Boolean OR, and the overbar is the Boolean NOT.\ \(W_A^{(2)}\) and \(T_A\), where we have dropped the shared randomness label \(\lambda\) due to the wiring being deterministic, are fully specified by 4 and 8 values respectively, instead of the full 8 and 32 values that would be needed to specify the target for each source sequence.
+              is represented by the lookup tables in~\Cref{tab:wiring_lut}, where juxtaposition is the Boolean AND, addition is the Boolean OR, and the overbar is the Boolean NOT.\ \(W_{A}^{(2)}\) and \(T_{A}\) are fully specified by 4 and 8 values respectively, instead of the full 8 and 32 values that would be needed to specify the target for each source sequence.
 
               Another way to reduce the number of wirings would be to fix some input settings to use a given wiring. For example, if both parties apply the AND gating to specific inputs, the correlators involving those inputs will increase in value. Therefore, we can fix the key generating settings \(x = 1\) and \(y = 3\) to be AND-wired. If we fix the wirings for \(f\) input settings, then the number of possible sources for the \(j\)th function will be \((i_A - f) o_A^{j-1}\), so the number of possible wirings becomes
               \begin{equation}
@@ -1633,53 +1618,54 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
               \end{equation}
               for Alice, with the analogous relabelling for Bob.
 
-              For the case of two boxes in the QKD setting, there are 16384 marginal wiring functions for Alice, and \(\approx \num{8.06e7}\) for Bob, for a total of \(\approx \num{1.32e12}\). Fixing the AND gating as discussed above gives us 128 wirings for Alice and 186624 for Bob, for a total of \(\approx \num{2.39e7}\). Both are much more manageable than the number of vertices of \(\Ls\) without causality constraints, but still a substantial computational workload.
+              This iteration is implemented as the \verb`WiringFnIter` type in \verb`wiring.jl`, which allows the maps to fix to be specified. For the case of two boxes in the QKD setting, there are 16384 marginal wiring functions for Alice, and \(\approx \num{8.06e7}\) for Bob, for a total of \(\approx \num{1.32e12}\) joint wiring functions. Fixing the AND gating as discussed above gives us 128 marginal wiring functions for Alice and 186624 for Bob, for a total of \(\approx \num{2.39e7}\) joint wiring functions. Both are much more manageable than the number of vertices of \(\Ls\) without causality constraints, but still a substantial computational workload.
 
-              \subsection{Wiring Matrices}
+              \subsection{Wiring Matrices}\label{sec:locwir_mat}
 
-              Inspired by the analysis of single-copy local transformations in~\cite{LocalTransformations}, another approach would be to view each marginal wiring function as a reversible symmetry operation on its source, followed by an irreversible mapping to a target, and then a reversible symmetry operation on the target. It is tempting to argue that reversible symmetry operations, which can be represented by unitary operators, cannot change the von Neumann entropy of a state, and therefore can be neglected. Unfortunately, these operators are applied a part of a long sequence of operators, some of which are not unitary, and therefore cannot be simply neglected (aside from the final symmetry operation).
-
-              Nonetheless, we can simplify our analysis using the observation that the symmetry operations on the target of one wiring function are of the same type as the symmetry operations on the source of the subsequent wiring function. Let \(S\) be a symmetry operation on the source of a wiring function, \(T\) the symmetry operation on the target of a function, and \(R\) the irreversible operation implemented by the wiring function. Then, the overall effect of a wiring on a behaviour \(p\) can be informally expressed as
+              Inspired by the analysis of single-copy local transformations in~\cite{LocalTransformations}, another approach would be to view each wiring map function as a reversible symmetry operation on its source, followed by an irreversible mapping to a target, and then a reversible symmetry operation on the target. We can simplify our analysis using the observation that the symmetry operations on the target of one wiring map function are of the same type as the symmetry operations on the source of the subsequent wiring map function. Let \(S\) be a symmetry operation on the source of a wiring map function, \(T\) the symmetry operation on the target of a function, and \(R\) the irreversible operation implemented by the wiring map function. Then, the overall effect of a wiring on a behaviour \(p\) can be informally expressed as
               \[ T_{c+1}R_{c+1}S_{c+1} \cdots T_2R_2S_2 T_1R_1S_1 p. \]
               Our argument then is that \(S_{j+1}\) and \(T_{j}\) for any \(j\) are elements of the same group of transformations, and can therefore be combined when enumerating the possible deterministic transformations. The sequence of operations is then effectively
-              \[ T_{c+1}R_{c+1}S_{c+1} \cdots R_2S_2 R_1S_1 p, \]
-              where we keep the final target symmetry operation \(T_{c+1}\) since, while \(H(\crv{A}|E)\) itself is not affected by local symmetry operations, some methods for estimating \(H(\crv{A}|E)\) might be.
+              \[ R_{c+1}S_{c+1} \cdots R_2S_2 R_1S_1 p, \]
+              where we have dropped the final symmetry operation \(T_{c+1}\) because, as will be demonstrated later, it does not perform any transformation that variation in the other operators cannot produce.
 
-              We will formalise this by expressing the wirings as linear operators: that is, matrices. Since the deterministic marginal wirings are local, they are entirely characterised by their effect on a single-party behaviour, with the effect of a joint deterministic wiring being the tensor product of the marginal wirings, as explicitly described later in this section.
+              We will formalise this by expressing the wirings as linear operators: that is, matrices. Since the deterministic marginal wirings are local, they are entirely characterised by their effect on a single-party behaviour, with the effect of a joint deterministic wiring being isomorphic to that of the tensor product of the marginal wirings, as explicitly described later in this section. While our examples, explanations and implementations focus primarily on ordered iid joint behaviours (\Cref{sec:locwir_dist}), they are straightforwardly extended to more general joint behaviours.
 
-              We therefore now consider the case of a single party, whose box takes input \(x \in \dintv{1}{i_A}\) and gives output \(a \in \dintv{1}{o_A}\). We vectorise the behaviour by incrementing \(a\), then \(x\), that is
+              We first consider the case of a single party, whose box takes input \(x \in \dintv{1}{i_A}\) and gives output \(a \in \dintv{1}{o_A}\). We vectorise the behaviour by incrementing \(a\), then \(x\), that is
               \begin{equation}
-                p_{A;k} = p(a|x) \Leftrightarrow k = (a-1) \times i_A + x,
+                \matr[_A]{p}_k = p(a|x) \Leftrightarrow k = (a-1) i_A + x,
               \end{equation}
               which means that \(\cvec{p}_A\), the vector corresponding to the behaviour, is the direct sum of normalised probability vectors \(\cvec{p}_{A|x}\), each corresponding to the distribution obtained from input \(x\). We refer to the real vector space that \(\cvec{p}_A\) lives in as \(\sP_A \cong \R^{o_Ai_A}\).
 
-              We want to represent the wiring of \(c\) independent boxes together as the action of a matrix \(\matrp{W}{_A}\) on \(\cvec{p}_A^{\otimes c}\). Further, we want to represent each marginal wiring function as a matrix \(\matrp{W}{_A^{(j)}}\) (or \(\matrp{T}{_A}\) for the marginal wiring output function), acting on a single-party behaviour representing the box being wired, and the auxiliary information collected thus far. This state information is represented as a vector \(\cvec{p}^{(j)}_A\), and we want
-              \[ \matrp{W}{_A} = \matrp{T}{_A} \matrp{W}{_A^{(c)}} \matrp{W}{_A^{(c-1)}} \cdots \matrp{W}{_A^{(1)}}. \]
+              We want to represent the wiring of \(c\) independent boxes together as the action of a matrix \(\matr[_A]{W}\) on \(\cvec{p}_A^{\otimes c}\). Further, we want to represent each wiring map function as a matrix \(\matr[_A^{(j)}]{W}\) (or \(\matr[_A]{T}\) for the wiring output function), acting on a single-party behaviour representing the box being wired, and the auxiliary information collected thus far. This state information is represented as a vector \(\cvec{p}^{(j)}_A\), and we want
+              \[ \matr[_A]{W} = \matr[_A]{T} \matr[_A^{(c)}]{W} \matr[_A^{(c-1)}]{W} \cdots \matr[_A^{(1)}]{W}. \]
               To additionally represent the dependency on the overall input \(x\), the initial state of the system must be an element of \(\R^{i_A} \otimes \sP_A^{\otimes c}\). Therefore, we have
               \begin{equation}
                 \cvec{p}_A^{(1)} = \bigoplus_{l=1}^{i_A} 1 \otimes \bigotimes_{k=1}^c \cvec{p}_A.
               \end{equation}
 
-              Now, application of a wiring function, aside from the overall output function that gives \(a\), corresponds to performing a wiring, inputting the wiring function's target into the next nonlocal box, and then retrieving the nonlocal box output. However, we do not need to record the wiring function's target, as argued above: we only need the box output that will become part of the next wiring function's source. Therefore, we can have
-              \[ \matrp{W}{_A^{(1)}} \cvec{p}_A^{(1)} = \cvec{p}_A^{(2)} \in \R^{i_A} \otimes \R^{o_A} \otimes \sP_A^{\otimes c-1}, \]
+              Now, application of a wiring map function, aside from the output function \(T_A\), corresponds to performing a wiring, inputting the wiring map function's target into the next nonlocal box, and then retrieving the nonlocal box output. However, we do not need to record the wiring map function's target, as argued in \Cref{sec:locwir_func}; we only need the box output that will become part of the next wiring map function's source. Therefore, we can have
+              \[ \matr[_A^{(1)}]{W} \cvec{p}_A^{(1)} = \cvec{p}_A^{(2)} \in \R^{i_A} \otimes \R^{o_A} \otimes \sP_A^{\otimes c-1}, \]
               which we can generalise to
               \begin{equation}
-                \matrp{W}{_A^{(j)}} \cvec{p}_A^{(j)} = \cvec{p}_A^{(j+1)} \in \R^{i_A} \otimes \bigotimes_{k=1}^{j} \R^{o_A} \otimes \bigotimes_{l=1}^{c-j} \sP_A,\, \forall j \in \dintv{1}{c}.
+                \matr[_A^{(j)}]{W} \cvec{p}_A^{(j)} = \cvec{p}_A^{(j+1)} \in \R^{i_A} \otimes \bigotimes_{k=1}^{j} \R^{o_A} \otimes \bigotimes_{l=1}^{c-j} \sP_A,\, \forall j \in \dintv{1}{c}.
               \end{equation}
-              The matrix \(\matrp{W}{_A^{(j)}}\) depends on \(\R^{i_A}\) and all existing copies of \(\R^{o_A}\), but maps only one copy of \(\sP_A\) to one copy of \(\R^{o_A}\) and leaves the values in \(\R^{i_A}\) and the copies of \(\R^{o_A}\) unchanged. That is, we can write this operator as
+              The matrix \(\matr[_A^{(j)}]{W}\) depends on \(\R^{i_A}\) and all existing copies of \(\R^{o_A}\), but maps only one copy of \(\sP_A\) to one copy of \(\R^{o_A}\) and leaves the values in \(\R^{i_A}\) and the copies of \(\R^{o_A}\) unchanged. That is, we can write the matrix as
               \begin{equation}
-                \matrp{W}{_A^{(j)}} = \matrp{\tilde{W}}{_A^{(j)}} \otimes \bigotimes_{l=1}^{c-j} I_{\sP_A} \, \forall j \in \dintv{1}{c}.
+                \matr[_A^{(j)}]{W} = \matr[_A^{(j)}]{\tilde{W}} \otimes \bigotimes_{l=1}^{c-j} I_{\sP_A} \, \forall j \in \dintv{1}{c},
               \end{equation}
+              where the matrices \(\matr[_A^{(j)}]{\tilde{W}}\) are maps from \(\R^{i_A} \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \sP_A\) to \(\R^{i_A} \otimes \bigotimes_{k=1}^{j} \R^{o_A}\). \(\matr[_A]{T}\) is, however, a map from \(\R^{i_A} \bigotimes_{k=1}^{c} \R^{o_A}\) to \(\sP_A\), and does not admit such a factorisation.
 
-              TODO write the tilde stuff for T
+              The matrices \(\matr[_A^{(j)}]{\tilde{W}}\) can be factorised into a \emph{permutation map} \(\matr[_A^{(j)}]{S}\) (i.e.\ a symmetry operation) followed by an \emph{application map} \(\matr[_A^{(j)}]{R}\), corresponding respectively to \(S_j\) and \(R_j\) for \(j \leq c\) in our informal notation. However, both maps must be a direct sum of \(i_A\) smaller \emph{conditional submatrices}, in order to preserve the separation between the \(i_A\) possible values of the overall input \(x\). This separation must be preserved throughout for the output matrix \(\matr[_A]{T}\), which also consists of a permutation map \(\matr[_A^{(j)}]{S}\) and application map \(\matr[_A]{T}\) that are direct sums of conditional submatrices, to be able to correctly assign the probabilities based on the overall input \(x\). Therefore, we have
+              \begin{align}
+                \matr[_A^{(j)}]{W} &= \left( \bigoplus_{x=1}^{i_A} \matr[_{A|x}^{(j)}]{R} \right) \left( \bigoplus_{x=1}^{i_A} \matr[_{A|x}^{(j)}]{S} \right) \\
+                                   &= \matr[_{A}^{(j)}]{R} \matr[_{A}^{(j)}]{S} \\
+                \matr[_A]{T} &= \left( \bigoplus_{x=1}^{i_A} \matr[_{A|x}]{T} \right) \left( \bigoplus_{x=1}^{i_A} \matr[_{A|x}^{(c+1)}]{S} \right) \\
+                                   &= \matr[_{A}]{T} \matr[_{A}^{(c+1)}]{S}.
+              \end{align}
 
-              The matrices \(\matrp{\tilde{W}}{_A^{(j)}}\), mapping from \(\R^{i_A} \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \sP_A\) to \(\R^{i_A} \otimes \bigotimes_{k=1}^{j} \R^{o_A}\), can then be factorised into a permutation map (i.e.\ a symmetry operation) followed by an application map, corresponding respectively to \(S\) and \(R\) above. However, both maps must be a direct sum of \(i_A\) smaller \emph{conditional wiring matrices}, in order to preserve the separation between the \(i_A\) possible values of the overall input \(x\). This separation must be preserved throughout for the final matrix \(\matrp{W}{_A^{(c+1)}}\) to be able to correctly assign the probabilities based on the overall input.
-
-              TODO relate application matrix to wiring matrix
-
-              Each application matrix can be considered abstractly as mapping each source sequence \(\cvec{a}^{j-1}\) to a specific value of \(x_j\), and multiplying the probability of the source sequence with \(\cvec{p}_{A|x_j}\). In order to operate on a copy of \(\cvec{p}_A\), the application matrix \(\matrp{R}{_{A|x}^{(j)}}\) for a given \(x\) must take the following form:
+              Each application matrix \(\matr[_{A}^{(j)}]{R}\) can be considered abstractly as mapping each source sequence \(\cvec{a}^{j-1}\) to a specific value of \(x_j\), and multiplying the probability of the source sequence with \(\cvec{p}_{A|x_j}\). In order to operate on a copy of \(\cvec{p}_A\), the conditional submatrix \(\matr[_{A|x}^{(j)}]{R}\) for a given \(x\) must take the following form:
               \begin{equation}
-                \matrp{R}{_{A|x}^{(j)}} = \left( \bigoplus_{l=1}^{n_1} \underbrace{\begin{bmatrix} 1 & 0 & 0 & \cdots \end{bmatrix}}_{i_A\text{ entries}}
+                \matr[_{A|x}^{(j)}]{R} = \left( \bigoplus_{l=1}^{n_1} \underbrace{\begin{bmatrix} 1 & 0 & 0 & \cdots \end{bmatrix}}_{i_A\text{ entries}}
                   \oplus \bigoplus_{l=1}^{n_2} \underbrace{\begin{bmatrix} 0 & 1 & 0 & \cdots \end{bmatrix}}_{i_A\text{ entries}} \oplus \cdots
                 \right) \otimes I_{o_A},
                 \end{equation}
@@ -1687,11 +1673,11 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
                 While the application matrix determines the multiplicity of each input, the permutation matrix takes care of assigning the source sequences to those inputs. It is a permutation matrix, consisting of the identity matrix with its rows permuted, with a tensor product with \(I_{i_A o_A}\) in order to operate on the probabilities \(\cvec{p}\). However, there are degeneracies here as well. The number of permutations with different effects can be calculated by considering the combinatoric problem of assigning \(n_1\) inputs \(1\), \(n_2\) inputs \(2\), and so on, to \(o_A^{j-1}\) source sequences. There are therefore \(o_A^{j-1}!/\prod_{k=1}^{i_A} n_k!\) possible permutation matrices.
 
-                \(\matrp{T}{_A}\) maps an element of \(\R^{i_A} \otimes \bigotimes_{k=1}^{c} \R^{o_A}\) to \(\sP_A\). Analogous to the case of \(\matrp{W}{^{(j)}_A}\), the application matrix provides the multiplicity of output values, while the permutation matrix decides which probabilities are assigned to which output. This gives \(\binom{o_A^c + o_A-1}{o_A-1}\) application matrices and \(o_A^c!/\prod_{k=1}^{o_A} n_k!\) permutation matrices. Note, however, that the final symmetry operation, corresponding to \(T_{c+1}\) in our informal notation, does not perform any transformation that the variation in the application and permutation matrices cannot (except for permutations of the different values of \(x\), but this effect would already have been generated by the variation in the application and permutation matrices). We therefore will not consider it.
+                \(\matr[_A]{T}\) maps an element of \(\R^{i_A} \otimes \bigotimes_{k=1}^{c} \R^{o_A}\) to \(\sP_A\). Analogous to the case of \(\matr[^{(j)}_A]{W}\), the application matrix provides the multiplicity of output values, while the permutation matrix decides which probabilities are assigned to which output. This gives \(\binom{o_A^c + o_A-1}{o_A-1}\) application matrices and \(o_A^c!/\prod_{k=1}^{o_A} n_k!\) permutation matrices. From this analysis, it is clear that the final output permutation would not generate any permutation that would not already be generated by \(\matr[_A^{(c+1)}]{S}\), and hence can be safely removed.
 
-                For clarity, we provide an explicit example using the wiring characterised by \Cref{eqn:wiringeg}, and define \(\cvec{\tilde{p}}_A^{(j)}\) as the element of \(\R^{i_A} \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \sP_A\) that is acted on by \(\matrp{\tilde{W}}{_A^{(j)}}\). To improve readability, we have also factorised out tensor products with identity matrices. The effect of the wiring can then be written as:
+                For clarity, we provide an explicit example using the wiring characterised by \Cref{eqn:wiringeg}, and define \(\cvec{\tilde{p}}_A^{(j)}\) as the element of \(\R^{i_A} \otimes \bigotimes_{k=1}^{j-1} \R^{o_A} \otimes \sP_A\) that is acted on by \(\matr[_A^{(j)}]{\tilde{W}}\). To improve readability, we have also factorised out tensor products with identity matrices. The effect of the wiring can then be written as:
                 \begin{align}
-                  \matrp{\tilde{W}}{_A^{(1)}} \cvec{\tilde{p}}{_A^{(1)}} &= \left( \left(
+                  \matr[_A^{(1)}]{\tilde{W}} \cvec{\tilde{p}}{_A^{(1)}} &= \left( \left(
                       \begin{bmatrix} 1 & 0 \\ \end{bmatrix} 
                   \oplus \begin{bmatrix} 0 & 1 \\ \end{bmatrix} \right) \otimes I_2 \right)
                   \left( \left( \begin{bmatrix} 1 \end{bmatrix} \oplus \begin{bmatrix} 1 \end{bmatrix} \right) \otimes I_{4} \right) 
@@ -1708,7 +1694,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                                              \cvec{p}_{A|0} \\
                                              \cvec{p}_{A|1} \\
                                            \end{bmatrix} \in \R^{i_A} \otimes \R^{o_A} \\
-                  \matrp{\tilde{W}}{_A^{(2)}} \cvec{\tilde{p}}{_A^{(2)}} &= \begin{gathered}
+                  \matr[_A^{(2)}]{\tilde{W}} \cvec{\tilde{p}}{_A^{(2)}} &= \begin{gathered}
                     \left( \left(
                         \left( \begin{bmatrix} 1 & 0 \\ \end{bmatrix} \oplus \begin{bmatrix} 0 & 1 \\ \end{bmatrix} \right)
                     \oplus \bigoplus_{k=1}^2 \begin{bmatrix} 0 & 1 \\ \end{bmatrix} \right) \otimes I_2 \right) \\
@@ -1731,7 +1717,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                                         p(1|0) \cvec{p}_{A|0} \\ p(0|0) \cvec{p}_{A|1} \\
                                         p(0|1) \cvec{p}_{A|1} \\ p(1|1) \cvec{p}_{A|1} \\ 
                                       \end{bmatrix} \in \R^{i_A} \otimes \R^{o_A} \otimes \R^{o_A} \\
-                    \matrp{T}{_A} \cvec{p}_A^{(3)} &= \left( \matrp{T}{_{A|0}^{(3)}} \oplus \matrp{T}{_{A|1}^{(3)}} \right)
+                    \matr[_A]{T} \cvec{p}_A^{(3)} &= \left( \matr[_{A|0}^{(3)}]{T} \oplus \matr[_{A|1}^{(3)}]{T} \right)
                     \left(\begin{bmatrix}
                         1 & 0 & 0 & 0 \\
                         0 & 0 & 0 & 1 \\
@@ -1765,11 +1751,10 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                                                      p(1|1) p(1|1) + p(0|1) p(1|1) + p(1|1) p(0|1) \\ p(0|1) p(0|1) \\ 
                                                    \end{bmatrix} \in \sP_A
                   \end{align}
-                  Note that, when \(j=c+1\), the versions of the objects with and without tildes are identical, i.e. \(\matrp{\tilde{W}}{_A^{(3)}} \cvec{\tilde{p}}_A^{(3)} = \matrp{{W}}{^{(3)}_A} \cvec{{p}}_A^{(3)} = \matrp{W}{_A} \cvec{p}_A^{(3)}\).
 
-                  Unfortunately, the exact number of wirings does not seem easily computed in closed form, due to the dependence of the number of distinct permutation maps on the application maps. Nonetheless, it is straightforward to compute numerically, which give us the exact same number of wirings as derived from the wiring function approach. While this verifies that the two approaches are consistent, it implies that there are no simplifications to be had from this structural analysis of wirings.
+                  Unfortunately, the exact number of wirings does not seem easily computed in closed form, due to the dependence of the number of distinct permutation maps on the application maps. Nonetheless, it is straightforward to compute numerically based on the counting arguments above, which are implemented as the type \verb`StarsBarsNN` in \verb`wiring.jl`. On the examples tried, however, this gives us the exact same number of wirings as derived from the wiring function approach. While this verifies that the two approaches are consistent, it implies that there are no simplifications to be had from this structural analysis of wirings.
 
-                  This formalism nonetheless retains some advantages over the wiring function representation. Firstly, similar to the case of wiring distributions, it is easy to represent a convex mixture of wirings by the convex mixture of the corresponding wiring matrices, but unlike the case of wiring distributions, the no-retrocausation conditions are automatically encoded. This allows us to represent wirings using a lower-dimensional vector of coefficients as compared to the wiring distribution approach, enabling more efficient polytope computations. In this sense, it is analogous to the Collins-Gisin representation. Although we will later see that convex mixtures do not maximise the secret key capacity (\Cref{sec:wirkr}), this still allows us to obtain a better fundamental understanding of the structure of the space of wirings.
+                  This formalism nonetheless retains some advantages over the wiring function representation. Firstly, similar to the case of wiring distributions, it is easy to represent a convex mixture of wirings by the convex mixture of the corresponding wiring matrices, but unlike the case of wiring distributions, the no-retrocausation conditions are automatically encoded. This allows us to represent wirings using a lower-dimensional vector of coefficients as compared to the wiring distribution approach, enabling more efficient polytope computations. In this sense, it is analogous to the Collins-Gisin representation. Although we will later see that convex mixtures do not maximise the secret key capacity (\Cref{sec:locwir_kr}), this still allows us to obtain a better fundamental understanding of the structure of the space of wirings.
 
                   Additionally, as mentioned above, it allows for easy composition of each party's local wirings, and extension to the \(n\)-partite case. The coefficients of the \(n\)-partite behaviour vector \(\cvec{p}_{\cvec{A}^n}\) are arranged in the order corresponding to \(\bigotimes_{k=1}^n \cvec{p}_{A_k}\); that is,
                   \begin{equation}
@@ -1787,18 +1772,16 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                                               p(o_{A_1},\ldots,o_{A_{n-1}},o_{A_n}|i_{A_1},\ldots,i_{A_{n-1}},i_{A_n})
                                             \end{bmatrix},
                   \end{equation}
-                  as implemented in the \verb`BehaviourVec` type constructor in \verb`wiring.kl`. For wiring matrices, composition is somewhat more complicated. Naively taking \(\bigotimes_{k=1}^n \matrp{W}{_{A_k}}\) gives an operator in \(\Lin{\bigotimes_{k=1}^n \left(\bigotimes_{j=1}^c \sP_{A_k}\right) \to \bigotimes_{k=1}^n \sP_{A_k}}\), whereas  \(\cvec{p}_{\cvec{A}^n}^{\otimes{c}} \in \bigotimes_{j=1}^c \left(\bigotimes_{k=1}^n \sP_{A_k}\right)\). While the domain of the former is isomorphic to the space of the latter, this isomorphism must be manually implemented, which is done in the \verb`Wiring` type constructor in \verb`wiring.jl` by interpreting the individual parties' matrices as an element of  permuting the entries of the Kronecker product matrix.
+                  as implemented in the \verb`BehaviourVec` type constructor in \verb`wiring.jl`. For wiring matrices, composition is somewhat more complicated. Naively taking \(\bigotimes_{k=1}^n \matr[_{A_k}]{W}\) gives an operator in \(\Lin{\bigotimes_{k=1}^n \left(\bigotimes_{j=1}^c \sP_{A_k}\right) \to \bigotimes_{k=1}^n \sP_{A_k}}\), whereas  \(\cvec{p}_{\cvec{A}^n}^{\otimes{c}} \in \bigotimes_{j=1}^c \left(\bigotimes_{k=1}^n \sP_{A_k}\right)\). While the domain of the former is isomorphic to the space of the latter, this isomorphism must be manually implemented, which is done in the \verb`Wiring` type constructor in \verb`wiring.jl` by interpreting the \(j\)th party's matrix, which acts on \(\sP_{A_j}^{\otimes c}\), as an element of \(\Lin{\sP_{A_j}} \otimes \bigotimes_{k=1}^{c-1} \Lin{\sP_{A_j} \to \R}\), and using this identification to permute the entries of the overall wiring matrix to obtain an operator in \(\Lin{\bigotimes_{j=1}^c \left(\bigotimes_{k=1}^n \sP_{A_k}\right) \to \bigotimes_{k=1}^n \sP_{A_k}}\). Intuitively, this interpretation describes the action of the wiring: it maps \(c-1\) copies of the behaviour to a scalar value, which is propagated to subsequent wiring maps via the tensor product structure, then maps the last copy of the behaviour to another behaviour, based on all the previous mappings. Multiplying a \verb`Wiring` with a \verb`BehaviourVec` will automatically extend the \verb`BehaviourVec` an ordered iid joint behaviour with \(c\) copies and apply the specified wiring to it.
 
-                  Aren't we glad we have computers?
+                  \verb`wiring.jl` also contains some basic wiring functions for specifying wirings, such as \verb`jth_Wmap`, which simply uses the \(j\)th box and ignores the other copies of it, \verb`and_Wmap` which implements the AND wiring in \Cref{sec:preres}, and \verb`xor_Wmap` which implements the parity wiring known to be optimal for distilling CHSH from certain classes of boxes~\cite{OptimalNLDistillation}. A more complex wiring, where some inputs result in only the first box being used, and others in the AND wiring being used, is implemented in \verb`sel_and_behav`. \verb`wiring.jl` in the \verb`test` folder contains several symbolic input behaviours, implemented using the \verb`Symbolics.jl` package~\cite{Symbolics}, that are used to verify this framework.
 
-                  A possible extension is to store the component matrices rather than the explicit tensor products, and compute the tensor products using the \emph{vec trick}~\cite{VecTrick}, which gives that \((\matr{M}\otimes\matr{N})\mathrm{vec}(\matr{Q}) = \mathrm{vec}(\matr{N}\matr{Q}\matrp{M}{^\tpose})\), allowing the application of matrix to a vector to be efficiently evaluated without explicitly computing and storing the Kronecker product.
+                  A possible extension to the work done here is to store the component matrices rather than the explicit tensor products, and compute the tensor products using the \emph{vec trick}~\cite{VecTrick}, which gives that \((\matr{M}\otimes\matr{N})\mathrm{vec}(\matr{Q}) = \mathrm{vec}(\matr{N}\matr{Q}\matr[^\tpose]{M})\), allowing the application of matrix to a vector to be efficiently evaluated without explicitly computing and storing the Kronecker product. This would improve the scalability of this representation.
 
-                  However, obtaining a deeper understanding of the problem through these methods seems unlikely. Given a family of behaviours and a bounding function, it is possible to search for the wiring for each particular behaviour that produces the largest increase in the bound. However, without a convenient parametrisation or classification of the wirings, it would be difficult to generalise this data or draw any conclusions from it. Indeed, the underlying problem in our study of the space of wirings is summed up in the following question:
-                  \begin{funqn}\label{fqn:wir}
-                    What is the structure of the space of wirings? How does it interact with the structure of the space of behaviours? How does the secret key capacity vary over these structures?
-                  \end{funqn}
-
-                  Nonetheless, a brute force enumeration can answer \Cref{fqn:wircap} in the affirmative, if we find a behaviour with \(C_{\sk} = 0\) but which exhibits \(C_{\sk} \geq 0\), that is, with an upper bound of 0 on the key rate before wiring, and a lower bound \(\geq 0\).
+                  An application of this representation that we were not able to explore further was to express the wiring matrices for elements of \(\sW_D\) as vertices of a polytope, which could have allowed more redundancies to be uncovered and eliminated. We leave this for future work.
+                  \begin{question}
+                    Are there further redundancies that can be eliminated through the analysis of wiring matrices?
+                  \end{question}
 
                   \subsection{The Short, Popescu and Gisin Classification}\label{sec:locwir_SPG}
 
@@ -1810,7 +1793,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                   \end{equation}
                   where the breve indicates the inputs and outputs corresponding to boxes that were not coupled together, and \(b'\) is the coupler output.
 
-                  TODO do the comparison properly
+                  TODO do the comparison properly.
 
                   Comparing this expression to \Cref{eqn:jwirdistdef}, we see that couplers seem to be more general than wirings. For couplers, Alice and Bob are allowed to have different numbers of boxes. The boxes are assumed to be arbitrarily related through some no-signalling behaviour, instead of iid rounds of a Bell test: if Alice and Bob have a total of \(\hat{c}\) boxes, \(P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y})\) can be any behaviour in the \(\hat{c}\)-partite \(\NSs\), not necessarily \(\hat{c}/2\) iid copies of the same behaviour. The output of the coupling operation is a set of new \(\hat{c}'\)-partite behaviours, with \(\hat{c}' < \hat{c}\), each tagged to a distinct value of the output \(b'\), but without specifying the overall input to the boxes that are coupled (i.e.\ the choice of the initial input for the sequence of outcomes assigned to a particular \(b'\) may not follow any consistent rule). Finally, this analysis does not include the causality restrictions that we have used to reduce the number of possible wirings.
 
@@ -1824,188 +1807,16 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
                   TODO classify the extremal points for the QKD setting
 
-                  One possible approach is to adapt the methodology by only considering distributions consisting of independent boxes, instead of allowing an arbitrary nonsignalling relationship between the boxes. The different values of \(b'\) then correspond to different values of the overall output \(b\), while the distributions \(P(\cvec{b}|\cvec{y})\) must be the product of \(c\) deterministic single-box wirings, of which there are \(o_B^{i_B}\). Essentially, this approach allows us to explore the possible probability distributions that can arise from combining boxes across several independent rounds, without restricting ourselves to wirings that are physically realisable as a sequence of local operations that respect causality. It therefore contains \(\sW^c\), and also contains the polytope of couplers in this scenario, since the inequalities defining the latter are a strict superset of these inequalities.
+                  One possible approach is to adapt the methodology by only considering distributions consisting of independent boxes, instead of allowing an arbitrary nonsignalling relationship between the boxes. The different values of \(b'\) then correspond to different values of the overall output \(b\), while the distributions \(P(\cvec{b}|\cvec{y})\) must be the product of \(c\) deterministic single-box wirings, of which there are \(o_B^{i_B}\). Essentially, this approach allows us to explore the possible probability distributions that can arise from combining boxes across several independent rounds, without restricting ourselves to wirings that are physically realisable as a sequence of local operations that respect causality. It therefore contains \(\sW\), and also contains the polytope of couplers in this scenario, since the inequalities defining the latter are a strict superset of these inequalities.
 
                   Nonetheless, the utility of this polytope is questionable. While it will lead to an overapproximation to \(\sWB(p)\), some of these wirings may not be physically realisable even within a super-quantum no-signalling theory (since they are not checked against boxes with an arbitrary no-signalling relationship), and there is no guarantee that optimisations performed over this generated polytope will have any meaningful interpretation.
 
-
-                  \section{Exploring the No-Signalling Polytope}\label{sec:nspoly}
-
-                  TODO shorten this discussion, maybe use the NL convertibility/geometric decomp papers
-
-                  \begin{table}
-                    \centering
-                    \begin{tabular}{|r|cccc|cc|cc|} \hline
-                      \diagbox{Type}{\(ab\)} & 00  & 01  & 10  & 11  & \(a=0|x\) & \(a=1|x\) & \(b=0|y\) & \(b=1|y\) \\ \hline
-                      Correlated             & 1/2 & 0   & 0   & 1/2 & 1/2     & 1/2     & 1/2     & 1/2 \\ 
-                      Anticorrelated         & 0   & 1/2 & 1/2 & 0   & 1/2     & 1/2     & 1/2     & 1/2 \\
-                      \(a=0\), \(b\) random  & 1/2 & 1/2 & 0   & 0   & 1/2     & 1/2     & 1       & 0 \\
-                      \(a=1\), \(b\) random  & 0   & 0   & 1/2 & 1/2 & 1/2     & 1/2     & 0       & 1 \\
-                      \(a\) random, \(b=0\)  & 1/2 & 0   & 1/2 & 0   & 1       & 0       & 1/2     & 1/2 \\
-                      \(a\) random, \(b=1\)  & 0   & 1/2 & 0   & 1/2 & 0       & 1       & 1/2     & 1/2 \\
-                      \(a=0\), \(b=0\)       & 1   & 0   & 0   & 0   & 1       & 0       & 1       & 0 \\
-                      \(a=0\), \(b=1\)       & 0   & 1   & 0   & 0   & 0       & 1       & 1       & 0 \\
-                      \(a=1\), \(b=0\)       & 0   & 0   & 1   & 0   & 1       & 0       & 0       & 1 \\
-                      \(a=1\), \(b=1\)       & 0   & 0   & 0   & 1   & 0       & 1       & 0       & 1 \\
-                      \hline
-                    \end{tabular}
-                    \caption[Possible conditional distributions in binary-output extremal boxes and their marginals]{Possible conditional distributions in binary-output extremal boxes and their marginals. All marginals \(p(a|x)\) (\(p(b|y)\)) must match across all \(y\)'s (\(x\)'s).}\label{tab:extr_cond}
-                  \end{table}
-
-                  \begin{table}
-                    \centering
-                    \begin{tabular}{|r|cccc|} \hline
-                      \diagbox{Type}{\(ab\)} & 00 & 01 & 10 & 11 \\ \hline
-                      Fully mixed & 1/4 & 1/4 & 1/4 & 1/4 \\
-                      Correlated + Random & 1/2 & 1/4 & 0 & 1/4 \\
-                      Correlated + Fixed & 3/4 & 0 & 0 & 1/4 \\
-                      Random + Fixed & 3/4 & 1/4 & 0 & 0 \\
-                      \hline
-                    \end{tabular}
-                    \caption[Possible conditional distributions arising in equal mixtures of extremal boxes]{Representative examples of the possible conditional distributions arising in equal mixtures of extremal boxes}\label{tab:extrmix_cond}
-                  \end{table}
-
-                  \begin{figure}
-                    \centering
-                    \begin{tikzpicture}[z={(0:1)}, x={(-55:0.5)}] % set projection of unit vectors onto screen
-                      \tikzmath{ \raylen = 3; }
-                      \draw[dotted] (0,0,0) node[name=boundbehav, point, label=\(p_{\Ls}^{(0)}\)] {} -- ++(0,\raylen,0) node[name=prbehav, point, label=\(p_{\PR}\)] {};
-                      \begin{scope}[canvas is xz plane at y=0]
-                        \tikzmath{
-                          coordinate \L;
-                        int \i;
-                      for \i in {1,2,...,8}{
-                        let \lname = lbehav\i;
-                      { \draw (22.5+45*\i:\raylen) node[point, name=\lname, label=\(p_{\Ls}^{(\i)}\)] {} -- (prbehav); };
-                    };
-                }
-                \begin{pgfonlayer}{background}
-                  \fill[draw,fill=blue!20,fill opacity=0.5] (lbehav1.center) -- (lbehav2.center) -- (lbehav3.center) -- (lbehav4.center) -- (lbehav5.center) -- (lbehav6.center) -- (lbehav7.center) -- (lbehav8.center) -- (lbehav1.center);
-                \end{pgfonlayer}
-              \end{scope}
-            \end{tikzpicture}
-            \caption[Representation of behaviours that violate CHSH inequality]{Representation of behaviours that violate \(S \leq 2\), with CHSH facet in blue}%
-                  \end{figure}
-
-                  NL interconversion: lifted PR boxes (extremal correlations in binary-output scenarios) are able to be converted into a form closely analogous to a PR box using local symmetry operations. They can then be used to simulate any extremal correlations. However, non-extremal correlations may have limited potential for symmetric conversion, since the symmetry operation would have to be applied to a mixture of behaviours. They would also be too noisy to use for simulating extremal correlations.
-
-                  There are three types of marginals, and each combination of marginals specifies a unique distribution, except \(1/2, 1/2, 1/2, 1/2\), which can be correlated or anticorrelated.
-
-                  In order to study the effects of wirings on arbitrary behaviours, we wish to characterise the space of possible behaviours in the QKD setting (that is, \((i_A=2,o_A=2;i_B=3,o_B=2)\)) so as to identify the notable behaviours we may wish to investigate further.
-
-                  We begin by characterising the facets of \(\Ls\), each of which corresponds to an inequality. If any inequality is violated by a behaviour, that behaviour lies outside \(\Ls\). As mentioned above, all inequalities \(p(ab|xy) \geq 0\) are constraints on the possible behaviours, and each of these inequalities corresponds to a facet. We therefore have \(i_A o_A i_B o_B = 24\) \emph{positivity facets}, one for each inequality.
-
-                  As mentioned in \Cref{sec:nl}, behaviours in the \((2,2;2,2)\) setting with \(S > 2\) are not contained in \(\Ls\). This is because \(S \leq 2\) defines a facet for \(\Ls\) in this setting. However, there are actually multiple versions of the CHSH inequality, which can generically by written as
-                  \[ \abs{\angleb{A_{x_0} B_{y_0}} + \angleb{A_{x_1} B_{y_0}} + \angleb{A_{x_0} B_{y_1}} - \angleb{A_{x_1} B_{y_1}}} \leq 2, \]
-                  where \(x_0, x_1, y_0, y_1 \in \{0,1\}\), with 4 possible assignments, while the absolute value induces 2 further linear variants. All of these can be obtained by permuting the labels for the inputs (\(i_A!i_B!\) possible permutations), and the outputs for each input (\(o_A!\) for each \(x\) and \(o_B\) for each \(y\)). Lastly, since \((i_A, o_A) = (i_B, o_B)\), we can permute the parties' names as well, giving 2 versions of each permutation. Since each of these permutations can be applied independently, the total number of overall permutations possible is \(2i_A!i_B!(o_A!)^{i_A}(o_B!)^{i_B} = 128\). However, the symmetry of the CHSH expression yields only \(2 \times 4 = 8\) variants in total.
-
-                  Now, moving to the QKD setting, if we pick two out of three values for \(y\), we can still calculate the CHSH value for those two settings, and Alice's two values of \(x\). Or, more operationally, we can delete the data for the rounds where Bob chooses \(y=2\), and the Bell test data will then be that for a \((2,2;2,2)\) test. However we compute it, the CHSH value still should not violate the inequality for a behaviour in \(\Ls\). Since there are \(\binom{3}{2} = 3\) ways to select Bob's settings, there are 3 \emph{liftings} of each CHSH facet in the QKD setting, and therefore we have 24 liftings of CHSH in total. This gives us 48 facets for \(\Ls\) in the QKD setting.
-
-                  \begin{table}
-                    \begin{minipage}{0.5\linewidth}
-                      \begin{center}
-                        \begin{tabular}{|r|cccccc|} \hline
-                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
-                          00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\
-                          01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
-                          10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
-                          11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\ \hline
-                        \end{tabular}
-                        \[Q_{02} = 1, S = 4\]
-                      \end{center}
-                    \end{minipage}
-                    \begin{minipage}{0.5\linewidth}
-                      \begin{center}
-                        \begin{tabular}{|r|cccccc|} \hline
-                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
-                          00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.5 \\
-                          01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.0 \\
-                          10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.0 \\
-                          11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.5 \\ \hline
-                        \end{tabular}
-                        \[Q_{02} = 1, S = 4\]
-                      \end{center}
-                    \end{minipage}
-                    \vspace{1em}
-
-                    \begin{minipage}{0.5\linewidth}
-                      \begin{center}
-                        \begin{tabular}{|r|cccccc|} \hline
-                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
-                          00 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.5 \\
-                          01 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.0 \\
-                          10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
-                          11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\ \hline
-                        \end{tabular}
-                        \[Q_{02} = 0.5, S = 4\]
-                      \end{center}
-                    \end{minipage}
-                    \begin{minipage}{0.5\linewidth}
-                      \begin{center}
-                        \begin{tabular}{|r|cccccc|} \hline
-                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
-                          00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\
-                          01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
-                          10 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.0 \\
-                          11 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.5 \\ \hline
-                        \end{tabular}
-                        \[Q_{02} = 0.5, S = 4\]
-                      \end{center}
-                    \end{minipage}
-                    \vspace{1em}
-
-                    \begin{minipage}{0.5\linewidth}
-                      \begin{center}
-                        \begin{tabular}{|r|cccccc|} \hline
-                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
-                          00 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.0 \\
-                          01 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.5 \\
-                          10 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.5 \\
-                          11 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.0 \\ \hline
-                        \end{tabular}
-                        \[Q_{02} = 0, S = 4\]
-                      \end{center}
-                    \end{minipage}
-                    \begin{minipage}{0.5\linewidth}
-                      \begin{center}
-                        \begin{tabular}{|r|cccccc|} \hline
-                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
-                          00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\
-                          01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
-                          10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
-                          11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\ \hline
-                        \end{tabular}
-                        \[Q_{02} = 0, S = 4\]
-                      \end{center}
-                    \end{minipage}
-                    \caption{\(p(ab|xy)\) for PR-box analogues in the QKD setting.}\label{tab:qkd_iso}
-                  \end{table}
-
-                  Using the \verb`LazySets.jl` package for the Julia programming language, we specified the deterministic behaviours as vertices of \(\Ls\), since all other local behaviours can be specified as probabilistic mixtures, that is, convex combinations, of the deterministic behaviours. For each \(x \in \dintv{1}{i_A}\), we have \(i_A\) choices for the output \(a\) to assign, with the analogous scenario for Bob. Therefore, there are \(i_A^{o_A}i_B^{o_B} = 32\) vertices. The GLPK solver was then used to identify the facets and their corresponding inequalities, and yielding 48 facets for our polytope. Therefore, all facets in the QKD setting are either liftings of CHSH or positivity facets, which is expected, since the next unique Bell inequality is \(I_{3322}\), in the \((3,2;3,2)\) setting.
-
-                  To generate \(\NSs\), we provided the aforementioned positivity, normalisation, and no-signalling constraints, which are also solved using GLPK to eliminate redundant constraints, and to find the vertices of the polytope. This yields 24 constraints (namely, the positivity constraints in the CG representation) and 128 vertices.
-
-                  In the \((2,2;2,2)\) setting, each of the 8 CHSH facets contains 8 deterministic points with \(S = 2\), and is violated to the algebraic maximum of \(S = 4\) by a \emph{Popescu–Rohrlich} (PR) box, whose outputs are always anti-correlated for one pair of inputs and always correlated otherwise. This behaviour is not within \(\Qs\), and so is not physically realisable as far as we know, but it still plays a crucial role in understanding nonlocality, and the geometry of \(\NSs\). For example, being the only extremal point of \(\NSs\) to have \(S > 2\), all behaviours that violate the corresponding CHSH inequality can be decomposed as a mixture of the PR box and a local box on the CHSH facet~\cite{GeomDecomp}. The line between the \emph{maximally mixed behaviour} \(p_{\varnothing}\), which has all correlators and marginals 0 and \(p_{\varnothing}(ab|xy) = 1/o_A o_B\; \forall a,b,x,y\), and a PR box is called the \emph{isotropic line}, and behaviours on the line (so-called \emph{isotropic boxes}) are convex combinations of the two. Notably, the quantum maximum of \(S = 2\sqrt{2}\) is achieved by a behaviour that is on this line.
-
-                  Most importantly, since the different versions of the CHSH inequality can be obtained simply by permuting labels, the PR boxes are effectively all equivalent up to relabelling. In this sense, we need only study one CHSH inequality and its corresponding PR box, since all other behaviours can be mapped into the corresponding part of \(\NSs\) by symmetry operations. We would like to see if this nice symmetry holds in the QKD setting as well, which we would expect since the only facets aside from positivity facets are liftings of CHSH.
-                  Indeed, we can identify an analogue for the PR box and an analogous structure for \(\NSs\) in the QKD setting. There are \(128 - 32 = 96\) extremal points of \(\NSs\) that are outside \(\Ls\). By checking if their isotropic lines intersect the facet corresponding to CHSH on \(x, y \in \{0,1\}\), we have found 6 extremal points violating it, as shown in \Cref{tab:qkd_iso}. Unlike the \((2,2;2,2)\) setting, we do not have one extremal point per CHSH facet, and the extremal points violate more than one facet. As can be seen from these behaviours, their distributions for \(x, y \in \{0,1\}\) are identical, and it is only the correlations when \(y = 2\) that distinguish the six PR analogues. However, this implies that there is information in these correlations that we are not using. In particular, other liftings of CHSH might be violated by a given behaviour. Could quantifying this improve our key rates?
-
-                  We have merely scratched the surface thus far in our analysis of \(\NSs\) in the QKD setting. Fortunately, it seems to just be slightly more complicated than the well-studied \((2,2;2,2)\) setting. We summarise our hope for investigations in this direction as follows:
-                  \begin{question}
-                    What other insights can be obtained from studying the structure and symmetry of \(\NSs\)? Can all behaviours be mapped into a region where the only nonlocal contributions are from a PR-analogue box? Can we improve our key rates if we consider other CHSH violations, or other aspects of the correlation when \(y=2\)?
-                  \end{question}
-
-                  TODO Since wirings are linear operations, can we study the effect on a general wiring from the effect on the PR box?
-
-
-                  \section{Key Rates of Wired Behaviours}\label{sec:wirkr}
+                  \subsection{Key Rates of Wired Behaviours}\label{sec:locwir_kr}
 
                   Let \(C^{W}_{\sk}(p)\) be the secret key capacity of a behaviour with wiring, that is
                   \begin{equation}
                     C^{W}_{\sk}(p) = \sup_{\chi\in\sW^2} C_{\sk}(\chi(p)).
                   \end{equation}
-
-                  \subsection{Direct Optimisation}
 
                   A possible approach is to introduce the joint wiring distribution \(\chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy)\) as an optimisation variable into the semidefinite program in \Cref{eqn:bff_npa}, or more specifically \(\chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx\) and \(\chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy)\), as defined in \Cref{eqn:mwirdistdef}. Since \(\chi\) takes a discrete set of arguments, its value for every possible argument can be introduced as a variable, and constrained with the no-retrocausation conditions in \Cref{eqn:wiringnoretro}, and the appropriate normalisation:
                   \begin{equation}
@@ -2046,6 +1857,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                   Therefore, the maximum is achieved on the vertices of the polytope, TODO just use result on convex functions
 
                   \(Q_m(p, \matr{M})\) is convex in \(\matr{M}\), since it is a linear objective function in the entries of the moment matrix, while \(H(\crv{A}|\crv{B})_p\) is concave in \(p\).
+
 
                   \section{Upper Bounds from Classical Attacks}
 
@@ -2230,7 +2042,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                   \begin{equation}
                     R_1 \leadsto R_2 \Rightarrow \mu(R_1) \succeq \mu(R_2)
                   \end{equation}
-                  for some pre-order \(\succeq\) defined on the codomain of the monotone. As mentioned in \Cref{sec:locwir}, wirings are \emph{multiple-copy conversions}~\cite{BellResourceTheory}. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under a set of free actions that is a strict superset of \(\sW_D^c\) defined in \Cref{sec:locwir}. However, its monotonicity under wirings with shared randomness was not proved. Nonetheless, we will review these results to see how they can help us.
+                  for some pre-order \(\succeq\) defined on the codomain of the monotone. As mentioned in \Cref{sec:locwir}, wirings are \emph{multiple-copy conversions}~\cite{BellResourceTheory}. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under \(\sW_D\) defined in \Cref{sec:locwir}. However, its monotonicity under wirings with shared randomness (that is, \(\sW^n\)) was not proved. Nonetheless, we will review these results to see how they can help us.
 
                   \subsection{Maximal Correlation and Related Measures}\label{sec:wirmono_maxcorr}
 
@@ -2256,34 +2068,34 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
                   The maximal correlation is particularly important because it can be efficiently computed given a distribution, despite its generality. We define the matrices
                   \begin{align}
-                    \matrp{P}{_{\crv{AB}|xy}}_{ab} &= \Pr(\crv{A} = a, \crv{B} = b|\crv{X} = x, \crv{Y} = y) \\
-                    \matrp{P}{_{\crv{A}|x}}_{ab} &= \delta_{ab} \Pr(\crv{A} = a|\crv{X} = x) \\
-                    \matrp{P}{_{\crv{B}|y}}_{ab} &= \delta_{ab} \Pr(\crv{B} = b|\crv{Y} = y) \\
-                    \matrp{\tilde{P}}{_{\crv{AB}|xy}} &= \matrp{P}{_{\crv{A}|x}}^{-1/2} \matrp{P}{_{\crv{AB}|xy}} \matrp{P}{_{\crv{B}|y}}^{-1/2} \\
-                    \therefore \matrp{\tilde{P}}{_{\crv{AB}|xy}}_{ab} &= \frac{p(a,b|x,y)}{\sqrt{p(a|x)p(b|y)}},
+                    \matr[_{\crv{AB}|xy}]{P}_{ab} &= \Pr(\crv{A} = a, \crv{B} = b|\crv{X} = x, \crv{Y} = y) \\
+                    \matr[_{\crv{A}|x}]{P}_{ab} &= \delta_{ab} \Pr(\crv{A} = a|\crv{X} = x) \\
+                    \matr[_{\crv{B}|y}]{P}_{ab} &= \delta_{ab} \Pr(\crv{B} = b|\crv{Y} = y) \\
+                    \matr[_{\crv{AB}|xy}]{\tilde{P}} &= \matr[_{\crv{A}|x}]{P}^{-1/2} \matr[_{\crv{AB}|xy}]{P} \matr[_{\crv{B}|y}]{P}^{-1/2} \\
+                    \therefore \matr[_{\crv{AB}|xy}]{\tilde{P}}_{ab} &= \frac{p(a,b|x,y)}{\sqrt{p(a|x)p(b|y)}},
                   \end{align}
-                  where \(\matrp{P}{_{\crv{A}|x}}_{ab}\), \(\matrp{P}{_{\crv{B}|y}}_{ab}\), \(\matrp{P}{_{\crv{AB}|xy}}_{ab}\) and \(\matrp{\tilde{P}}{_{\crv{AB}|xy}}\) have dimensions \(o_A \times o_A\), \(o_B \times o_B\), \(o_A \times o_B\), \(o_A \times o_B\) respectively, and we take the Moore-Penrose pseudoinverse, which, since \(\matrp{P}{_{\crv{A}|x}}_{ab}\) and \(\matrp{P}{_{\crv{B}|y}}_{ab}\) are diagonal, involves inverting their non-zero diagonal entries and leaving the zero entries in place.
+                  where \(\matr[_{\crv{A}|x}]{P}_{ab}\), \(\matr[_{\crv{B}|y}]{P}_{ab}\), \(\matr[_{\crv{AB}|xy}]{P}_{ab}\) and \(\matr[_{\crv{AB}|xy}]{\tilde{P}}\) have dimensions \(o_A \times o_A\), \(o_B \times o_B\), \(o_A \times o_B\), \(o_A \times o_B\) respectively, and we take the Moore-Penrose pseudoinverse, which, since \(\matr[_{\crv{A}|x}]{P}_{ab}\) and \(\matr[_{\crv{B}|y}]{P}_{ab}\) are diagonal, involves inverting their non-zero diagonal entries and leaving the zero entries in place.
 
-                  Let the singular values of \(\matrp{\tilde{P}}{_{\crv{AB}|xy}}\) be \(\sigma_i\) for \(i \in \dintv{1}{\min\{o_A, o_B\}}\) such that \(\sigma_{i} \geq \sigma_{i+1}\). Then,
+                  Let the singular values of \(\matr[_{\crv{AB}|xy}]{\tilde{P}}\) be \(\sigma_i\) for \(i \in \dintv{1}{\min\{o_A, o_B\}}\) such that \(\sigma_{i} \geq \sigma_{i+1}\). Then,
                   \begin{equation}
-                    \varrho(\crv{A},\crv{B}|\crv{X}=x,\crv{Y}=y) = \sigma_2\left( \matrp{\tilde{P}}{_{\crv{AB}|xy}} \right).
+                    \varrho(\crv{A},\crv{B}|\crv{X}=x,\crv{Y}=y) = \sigma_2\left( \matr[_{\crv{AB}|xy}]{\tilde{P}} \right).
                   \end{equation}
 
                   Working with the normalised form of the maximum correlation function, and so considering only normalised functions, we have
                   \begin{align}
                     \E[f(\crv{A})g(\crv{B})|xy] &= \sum_{a,b} p(a,b|x,y) f(a)g(b) \\
                                                 &= \sum_{a,b} \sqrt{p(a|x)} f(a) \frac{p(a,b|x,y)}{\sqrt{p(a|x)p(b|y)}} \sqrt{p(b|y)} g(b) \\
-                                                &= \rvec{f} \matrp{\tilde{P}}{_{\crv{AB}|xy}} \cvec{g},
+                                                &= \rvec{f} \matr[_{\crv{AB}|xy}]{\tilde{P}} \cvec{g},
                   \end{align}
                   where we have defined
                   \begin{equation}
                     \cvec{f} = {[\sqrt{p(a|x)} f(a)]}^T_a \qquad \cvec{g} = {[\sqrt{p(b|y)} g(b)]}^T_b.
                   \end{equation}
-                  The technicalities arising from cases where \(p(a|x)\) or \(p(b|y)\) are zero, which result in \(p(a,b|x,y)\) being divided by zero, are handled by the pseudoinverse, which maps those entries of \(\matrp{\tilde{P}}{_{\crv{AB}|xy}}\) to zero.
+                  The technicalities arising from cases where \(p(a|x)\) or \(p(b|y)\) are zero, which result in \(p(a,b|x,y)\) being divided by zero, are handled by the pseudoinverse, which maps those entries of \(\matr[_{\crv{AB}|xy}]{\tilde{P}}\) to zero.
 
-                  We also represent \(\matrp{\tilde{P}}{_{\crv{AB}|xy}}\) in its compact singular value decomposition as
+                  We also represent \(\matr[_{\crv{AB}|xy}]{\tilde{P}}\) in its compact singular value decomposition as
                   \begin{equation}
-                    \matrp{\tilde{P}}{_{\crv{AB}|xy}} = \sum_i \sigma_i \cvec{u}_i \rvec{v}_i,
+                    \matr[_{\crv{AB}|xy}]{\tilde{P}} = \sum_i \sigma_i \cvec{u}_i \rvec{v}_i,
                   \end{equation}
                   where \(\{\cvec{u}_i\}\) and \(\{\cvec{v}_i\}\) are sets of orthonormal vectors in \(\R^{o_A}\) and \(\R^{o_B}\) respectively.
 
@@ -2382,7 +2194,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
                   \section{Summary and Outlook}
 
-                  The study of distillation via wiring multiple boxes together has largely fallen by the wayside, and there has been little attention paid to the idea in DIQKD research. However, this review has uncovered a vast variety of related tools and approaches for tackling this problem, for studying the space of behaviours, the space of wirings, and upper and lower bounds on key rates. Having consolidated these techniques, we are ready to embark on a deeper and more focused attempt to apply them. We hope that we will be able to uncover some interesting insights about the structure of nonlocality by utilising these different approaches and techniques.
+                  The study of distillation via wiring multiple boxes together has largely fallen by the wayside, and there has been little attention paid to the idea in DIQKD research. However, this review has uncovered a vast variety of related tools and approaches for ta)kling this problem, for studying the space of behaviours, the space of wirings, and upper and lower bounds on key rates. Having consolidated these techniques, we are ready to embark on a deeper and more focused attempt to apply them. We hope that we will be able to uncover some interesting insights about the structure of nonlocality by utilising these different approaches and techniques.
                   \clearpage
 
                   \phantomsection{}
@@ -2718,6 +2530,175 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
                       It is clear, then, that \(p^{(k)}\) here plays the role of \(P_{\Lambda}(\lambda)\) in \Cref{eqn:localdef}, and that any behaviour of this form must therefore be contained in \(\Ls\). Hence, this parametrisation, although simpler than the one in \Cref{sec:ubound_statemeas}, cannot be used to examine behaviours outside of \(\Ls\).
 
+                      \section{Exploiting the Structure of the No-Signalling Polytope}\label{sec:nspoly}
+
+                  TODO shorten this discussion, maybe use the NL convertibility/geometric decomp papers
+
+                  \begin{table}
+                    \centering
+                    \begin{tabular}{|r|cccc|cc|cc|} \hline
+                      \diagbox{Type}{\(ab\)} & 00  & 01  & 10  & 11  & \(a=0|x\) & \(a=1|x\) & \(b=0|y\) & \(b=1|y\) \\ \hline
+                      Correlated             & 1/2 & 0   & 0   & 1/2 & 1/2     & 1/2     & 1/2     & 1/2 \\ 
+                      Anticorrelated         & 0   & 1/2 & 1/2 & 0   & 1/2     & 1/2     & 1/2     & 1/2 \\
+                      \(a=0\), \(b\) random  & 1/2 & 1/2 & 0   & 0   & 1/2     & 1/2     & 1       & 0 \\
+                      \(a=1\), \(b\) random  & 0   & 0   & 1/2 & 1/2 & 1/2     & 1/2     & 0       & 1 \\
+                      \(a\) random, \(b=0\)  & 1/2 & 0   & 1/2 & 0   & 1       & 0       & 1/2     & 1/2 \\
+                      \(a\) random, \(b=1\)  & 0   & 1/2 & 0   & 1/2 & 0       & 1       & 1/2     & 1/2 \\
+                      \(a=0\), \(b=0\)       & 1   & 0   & 0   & 0   & 1       & 0       & 1       & 0 \\
+                      \(a=0\), \(b=1\)       & 0   & 1   & 0   & 0   & 0       & 1       & 1       & 0 \\
+                      \(a=1\), \(b=0\)       & 0   & 0   & 1   & 0   & 1       & 0       & 0       & 1 \\
+                      \(a=1\), \(b=1\)       & 0   & 0   & 0   & 1   & 0       & 1       & 0       & 1 \\
+                      \hline
+                    \end{tabular}
+                    \caption[Possible conditional distributions in binary-output extremal boxes and their marginals]{Possible conditional distributions in binary-output extremal boxes and their marginals. All marginals \(p(a|x)\) (\(p(b|y)\)) must match across all \(y\)'s (\(x\)'s).}\label{tab:extr_cond}
+                  \end{table}
+
+                  \begin{table}
+                    \centering
+                    \begin{tabular}{|r|cccc|} \hline
+                      \diagbox{Type}{\(ab\)} & 00 & 01 & 10 & 11 \\ \hline
+                      Fully mixed & 1/4 & 1/4 & 1/4 & 1/4 \\
+                      Correlated + Random & 1/2 & 1/4 & 0 & 1/4 \\
+                      Correlated + Fixed & 3/4 & 0 & 0 & 1/4 \\
+                      Random + Fixed & 3/4 & 1/4 & 0 & 0 \\
+                      \hline
+                    \end{tabular}
+                    \caption[Possible conditional distributions arising in equal mixtures of extremal boxes]{Representative examples of the possible conditional distributions arising in equal mixtures of extremal boxes}\label{tab:extrmix_cond}
+                  \end{table}
+
+                  \begin{figure}
+                    \centering
+                    \begin{tikzpicture}[z={(0:1)}, x={(-55:0.5)}] % set projection of unit vectors onto screen
+                      \tikzmath{ \raylen = 3; }
+                      \draw[dotted] (0,0,0) node[name=boundbehav, point, label=\(p_{\Ls}^{(0)}\)] {} -- ++(0,\raylen,0) node[name=prbehav, point, label=\(p_{\PR}\)] {};
+                      \begin{scope}[canvas is xz plane at y=0]
+                        \tikzmath{
+                          coordinate \L;
+                        int \i;
+                      for \i in {1,2,...,8}{
+                        let \lname = lbehav\i;
+                      { \draw (22.5+45*\i:\raylen) node[point, name=\lname, label=\(p_{\Ls}^{(\i)}\)] {} -- (prbehav); };
+                    };
+                }
+                \begin{pgfonlayer}{background}
+                  \fill[draw,fill=blue!20,fill opacity=0.5] (lbehav1.center) -- (lbehav2.center) -- (lbehav3.center) -- (lbehav4.center) -- (lbehav5.center) -- (lbehav6.center) -- (lbehav7.center) -- (lbehav8.center) -- (lbehav1.center);
+                \end{pgfonlayer}
+              \end{scope}
+            \end{tikzpicture}
+            \caption[Representation of behaviours that violate CHSH inequality]{Representation of behaviours that violate \(S \leq 2\), with CHSH facet in blue}%
+                  \end{figure}
+
+                  NL interconversion: lifted PR boxes (extremal correlations in binary-output scenarios) are able to be converted into a form closely analogous to a PR box using local symmetry operations. They can then be used to simulate any extremal correlations. However, non-extremal correlations may have limited potential for symmetric conversion, since the symmetry operation would have to be applied to a mixture of behaviours. They would also be too noisy to use for simulating extremal correlations.
+
+                  There are three types of marginals, and each combination of marginals specifies a unique distribution, except \(1/2, 1/2, 1/2, 1/2\), which can be correlated or anticorrelated.
+
+                  In order to study the effects of wirings on arbitrary behaviours, we wish to characterise the space of possible behaviours in the QKD setting (that is, \((i_A=2,o_A=2;i_B=3,o_B=2)\)) so as to identify the notable behaviours we may wish to investigate further.
+
+                  We begin by characterising the facets of \(\Ls\), each of which corresponds to an inequality. If any inequality is violated by a behaviour, that behaviour lies outside \(\Ls\). As mentioned above, all inequalities \(p(ab|xy) \geq 0\) are constraints on the possible behaviours, and each of these inequalities corresponds to a facet. We therefore have \(i_A o_A i_B o_B = 24\) \emph{positivity facets}, one for each inequality.
+
+                  As mentioned in \Cref{sec:nl}, behaviours in the \((2,2;2,2)\) setting with \(S > 2\) are not contained in \(\Ls\). This is because \(S \leq 2\) defines a facet for \(\Ls\) in this setting. However, there are actually multiple versions of the CHSH inequality, which can generically by written as
+                  \[ \abs{\angleb{A_{x_0} B_{y_0}} + \angleb{A_{x_1} B_{y_0}} + \angleb{A_{x_0} B_{y_1}} - \angleb{A_{x_1} B_{y_1}}} \leq 2, \]
+                  where \(x_0, x_1, y_0, y_1 \in \{0,1\}\), with 4 possible assignments, while the absolute value induces 2 further linear variants. All of these can be obtained by permuting the labels for the inputs (\(i_A!i_B!\) possible permutations), and the outputs for each input (\(o_A!\) for each \(x\) and \(o_B\) for each \(y\)). Lastly, since \((i_A, o_A) = (i_B, o_B)\), we can permute the parties' names as well, giving 2 versions of each permutation. Since each of these permutations can be applied independently, the total number of overall permutations possible is \(2i_A!i_B!(o_A!)^{i_A}(o_B!)^{i_B} = 128\). However, the symmetry of the CHSH expression yields only \(2 \times 4 = 8\) variants in total.
+
+                  Now, moving to the QKD setting, if we pick two out of three values for \(y\), we can still calculate the CHSH value for those two settings, and Alice's two values of \(x\). Or, more operationally, we can delete the data for the rounds where Bob chooses \(y=2\), and the Bell test data will then be that for a \((2,2;2,2)\) test. However we compute it, the CHSH value still should not violate the inequality for a behaviour in \(\Ls\). Since there are \(\binom{3}{2} = 3\) ways to select Bob's settings, there are 3 \emph{liftings} of each CHSH facet in the QKD setting, and therefore we have 24 liftings of CHSH in total. This gives us 48 facets for \(\Ls\) in the QKD setting.
+
+                  \begin{table}
+                    \begin{minipage}{0.5\linewidth}
+                      \begin{center}
+                        \begin{tabular}{|r|cccccc|} \hline
+                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
+                          00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\
+                          01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
+                          10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
+                          11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\ \hline
+                        \end{tabular}
+                        \[Q_{02} = 1, S = 4\]
+                      \end{center}
+                    \end{minipage}
+                    \begin{minipage}{0.5\linewidth}
+                      \begin{center}
+                        \begin{tabular}{|r|cccccc|} \hline
+                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
+                          00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.5 \\
+                          01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.0 \\
+                          10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.0 \\
+                          11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.5 \\ \hline
+                        \end{tabular}
+                        \[Q_{02} = 1, S = 4\]
+                      \end{center}
+                    \end{minipage}
+                    \vspace{1em}
+
+                    \begin{minipage}{0.5\linewidth}
+                      \begin{center}
+                        \begin{tabular}{|r|cccccc|} \hline
+                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
+                          00 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.5 \\
+                          01 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.0 \\
+                          10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
+                          11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\ \hline
+                        \end{tabular}
+                        \[Q_{02} = 0.5, S = 4\]
+                      \end{center}
+                    \end{minipage}
+                    \begin{minipage}{0.5\linewidth}
+                      \begin{center}
+                        \begin{tabular}{|r|cccccc|} \hline
+                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
+                          00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\
+                          01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
+                          10 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.0 \\
+                          11 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.5 \\ \hline
+                        \end{tabular}
+                        \[Q_{02} = 0.5, S = 4\]
+                      \end{center}
+                    \end{minipage}
+                    \vspace{1em}
+
+                    \begin{minipage}{0.5\linewidth}
+                      \begin{center}
+                        \begin{tabular}{|r|cccccc|} \hline
+                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
+                          00 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.0 \\
+                          01 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.5 \\
+                          10 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.5 \\
+                          11 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.0 \\ \hline
+                        \end{tabular}
+                        \[Q_{02} = 0, S = 4\]
+                      \end{center}
+                    \end{minipage}
+                    \begin{minipage}{0.5\linewidth}
+                      \begin{center}
+                        \begin{tabular}{|r|cccccc|} \hline
+                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
+                          00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\
+                          01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
+                          10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
+                          11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\ \hline
+                        \end{tabular}
+                        \[Q_{02} = 0, S = 4\]
+                      \end{center}
+                    \end{minipage}
+                    \caption{\(p(ab|xy)\) for PR-box analogues in the QKD setting.}\label{tab:qkd_iso}
+                  \end{table}
+
+                  Using the \verb`LazySets.jl` package for the Julia programming language, we specified the deterministic behaviours as vertices of \(\Ls\), since all other local behaviours can be specified as probabilistic mixtures, that is, convex combinations, of the deterministic behaviours. For each \(x \in \dintv{1}{i_A}\), we have \(i_A\) choices for the output \(a\) to assign, with the analogous scenario for Bob. Therefore, there are \(i_A^{o_A}i_B^{o_B} = 32\) vertices. The GLPK solver was then used to identify the facets and their corresponding inequalities, and yielding 48 facets for our polytope. Therefore, all facets in the QKD setting are either liftings of CHSH or positivity facets, which is expected, since the next unique Bell inequality is \(I_{3322}\), in the \((3,2;3,2)\) setting.
+
+                  To generate \(\NSs\), we provided the aforementioned positivity, normalisation, and no-signalling constraints, which are also solved using GLPK to eliminate redundant constraints, and to find the vertices of the polytope. This yields 24 constraints (namely, the positivity constraints in the CG representation) and 128 vertices.
+
+                  In the \((2,2;2,2)\) setting, each of the 8 CHSH facets contains 8 deterministic points with \(S = 2\), and is violated to the algebraic maximum of \(S = 4\) by a \emph{Popescu–Rohrlich} (PR) box, whose outputs are always anti-correlated for one pair of inputs and always correlated otherwise. This behaviour is not within \(\Qs\), and so is not physically realisable as far as we know, but it still plays a crucial role in understanding nonlocality, and the geometry of \(\NSs\). For example, being the only extremal point of \(\NSs\) to have \(S > 2\), all behaviours that violate the corresponding CHSH inequality can be decomposed as a mixture of the PR box and a local box on the CHSH facet~\cite{GeomDecomp}. The line between the \emph{maximally mixed behaviour} \(p_{\varnothing}\), which has all correlators and marginals 0 and \(p_{\varnothing}(ab|xy) = 1/o_A o_B\; \forall a,b,x,y\), and a PR box is called the \emph{isotropic line}, and behaviours on the line (so-called \emph{isotropic boxes}) are convex combinations of the two. Notably, the quantum maximum of \(S = 2\sqrt{2}\) is achieved by a behaviour that is on this line.
+
+                  Most importantly, since the different versions of the CHSH inequality can be obtained simply by permuting labels, the PR boxes are effectively all equivalent up to relabelling. In this sense, we need only study one CHSH inequality and its corresponding PR box, since all other behaviours can be mapped into the corresponding part of \(\NSs\) by symmetry operations. We would like to see if this nice symmetry holds in the QKD setting as well, which we would expect since the only facets aside from positivity facets are liftings of CHSH.
+                  Indeed, we can identify an analogue for the PR box and an analogous structure for \(\NSs\) in the QKD setting. There are \(128 - 32 = 96\) extremal points of \(\NSs\) that are outside \(\Ls\). By checking if their isotropic lines intersect the facet corresponding to CHSH on \(x, y \in \{0,1\}\), we have found 6 extremal points violating it, as shown in \Cref{tab:qkd_iso}. Unlike the \((2,2;2,2)\) setting, we do not have one extremal point per CHSH facet, and the extremal points violate more than one facet. As can be seen from these behaviours, their distributions for \(x, y \in \{0,1\}\) are identical, and it is only the correlations when \(y = 2\) that distinguish the six PR analogues. However, this implies that there is information in these correlations that we are not using. In particular, other liftings of CHSH might be violated by a given behaviour. Could quantifying this improve our key rates?
+
+                  We have merely scratched the surface thus far in our analysis of \(\NSs\) in the QKD setting. Fortunately, it seems to just be slightly more complicated than the well-studied \((2,2;2,2)\) setting. We summarise our hope for investigations in this direction as follows:
+                  \begin{question}
+                    What other insights can be obtained from studying the structure and symmetry of \(\NSs\)? Can all behaviours be mapped into a region where the only nonlocal contributions are from a PR-analogue box? Can we improve our key rates if we consider other CHSH violations, or other aspects of the correlation when \(y=2\)?
+                  \end{question}
+
+                  TODO Since wirings are linear operations, can we study the effect on a general wiring from the effect on the PR box?
+
+
                       \section{Additional Techniques Considered}\label{sec:addtech}
 
                       We collect here our description of additional techniques that were reviewed in the course of the project but not used extensively.
@@ -2779,6 +2760,8 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                     \[ p = (1-q)p_I + qp_L \]
                     for some local behaviour \(p_L\) and scalar \(q \in\ccintv{0}{1}\). This optimisation can be done efficiently with a linear program~\cite{LocalPartLP}. Now, since we can mix \(p_I'\) with the corresponding local behaviour \(p_L'\) to obtain \(p\), we must have \(S^*_c(p) \leq S^*_c(p_I')\), otherwise we could perform this mixing and distill the resultant \(p\), which would contradict the assumption that \(S^*_c(p_I')\) is the maximum CHSH value obtainable.
 
+                    TODO rewrite below, we have proved this
+
                     This is an important result, because later work has shown that the CHSH values of isotropic boxes are not distillable without shared randomness~\cite{NLMonotones}, and we discuss the possibility of proving this even with shared randomness in \Cref{sec:wirmono_isodist}, giving hope that we can close a problem that has been open for over a decade~\cite{NLLimits, DistillationBounds}.
 
                     More directly, we could adapt this methodology to come up with a dynamic programming approach to simplify the exhaustive search over \(\sW_D\), using bounds on key rates as a figure of merit instead of CHSH values.
@@ -2810,7 +2793,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
                     However, a major issue with this parametrisation for density matrices is that it is very difficult to check that the generated Hermitian matrix is PSD in general dimensions, which was accomplished by the simple normalisation constraint in the qubit case~\cite{DensMatParam}. In fact, the complexity of the generated parametrisation is both unavoidable~\cite{NoHigherEuclideanRepr} and of fundamental significance~\cite{InfoAsymStateSpace}. These and other issues related to state parametrisation are reviewed in~\cite{DensMatParam}, and a more recent parametrisation that automatically enforces PSD given by~\cite{SquaringParam}, at the cost of injectivity between parameters and states.
 
-                    One notable application of the Bloch vector parametrisation that may be relevant to us is the construction of generalised Werner and isotropic states in dimensions greater than 2~\cite{WernerIsotropicDecomp}, which may be interesting for studying the behaviours generated by higher-dimensional states. 
+                    One notable application of the Bloch vector parametrisation that may be relevant to us is the construction of generalised Werner and isotropic states in dimensions greater than 2~\cite{WernerIsotropicDecomp}. These states are somewhat easier to study due to their degree of symmetry, and may facilitate study of the behaviours generated by higher-dimensional states. 
 
                   \end{appendices}
 

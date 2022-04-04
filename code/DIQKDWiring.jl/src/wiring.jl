@@ -99,24 +99,25 @@ end
 Base.iterate(ldwit::LDWiringIter) = _iterate(ldwit, iterate(ldwit._dtsit))
 Base.iterate(ldwit::LDWiringIter, state) = _iterate(ldwit, iterate(ldwit._dtsit, state))
 
-# Approach 2: Enumerate possible wiring maps
-num_wirings(c, sett::Setting) = num_wirings(c, sett.oA, sett.iA) * num_wirings(c, sett.oB, sett.iB)
-num_wirings(c, o, i) = o^(i * o^c) * prod(i^(i * o^(j-1)) for j in 1:c)
-num_wirings_fix(c, sett::Setting, fA, fB) = num_wirings_fix(c, sett.oA, sett.iA, fA) * num_wirings_fix(c, sett.oB, sett.iB, fB)
-function num_wirings_fix(c, o, i, f)
+# Approach 2: Enumerate possible wiring functions
+num_wiring_fns(c, sett::Setting) = num_wiring_fns(c, sett.oA, sett.iA) * num_wiring_fns(c, sett.oB, sett.iB)
+num_wiring_fns(c, o, i) = o^(i * o^c) * prod(i^(i * o^(j-1)) for j in 1:c)
+num_wiring_fns_fix(c, sett::Setting, fA, fB) = num_wiring_fns_fix(c, sett.oA, sett.iA, fA) * num_wiring_fns_fix(c, sett.oB, sett.iB, fB)
+function num_wirings_fns_fix(c, o, i, f)
   if f > i
     throw(ArgumentError("$f inputs to fix, but there are only $i inputs!"))
   end
   o^((i-f) * o^c) * prod(i^((i-f) * o^(j-1)) for j in 1:c)
 end
-struct CondWiringMapIter{T <: Integer}
+
+struct WiringMapFnIter{T <: Integer}
   c::T
   o::T
   i::T
   j::T
   _idxit
   _valit
-  function CondWiringMapIter(c::Integer, o::Integer, i::Integer, j::Integer)
+  function WiringMapFnIter(c::Integer, o::Integer, i::Integer, j::Integer)
     if j > c + 1
       throw(ArgumentError("There are only $(c+1) wiring maps for c = $c!"))
     end
@@ -132,52 +133,53 @@ struct CondWiringMapIter{T <: Integer}
     new{T}(c, o, i, j, idxit, valit)
   end
 end
-_iterate(cwmit::CondWiringMapIter, mapitcurr::Nothing) = nothing
-function _iterate(cwmit::CondWiringMapIter{T}, valitcurr) where T
+_iterate(wmfit::WiringMapFnIter, mapitcurr::Nothing) = nothing
+function _iterate(wmfit::WiringMapFnIter{T}, valitcurr) where T
   vals, state = valitcurr
-  c, o, i, j = cwmit.c, cwmit.o, cwmit.i, cwmit.j
+  c, o, i, j = wmfit.c, wmfit.o, wmfit.i, wmfit.j
   W = Array{T}(undef, repeat([o], j-1)...)
-  for (val, idx) in zip(vals, cwmit._idxit)
+  for (val, idx) in zip(vals, wmfit._idxit)
     W[idx...] = val
   end
   return W, state
 end
-Base.length(cwmit::CondWiringMapIter) = length(cwmit._valit)
-Base.iterate(cwmit::CondWiringMapIter) = _iterate(cwmit, iterate(cwmit._valit))
-Base.iterate(cwmit::CondWiringMapIter, state) = _iterate(cwmit, iterate(cwmit._valit, state))
+Base.length(wmfit::WiringMapFnIter) = length(wmfit._valit)
+Base.iterate(wmfit::WiringMapFnIter) = _iterate(wmfit, iterate(wmfit._valit))
+Base.iterate(wmfit::WiringMapFnIter, state) = _iterate(wmfit, iterate(wmfit._valit, state))
 
-struct WiringMapIter{T <: Integer}
+struct WiringFnIter{T <: Integer}
   c::T
   o::T
   i::T
   fix::Vector{Tuple{Array{T}, T, T}}
-  _prodwmit
-  function WiringMapIter(c::Integer, o::Integer, i::Integer, fix::Vector)
+  _prodwfit
+  function WiringFnIter(c::Integer, o::Integer, i::Integer, fix::Vector)
     T = promote_type(typeof(c), typeof(o), typeof(i))
     its = [
-           repeat([CondWiringMapIter(c, o, i, j)], i) for j in 1:c+1
+           repeat([WiringMapFnIter(c, o, i, j)], i) for j in 1:c+1
     ]
     for (cWmap, x, j) in fix
       # TODO check for validity
       its[j][x] = [cWmap]
     end
-    prodwmit = itprod(itprod(itj...) for itj in its...)
-    new{T}(c, o, i, fix, prodwmit)
+    prodwfit = itprod([itprod(itj...) for itj in its]...)
+    new{T}(c, o, i, fix, prodwfit)
   end
-  WiringMapIter(c, o, i) = WiringMapIter(c, o, i, [])
+  WiringFnIter(c, o, i) = WiringFnIter(c, o, i, [])
 end
-Base.length(wmit::WiringMapIter) = length(wmit._prodwmit)
-Base.iterate(wmit::WiringMapIter) = iterate(wmit._prodwmit)
-Base.iterate(wmit::WiringMapIter, state) = iterate(wmit._prodwmit, state)
+Base.length(wfit::WiringFnIter) = length(wfit._prodwfit)
+Base.iterate(wfit::WiringFnIter) = iterate(wfit._prodwfit)
+Base.iterate(wfit::WiringFnIter, state) = iterate(wfit._prodwfit, state)
 # NOTE: returns tuple of tuple of arrays
 # for c=2, o=2, i=3 we need 200GB of RAM; I think we should write this out and
 # solve slowly using lrs
 
 # Approach 3: Interpret wirings as linear operators
 # TODO use RecursiveArrayTools/vec trick? kron(A, B) * vec(C) = vec(BCA')
-const MargWiringMap{Tp} = Vector{Vector{Array{Tp}}}
-const MargWiringComponents{Tp, Ti} = Vector{Union{Vector{SparseVector{Tp, Ti}}, Vector{ SparseMatrixCSC{Tp, Ti}}}}
-function Vector(mwcomp::MargWiringComponents{Tp, Ti}) where {Tp, Ti}
+# TODO rename types for consistency with paper
+const MWiringMap{Tp} = Vector{Vector{Array{Tp}}}
+const MWiringComponents{Tp, Ti} = Vector{Union{Vector{SparseVector{Tp, Ti}}, Vector{ SparseMatrixCSC{Tp, Ti}}}}
+function Vector(mwcomp::MWiringComponents{Tp, Ti}) where {Tp, Ti}
   i = length(mwcomp[1])
   # TODO precompute length
   vcontent = SparseVector{Tp, Ti}[] 
@@ -188,20 +190,20 @@ function Vector(mwcomp::MargWiringComponents{Tp, Ti}) where {Tp, Ti}
   end
   return vcat(vcontent...)
 end
-function MargWiringComponents(c::Integer, o::Integer, i::Integer, v::Vector{Tp}) where Tp <: Real
+function MWiringComponents(c::Integer, o::Integer, i::Integer, v::Vector{Tp}) where Tp <: Real
   Ti = promote_type(typeof(c), typeof(o), typeof(i))
   # TODO find formulas for lengths
 end
 
-struct MargWiringVec{Ti <: Integer, Tp <: Real}
+struct MWiringVec{Ti <: Integer, Tp <: Real}
   c::Ti
   o::Ti
   i::Ti
   v::Vector{Tp}
-  Ws::MargWiringComponents{Tp}
+  Ws::MWiringComponents{Tp}
 end
-MargWiringVec(c::Integer, o::Integer, i::Integer, Wmap) = MargWiring(Float64, c, o, i, Wmap)
-function MargWiringVec(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where Tp <: Real
+MWiringVec(c::Integer, o::Integer, i::Integer, Wmap) = MWiring(Float64, c, o, i, Wmap)
+function MWiringVec(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where Tp <: Real
   Ti = promote_type(typeof(c), typeof(o), typeof(i))
   Ws = []
   vcontent = []
@@ -231,17 +233,17 @@ function MargWiringVec(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) whe
   end
   push!(Ws, Wfinal)
   v = vcat(vcontent...)
-  return MargWiringVec{Ti, Tp}(c, o, i, v, Ws)
+  return MWiringVec{Ti, Tp}(c, o, i, v, Ws)
 end
 
-struct MargWiring{Ti <: Integer, Tp <: Real}
+struct MWiring{Ti <: Integer, Tp <: Real}
   c::Ti
   o::Ti
   i::Ti
   W::SparseMatrixCSC{Tp}
 end
-MargWiring(c::Integer, o::Integer, i::Integer, Wmap) = MargWiring(Float64, c, o, i, Wmap)
-function MargWiring(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where Tp <: Real
+MWiring(c::Integer, o::Integer, i::Integer, Wmap) = MWiring(Float64, c, o, i, Wmap)
+function MWiring(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where Tp <: Real
   Ti = promote_type(typeof(c), typeof(o), typeof(i))
   W = vcat(repeat([I((o*i)^c)], i)...)
   for j in 1:c
@@ -260,7 +262,7 @@ function MargWiring(::Type{Tp}, c::Integer, o::Integer, i::Integer, Wmap) where 
   scount = length(sit)
   Wfinalit = (sparse([(Wmap[c+1][x][s...] for s in sit)...], 1:scount, ones(Tp, scount), o, scount) for x in 1:i)
   Wfinal = cat(Wfinalit...; dims=(1,2))
-  return MargWiring{Ti, Tp}(c, o, i, Wfinal * W)
+  return MWiring{Ti, Tp}(c, o, i, Wfinal * W)
 end
 
 struct Wiring{Ti <: Integer, Tp <: Real}
@@ -270,7 +272,7 @@ struct Wiring{Ti <: Integer, Tp <: Real}
   is::Vector{Ti}
   W::SparseMatrixCSC{Tp}
 end
-function Wiring(margWs::AbstractVector{MargWiring{Ti, Tp}}) where {Ti, Tp}
+function Wiring(margWs::AbstractVector{MWiring{Ti, Tp}}) where {Ti, Tp}
   cs = [margW.c for margW in margWs]
   c = first(cs)
   if !(all(c -> c == first(cs), cs))
@@ -350,7 +352,7 @@ end
 Behaviour(bv::BehaviourVec) = Behaviour(Array(bv))
 Correlators(bv::BehaviourVec) = Correlators(Behaviour(Array(bv)))
 
-Base.:*(margwir::MargWiring, b::BehaviourVec) = Wiring([margwir]) * b
+Base.:*(margwir::MWiring, b::BehaviourVec) = Wiring([margwir]) * b
 function Base.:*(wiring::Wiring{Tiw, Tpw}, b::BehaviourVec{Tib, Tpb}) where {Tiw, Tpw, Tib, Tpb}
   c, n, os, is = wiring.c, b.n, b.os, b.is
   @assert wiring.n == n
@@ -430,7 +432,7 @@ const eg_Wmap = ((fill(1), fill(2)), ([2, 1], [2, 2]), ([1 1; 1 2], [2 1; 1 1]))
 # binary AND (a = 1 unless all as = 2, then a = 2)
 function and_Wmap(c::Integer, i::Integer)
   Ti = promote_type(typeof(c), typeof(i))
-  Wmap::MargWiringMap{Ti} = [[fill(Ti(x), repeat([2], j-1)...) for x in 1:i] for j in 1:c]
+  Wmap::MWiringMap{Ti} = [[fill(Ti(x), repeat([2], j-1)...) for x in 1:i] for j in 1:c]
   push!(Wmap, [ones(Ti, repeat([2], c)...) for x in 1:i])
   for x in 1:i
     Wmap[c+1][x][repeat([2], c)...] = 2
@@ -441,7 +443,7 @@ end
 # binary XOR
 function xor_Wmap(c::Integer, i::Integer)
   Ti = promote_type(typeof(c), typeof(i))
-  Wmap::MargWiringMap{Ti} = [[fill(Ti(x), repeat([2], j-1)...) for x in 1:i] for j in 1:c]
+  Wmap::MWiringMap{Ti} = [[fill(Ti(x), repeat([2], j-1)...) for x in 1:i] for j in 1:c]
   Wfinal = [Array{Ti}(undef, repeat([2], c)...) for x in 1:i]
   asitr = itprod(repeat([1:2], c)...)
   for as in asitr
@@ -458,7 +460,7 @@ end
 # take the jth output and ignore the rest
 function jth_Wmap(c::Integer, o::Integer, i::Integer, j::Integer)
   Ti = promote_type(typeof(c), typeof(o), typeof(i))
-  Wmap::MargWiringMap{Ti} = [[fill(Ti(x), repeat([o], j-1)...) for x in 1:i] for j in 1:c]
+  Wmap::MWiringMap{Ti} = [[fill(Ti(x), repeat([o], j-1)...) for x in 1:i] for j in 1:c]
   push!(Wmap, [Array{Ti}(undef, repeat([o], c)...) for x in 1:i])
   idx = repeat(Union{Colon, Ti}[:], c)
   for x in 1:i, a in 1:o
@@ -496,8 +498,8 @@ function sel_and_wiring(sett::Setting, N, xs, ys)
     end
   end
 
-  margWA = MargWiring(N, oA, iA, A_Wmap)
-  margWB = MargWiring(N, oB, iB, B_Wmap)
+  margWA = MWiring(N, oA, iA, A_Wmap)
+  margWB = MWiring(N, oB, iB, B_Wmap)
   Wtot = Wiring([margWA, margWB])
 end
 
@@ -515,8 +517,8 @@ function parity_behav(N::Integer, behav::Behaviour)
   A_Wmap = xor_Wmap(N, iA)
   B_Wmap = xor_Wmap(N, iB)
 
-  margWA = MargWiring(N, oA, iA, A_Wmap)
-  margWB = MargWiring(N, oB, iB, B_Wmap)
+  margWA = MWiring(N, oA, iA, A_Wmap)
+  margWB = MWiring(N, oB, iB, B_Wmap)
   Wtot = Wiring([margWA, margWB])
   return Behaviour(Wtot * bv)
 end

@@ -132,8 +132,6 @@ function Correlators(rho::AbstractMatrix{<:Number}, As::AbstractVector{<:Abstrac
   return Correlators(Eax, Eby, Eabxy)
 end
 
-
-
 # operator parametrisations
 symbmat(d, sym) = [symbols("$(sym)_{$i;$j}") for i in 1:d, j in 1:d]
 diagmat(v::AbstractVector) = sparse(1:length(v), 1:length(v), v)

@@ -3,6 +3,7 @@ using Test, Printf
 
 includet("../src/wiring.jl")
 includet("../src/quantum.jl")
+includet("../src/keyrates.jl")
 
 Symbolics.@variables PA[1:2, 1:2] PB[1:2, 1:2] PC[1:3, 1:2] PD[1:2, 1:3]
 PAvec = BehaviourVec(PA); PBvec = BehaviourVec(PB)
@@ -32,8 +33,8 @@ for (a1, b1, a2, b2, x, y) in itprod(repeat([1:2], 6)...)
    Pand2[a, b, x, y] += PAB2[a1, b1, x, y] * PAB2[a2, b2, x, y]
 end
 Pand2b = Behaviour(Pand2)
-margWand222 = MargWiring(2, 2, 2, and_Wmap(2,2))
-margWfirst222 = MargWiring(2, 2, 2, first_Wmap(2,2,2))
+margWand222 = MWiring(2, 2, 2, and_Wmap(2,2))
+margWfirst222 = MWiring(2, 2, 2, first_Wmap(2,2,2))
 Wand2222 = Wiring([margWand222, margWand222])
 PABc = kron(PAB1vec.p, PAB2vec.p)
 permPABc = permutespaces(PABc, [4,4,4,4], [1, 3, 2, 4])
@@ -42,7 +43,7 @@ and2222kronb = Behaviour(Wand2222 * PAB2vec)
 
 Symbolics.@variables qAB[1:2, 1:2, 1:2, 1:3] qB[1:2, 1:3]
 qBvec = BehaviourVec(qB)
-margWand223 = MargWiring(2, 2, 3, and_Wmap(2,3))
+margWand223 = MWiring(2, 2, 3, and_Wmap(2,3))
 Wand1223 = Wiring([margWand223])
 
 PandQ = zeros(Num, 2, 2, 2, 3)
