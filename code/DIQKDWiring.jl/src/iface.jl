@@ -83,7 +83,7 @@ end
 # ineqAs[i,:] \dot x \leq ineqbs[i]; eqAs[i,:] \dot x = eqbs[i]
 # from LRSLib: As = -A[:, 2:end], bs = -A[:, 1], use linset to split
 function write_lrs_hrep!(name, options, ineqAs::AbstractMatrix, ineqbs::AbstractVector, eqAs::AbstractMatrix, eqbs::AbstractVector)
-  ineqmat = hcat(ineqbs, -ineqAs)
+  ineqmat = hcat(-ineqbs, -ineqAs)
   eqmat = hcat(eqbs, -eqAs)
   neqs = length(eqbs)
   Hmat = vcat(eqmat, ineqmat)

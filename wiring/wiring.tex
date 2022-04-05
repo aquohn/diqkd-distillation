@@ -46,6 +46,7 @@
 \usepackage{listings} % allows for source code blocks
 \usepackage{algorithm} % typeset algorithms
 \usepackage{algpseudocode} % pseudocode style algorithms
+\usepackage{fancyvrb} % better verbatim stuff
 
 % Document
 \usepackage[backend=biber, style=ieee-alphabetic, natbib=true]{biblatex}
@@ -276,7 +277,8 @@
     \newcommand*\markov{\mathrel{\ooalign{\hidewidth$\circ$\hidewidth\cr$-$\cr}}} % Markov chain
 
     % quantum physics
-    \newcommand{\Tr}{\mathrm{Tr}} % enables Trace operator
+    \newcommand{\Tr}[2][]{\mathop{\mathrm{Tr}#1}\left[ #2 \right]} % enables Trace operator
+    \newcommand{\Trdist}[2]{\mathop{}\Delta_\mathrm{Tr}\left(#1, #2\right)}
     \newcommand{\Hs}{\mathcal{H}} % enables H for Hilbert space
 
     % category theory
@@ -594,7 +596,7 @@
     \begin{defn}[The Quantum Set]
       A behaviour \(p\) is an element of \(\Qs\) iff there exist Hilbert spaces \(A\) and \(B\), POVMs \({\{{\{M_{a|x}\}}_a\}}_x\) and \({\{{\{N_{b|y}\}}_b\}}_y\), with \(M_{a|x} \in \Lin{A}\) and \(N_{b|y} \in \Lin{B}\), and a quantum state \(\rho_{AB} \in \Lin{A\otimes{B}}\) such that
       \begin{equation}\label{eqn:Qprob}
-        p(ab|xy) = \Tr\left[\rho_{AB} \left(M_{a|x} \otimes N_{b|y}\right) \right].
+        p(ab|xy) = \Tr{\rho_{AB} \left(M_{a|x} \otimes N_{b|y}\right) }.
       \end{equation}
       This set of POVMs is referred to as the \emph{measurement strategy}.
     \end{defn}
@@ -606,13 +608,13 @@
     \end{lemma}
     \begin{proof}
       Let
-      \[ p_j(ab|xy) = \Tr\left[\rho^{(j)} \left( M_{a|x}^{(j)} \otimes N_{b|y}^{(j)} \right) \right] \]
+      \[ p_j(ab|xy) = \Tr{\rho^{(j)} \left( M_{a|x}^{(j)} \otimes N_{b|y}^{(j)} \right) } \]
       for \(j = 1,2\). Then, define \(\tilde{\rho} = q\rho^{(1)} \oplus 0^{(1)} \oplus 0^{(2)} \oplus (1-q)\rho^{(2)}\), where \(0^{(j)}\) is the zero operator with the same dimensions as \(\rho^{(j)}\), \(\tilde{M}_{a|x} = M_{a|x}^{(1)} \oplus M_{a|x}^{(2)}\) and \(\tilde{N}_{b|y} = N_{b|y}^{(1)} \oplus N_{b|y}^{(2)}\). Observe that these operators form a valid state and measurements strategy, and that
       \begin{align*}
         \tilde{M}_{a|x} \otimes \tilde{N}_{b|y} &= \left(\tilde{M}_{a|x} \otimes N_{b|y}^{(1)}\right) \oplus \left(\tilde{M}_{a|x} \otimes N_{b|y}^{(2)}\right) \\
                                                 &=  \left(M_{a|x}^{(1)} \otimes N_{b|y}^{(1)}\right) \oplus \left(M_{a|x}^{(1)} \otimes N_{b|y}^{(2)}\right) \oplus \left(M_{a|x}^{(1)} \otimes N_{b|y}^{(2)}\right) \oplus \left(M_{a|x}^{(2)} \otimes N_{b|y}^{(2)}\right) \\
         \therefore \tilde{\rho} \left( \tilde{M}_{a|x} \otimes \tilde{N}_{b|y} \right) &= \left(q\rho^{(1)} M_{a|x}^{(1)} \otimes N_{b|y}^{(1)}\right) \oplus 0^{(1)} \oplus 0^{(2)} \oplus \left((1-q)\ \rho^{(2)} M_{a|x}^{(2)} \otimes N_{b|y}^{(2)}\right) \\
-        \therefore \Tr\left[ \tilde{\rho} \left( \tilde{M}_{a|x} \otimes \tilde{N}_{b|y} \right) \right] &= qp_1(ab|xy) + (1-q)p_2(ab|xy) = p(ab|xy).
+        \therefore \Tr{ \tilde{\rho} \left( \tilde{M}_{a|x} \otimes \tilde{N}_{b|y} \right) } &= qp_1(ab|xy) + (1-q)p_2(ab|xy) = p(ab|xy).
       \end{align*}
 
       By increasing the dimension of the Hilbert space, we are able to express a convex combination of two quantum correlations in terms of a state and measurement strategy. This process can be applied recursively to a convex combination of arbitrarily many states and measurement strategies.
@@ -622,7 +624,7 @@
 
     Another consequence is that states which are related through local unitaries, can all produce the same set of behaviours, because given a state \(U\rho{U^{\dagger}}\) with \(U = U_A \otimes U_B\), \(U_A^{\dagger} M_{a|x} U_A\) and \(U_B^{\dagger} N_{b|y} U_B\) are valid measurements that reproduce the original behaviour:
     \begin{equation}
-       \Tr\left[{(U_A \otimes U_B)} \rho {(U_A \otimes U_B)}^{\dagger} \left(U_A M_{a|x} U_A^{\dagger} \otimes U_B N_{b|y} U_B^{\dagger} \right)\right] = \Tr\left[ \rho \left(M_{a|x} \otimes N_{b|y} \right)\right].
+      \Tr{{(U_A \otimes U_B)} \rho {(U_A \otimes U_B)}^{\dagger} \left(U_A M_{a|x} U_A^{\dagger} \otimes U_B N_{b|y} U_B^{\dagger} \right)} = \Tr{ \rho \left(M_{a|x} \otimes N_{b|y} \right)}.
     \end{equation}
 
     In our analysis, we focus primarily on \emph{binary-output} settings, that is, settings where \(o_A = o_B = 2\), which are simpler to analyse and more helpful for applications. In this case, we can express many statistics of interest in language reminiscent of quantum theory. We define the \emph{observables} \(A_x\) and \(B_y\) for each value of \(x\) and \(y\), acting on Alice and Bob's respective Hilbert spaces\footnote{More formally, then, the observables are \(A_x \otimes I_B\) and \(I_A \otimes B_y\)}:
@@ -631,14 +633,14 @@
 
     The \emph{expectation values} of the individual observables on the state are the \emph{marginal correlators}  \(\angleb{A_x}\) and \(\angleb{B_y}\). We are also interested in the \emph{two-body correlators} \(\angleb{A_x B_y}\) (sometimes simply \emph{marginals} and \emph{correlators}, when the distinction from marginal probabilities is clear from context). These can be computed as
     \begin{align}
-      \angleb{A_x B_y} &\coloneqq \Tr\left[\rho{A_x B_y}\right] \\
+      \angleb{A_x B_y} &\coloneqq \Tr{\rho{A_x B_y}} \\
                        &= \begin{aligned}[c]
                          (1 \times 1 \times p(a=1,b=1|xy)) + (-1 \times -1 \times p(a=0,b=0|xy)) \\
                          + (1 \times -1 \times p(a=1,b=0|xy)) + (-1 \times 1 \times p(a=0,b=1|xy))
                        \end{aligned} \notag \\
                        &= p(a=b|xy) - p(a\neq b|xy) \\
-      \angleb{A_x} &\coloneqq \Tr\left[\rho{A_x}\right] = p(a=1|x) - p(a=0|x) \\
-      \angleb{B_y} &\coloneqq \Tr\left[\rho{B_y}\right] = p(b=1|y) - p(b=0|y).
+      \angleb{A_x} &\coloneqq \Tr{\rho{A_x}} = p(a=1|x) - p(a=0|x) \\
+      \angleb{B_y} &\coloneqq \Tr{\rho{B_y}} = p(b=1|y) - p(b=0|y).
     \end{align}
 
     Note that, with \(o_A = o_B = 2\), we have \(d_{NS} = {i_A}{i_B} + i_A + i_B\), which is precisely the number of correlators and marginals. Since these are linear functions of the probabilities, a binary-output behaviour can be fully specified by giving its correlators and marginals and solving the linear system of equations consisting of the \(d_{NS}\) definitions for the correlators and marginals, and the \(o_A i_A i_B + o_B i_A i_B\) no-signalling conditions. Although defined in terms of the expectation values of quantum observables, the equivalent expressions in terms of probabilities allow them to be computed for behaviours that are not in \(\Qs\) as well.
@@ -717,8 +719,8 @@
       \end{enumerate}
     \item The overall map is described by
       \begin{gather}
-        \crv{S}_A^{(k+1)}\crv{D}_A^{(k+1)}
-        \crv{S}_B^{(k+1)}\crv{D}_B^{(k+1)}\crv{D}^{(k+1)}E^n =
+        \Omega^{(k)} : \crv{S}_A^{(k+1)}\crv{D}_A^{(k+1)}
+        \crv{S}_B^{(k+1)}\crv{D}_B^{(k+1)}\crv{D}^{(k+1)}E^n \to
         \crv{S}_A^{(k)}\crv{D}_A^{(k)}
         \crv{S}_B^{(k)}\crv{D}_B^{(k)}
         \crv{D}^{(k)}E^n \\
@@ -730,7 +732,7 @@
       A DIQKD protocol \(\proto{P}\) is a family of sequences of LOPC operations \({\{{\{\Omega^{(k)}_{n}\}}_{k=1}^{m_n}\}}_{n\in\Z_{++}}\), such that
       \begin{gather}
         \Omega_n \coloneqq \bigcirc_{k=1}^{m_n} \Omega^{(m_n - k + 1)}_{n} \\
-      {\Omega[\rho]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n} \coloneqq \Tr_{\crv{D}^{(m_n)}_A \crv{D}^{(m_n)}_B} \left[ \Omega_n \left[ \rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n} \right] \right],
+        {\Omega[\rho]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n} \coloneqq \Tr[_{\crv{D}^{(m_n)}_A \crv{D}^{(m_n)}_B}]{ \Omega_n \left[ \rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n} \right] },
       \end{gather}
       where \(\bigcirc\) denotes function composition, \(\crv{K}_{A}^{\ell_n} = \crv{S}_{A}^{(m_n)}\) and \(\crv{K}_{B}^{\ell_n} = \crv{S}_{B}^{(m_n)}\) hold Alice and Bob's keys of length \(\ell_n\), respectively, while \(\crv{D}^n = \crv{D}^{(m_n)}\) is all the public data that is communicated during the protocol.
     \end{defn}
@@ -740,7 +742,7 @@
     \begin{defn}[\(\epsilon\)-security]
     Alice and Bob share an \emph{\(\epsilon\)-secure key} iff the overall state of their systems, Eve's system, and the publicly transmitted data \({\Omega[\rho]}_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}^n}\) satisfies
       \begin{equation}
-        \Delta_{\Tr}({\Omega[\rho]}_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}^n}, \tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}} \otimes \rho_{E^n} \otimes {\Omega[\rho]}_{\crv{D}^n}) \leq \epsilon,
+        \Trdist{{\Omega[\rho]}_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}^n}}{\tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}} \otimes \rho_{E^n} \otimes {\Omega[\rho]}_{\crv{D}^n}} \leq \epsilon,
       \end{equation}
       where \(\tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}}\) is the \emph{ideal key}
       \begin{equation}
@@ -748,11 +750,11 @@
       \end{equation}
       a uniformly distributed mixture amongst all possible keys of length \(\ell\), \(\rho_{E^n}\) is Eve's marginal state
       \begin{equation}
-        \rho_{E^n} = \Tr_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n}\left[ \rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n} \right],
+        \rho_{E^n} = \Tr[_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n}]{ \rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n} },
       \end{equation}
       and \({\Omega[\rho]}_{\crv{D}^n}\) is the publicly exchanged data
       \begin{equation}
-        {\Omega[\rho]}_{\crv{D}^n} = \Tr_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n}\left[ {\Omega[\rho]}_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}^n} \right],
+        {\Omega[\rho]}_{\crv{D}^n} = \Tr[_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n}]{ {\Omega[\rho]}_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}^n} },
       \end{equation} 
       which is to say that Alice and Bob's keys should ideally be uniformly distributed and independent of Eve's quantum side information and the publicly exchanged data. Eve's marginal state is left unchanged because the protocol is executed only by Alice and Bob.
     \end{defn}
@@ -766,7 +768,7 @@
     \end{equation}
     where \(L_{\Omega}(\prin^n)\) is the minimum number of bits in Alice and Bob's existing shared secrecy that must be expended to sample from \(\prin^n\) with asymptotically vanishing error, taking into account the protocol \(\proto{P}\), and the protocols must fulfill
     \begin{equation}
-      \lim_{n\to\infty} \Delta_{\Tr}({\Omega[\rho^n]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n}, \tau_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n}} \otimes \rho_{E^n} \otimes {\Omega[\rho^n]}_{\crv{D}^n}) = 0,
+    \lim_{n\to\infty} \Trdist{{\Omega[\rho^n]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n}}{\tau_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n}} \otimes \rho_{E^n} \otimes {\Omega[\rho^n]}_{\crv{D}^n}} = 0,
     \end{equation}
     which is to say that the generated key must be \(\epsilon\)-secure with \(\epsilon\) vanishing as \(n\to\infty\).
   \end{defn}
@@ -825,7 +827,7 @@
       \begin{enumerate}
         \item There exist POVMs \({\{ {\{ M_{\cvec{a}^n|\cvec{x}^n}\}}_{\cvec{a}^n} \}}_{\cvec{x}^n}\) and \({\{ {\{ N_{\cvec{b}^n|\cvec{y}^n}\}}_{\cvec{b}^n} \}}_{\cvec{y}^n}\) and a qqq state \(\rho_{A^n B^n E^n}\) such that
         \begin{equation}\label{eqn:probmeas}
-          p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \rho_{E|\cvec{a}^n\cvec{x}^n\cvec{b}^n\cvec{y}^n} = \Tr_{A^n B^n}\left[\rho_{A^n B^n E^n} \left(M_{\cvec{a}^n|\cvec{x}^n} \otimes N_{\cvec{b}^n|\cvec{y}^n} \otimes I_{E^n}\right) \right],
+          p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \rho_{E|\cvec{a}^n\cvec{x}^n\cvec{b}^n\cvec{y}^n} = \Tr[_{A^n B^n}]{\rho_{A^n B^n E^n} \left(M_{\cvec{a}^n|\cvec{x}^n} \otimes N_{\cvec{b}^n|\cvec{y}^n} \otimes I_{E^n}\right) },
         \end{equation}
         \item Its joint behaviour \(p^n\) satisfies
       \begin{equation}
@@ -837,7 +839,7 @@
 
     We define the operator \(\behav{\rho}{\sM}\) as mapping the state and measurement strategy \(\sM\) to the behaviour they produce:
     \begin{equation}
-    \behav{\rho_{A^n B^n E^n}}{\sM} = p \Leftrightarrow p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) = \Tr\left[\rho_{A^n B^n E^n} \left(M_{\cvec{a}^n|\cvec{x}^n} \otimes N_{\cvec{b}^n|\cvec{y}^n} \otimes I_{E^n}\right) \right].
+      \behav{\rho_{A^n B^n E^n}}{\sM} = p \Leftrightarrow p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) = \Tr{\rho_{A^n B^n E^n} \left(M_{\cvec{a}^n|\cvec{x}^n} \otimes N_{\cvec{b}^n|\cvec{y}^n} \otimes I_{E^n}\right) }.
     \end{equation}
     A particular measurement strategy and state are jointly referred to as the \emph{implementation} of a behaviour.
 
@@ -939,14 +941,14 @@
     \begin{equation}\label{eqn:red_intr_info}
       I{(A : B \downarrow\downarrow E)}_{\rho} = \inf_{%
         \substack{\rho_{A B EE'} : \\ 
-      \Tr_{E'} \rho_{A B EE'} = \rho_{A B E}}}
+      \Tr[_{E'}]{\rho_{A B EE'}} = \rho_{A B E}}}
       I{(A : B \downarrow EE')}_{\rho} + (1+\indic{E' \text{ classical}})H(E'),
     \end{equation}
     The increase in the reduced intrinsic information from Eve's loss of \(E'\) is bounded by \((1+\indic{E' \text{ classical}})H(E')\).
 
     Entanglement measures include the \emph{squashed entanglement}
     \begin{equation}
-      E_{sq}(\rho_{A B}) = \frac{1}{2} \inf_{\substack{\rho_{A BE} : \\ \rho_{A B} = \Tr_E \rho_{A BE}}} I(A:B|E)_{\rho},
+      E_{sq}(\rho_{A B}) = \frac{1}{2} \inf_{\substack{\rho_{A BE} : \\ \rho_{A B} = \Tr[_E]{\rho_{A BE}}}} I(A:B|E)_{\rho},
     \end{equation}
     which can be seen as the minimisation of the conditional mutual information on all possible states for Eve, and gives
     \begin{equation}
@@ -973,7 +975,7 @@
 
     \subsection{Locking}\label{sec:diqkd_lock}
 
-    It is known that, in the device-dependent QKD scenario, a PSK cannot increase the rate of a protocol~\cite[Cor. 5.3]{CQKeyDistill}, as a consequence of non-lockability of the device-dependent key rate (\Cref{sec:diqkd_ustate}). The proof proceeds by arguing that, given a protocol \(\qproto{P}\) for \(\rho_{ABE}\), and giving Eve an additional register \(E'\), such that \(\Tr_{E'}\left[\rho_{ABEE'}\right] = \rho_{ABE}\), executing \(\qproto{P}\) as if \(E'\) did not exist will achieve
+    It is known that, in the device-dependent QKD scenario, a PSK cannot increase the rate of a protocol~\cite[Cor. 5.3]{CQKeyDistill}, as a consequence of non-lockability of the device-dependent key rate (\Cref{sec:diqkd_ustate}). The proof proceeds by arguing that, given a protocol \(\qproto{P}\) for \(\rho_{ABE}\), and giving Eve an additional register \(E'\), such that \(\Tr[_{E'}]{\rho_{ABEE'}} = \rho_{ABE}\), executing \(\qproto{P}\) as if \(E'\) did not exist will achieve
               \begin{equation}
                 r\left(\qproto{P}, {\{\rho_{ABEE'}^{\otimes n}\}} \right) \geq r\left(\qproto{P}, {\{\rho_{ABE}^{\otimes n}\}} \right) - (1+\indic{E' \text{ classical}})H{(E')}_{\rho}.
               \end{equation}
@@ -1118,9 +1120,13 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
     The full derivation of this result involves the use of the operator algebra approach to quantum mechanics and spectral theory, which is generally not covered in undergraduate treatments of quantum mechanics and quantum information. An important practical result from their general approach is the extension to bounded infinite-dimensional operators. This has been reviewed (using more elementary methods, without the generality of operator algebras) in \Cref{sec:qretech}, but for this section, we write the expressions in finite-dimensional form, where all spectra are discrete.
 
     The set of \emph{bounded operators} \(\mathcal{B}(\Hs)\) on the Hilbert space \(\Hs\) is the subset of \(\Lin{\Hs}\) such that the \emph{operator norm} of \(X \in \Lin{\Hs}\)
-    \[ \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}} \]
+    \begin{equation}
+    \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}}
+  \end{equation}
     is finite. An operator \(X \in \mathcal{B}(\Hs)\) is \emph{trace-class} if, for the positive-semidefinite operator \(\sqrt{X^{\dagger}X}\),
-    \[ \Tr\left[ \sqrt{X^{\dagger}X} \right] = \sum_{i} \angleb{e_i, Xe_i} \leq +\infty \]
+    \begin{equation}
+    \Tr{ \sqrt{X^{\dagger}X} } = \sum_{i} \angleb{e_i, Xe_i} \leq +\infty
+  \end{equation}
     for any orthonormal basis \(\{e_j\}\) for \(\Hs\)~\cite{HallQuantumForMath}. 
 
     The natural logarithm has the integral representation
@@ -1138,26 +1144,26 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
     Therefore, we can write the relative entropy as
     \begin{align}
-      D(\rho||\sigma) &= \frac{1}{\ln 2} \Tr\left[\rho \left(\ln\rho - \ln\sigma\right) \right] \\
-                      &= \frac{1}{\ln 2} \Tr\left[ \sum_{x,y} y \ln\left(\frac{y}{x}\right) \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho}  \right] \label{eqn:finitedim_relent} \\ 
-                      &= -\frac{1}{\ln 2} \Tr\left[ \sum_{x,y} y \underbrace{\ln\left(\frac{x}{y}\right)}_{\geq r_m(x/y)} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} \right] \\
-                      &\leq -\frac{1}{\ln 2} \Tr\left[ \sum_{x,y} y \frac{x-y}{t_i(x-y)+y} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} \right],
+      D(\rho||\sigma) &= \frac{1}{\ln 2} \Tr{\rho \left(\ln\rho - \ln\sigma\right) } \\
+                      &= \frac{1}{\ln 2} \Tr{ \sum_{x,y} y \ln\left(\frac{y}{x}\right) \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho}  } \label{eqn:finitedim_relent} \\ 
+                      &= -\frac{1}{\ln 2} \Tr{ \sum_{x,y} y \underbrace{\ln\left(\frac{x}{y}\right)}_{\geq r_m(x/y)} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} } \\
+                      &\leq -\frac{1}{\ln 2} \Tr{ \sum_{x,y} y \frac{x-y}{t_i(x-y)+y} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} },
     \end{align}
     where \(x\) and \(y\) are eigenvalues of \(\sigma\) and \(\rho\), and \(\Pi^{(x)}_{\sigma}\) and \(\Pi^{(y)}_{\rho}\) are their respective eigenprojectors, and the inequality direction is flipped since \(y\) is always positive, and so the logarithm is always being multiplied by a negative number.
 
     The key insight of this method is in observing that this sum can be commuted with the sum over the eigenvalues to obtain the following inequality, which converges to equality as \(m\to\infty\)
     \begin{equation}
-      D(\rho||\sigma) \leq - \sum_{i=1}^{m} \frac{w_i}{\ln 2} \underbrace{\Tr\left[ \sum_{x,y} y \frac{x-y}{t_i(x-y)+y} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} \right]}_{\eqqcolon D_{F_{t_i}}(\rho||\sigma)},\label{eqn:re_from_qre}
+      D(\rho||\sigma) \leq - \sum_{i=1}^{m} \frac{w_i}{\ln 2} \underbrace{\Tr{ \sum_{x,y} y \frac{x-y}{t_i(x-y)+y} \Pi^{(x)}_{\sigma} \Pi^{(y)}_{\rho} }}_{\eqqcolon D_{F_{t_i}}(\rho||\sigma)},\label{eqn:re_from_qre}
     \end{equation}
     and that the \emph{quasi-relative entropy} \(D_{F_{t}}(\rho||\sigma)\) can be characterised variationally as
     \begin{equation}
-      D_{F_{t}}(\rho||\sigma) = \frac{1}{t} \inf_Z \Tr\left[ \rho + \rho(Z + Z^{\dagger}) + (1-t)\rho{}Z^{\dagger}Z + t\sigma{}ZZ^{\dagger} \right].\label{eqn:qre_var}
+      D_{F_{t}}(\rho||\sigma) = \frac{1}{t} \inf_Z \Tr{ \rho + \rho(Z + Z^{\dagger}) + (1-t)\rho{}Z^{\dagger}Z + t\sigma{}ZZ^{\dagger} }.\label{eqn:qre_var}
     \end{equation}
-    This variational expression is of the form \(\Tr[\rho P]\), where \(P\) is a polynomial of operators. As will be seen later, optimisations of this form can be efficiently approximated (with some technical caveats).
+  This variational expression is of the form \(\Tr{\rho P}\), where \(P\) is a polynomial of operators. As will be seen later, optimisations of this form can be efficiently approximated (with some technical caveats).
 
-    If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then the \(i=m\) optimisation can be bounded analytically. We additionally collect the terms that are not multiplied with the optimisation variable \(Z\), removing the \(\Tr[\rho]\) terms from the optimisation and yielding the constant
+If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then the \(i=m\) optimisation can be bounded analytically. We additionally collect the terms that are not multiplied with the optimisation variable \(Z\), removing the \(\Tr{\rho}\) terms from the optimisation and yielding the constant
     \begin{equation}
-      c_m(\Tr[\rho]) = \frac{1}{m^2} \frac{\lambda \Tr[\rho]}{\ln 2} - \sum_{i=1}^m \frac{w_i \Tr[\rho]}{t_i \ln 2}.
+    c_m(\Tr{\rho}) = \frac{1}{m^2} \frac{\lambda \Tr{\rho}}{\ln 2} - \sum_{i=1}^m \frac{w_i \Tr{\rho}}{t_i \ln 2}.
     \end{equation}
     Further, we have \(\norm{Z} \leq \alpha_i\) in each optimisation, where
     \begin{equation}\label{eqn:qre_bound}
@@ -1167,16 +1173,16 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
     For DIQKD protocols that use a specific input, say \(x^{\star}\), to generate the key, we can apply this analysis to bound the relevant conditional entropy \(H{(\crv{A}|E, \crv{X}=x^{\star})}_{\rho}\) by observing that
     \begin{align*}
       H{(\crv{A}|E)}_{\rho} &= \log d_A - D(\rho_{\crv{A}E}||I_{\crv{A}}\otimes\rho_{E} / d_A) \\
-                            &= \log d_A - \Tr\left[\rho_{\crv{A}E}(\log(\rho_{\crv{A}E}) - \log(I_{\crv{A}}\otimes\rho_{E} / d_A))\right] \\
-                            &= \log d_A - \Tr\left[\rho_{\crv{A}E}(\log(\rho_{\crv{A}E}) - \log(I_{\crv{A}}\otimes\rho_{E}) + \log d_A)\right] \\
-                            &= -\Tr\left[\rho_{\crv{A}E}(\log(\rho_{\crv{A}E}) - \log(I_{\crv{A}}\otimes\rho_{E}))\right] = -D(\rho_{\crv{A}E}||I_{\crv{A}}\otimes\rho_{E}),
+                            &= \log d_A - \Tr{\rho_{\crv{A}E}(\log(\rho_{\crv{A}E}) - \log(I_{\crv{A}}\otimes\rho_{E} / d_A))} \\
+                            &= \log d_A - \Tr{\rho_{\crv{A}E}(\log(\rho_{\crv{A}E}) - \log(I_{\crv{A}}\otimes\rho_{E}) + \log d_A)} \\
+                            &= -\Tr{\rho_{\crv{A}E}(\log(\rho_{\crv{A}E}) - \log(I_{\crv{A}}\otimes\rho_{E}))} = -D(\rho_{\crv{A}E}||I_{\crv{A}}\otimes\rho_{E}),
     \end{align*}
     where \(d_A\) is the dimension of Alice's system and \(I_A/d_A\) is the state representing a uniform distribution for Alice's system. Further, \(\rho_{\crv{A}E} \leq I_{\crv{A}} \otimes \rho_{E}\), so we have \(\lambda = 1\).
 
     Then, with \(r\) arbitrary linear constraints on the behaviour, indexed by \(j\)
     \[ \sum_{abxy} c^{(j)}_{abxy} p(ab|xy) \geq v_j, \]
     and recalling that
-    \[ p(ab|xy) = \Tr\left[\rho_{A B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right], \]
+    \[ p(ab|xy) = \Tr{\rho_{A B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) }, \]
     we can obtain the lower bound:
     \begin{equation}
     \inf_{\substack{\rho: \exists \sM : \\ \behav{\rho}{ \sM} = p}} H{(\crv{A}|E, \crv{X}=x^{\star})}_{\rho} \geq c_m(1) + q_m(p),
@@ -1184,30 +1190,35 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
     where \(q_m(p)\) is given by
     \begin{equation}
       \begin{aligned}[c]
-        \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \Tr\left[ 
+        \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \Tr{ 
           \rho_{A B E} \left(
             \begin{gathered}
               M_{a|x^{\star}} \otimes I_{B} \otimes \left[ Z_{a,i} + Z_{a,i}^{\dagger} + (1-t_i)  Z_{a,i}^{\dagger}Z_{a,i} \right] \\
               + t_i \left( I_{A B} \otimes Z_{a,i}Z_{a,i}^{\dagger}\right) 
             \end{gathered}
           \right)
-        \right] \\
+        } \\
           \text{s.t.} & \begin{aligned}[t] 
-            & \sum_{abxy} c^{(j)}_{abxy} \Tr\left[\rho_{A B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right] \geq v_j & & \forall 1 \leq j \leq r \\
+            & \sum_{abxy} c^{(j)}_{abxy} \Tr{\rho_{A B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) } \geq v_j & & \forall 1 \leq j \leq r \\
             & \sum_{a} M_{a|x} = I_{A}, \sum_{b} N_{b|y} = I_{B} & & \forall x, y \\
-            & M_{a|x} \geq 0, N_{b|y} \geq 0 & & \forall a, b, x, y \\
-            & \norm{Z_{a,i}} \leq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
+            & M_{a|x} \succeq 0, N_{b|y} \succeq 0 & & \forall a, b, x, y \\
+          & Z_{a,i} Z_{a,i}^{\dagger} \preceq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
+          & Z_{a,i}^{\dagger} Z_{a,i} \preceq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
             & M_{a|x} \in \sB(A), N_{b|y} \in \sB(B), Z_{a,i} \in \sB(E) & & \forall a, b, x, y, i \\
             & \rho_{A B E} \text{ is a valid state} & &
           \end{aligned}
           \end{aligned}
         \end{equation}
 
-        We can use Naimark's dilation theorem to construct a state \(\tilde{\rho}\) and projective measurement operators \(\{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\) on a Hilbert space \(\Hs\), such that \(\Tr\left[\tilde{\rho}\tilde{M}_{a|x}\right] = \Tr\left[\rho M_{a|x}\right]\) and  \(\Tr\left[\tilde{\rho}\tilde{N}_{b|y}\right] = \Tr\left[\rho N_{b|y}\right]\): that is, the behaviour remains the same. These can be mapped to the original behaviour and states via local isometries~\cite{BFF_QRE}.\footnote{See \Cref{sec:ubound_statemeas} for futher detail.} We can further assume that the state is pure, that is, \(\tilde{\rho} = {\ket{\psi}\bra{\psi}}_{\Hs}\), which can only help Eve (due to the data-processing inequality).
+        We can use Naimark's dilation theorem to construct a state \(\tilde{\rho}\) and projective measurement operators \(\{\tilde{M}_{a|x}, \tilde{N}_{b|y}\}\) on a Hilbert space \(\Hs\), such that \(\Tr{\tilde{\rho}\tilde{M}_{a|x}} = \Tr{\rho M_{a|x}}\) and  \(\Tr{\tilde{\rho}\tilde{N}_{b|y}} = \Tr{\rho N_{b|y}}\): that is, the behaviour remains the same. These can be mapped to the original behaviour and states via local isometries~\cite{BFF_QRE}.\footnote{See \Cref{sec:ubound_statemeas} for futher detail.} We can further assume that the state is pure, that is, \(\tilde{\rho} = {\ket{\psi}\bra{\psi}}_{\Hs}\), which can only help Eve (due to the data-processing inequality).
 
-        Additionally, instead of enforcing the tensor product explicitly, we can enforce that the operators \(Z_{a,i}\) commute with all \(\tilde{M}_{a|x}\) and \(\tilde{N}_{b|y}\), which in turn commute with each other. Therefore, we can replace all instances of \(\Tr\left[\rho S\right]\) in our objective function with \(\braket{\psi|\tilde{S}|\psi}\) for all monomials \(S\) (individual operators and products of operators), where \(\tilde{S}\) is the monomial with all measurements replaced by their projective versions on \(\Hs\). 
+        Additionally, instead of enforcing the tensor product explicitly, we can enforce that the operators \(Z_{a,i}\) commute with all \(\tilde{M}_{a|x}\) and \(\tilde{N}_{b|y}\), which in turn commute with each other. Therefore, we can replace all instances of \(\Tr{\rho S}\) in our objective function with \(\braket{\psi|\tilde{S}|\psi}\) for all monomials \(S\) (individual operators and products of operators), where \(\tilde{S}\) is the monomial with all measurements replaced by their projective versions on \(\Hs\). 
 
-        These inner products can then be seen as elements of a Gram matrix for the vectors \(\{\ket{\psi}, \tilde{S}\ket{\psi}\}\), which must be positive semidefinite. In order to constrain \(\ket{\psi}\) to be a valid quantum state, we introduce more vectors of the form \(M\ket{\psi}\), where \(M\) is a monomial formed by the operators in our problem, to our Gram matrix. If all states and operators are valid, the Gram matrix should still be positive semidefinite, no matter the length of the monomials \(M\). The \emph{NPA hierarchy} of level \(n\) is the hierarchy that results from including all monomials of length \(n\) in this Gram matrix. It is a hierarchy of outer approximations to \(\Qs\) that converges, as \(n\to\infty\), to the \emph{almost-quantum set} \(\Qs'\), defined by commuting operators rather than tensor products, and which is strictly larger than \(\Qs\).\footnote{Recent results imply that there is no algorithm that can converge to exactly to \(\Qs\) from outside, since such an algorithm would allow one to solve the halting problem~\cite{MIPRE}. However, if all parties use finite-dimensional systems, \(\Qs = \Qs'\).} Higher levels of the hierarchy involve monomials consisting of longer chains of measurement operators. The final expression for \(q_m(p)\) then becomes
+        These inner products can then be seen as elements of a Gram matrix for the vectors \(\{\ket{\psi}, \tilde{S}\ket{\psi}\}\), which must be positive semidefinite. In order to constrain \(\ket{\psi}\) to be a valid quantum state, we introduce more vectors of the form \(M\ket{\psi}\), where \(M\) is a monomial formed by the operators in our problem, to our Gram matrix. If all states and operators are valid, the Gram matrix should still be positive semidefinite, no matter the length of the monomials \(M\).
+
+        The \emph{Navascues, Pironio and Acin (NPA) hierarchy} of level \(k\) is the hierarchy that results from including all monomials of length \(k\) in this Gram matrix, which is termed the \emph{moment matrix}~\cite{BoundingQ, ConvHierQ}, while these inner products are termed \emph{moments}. It is a hierarchy of outer approximations to \(\Qs\) that converges, as \(k\to\infty\), to the \emph{almost-quantum set} \(\Qs'\), defined by commuting operators rather than tensor products, and which is strictly larger than \(\Qs\).\footnote{Recent results imply that there is no algorithm that can converge to exactly to \(\Qs\) from outside, since such an algorithm would allow one to solve the halting problem~\cite{MIPRE}. However, if all parties use finite-dimensional systems, \(\Qs = \Qs'\).} Higher levels of the hierarchy involve monomials consisting of longer chains of measurement operators. The NPA hierarchy was later extended to incorporate polynomial operator inequalities by encoding them as \emph{localising matrices}~\cite{NPAHierarchy}, whose entries are linear combinations of the elements of the moment matrix and which must be PSD for the original inequalities to hold.
+
+        The final expression for \(q_m(p)\), which can now be approximated via the NPA hierarchy, is then
         \begin{equation}
           \begin{aligned}[c]
             \inf & \sum_{i=1}^{m-1} \frac{w_i}{t_i \ln 2} \sum_a \angleb{\psi\left|
@@ -1215,9 +1226,9 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
               \text{s.t.} & \begin{aligned}[t] 
           & \sum_{abxy} c^{(j)}_{abxy} \angleb{\psi\left| \tilde{M}_{a|x} \tilde{N}_{b|y} \right|\psi} \geq v_j & & \forall 1 \leq j \leq r \\
           & \sum_{a} \tilde{M}_{a|x} = I_{A}, \sum_{b} \tilde{N}_{b|y} = I_{B} & & \forall x, y \\
-          & \tilde{M}_{a|x} \geq 0, \tilde{N}_{b|y} \geq 0 & & \forall a, b, x, y \\
-          & Z_{a,i} Z_{a,i}^{\dagger} \leq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
-          & Z_{a,i}^{\dagger} Z_{a,i} \leq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
+          & \tilde{M}_{a|x} \succeq 0, \tilde{N}_{b|y} \succeq 0 & & \forall a, b, x, y \\
+          & Z_{a,i} Z_{a,i}^{\dagger} \preceq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
+          & Z_{a,i}^{\dagger} Z_{a,i} \preceq \alpha_i & & \forall a, i \in \dintv{1}{m-1} \\
           & \tilde{M}_{a|x}, \tilde{N}_{b|y}, Z_{a,i} \in \sB(\Hs) & & \forall a, b, x, y, i \\
           & [\tilde{M}_{a|x}, \tilde{N}_{b|y}] = [\tilde{M}_{a|x}, Z_{b,i}] = [\tilde{N}_{b|y}, Z_{a,i}] = 0 & & \forall a, b, x, y, i \\
           & [\tilde{M}_{a|x}, Z_{b,i}^{\dagger}] = [\tilde{N}_{b|y}, Z_{a,i}^{\dagger}] = 0 & & \forall a, b, x, y, i \\
@@ -1225,6 +1236,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
               \end{aligned}
               \end{aligned}\label{eqn:bff_npa}
             \end{equation}
+            The exact translation of these constraints into an SDP is discussed further in \Cref{sec:krwir_wiropt}.
 
             A few other simplifications are possible, which are discussed and implemented in~\cite{BFF_QRE}:
             \begin{enumerate}
@@ -1255,9 +1267,9 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
             The marginals and correlators, then, are as follows:
             \begin{align*}
-              \angleb{A_x} &= \Tr[\rho_{AB} A_x \otimes I_A] = -n_c + (1-n_c)(\eta_A\angleb{\tilde{A}_x} - (1-\eta_A)) \\
-              \angleb{B_y} &= \Tr[\rho_{AB} I_A \otimes B_y] = -n_c + (1-n_c)(\eta_B\angleb{\tilde{B}_y} - (1-\eta_B)) \\
-              \angleb{A_x B_y} &= \Tr[\rho_{AB} A_x \otimes B_y] = \begin{aligned}[c]
+            \angleb{A_x} &= \Tr{\rho_{AB} A_x \otimes I_A} = -n_c + (1-n_c)(\eta_A\angleb{\tilde{A}_x} - (1-\eta_A)) \\
+          \angleb{B_y} &= \Tr{\rho_{AB} I_A \otimes B_y} = -n_c + (1-n_c)(\eta_B\angleb{\tilde{B}_y} - (1-\eta_B)) \\
+        \angleb{A_x B_y} &= \Tr{\rho_{AB} A_x \otimes B_y} = \begin{aligned}[c]
       & n_c + (1-n_c)(\eta_A\eta_B\angleb{\tilde{A}_x\tilde{B}_y} - \eta_A(1-\eta_B)\angleb{\tilde{A}_x} \\
       & -\eta_B(1-\eta_A)\angleb{\tilde{B}_y} + (1-\eta_A\eta_B) )
               \end{aligned}
@@ -1265,8 +1277,8 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
               \begin{figure}
                 \centering
-                \includegraphics[width=0.9\linewidth]{exptplt.pdf}
-                \caption{\label{fig:exptplt} Minimum \(\eta\) required for \(r_{\std} > 0\), given \(n_c\).}
+                \includegraphics[width=0.8\linewidth]{and_plot.pdf}
+                \caption{\label{fig:exptplt} Minimum \(\eta\) required for \(r_{\std} > 0\), given \(n_c\). Plotted using \texttt{expt\_wiring\_plot} in \texttt{plots.jl}.}
               \end{figure}
 
               Consider the following simple wiring, the \emph{N-AND wiring}, where we broadcast the same inputs \(x\) and \(y\) to \(N\) boxes on each side, and drive an AND gate with all the outputs. Clearly, this can only increase the correlation between Alice and Bob, since \(a \neq b\) only if all \(N\) boxes return different outputs to Alice and Bob. However, this means that if Eve knows that any of the boxes produced 0, she can conclude that the overall output is 0, increasing her correlation with Alice. If Alice's increase in correlation with Bob exceeds her increase in correlation with Eve, then this wiring improves the key rate.
@@ -1435,121 +1447,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
               We refer to the discrete set of deterministic marginal wirings as \(\sW_D\), which are therefore the vertices of the polytope \(\sW\). \(\sW^n\) is then the convex polytope with vertices \(\sW_D^n = \underbrace{\sW_D \times \sW_D \times \cdots \times \sW_D}_{n\text{ times}}\). We also define \(\sWB(p)\) as the set of behaviours generated by applying \(\sW^n\) to an \(n\)-partite behaviour \(p\) using \Cref{eqn:jwirdistdef}.
 
-                  % NEXT bound the secret key capacity itself not the iid
-                  % version
-
-              Just from this first characterisation of wirings, we are able to derive a fundamental limitation on achievable key rates via wiring.
-              \begin{lemma}\label{thm:outdep}
-                Define a \emph{wiring without output dependency} as a wiring for which all inputs are independent of previous outputs, that is, a wiring \(\chi\) that obeys
-                \begin{equation}\label{eqn:nooutputdep}
-                  \chi(\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \chi(\cvec{x}^c\cvec{y}^c|xy).
-                \end{equation}
-                Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring with output dependency cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p]\), where \(\chi\) is a wiring without output dependency, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p)\).
-              \end{lemma}
-              \begin{proof}
-                From \Cref{eqn:nooutputdep} and using \Cref{eqn:mwirdistdef}, for any given \(\cvec{a}^c\) and \(\cvec{b}^c\),
-                \begin{align}
-                  \chi(\cvec{x}^c\cvec{y}^c|xy) &= \sum_{ab} P_{\Lambda}(\lambda) \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) \\
-                                                &= \sum_{ab} \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) \\
-                                                &= \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(\cvec{y}^c|\cvec{b}^cy)  \\
-                                                &= \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y),\label{eqn:nooutputmwir}
-                \end{align}
-                that is, \(\cvec{x}^c\) and \(\cvec{y}^c\) can be locally generated with just access to \(x\) and \(y\), respectively, and the shared randomness \(\Lambda\).
-
-                Then, if \(p'\) is observed, one implementation of the devices to produce \(p'\) is to locally generate vectors \(\cvec{x}^c\) and \(\cvec{y}^c\) from the inputs \(x\) and \(y\), run the process that generates \(p\) using the generated inputs \(\cvec{x}^c\) and \(\cvec{y}^c\), and then to consolidate \(\cvec{a}^c\) and \(\cvec{b}^c\) into outputs \(a\) and \(b\) based on the wiring distribution. In both cases, the underlying physical process, and therefore the information that Eve gains from it, is the same, and therefore the secret key capacity of \(p'\) cannot exceed that of \(p\).
-
-              More concretely, consider any joint behaviour \(p^c\) generated by a quantum process:
-              \begin{equation}
-                p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) = \Tr\left[\rho_{AB} \left( M_{\cvec{a}^c|\cvec{x}^c} \otimes N_{\cvec{b}^c|\cvec{y}^c} \right) \right].
-              \end{equation}
-              Then, for any behaviour \(p'\) that can be obtained from applying a wiring without output dependency \(\chi\) to \(p^c\), we have
-              \begin{gather}
-                p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \sum_{\lambda} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) P_{\Lambda}(\lambda) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \\
-                = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \sum_{\lambda} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) P_{\Lambda}(\lambda) \Tr\left[\rho_{AB} \left( M_{\cvec{a}^c|\cvec{x}^c} \otimes N_{\cvec{b}^c|\cvec{y}^c} \right) \right], \\
-                = \sum_{\lambda} P_{\Lambda}(\lambda) \Tr\left[\rho_{AB} \underbrace{\left( \sum_{\cvec{a}^c\cvec{x}^c} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) M_{\cvec{a}^c|\cvec{x}^c} \right)}_{M'_{a|x\lambda}} \otimes \underbrace{\left(\sum_{\cvec{b}^c\cvec{y}^c} \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) N_{\cvec{b}^c|\cvec{y}^c} \right)}_{N'_{b|y\lambda}} \right].
-              \end{gather}
-              The operators \({\{M'_{a|x\lambda}\}}_a\) form a POVM, since the operators retain their positive-semidefiniteness from the positive-semidefiniteness of the underlying operators and the nonnegativity of the weights \(\chi_{A|\lambda}\), and
-              \begin{align}
-                \sum_a M'_{a|x\lambda} &= \sum_a \sum_{\cvec{a}^c\cvec{x}^c} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) M_{\cvec{a}^c|\cvec{x}^c} \stackrel{(\ref{eqn:nooutputmwir})}{=} \sum_{\cvec{a}^c\cvec{x}^c} \chi_{A|\lambda}(\cvec{x}^c|x) M_{\cvec{a}^c|\cvec{x}^c} \\
-                                       &= \sum_{\cvec{x}^c} \chi_{A|\lambda}(\cvec{x}^c|x) I = I.
-              \end{align}
-               The analogous result follows for \({\{N'_{b|y\lambda}\}}_b\). The resultant implementation of \(p'\) requires the shared random variable \(\Lambda\), but by \Cref{thm:Qcvx}, an implementation without shared randomness can be constructed by expanding the Hilbert space.
-
-               Let \(C_{\sk}^{\otimes}(p') = r'\) (\Cref{def:seckeycapbehaviid}) and let \(\prin'\) achieve \(r'\). Then, Alice and Bob can generate \(\prin'\), share random variable \(\Lambda\), keeping local copies in \(\Lambda_A\) and \(\Lambda_B\), which they use to generate
-               \[ \prin^c(\cvec{x}^c, \cvec{y}^c) = \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(\cvec{x^c}|x)\chi_{B|\lambda}(\cvec{y^c}|y). \]
-               Let \(\rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E} \in \compatstates{p^c}{\prin^c}\) achieve
-               \[ \sup_{\proto{P}} \inf_{\rho} r(\proto{P}, \{\rho^{\otimes n}\}), \]
-               where the choice of the protocol is optimised over all protocols of the above form. Note that, since \(\Lambda\) is exchanged prior to the input, Eve can adapt her state accordingly, and we can write the overall state as
-               \begin{align*}
-                 \rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E} &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c} \begin{aligned}[c]
-          & \prin^c(\cvec{x}^c,\cvec{y}^c) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \proj[\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c]{\cvec{a}^c\cvec{x}^c\cvec{b}^c\cvec{y}^c} \\
-                   \otimes & \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c},
-                 \end{aligned} \\
-                                                                &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c xy\lambda} \begin{aligned}[c]
-          & \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y) \prin'(x,y) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \\
-          & P_{\Lambda}(\lambda) \proj[\crv{A}^c\crv{X}^c\crv{X}\Lambda_A \crv{B}^c\crv{Y}^c\crv{Y}\Lambda_B]{\cvec{a}^c\cvec{x}^c\lambda{x} \cvec{b}^c\cvec{y}^c\lambda{y}} \otimes \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
-                 \end{aligned}
-                 \end{align*}
-                 where the public shared randomness \(\Lambda\) is incorporated into Eve's system \(E^c\). Then, Alice and Bob can execute the local operations
-                 \begin{align*}
-                   V_{a|\cvec{a}^c\cvec{x}^c x\lambda} &= \sqrt{\chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^cx)} \ket{ax}\bra{\cvec{a}^c\cvec{x}^c x\lambda} \\
-                   V_{b|\cvec{b}^c\cvec{y}^c y\lambda} &= \sqrt{\chi_{B|\lambda}(b|\cvec{y}^c\cvec{b}^cy)} \ket{by}\bra{\cvec{b}^c\cvec{y}^c y\lambda},
-                 \end{align*}
-                 obtaining a state
-                 \begin{align*}
-                   \hat{\rho} &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c abxy\lambda} \begin{aligned}[c]
-          & \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y) \prin'(x,y) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \\
-          & P_{\Lambda}(\lambda) \chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^cx) \chi_{B|\lambda}(b|\cvec{y}^c\cvec{b}^cy) \proj[\crv{AXBY}]{axby} \otimes \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
-                   \end{aligned} \\
-                              &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c abxy\lambda} \begin{aligned}[c]
-          & \prin'(x,y) \proj[\crv{AXBY}]{axby} \otimes \\
-          & P_{\Lambda}(\lambda)  \chi_{A|\lambda}(a\cvec{x}|^c\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
-                   \end{aligned}
-                 \end{align*}
-                 and let the optimal rate amongst all protocols that begin with these steps be \(\hat{r}\), where \(\hat{r} \leq C_{\sk}^{\otimes}(p^c)\) since we have constrained Alice and Bob's actions but not Eve's.
-
-               Now consider a state \(\rho_{\crv{AXBY}{E}}' \in \compatstates{p'}{\prin'}\) that uses the same physical implementation as \(\rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E}\), in the manner described above with the expanded Hilbert space, \(\prin'\) as above, and \(\proto['_{\Omega',\ell'}]{P}\) achieving
-               \[
-                 r' = \sup_{\proto['_{\Omega',\ell'}]{P}} \sup_{\prin'} r(\proto['_{\Omega',\ell'}]{P}, \{\rho'^{\otimes{n}}\}),
-               \]
-               where \(r' \geq C_{\sk}^{\otimes}(p')\) since we have fixed Eve's quantum implementation, rather than optimising it. Then we can write these states as
-      \begin{align*}
-          \rho'_{\crv{A}\crv{X} \crv{B}\crv{Y} E} &= \sum_{abxy} \prin(x,y) \proj[\crv{A}\crv{X} \crv{B}\crv{Y}]{axby} \otimes p'(ab|xy) \rho_{E\Lambda|abxy} \\
-          p'(ab|xy) \rho_{E|abxy} &= \sum_{\lambda} P_{\Lambda}(\lambda) \Tr\left[ \rho_{ABE|\lambda} \left( M'_{a|x\lambda} \otimes N'_{b|y\lambda} \otimes I_{E} \right) \right] \\
-                       &= \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c\lambda}
-          P_{\Lambda}(\lambda) \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy)
-          p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)
-          \rho_{E|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
-      \end{align*}
-      where Eve can adapt her state to \(\lambda\) since she holds the purification of Alice and Bob's state (which, by the construction explained in \Cref{thm:Qcvx}, gives her the value of \(\lambda\)). Now, since this state is equivalent to \(\hat{\rho}\), Alice and Bob can apply \(\proto['_{\Omega',\ell'}]{P}\) to \(\hat{\rho}\), generating keys of length \(\ell'_n\). Since the steps taken, namely Alice and Bob publicly generating \(\Lambda\) and applying local maps to their data, do not reveal or discard information about \(\crv{X}\) and \(\crv{Y}\), by assumption\footnote{This assumption is quite intuitive, and holds for well-studied cases such as independent input distributions, and the key recovery technique of~\cite[Prot. 2]{DIQKD_FiniteSize}. However, without a more formal model of the cost function \(L_{\Omega}\), we need to explicitly state this assumption.}, it would not constrain the generation or recovery of \(\prin'\), and so the cost to generate it would not be more than \(L_{\Omega'}(\prin'^{\otimes n})\). Therefore,
-      \[ \hat{r} \geq \lim_{n\to\infty} \frac{\ell'_n - L_{\Omega'}(\prin'^{\otimes n})}{n} = r' \]
-      and therefore
-      \begin{equation}
-      C_{\sk}^{\otimes}(p^c) \geq \hat{r} \geq r' \geq C_{\sk}(p').
-      \end{equation}
-    \end{proof}
-
-    More generally, if the wiring produces a behaviour \(p'\) that can be produced by LOPC post-processing of Alice and Bob's Bell test data on \(p^c\), then by \Cref{def:seckeycapbehaviid}, we cannot have \(C_{\sk}^{\otimes}(p') \geq C_{\sk}^{\otimes}(p^c)\). On the other hand, if the wiring creates some correlation between the output of previous Bell test rounds and subsequent rounds, such an increase may be possible.
-
-    A direct application of this lemma to our project is to observe that, since the AND wiring in \Cref{sec:preres} simply broadcasts the input to all boxes, it is a wiring without output dependency, and therefore the increase in the key rate is not a fundamental increase in secret key capacity, but simply because the standard protocol key rate does not achieve the secret key capacity.
-
-    Our description of wirings as LOSR operations naturally motivates the question if there is any benefit to be gained from using \emph{private} randomness, unknown to Eve, beyond its necessary role in providing an authenticated classical channel (\Cref{def:diqkdassump}) and possibly its role in generating the inputs (\Cref{sec:diqkd_proto}). We distinguish between \emph{shared} private randomness, known to both Alice and Bob (that is, a PSK), and \emph{local} private randomness known to only one of them.
-
-              Local private randomness would result in both Bob and Eve being unable to tell which wiring Alice used. From their perspective, then, Alice's output is effectively randomise, and the use of local private randomness would therefore have the same effect as noisy preprocessing. However, analyses of noisy preprocessing typically treat it as \emph{trusted noise}, rather than part of the behaviour of the system that might be caused by Eve, e.g.\ in~\cite{BFF_QRE, AsymmetricCHSH, DIQKD_FiniteSize}. We therefore do not consider local private randomness in wirings, since the benefit that can be derived from it would be inferior to the benefit from noisy preprocessing, which can be performed at the same cost.
-
-              Shared private randomness cannot be so easily dismissed. By \Cref{thm:dilock}, the effect of using shared private randomness \emph{before} the state is distributed cannot be ruled out by a lockability-type argument. It is also not quite equivalent to the use of a PSK for generating the input distribution, since the overall effect of the wiring would depend on the outputs as well. By \Cref{thm:outdep}, we can only see a benefit from considering wirings that interact with the outputs in a nontrivial way, but that necessitates a more involved analysis of this complex interaction. Therefore, we leave this question for future work, and focus on results that can be obtained without considering such wirings.
-              \begin{question}
-                Is there be any benefit from using private shared randomness in wirings?
-              \end{question}
-
-    \Cref{thm:outdep}, and the discussion of correlated inputs from private shared randomness in this section and in \Cref{sec:diqkd_behavsec}, suggests a connection between the advantage of wirings in DIQKD and the \emph{measurement dependent scenario}, first studied in~\cite{RelaxedBell}, where local statistics are described by~\cite[Eq. 2]{MDLBeyondIID}
-              \begin{equation}
-                p(abxy) = \sum_{\lambda} P_{\Lambda}(\lambda) p(a|x\lambda) p(b|y\lambda) p(xy|\lambda).
-              \end{equation}
-              In such a scenario, the shared randomness \(\lambda\) mediates some correlation between the inputs and the behaviour observed. In the case of multiple boxes wired together, the inputs of later rounds depend on the outputs of earlier rounds, so these outputs can mediate some correlation between the later inputs, which may constitute a form of measurement dependence. Ideas from measurement dependence have been used in protocols for extracting strong private randomness from weak public randomness~\cite{DIRA}, which is impossible with classical means, so its analysis may likewise be helpful for studying the effect of wirings on DIQKD\@. In particular, the  \emph{block-iid} scenario, where the rounds are divided into blocks of multiple rounds that are correlated within themselves but iid with each other, may be of interest~\cite{MDLBeyondIID}. Lastly, these works on measurement dependence could be applied to analysing the benefits of explicitly generating correlated inputs, as discussed in \Cref{sec:diqkd_proto}. Nonetheless, we leave a more detailed study and analysis of this intriguing possibility to future work.
-              \begin{question}
-                What do results from the study of measurement dependence imply about the possible advantage from using wirings and correlated inputs in DIQKD\@?
-              \end{question}
+              Having established this crucial result about the structure of the space of wirings, we can start examining this structure more explicitly, and attempting to find a computationally tractable representation for it that can be applied to analysing DIQKD.
 
               \subsection{Wiring Functions}\label{sec:locwir_func}
 
@@ -1751,7 +1649,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
                   Unfortunately, the exact number of wirings does not seem easily computed in closed form, due to the dependence of the number of distinct permutation maps on the application maps. Nonetheless, it is straightforward to compute numerically based on the counting arguments above, which are implemented as the type \verb`StarsBarsNN` in \verb`wiring.jl`. On the examples tried, however, this gives us the exact same number of wirings as derived from the wiring function approach. While this verifies that the two approaches are consistent, it implies that there are no simplifications to be had from this structural analysis of wirings.
 
-                  This formalism nonetheless retains some advantages over the wiring function representation. Firstly, similar to the case of wiring distributions, it is easy to represent a convex mixture of wirings by the convex mixture of the corresponding wiring matrices, but unlike the case of wiring distributions, the no-retrocausation conditions are automatically encoded. This allows us to represent wirings using a lower-dimensional vector of coefficients as compared to the wiring distribution approach, enabling more efficient polytope computations. In this sense, it is analogous to the Collins-Gisin representation. Although we will later see that convex mixtures do not maximise the secret key capacity (\Cref{sec:locwir_kr}), this still allows us to obtain a better fundamental understanding of the structure of the space of wirings.
+                  This formalism nonetheless retains some advantages over the wiring function representation. Firstly, similar to the case of wiring distributions, it is easy to represent a convex mixture of wirings by the convex mixture of the corresponding wiring matrices, but unlike the case of wiring distributions, the no-retrocausation conditions are automatically encoded. This allows us to represent wirings using a lower-dimensional vector of coefficients as compared to the wiring distribution approach, enabling more efficient polytope computations. In this sense, it is analogous to the Collins-Gisin representation. Although we will later see that convex mixtures do not maximise the secret key capacity (\Cref{sec:krwir}), this still allows us to obtain a better fundamental understanding of the structure of the space of wirings.
 
                   Additionally, as mentioned above, it allows for easy composition of each party's local wirings, and extension to the \(n\)-partite case. The coefficients of the \(n\)-partite behaviour vector \(\cvec{p}_{\cvec{A}^n}\) are arranged in the order corresponding to \(\bigotimes_{k=1}^n \cvec{p}_{A_k}\); that is,
                   \begin{equation}
@@ -1841,225 +1739,256 @@ julia> collect(Iterators.filter(pt -> !in(pt, gencoup222), points(nscoup222)))
 julia> collect(Iterators.filter(pt -> !in(pt, nscoup222), points(gencoup222)))
 Any[]
                   \end{lstlisting}
-                  cannot be that we violate the inequalities, nor can it be that their wirings violate our conditions. Must be the same polytope with degeneracies removed in theirs. Unclear why they got this result since they only considered no-signalling boxes but our definitions apply to arbitrary, possibly signalling behaviours
+                  The discrepancy between these three polytopes is puzzling. While the strict inclusion certainly cannot be the other way around, since no-signalling behaviours are a subset of general behaviours, and imposing more constraints can only make the feasible region smaller, this does not admit an easy physical interpretation. As argued above, a physically realisable wiring should not care if the boxes it acts on are signalling or not. Nonetheless, it seems that some couplers that are positive and normalised on no-signalling boxes cease to be well-behaved when used on signalling boxes. The simplest explanation, which is that these couplers do not correspond to physically realisable wirings, does not work because they were all explicitly shown to be physically realisable in~\cite{ShortEntangleSwap}.
 
-                  TODO Complete positivity => causal?
+                  This phenomenon may be related to the results in~\cite[Sec. 1.5]{LocalTransformations}, where local transformations that are \emph{completely positive}, that is, the resultant behaviour is positive and normalised when the transformation is applied to one part of a behaviour while the other part is left unchanged, iff the transformation admits a causal decomposition as per \Cref{eqn:opmap}. Interestingly, they prove this fact using signalling behaviours, and also exhibit an example of a behaviour that is positive but not completely positive: it maps marginal behaviours to marginal behaviours, but when applied to part of a signalling behaviour, with no transformation done by the other party, the resultant joint behaviour is no longer valid. These results, together with our computational evidence, suggest that there is a deeper connection between complete positivity and no-signalling. In fact, a cursory analysis already suggests an answer: due to the signalling between the boxes, the local transformations performed by one party can influence the marginals of the other party, so that, even if one party does not physically modify or process his device, his observed marginal behaviour may be different, so that there is effectively some transformation being applied to his part of the system. Nonetheless, we leave the deeper exploration of this question to future work.
+                  \begin{question}
+                    How can the results of~\cite{LocalTransformations} on complete positivity be generalised to the case of wirings? What is the mechanism by which signalling behaviours prevent the use of certain local operations?
+                  \end{question}
 
-                  TODO One intriguing extension would be to analyse these couplers to see if they do, in fact, correspond to physically realisable wirings. The results of~\cite{ShortEntangleSwap} imply that all binary-input couplers are simply wirings, but since we have extended the number of inputs to 3, this implication does not apply to our scenario. Although we have the raw data necessary, we were not able to do this in the course of this project.
-                  \subsection{Key Rates of Wired Behaviours}\label{sec:locwir_kr}
+                  A further intriguing extension would be to analyse the couplers for three-input boxes to see if they do, in fact, correspond to physically realisable wirings. The results of~\cite{ShortEntangleSwap} imply that all binary-input couplers are simply wirings, but since we have extended the number of inputs to 3, this implication does not apply to our scenario. Although we have the raw data necessary, we were not able to do this in the course of this project.
+                  \begin{question}
+                    Are there couplers for three-input boxes that cannot be implemented by wirings?
+                  \end{question}
 
-                  Let \(C^{W}_{\sk}(p)\) be the secret key capacity of a behaviour with wiring, that is
+                  Finally, we can analyse the structure of the space of wirings using the other formulations established in this section in order to gain a deeper insight into these issues. A good first step would be to explicitly compute the polytope corresponding to the marginal conditional wiring functions based on our formulation, and to compare it with the coupler polytopes. Based on the results of~\cite{LocalTransformations} connecting completely positive transformations to causal transformations, we expect it to be equivalent to the polytope derived from general behaviours, rather than no-signalling behaviours. However, this leaves us with the anomalous fact that some physically-realisable wirings seem to lie outside this polytope. We leave the exploration of this issue to future work.
+                  \begin{question}
+                    What are the polytopes defined by wirings?
+                  \end{question}
+
+                  \section{Key Rates of Wired Behaviours}\label{sec:krwir}
+
+                  Having established some facts about the structure of the space of wirings, and developed tools to represent them computationally, we turn now to the primary application of this research: to see if wiring can increase the secret key capacity of a behaviour.
+
+                  \subsection{Wirings without Output Dependency}\label{sec:krwir_outdep}
+
+                  % NEXT bound the secret key capacity itself not the iid
+                  % version
+
+                  From the wiring distribution description of wirings alone, we are able to derive a major result about the potential for wiring to improve key rates. In particular, we identify a class of wirings that are unable to increase the secret key capacity of a behaviour.
+              \begin{lemma}\label{thm:outdep}
+                Define a \emph{wiring without output dependency} as a wiring for which all inputs are independent of previous outputs, that is, a wiring \(\chi\) that obeys
+                \begin{equation}\label{eqn:nooutputdep}
+                  \chi(\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \chi(\cvec{x}^c\cvec{y}^c|xy).
+                \end{equation}
+                Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring with output dependency cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p]\), where \(\chi\) is a wiring without output dependency, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p)\).
+              \end{lemma}
+              \begin{proof}
+                From \Cref{eqn:nooutputdep} and using \Cref{eqn:mwirdistdef}, for any given \(\cvec{a}^c\) and \(\cvec{b}^c\),
+                \begin{align}
+                  \chi(\cvec{x}^c\cvec{y}^c|xy) &= \sum_{ab} P_{\Lambda}(\lambda) \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) \\
+                                                &= \sum_{ab} \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) \\
+                                                &= \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(\cvec{y}^c|\cvec{b}^cy)  \\
+                                                &= \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y),\label{eqn:nooutputmwir}
+                \end{align}
+                that is, \(\cvec{x}^c\) and \(\cvec{y}^c\) can be locally generated with just access to \(x\) and \(y\), respectively, and the shared randomness \(\Lambda\).
+
+                Then, if \(p'\) is observed, one implementation of the devices to produce \(p'\) is to locally generate vectors \(\cvec{x}^c\) and \(\cvec{y}^c\) from the inputs \(x\) and \(y\), run the process that generates \(p\) using the generated inputs \(\cvec{x}^c\) and \(\cvec{y}^c\), and then to consolidate \(\cvec{a}^c\) and \(\cvec{b}^c\) into outputs \(a\) and \(b\) based on the wiring distribution. In both cases, the underlying physical process, and therefore the information that Eve gains from it, is the same, and therefore the secret key capacity of \(p'\) cannot exceed that of \(p\).
+
+              More concretely, consider any joint behaviour \(p^c\) generated by a quantum process:
+              \begin{equation}
+                p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) = \Tr{\rho_{AB} \left( M_{\cvec{a}^c|\cvec{x}^c} \otimes N_{\cvec{b}^c|\cvec{y}^c} \right) }.
+              \end{equation}
+              Then, for any behaviour \(p'\) that can be obtained from applying a wiring without output dependency \(\chi\) to \(p^c\), we have
+              \begin{gather}
+                p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \sum_{\lambda} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) P_{\Lambda}(\lambda) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \\
+                = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \sum_{\lambda} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) P_{\Lambda}(\lambda) \Tr{\rho_{AB} \left( M_{\cvec{a}^c|\cvec{x}^c} \otimes N_{\cvec{b}^c|\cvec{y}^c} \right) }, \\
+                = \sum_{\lambda} P_{\Lambda}(\lambda) \Tr{\rho_{AB} \underbrace{\left( \sum_{\cvec{a}^c\cvec{x}^c} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) M_{\cvec{a}^c|\cvec{x}^c} \right)}_{M'_{a|x\lambda}} \otimes \underbrace{\left(\sum_{\cvec{b}^c\cvec{y}^c} \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) N_{\cvec{b}^c|\cvec{y}^c} \right)}_{N'_{b|y\lambda}} }.
+              \end{gather}
+              The operators \({\{M'_{a|x\lambda}\}}_a\) form a POVM, since the operators retain their positive-semidefiniteness from the positive-semidefiniteness of the underlying operators and the nonnegativity of the weights \(\chi_{A|\lambda}\), and
+              \begin{align}
+                \sum_a M'_{a|x\lambda} &= \sum_a \sum_{\cvec{a}^c\cvec{x}^c} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) M_{\cvec{a}^c|\cvec{x}^c} \stackrel{(\ref{eqn:nooutputmwir})}{=} \sum_{\cvec{a}^c\cvec{x}^c} \chi_{A|\lambda}(\cvec{x}^c|x) M_{\cvec{a}^c|\cvec{x}^c} \\
+                                       &= \sum_{\cvec{x}^c} \chi_{A|\lambda}(\cvec{x}^c|x) I = I.
+              \end{align}
+               The analogous result follows for \({\{N'_{b|y\lambda}\}}_b\). The resultant implementation of \(p'\) requires the shared random variable \(\Lambda\), but by \Cref{thm:Qcvx}, an implementation without shared randomness can be constructed by expanding the Hilbert space.
+
+               Let \(C_{\sk}^{\otimes}(p') = r'\) (\Cref{def:seckeycapbehaviid}) and let \(\prin'\) achieve \(r'\). Then, Alice and Bob can generate \(\prin'\), share random variable \(\Lambda\), keeping local copies in \(\Lambda_A\) and \(\Lambda_B\), which they use to generate
+               \[ \prin^c(\cvec{x}^c, \cvec{y}^c) = \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(\cvec{x^c}|x)\chi_{B|\lambda}(\cvec{y^c}|y). \]
+               Let \(\rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E} \in \compatstates{p^c}{\prin^c}\) achieve
+               \[ \sup_{\proto{P}} \inf_{\rho} r(\proto{P}, \{\rho^{\otimes n}\}), \]
+               where the choice of the protocol is optimised over all protocols of the above form. Note that, since \(\Lambda\) is exchanged prior to the input, Eve can adapt her state accordingly, and we can write the overall state as
+               \begin{align*}
+                 \rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E} &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c} \begin{aligned}[c]
+          & \prin^c(\cvec{x}^c,\cvec{y}^c) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \proj[\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c]{\cvec{a}^c\cvec{x}^c\cvec{b}^c\cvec{y}^c} \\
+                   \otimes & \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c},
+                 \end{aligned} \\
+                                                                &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c xy\lambda} \begin{aligned}[c]
+          & \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y) \prin'(x,y) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \\
+          & P_{\Lambda}(\lambda) \proj[\crv{A}^c\crv{X}^c\crv{X}\Lambda_A \crv{B}^c\crv{Y}^c\crv{Y}\Lambda_B]{\cvec{a}^c\cvec{x}^c\lambda{x} \cvec{b}^c\cvec{y}^c\lambda{y}} \otimes \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
+                 \end{aligned}
+                 \end{align*}
+                 where the public shared randomness \(\Lambda\) is incorporated into Eve's system \(E^c\). Then, Alice and Bob can execute the local operations
+                 \begin{align*}
+                   V_{a|\cvec{a}^c\cvec{x}^c x\lambda} &= \sqrt{\chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^cx)} \ket{ax}\bra{\cvec{a}^c\cvec{x}^c x\lambda} \\
+                   V_{b|\cvec{b}^c\cvec{y}^c y\lambda} &= \sqrt{\chi_{B|\lambda}(b|\cvec{y}^c\cvec{b}^cy)} \ket{by}\bra{\cvec{b}^c\cvec{y}^c y\lambda},
+                 \end{align*}
+                 obtaining a state
+                 \begin{align*}
+                   \hat{\rho} &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c abxy\lambda} \begin{aligned}[c]
+          & \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y) \prin'(x,y) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \\
+          & P_{\Lambda}(\lambda) \chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^cx) \chi_{B|\lambda}(b|\cvec{y}^c\cvec{b}^cy) \proj[\crv{AXBY}]{axby} \otimes \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
+                   \end{aligned} \\
+                              &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c abxy\lambda} \begin{aligned}[c]
+          & \prin'(x,y) \proj[\crv{AXBY}]{axby} \otimes \\
+          & P_{\Lambda}(\lambda)  \chi_{A|\lambda}(a\cvec{x}|^c\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
+                   \end{aligned}
+                 \end{align*}
+                 and let the optimal rate amongst all protocols that begin with these steps be \(\hat{r}\), where \(\hat{r} \leq C_{\sk}^{\otimes}(p^c)\) since we have constrained Alice and Bob's actions but not Eve's.
+
+               Now consider a state \(\rho_{\crv{AXBY}{E}}' \in \compatstates{p'}{\prin'}\) that uses the same physical implementation as \(\rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E}\), in the manner described above with the expanded Hilbert space, \(\prin'\) as above, and \(\proto['_{\Omega',\ell'}]{P}\) achieving
+               \[
+                 r' = \sup_{\proto['_{\Omega',\ell'}]{P}} \sup_{\prin'} r(\proto['_{\Omega',\ell'}]{P}, \{\rho'^{\otimes{n}}\}),
+               \]
+               where \(r' \geq C_{\sk}^{\otimes}(p')\) since we have fixed Eve's quantum implementation, rather than optimising it. Then we can write these states as
+      \begin{align*}
+          \rho'_{\crv{A}\crv{X} \crv{B}\crv{Y} E} &= \sum_{abxy} \prin(x,y) \proj[\crv{A}\crv{X} \crv{B}\crv{Y}]{axby} \otimes p'(ab|xy) \rho_{E\Lambda|abxy} \\
+          p'(ab|xy) \rho_{E|abxy} &= \sum_{\lambda} P_{\Lambda}(\lambda) \Tr{ \rho_{ABE|\lambda} \left( M'_{a|x\lambda} \otimes N'_{b|y\lambda} \otimes I_{E} \right) } \\
+                       &= \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c\lambda}
+          P_{\Lambda}(\lambda) \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy)
+          p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)
+          \rho_{E|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
+      \end{align*}
+      where Eve can adapt her state to \(\lambda\) since she holds the purification of Alice and Bob's state (which, by the construction explained in \Cref{thm:Qcvx}, gives her the value of \(\lambda\)). Now, since this state is equivalent to \(\hat{\rho}\), Alice and Bob can apply \(\proto['_{\Omega',\ell'}]{P}\) to \(\hat{\rho}\), generating keys of length \(\ell'_n\). Since the steps taken, namely Alice and Bob publicly generating \(\Lambda\) and applying local maps to their data, do not reveal or discard information about \(\crv{X}\) and \(\crv{Y}\), by assumption\footnote{This assumption is quite intuitive, and holds for well-studied cases such as independent input distributions, and the key recovery technique of~\cite[Prot. 2]{DIQKD_FiniteSize}. However, without a more formal model of the cost function \(L_{\Omega}\), we need to explicitly state this assumption.}, it would not constrain the generation or recovery of \(\prin'\), and so the cost to generate it would not be more than \(L_{\Omega'}(\prin'^{\otimes n})\). Therefore,
+      \[ \hat{r} \geq \lim_{n\to\infty} \frac{\ell'_n - L_{\Omega'}(\prin'^{\otimes n})}{n} = r' \]
+      and therefore
+      \begin{equation}
+      C_{\sk}^{\otimes}(p^c) \geq \hat{r} \geq r' \geq C_{\sk}(p').
+      \end{equation}
+    \end{proof}
+
+    More generally, if the wiring produces a behaviour \(p'\) that can be produced by LOPC post-processing of Alice and Bob's Bell test data on \(p^c\), then by \Cref{def:seckeycapbehaviid}, we cannot have \(C_{\sk}^{\otimes}(p') \geq C_{\sk}^{\otimes}(p^c)\). On the other hand, if the wiring creates some correlation between the output of previous Bell test rounds and subsequent rounds, such an increase may be possible.
+
+    A direct application of this lemma to our project is to observe that, since the AND wiring in \Cref{sec:preres} simply broadcasts the input to all boxes, it is a wiring without output dependency, and therefore the increase in the key rate is not a fundamental increase in secret key capacity, but simply because the standard protocol key rate does not achieve the secret key capacity.
+
+    Our description of wirings as multi-copy LOSR operations naturally motivates the question if there is any benefit to be gained from using \emph{private} randomness, unknown to Eve, beyond its necessary role in providing an authenticated classical channel (\Cref{def:diqkdassump}) and possibly its role in generating the inputs (\Cref{sec:diqkd_proto}). We distinguish between \emph{shared} private randomness, known to both Alice and Bob (that is, a PSK), and \emph{local} private randomness known to only one of them.
+
+              Local private randomness would result in both Bob and Eve being unable to tell which wiring Alice used. From their perspective, then, Alice's output is effectively randomise, and the use of local private randomness would therefore have the same effect as noisy preprocessing. However, analyses of noisy preprocessing typically treat it as \emph{trusted noise}, rather than part of the behaviour of the system that might be caused by Eve, e.g.\ in~\cite{BFF_QRE, AsymmetricCHSH, DIQKD_FiniteSize}. We therefore do not consider local private randomness in wirings, since the benefit that can be derived from it would be inferior to the benefit from noisy preprocessing, which can be performed at the same cost.
+
+              Shared private randomness cannot be so easily dismissed. By \Cref{thm:dilock}, the effect of using shared private randomness \emph{before} the state is distributed cannot be ruled out by a lockability-type argument. It is also not quite equivalent to the use of a PSK for generating the input distribution, since the overall effect of the wiring would depend on the outputs as well. By \Cref{thm:outdep}, we can only see a benefit from considering wirings that interact with the outputs in a nontrivial way, but that necessitates a more involved analysis of this complex interaction. Therefore, we leave this question for future work, and focus on results that can be obtained without considering such wirings.
+              \begin{question}
+                Is there be any benefit from using private shared randomness in wirings?
+              \end{question}
+
+    \Cref{thm:outdep}, and the discussion of correlated inputs from private shared randomness in this section and in \Cref{sec:diqkd_behavsec}, suggests a connection between the advantage of wirings in DIQKD and the \emph{measurement dependent scenario}, first studied in~\cite{RelaxedBell}, where local statistics are described by~\cite[Eq. 2]{MDLBeyondIID}
+              \begin{equation}
+                p(abxy) = \sum_{\lambda} P_{\Lambda}(\lambda) p(a|x\lambda) p(b|y\lambda) p(xy|\lambda).
+              \end{equation}
+              In such a scenario, the shared randomness \(\lambda\) mediates some correlation between the inputs and the behaviour observed. In the case of multiple boxes wired together, the inputs of later rounds depend on the outputs of earlier rounds, so these outputs can mediate some correlation between the later inputs, which may constitute a form of measurement dependence. Ideas from measurement dependence have been used in protocols for extracting strong private randomness from weak public randomness~\cite{DIRA}, which is impossible with classical means, so its analysis may likewise be helpful for studying the effect of wirings on DIQKD\@. In particular, the  \emph{block-iid} scenario, where the rounds are divided into blocks of multiple rounds that are correlated within themselves but iid with each other, may be of interest~\cite{MDLBeyondIID}. Lastly, these works on measurement dependence could be applied to analysing the benefits of explicitly generating correlated inputs, as discussed in \Cref{sec:diqkd_proto}. Nonetheless, we leave a more detailed study and analysis of this intriguing possibility to future work.
+              \begin{question}
+                What do results from the study of measurement dependence imply about the possible advantage from using wirings and correlated inputs in DIQKD\@?
+              \end{question}
+
+              \subsection{Optimisation over Wirings}\label{sec:krwir_wiropt}
+
+              % NEXT extend to non-iid secret key capacity
+
+                  Let \(C^{W}_{\sk}(p)\) be the iid secret key capacity of a behaviour with wiring, that is
                   \begin{equation}
-                    C^{W}_{\sk}(p) = \sup_{\chi\in\sW^2} C_{\sk}(\chi(p)).
+                    C^{W}_{\sk}(p) = \sup_{\chi\in\sW^2} C^{\otimes}_{\sk}(\chi[p]).
                   \end{equation}
 
-                  A possible approach is to introduce the joint wiring distribution \(\chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy)\) as an optimisation variable into the semidefinite program in \Cref{eqn:bff_npa}, or more specifically \(\chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx\) and \(\chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy)\), as defined in \Cref{eqn:mwirdistdef}. Since \(\chi\) takes a discrete set of arguments, its value for every possible argument can be introduced as a variable, and constrained with the no-retrocausation conditions in \Cref{eqn:wiringnoretro}, and the appropriate normalisation:
+                  From this simple definition, and the linearity of wirings, we have another major result.
+                  \begin{theorem}
+                    The secret key capacity is convex, and is therefore maximised by extremal wirings.
+                  \end{theorem}
+                  \begin{proof}
+                    Suppose that \(p\) can be expressed as a convex combination \(p = \sum_j w_j p_j\), and fix the protocol \(\proto{P}\) and input distribution \(\prin\). Let the states \(\rho_j\) achieve
+                    \[ r_j = \inf_{\rho \in \compatstates{p_j}{\prin}} r\left(\proto{P}, \{\rho^{\otimes n}\} \right) \]
+                    and observe that, if Eve uses a convex mixture of these states and the corresponding measurements, weighted according to \(\{w_j\}\), the average behaviour observed will be \(p\). Further, if we consider only the rounds where \(\rho_j\) is sent, the secret key rate cannot exceed \(r_j\), the asymptotic rate if all the rounds used \(\rho_j\), since Eve holds the purification that identifies the state and measurements being sent and can use her optimal strategy against it. Therefore, the key rate for this protocol, with these attacks, is
+                    \[ r \leq \sum_j w_j r_j. \]
+                    Now, since this applies to any choice of protocol and input distribution, it applies to the ones which achieve \(C_{\sk}^{\otimes}(p)\). Additionally, we have optimised Eve's choices when choosing \(\rho_j\), but not Alice and Bob's choices, so \(r_j \leq C_{\sk}^{\otimes}(p_j)\). Therefore,
+                    \[ C_{\sk}^{\otimes}(p) \leq \sum_j w_j r_j \leq \sum_j w_j C_{\sk}^{\otimes}(p_j) \]
+                    which gives us
+                  \begin{equation}
+                    C_{\sk}^{\otimes}\left(\sum_j w_j p_j\right) \leq \sum_j w_j C_{\sk}^{\otimes}(p_j) \Rightarrow C_{\sk}^{\otimes}(p)\text{ convex in }p.
+                  \end{equation}
+                  The maximum of a convex function over a convex set is achieved on the extreme points of that set. \(\sWB(p)\) is a convex set, and its extreme points are the behaviours achieved by extremal wirings. Therefore, extremal wirings maximise the secret key capacity.
+                  \end{proof}
+
+                  In~\cite{JanLiThesis}, it was observed that \(r_{\std}\) may not be maximised by extremal wirings. This is an important caveat: although the \emph{capacity} is convex, various methods of computing the key rate may not be similarly convex if they are not tight. Although fundamental, this result does not give us a concrete way to determine \emph{which} wirings maximise the secret key capacity, how to achieve it through the appropriate choice of protocols and input distributions, or what it is quantitatively.
+
+                  Nonetheless, our task is greatly simplified, because as long as we have an algorithm to compute the secret key capacity, or an approximation to it, we can evaluate it at all possible wired behaviours resulting from extremal wirings \(\sW_D\), in order to find the wiring that maximises it, giving a simple, if inefficient, brute force algorithm for maximising the secret key capacity. However, while this is a discrete set, and some wirings can be eliminated \emph{a priori} via \Cref{thm:outdep}, we have not established that the maximum will be achieved for any finite \(c\). We leave the question of how the secret key capacity changes with increasing \(c\) to future work, and focus on methods to maximise key rates given a fixed \(c\).
+                  \begin{question}
+                    How does \(C_{\sk}^W\) change as we increase \(c\)?
+                  \end{question}
+
+                  Instead of a discrete, brute-force search, we could try to incorporate the joint wiring distribution \(\chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy)\) as an optimisation variable into the semidefinite program in \Cref{eqn:bff_npa}, the SDP for approximating \(H(\crv{A}|E)\), which may find the optimal wiring more efficiently. Since we know that the key rate is maximised by extremal wirings, however, we only need to introduce the marginal wiring distributions, with no need for shared randomness. We can decompose each marginal wiring distribution as per \Cref{eqn:mapdecomp}, and introduce variables for each combination of inputs that the \(c+1\) constituent maps can take. The only constraints we need add are positivity and normalisation, and we can remove the normalisation constraint by eliminating the variable corresponding to some outcome from each map. Given \(c\) boxes to wire together, this introduces
+                  \begin{align}
+                    n_{\chi} &= (o_A - 1) i_A^c o_A^c i_A + \sum_{j=1}^c (i_A-1) i_A^{j-1} o_A^{j-1} i_A \\
+                             &= (o_A - 1) i_A^{c+1} o_A^c + \sum_{j=1}^c (i_A-1) i_A^{j} o_A^{j-1}
+                  \end{align}
+                  optimisation variables. However, directly including them as optimisation variables will not work, since \Cref{eqn:bff_npa} is a minimisation, but Alice and Bob would want to maximise their key rate through their choice of wirings.
+
+                  Let \(Q_{m,k}(\matr{M}, p)\) be the objective function of the \(k\)-level NPA approximation to \Cref{eqn:bff_npa}, with optimal value
+                  \begin{equation}
+                    q_{m,k}(p) \coloneqq \inf_{\matr{M}\in\sM} Q_{m,k}(p, \matr{M}),
+                  \end{equation}
+                  where \(\matr{M}\) is the moment matrix which contains the decision variables for the optimisation, and \(\sM\) is the feasible set for \(\matr{M}\). We then have, for any \(m,k\geq 1\),
+                  \begin{align}
+                    C^W_{\sk}(p) &\geq \sup_{\chi\in\sW^2} \left[ c_m(1) + \inf_{\matr{M}\in\sM} Q_{m,k}(\matr{M}, \chi[p]) - H{(\crv{A}|\crv{B})}_{\chi[p]} \right] \\
+                                 &= c_m(1) + \sup_{\chi\in\sW^2} \left[ \inf_{\matr{M}\in\sM} \left[ Q_{m,k}(\matr{M}, \chi[p]) - H{(\crv{A}|\crv{B})}_{\chi[p]} \right] \right].
+                  \end{align}
+                  This is an example of a \emph{bilevel optimisation}, in which some of the parameters of the \emph{outer} or \emph{upper} optimisation (in this case, \(\sup_{\chi\in\sW^2}\)) are set by an \emph{inner} or \emph{lower} optimisation (in this case, \(\inf_{\matr{M}\in\sM}\)). In the most general setting considered in the literature, the objective function and constraints of the outer optimisation are functions of the \emph{optimal decision variables}. This results in ambiguity when the inner optimisation is achieved by multiple sets of optimal decision variables. The resolution of this ambiguity produces two variants of the problem: the \emph{pessimistic} variant, where the outer optimisation must use the most unfavourable choice of decision variables, and the \emph{optimistic} variant, where the outer optimisation is free to choose any set of decision variables that achieves the inner optimum~\cite{BilevelReview}. However, since the inner decision variables only appear through the inner optimisation's objective function, we can use techniques for either optimistic or pessimistic bilevel optimisation.
+
+                  A simple approach to solving a bilevel optimisation problem is to replace the inner optimisation with its \emph{Kuhn-Karush-Tucker (KKT) conditions}~\cite{BilevelReview}, which, together with a \emph{constraint qualification} condition, are jointly necessary conditions for optimality in \emph{any} optimisation problem~\cite[Ch. 11.5]{LuenbergerYe}. However, our problem structure admits a related but simpler method: we can replace the infimum over \(\matr{M}\) with the \emph{Lagrangian dual problem} \(\sup_{\cvec{\mu} \in \sM'} Q'_m(\cvec{\mu}, \chi[p])\), with feasible region \(\sM'\), which is a lower bound on the \emph{primal problem} \(\inf_{\matr{M} \in \sM} Q_{m,k}(\matr{M}, \chi[p])\)~\cite[Ch. 5.9.1]{BoydVand}. We would then have
+                  \begin{align}
+                    C^W_{\sk}(p) &\geq \sup_{\chi\in\sW^2} \left[ c_m(1) + \sup_{\cvec{\mu} \in \sM'} Q_{m,k}'(\cvec{\mu}, \chi[p]) - H{(\crv{A}|\crv{B})}_{\chi[p]} \right] \\
+                                 &= c_m(1) + \sup_{\chi\in\sW^2, \cvec{\mu} \in \sM'} \left[ Q_{m,k}'(\cvec{\mu}, \chi[p]) - H{(\crv{A}|\crv{B})}_{\chi[p]} \right],\label{eqn:wircap_dual}
+                  \end{align}
+                  a single-level optimisation which is hopefully computationally tractable.
+
+                  Let us see what form the dual problem will take. The \emph{standard form} for an SDP is~\cite[Ch. 4.6.2]{BoydVand}
                   \begin{equation}
                     \begin{aligned}[c]
-                      \sum_{a\cvec{x}^c} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) &= 1 \\
-                      \sum_{b\cvec{y}^c} \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) &= 1.
-                    \end{aligned}
-                  \end{equation}
-                  Given \(c\) boxes to wire together, this introduces
-                  \begin{equation}
-                    n_{\chi} = o_A \times o_B \times i_A^c \times i_B^c \times o_A^c \times o_B^c \times i_A \times i_B
-                  \end{equation}
-                  optimisation variables.
+                      \min_{\matr{X}} & \Tr{ \matr{C}\matr{X} } \\
+                      \text{s.t.} & \begin{aligned}[t]
+                                  & \Tr{ \matr[_i]{A} \matr{X} } = b_i & & \forall i \\
+                                  & \matr{X} \succeq 0 & & \\
+                      \end{aligned}
+                      \end{aligned}
+                    \end{equation}
+                    with \(\matr[_i]{A}\) and \(\matr{C}\) symmetric. It can be easily verified that
+                    \begin{equation}
+                      \Tr{\matr{X}\matr{Y}} = \sum_{ij} \matr{X}_{ij} \matr{Y}_{ji} = \sum_{ij} \matr{X}_{ij} \matr{Y}_{ij}
+                    \end{equation}
+                    for symmetric matrices, with the last equality following by symmetry of \(\matr{Y}\), and this allows arbitrary linear functions of the entries of \(\matr{X}\) to be encoded. The dual problem's optimal value is always a lower bound to the optimal value of the primal problem, which is termed \emph{weak duality}. The dual program is an SDP in \emph{inequality form}~\cite[Ch. 5.9]{BoydVand}:
+                    \begin{equation}
+                      \begin{aligned}[c]
+                        \max_{\cvec{y}} & \sum_{i} b_i y_i \\
+                        \text{s.t.} & \sum_{i} y_i \matr[_i]{A} \preceq C,
+                      \end{aligned}
+                    \end{equation}
+                    where \(\cvec{y}\) is the vector of the \emph{dual variables}, one for each constraint. When \emph{Slater's condition} holds, which requires that either the primal or the dual be \emph{strictly feasible}, such that we have \(\matr{X}\) positive-definite or \(\sum_{i} y_i \matr[_i]{A} - C\) negative-definite, then \emph{strong duality} holds, and the primal and dual optima are equal.
 
-                  TODO \(\sX\) depends on \(\chi(p)\), may not be able to commute!
+                    While this is not immediately obvious, any SDP can be cast into the standard form, including the SDP that approximates \Cref{eqn:bff_npa}. If, for \(j\in\dintv{1}{m}\), we have inequality constraints \(\Tr{\matr[_j]{A}\matr{X}} \leq b_j\) instead of equality constraints, this problem can also be cast in the standard form. We append \emph{slack variables}~\cite[Ch. 4.1.3]{BoydVand} \(s_j\) as diagonal elements to the matrix variable \(\matr{X}\). If \(\matr{X}\) was originally an \(n\times{n}\) matrix, we would have a new \((n+m)\times{(n+m)}\) matrix \(\matr{\bar{X}}\) with
+                    \begin{equation}
+                      \matr{\bar{X}}_{ij} = \begin{cases}
+                        \matr{X}_{ij} & \text{if } i \leq n \text{ and } j \leq n \\
+                        s_{i-n} & \text{if } i = j \text{ and } i > n \\
+                        0 & \text{ otherwise,}
+                      \end{cases}
+                    \end{equation}
+                    and all matrices \(\matr[_i]{A}\) and \(\matr{C}\) padded with zeros to become \((n+m)\times(n+m)\) matrices \(\matr[_i]{\bar{A}}\) and \(\matr{\bar{C}}\) as well, except for \(i \leq m\). In that case, we have all new entries set to zero except \(\matr[_i]{\bar{A}}_{(n+i)(n+i)} = -1\). The inequalities would then be replaced by equalities \(\Tr{\matr[_j]{\bar{A}}\matr{\bar{X}}} = \Tr{\matr[_j]{A}\matr{X}} - s_j = b_j\), and the problem would be cast in the standard form, because the positive-semidefiniteness constraint ensures that all \(s_j\) are positive and hence the original inequality is fulfilled.
 
-                  Let \(Q(p, \matr{M})\) be the objective function of \Cref{eqn:bff_npa}, so that we can express this SDP as
-                  \begin{equation}
-                    q_m(p) = \inf_{\matr{M}\in\sM} Q_m(p, \matr{M}),
-                  \end{equation}
-                  where \(\matr{M}\) consists of the decision variables in \Cref{eqn:bff_npa} (namely the moment matrix), and \(\sM\) is the feasible set for \(\matr{M}\). We then have, for any \(m\geq 1\),
-                  \begin{align}
-                    C^W_{\sk}(p) &\geq \sup_{\chi\in\sW^2} \left[ c_m(1) + \inf_{\matr{M}\in\sM} Q_m(\chi(p), \matr{M}) - H{(\crv{A}|\crv{B})}_{\chi(p)} \right] \\
-                                 &= c_m(1) + \sup_{\chi\in\sW^2} \left[ \inf_{\matr{M}\in\sM} \left[ Q_m(\chi(p), \matr{M}) - H{(\crv{A}|\crv{B})}_{\chi(p)} \right] \right].
-                  \end{align}
-                  This is an example of a \emph{bilevel optimisation}, in which some of the parameters of the \emph{outer} or \emph{upper} optimisation (in this case, \(\sup_{\chi\in\sW^2}\)) are set by an \emph{inner} or \emph{lower} optimisation (in this case, \(\inf_{\matr{M}\in\sM}\)). In the most general setting considered in the literature, the objective function and constraints of the outer optimisation are functions of the \emph{optimal decision variables}. This results in ambiguity when the inner optimisation is achieved by multiple sets of optimal decision variables. The resolution of this ambiguity produces two variants of the problem: the \emph{pessimistic} variant, where the outer optimisation must use the most unfavourable choice of decision variables, and the \emph{optimistic} variant, where the outer optimisation is free to choose any set of decision variables that achieves the inner optimum (TODO cite). However, since the inner decision variables only appear through the inner optimisation's objective function, we can use techniques for either optimistic or pessimistic bilevel optimisation.
+                    Given this construction, it is clear how the NPA hierarchy approximation to \Cref{eqn:bff_npa} can be encoded as an SDP in standard form: the objective function, the linear equalities and inequalities based on the behaviour, and commutation relations are linear functions of moments, while the normalisation to sum to identity allows one measurement operator to be eliminated, and the operator inequalities can be encoded as localising matrices, appended diagonally to the moment matrix (which enforces their positive-semidefiniteness), and with further equalities to enforce the required relations between the localising and moment matrices.
 
-                  One approach to solving this problem is the \emph{max-min inequality} (TODO cite), which states that 
+                    However, even without explicitly constructing the complete dual objective function \(Q_{m,k}'(\cvec{\mu},\chi[p])\), it is evident that the some of the terms in the dual objective function would contain products between the dual variables \(\cvec{mu}\) and the variables representing the wiring \(\chi\), because the wiring variables would be part of the ``constants'', represented by \(b_i\) in the generic SDP above, in the linear equalities in the SDP\@. The product between these two variables makes the objective function neither convex nor concave under convex combinations of the vector of all optimisation variables variables \(\cvec{\mu} \oplus \cvec{\chi}\). The following example of \(f(\cvec{x}) = x_1x_2\) on vectors \(\cvec{x} = (x_1, x_2)\) and \(\cvec{y} = (y_1, y_2)\) illustrates this:
+                    \begin{align}
+                      \lambda f(\cvec{x}) + (1-\lambda)f(\cvec{y}) &= \lambda{x_1x_2} + (1-\lambda){y_1y_2} \\
+                      f(\lambda\cvec{x} + (1-\lambda)\cvec{y}) &= \lambda{x_1x_2} + \lambda(1-\lambda)\underbrace{(x_1y_2 + y_1x_2)}_{\text{unknown sign}} + (1-\lambda){y_1y_2}.
+                    \end{align}
+                  While we have that all \(\chi\) variables are positive, there is no constraint on the sign of the dual variables \(\cvec{\mu}\). At any rate, the function \(-H{(\crv{A}|\crv{B})}_{\rho}\) is not convex, so the whole optimisation is nonconvex anyway. This makes it unlikely to be computationally tractable, given the size of the SDP approximations required.
+
+                  Another possible approach to solving this problem is the \emph{max-min inequality}~\cite[Sec. 5.4]{BoydVand}, which states that 
                   \begin{equation}
                     \sup_{X\in\sX} \inf_{Y\in\sY} f(X,Y) \leq \inf_{Y\in\sY} \sup_{X\in\sX} f(X,Y)
                   \end{equation}
-                  for any sets \(\sX\) and \(\sY\), and any function \(f : \sX\times\sY \to \R\). Intuitively, the ``second mover'' (who performs the inner optimisation) always has the advantage, in being able to adapt his strategy to that of the ``first mover''. For the purpose of obtaining a lower bound, this does not help us, but using the \emph{minimax theorem}, which strengthens this relation to an equality when \(f(\cdot,Y)\) is concave for all \(Y\in\sY\) and \(f(X,\cdot)\) is convex for all \(X\in\sX\), enables us to solve the optimisation.
+                  for any sets \(\sX\) and \(\sY\), and any function \(f : \sX\times\sY \to \R\). Intuitively, the ``second mover'' (who performs the inner optimisation) always has the advantage, in being able to adapt his strategy to that of the ``first mover''. However, for the purpose of obtaining a lower bound, this does not help us. An attempted solution was to use the \emph{minimax theorem}, which strengthens this relation to an equality when \(f(\cdot,Y)\) is concave for all \(Y\in\sY\) and \(f(X,\cdot)\) is convex for all \(X\in\sX\). While \(Q_{m,k}(\matr{M}, p)\) is convex in \(\matr{M}\) for a fixed \(p\) as required, since it is a linear objective function in the entries of the moment matrix, \(-H{(\crv{A}|\crv{B})}_p\) is convex in \(p\) as noted above, and even worse, the feasible region \(\sM\) depends on the choice of \(\chi\), making it unclear if performing such a commutation would even be well-defined.
 
-                  \(C_{\sk}(p)\) is convex in \(p\), since if \(p\) can be expressed as a convex combination \(p = \sum_j w_j p_j\), it would be indistinguishable from such a probabilistic combination of behaviours, which has secret key capacity \(\sum_j w_j C_{\sk}(p_j)\). Therefore
-                  \begin{equation}
-                    C_{\sk}\left(\sum_j w_j p_j\right) \leq \sum_j w_j C_{\sk}(p_j) \Rightarrow C_{\sk}(p)\text{ convex in }p.
-                  \end{equation}
-                  Therefore, the maximum is achieved on the vertices of the polytope, TODO just use result on convex functions
-
-                  \(Q_m(p, \matr{M})\) is convex in \(\matr{M}\), since it is a linear objective function in the entries of the moment matrix, while \(H(\crv{A}|\crv{B})_p\) is concave in \(p\).
-
-
-                  \section{Upper Bounds from Classical Attacks}
-
-                  In order to sidestep the complexity of dealing with quantum attacks, we can upper-bound the secret key capacity of a behaviour by considering only classical attacks. This is a problem that has been well-studied in classical information theory, and would still yield valid, although possibly loose, upper bounds, since the adversary is free to perform classical attacks as well.
-
-                  \subsection{Secret Key Capacity of a Classical Joint Distribution}
-
-                  Stepping for a moment into the generic setting of an arbitrary number of parties \(m\), \(u\) of whom transmit information while establishing the key, we define the classical random variable \(\crv{V}_j\) as the input and output provided by the \(j\)th party, and the classical random variable \(\crv{E}\) as Eve's classical side information. Then, given a classical joint distribution \(P_{\cvec{\crv{V}}^m\crv{E}}\), the expression
-                  \begin{equation}
-                    S(\crv{V}_1, \crv{V}_2, \ldots, \crv{V}_{u}, \crv{V}_{u+1}^{(s)}, \ldots, \crv{V}_{m}^{(s)} || \crv{E})
-                  \end{equation}
-                  is the \emph{classical secret key capacity} of the \(m\) honest parties against the adversary holding \(\crv{E}\), where the superscript \((s)\), for \emph{silent}, indicates the parties that do not broadcast anything while establishing the key. To apply bounds on this quantity to DIQKD protocols, we must optimise over all joint distributions compatible with the observed behaviour.
-
-                  TODO get to our bound
-
-                  \newcommand{\splitkey}[3][\crv{J}]{I_{#1}\left(#2||#3\right)}
-
-                  Focusing on the case \(m = u = 2\), that is, the simple case of two communicating parties trying to establish a secret key from some joint distribution, this bound specialises to
-                  \begin{align}
-                    S(\crv{V}_1, \crv{V}_2||\crv{E}) &\leq \inf_\crv{J} S(\crv{V}_1, \crv{V}_2||\crv{J}) + S(\crv{V}_1\crv{V}_2, \crv{J}^{(s)}||\crv{E}) \\
-                                                     &\leq \inf_\crv{J} S(\crv{V}_1\crv{J}, \crv{V}_2\crv{J}||\crv{J}) + S(\crv{V}_1\crv{V}_2, \crv{J}^{(s)}||\crv{E}) \\
-                                                     &= \inf_\crv{J} I(\crv{V}_1 : \crv{V}_2|\crv{J}) + S(\crv{V}_1\crv{V}_2, \crv{J}^{(s)}||\crv{E}) \\
-                                                     &\leq \inf_\crv{J} I(\crv{V}_1 : \crv{V}_2|\crv{J}) + I(\crv{V}_1\crv{V}_2 : \crv{J}|\crv{E}) \eqqcolon \inf_{\crv{J}} \splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}},
-                  \end{align}
-                  where \(\crv{J}\) can have an arbitrary joint distribution with \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\), and the last bound is strictly better than the reduced intrinsic information (\Cref{eqn:red_intr_info}).
-
-                  \subsection{Computing the Optimisation}
-
-                  An immediate temptation is to express this bound in terms of relative entropies and use the method of quasi-relative entropies to approximate it, while accounting for Eve's possible quantum attacks. However, the NPA hierarchy, used in~\cite{BFF_QRE} to lower bound the key rate, provides a sequence of \emph{outer approximations}, giving Eve \emph{more} power than she would actually have. Hence, upper bounds derived by this route will not be valid, as they could be lower than the true upper bound. We will instead provide an \emph{inner approximation} by considering fixed dimensions \(d_A\), \(d_B\) and \(d_E\) for the Hilbert space \(A\), \(B\) and \(E\) respectively, which allows us to parametrise the measurements and states used by scalar variables. We can then minimise \(\splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}}\) over \(\crv{J}\) and these scalar variables to compute an upper bound.
-
-                  It is possible to perform this optimisation directly using a nonlinear constrained optimisation program, such as MATLAB's \verb`fmincon`. However, such an optimisation would generally only be able to find local minima, which would still be valid upper bounds but may be very loose. Although we are unable to use the NPA hierarchy of relaxations, the equivalent of the NPA hierarchy for commutative variables, the Lasserre hierarchy, has been used and studied extensively for the purpose of approximating the global minima of polynomials (TODO cite). Further, there is a related hierarchy of upper bounds on global minima from semidefinite programs (TODO cite). Therefore, if we are able to express these optimisations as polynomial optimisation problems, we could apply these techniques to tighten the achievable bounds. As it turns out, the variational approximation to the logarithm used in~\cite{BFF_QRE} allows us to transform all logarithms in the expression into multivariate polynomials, bringing us very close to this objective. Even if Lasserre-hierarchy based approaches turn out to be infeasible, the polynomial approximation may still be easier to optimise than the original formulation.
-
-                  It is known that, for classical rvs \(\{\crv{X}, \crv{Y}, \crv{Z}\}\) with joint pmf \(P_{\crv{XYZ}}\),
-                  \[ I(\crv{X}:\crv{Y}|\crv{Z}) = D\left(P_{\crv{XYZ}}||P_{\crv{X}|\crv{Z}} P_{\crv{Y}|\crv{Z}} P_{\crv{Z}}\right). \]
-                  Rewriting \(\splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}}\) in terms of relative entropies, we obtain
-                  \begin{gather}
-                    \splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}} =  D(P_{\crv{V}_1\crv{V}_2\crv{J}}||P'_{\crv{V}_1\crv{V}_2\crv{J}})
-                    + D(P_{\crv{V}_1\crv{V}_2\crv{JE}}||P''_{\crv{V}_1\crv{V}_2\crv{JE}}) \\
-                    = \sum_{v_1v_2j} P_{\crv{V}_1\crv{V}_2\crv{J}}(v_1v_2j) \log \frac{P_{\crv{V}_1\crv{V}_2\crv{J}}(v_1v_2j)}{P'_{\crv{V}_1\crv{V}_2\crv{J}}(v_1v_2j)} + \sum_{v_1v_2je} P_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je) \log \frac{P_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je)}{P''_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je)},
-                  \end{gather}
-                  where \(P'_{\crv{V}_1\crv{V}_2\crv{J}} = P_{\crv{V_1|V_2}} P_{\crv{V}_2|\crv{J}} P_{\crv{J}}\) and \(P''_{\crv{V}_1\crv{V}_2\crv{JE}} = P_{\crv{V_1V_2|E}} P_{\crv{J|E}} P_{\crv{E}}\).
-
-                  Now, since these are logarithms of scalar values rather than operators, we can apply the Gauss-Radau approximation directly. Indeed, as mentioned in~\cite[Remark 2.10]{BFF_QRE}, the Gauss-Radau nodes and weights \({\{t'_i, w'_i\}}_{i=1}^m\) such that \(t'_1 = 0\), in contrast to \(t_m = 1\), can be used to provide upper bounds for the logarithms, and therefore the relative entropies. Writing \(p_1(x)\) and \(p_2(x)\) for two generic pmfs on an alphabet \(\{x\}\), we have
-                  \begin{align}
-                    D(p_1||p_2) &= \sum_x p_1(x) \log \frac{p_1(x)}{p_2(x)} \\
-                                &\leq \sum_x p_1(x) \sum_{i=1}^m \frac{w'_i}{\ln 2} \frac{p_1(x)/p_2(x) - 1}{t'_i (p_1(x)/p_2(x)-1) + 1} \\
-                                &= \sum_x \sum_{i=1}^m \frac{w'_i}{\ln 2} \frac{p_1(x)(p_1(x) - p_2(x))}{t'_i (p_1(x)- p_2(x)) + p_2(x)}.
-                  \end{align}
-                  However, we can also derive another approximation that may be simpler to optimise over, either through representing the pmfs as operators, as per \Cref{sec:logratbound}, or through simple manipulation of the approximation using the lower bound Gauss-Radau nodes and weights:
-                  \begin{align}
-                    p_1(p_2-p_1) &= p_1p_2 - p_1^2  = -\frac{1}{t} p_1^2 - \frac{t-1}{t} p_1^2 + \frac{t}{t} p_1p_2 \\
-                                 &= -\frac{p_1^2}{t} + \frac{p_1((1-t)p_1+tp_2)}{t}  \\
-                    \therefore D(p_1||p_2) &= -\sum_x p_1(x) \log \frac{p_2(x)}{p_1(x)} \\
-                                           &\leq -\sum_x p_1(x) \sum_{i=1}^m \frac{w_i}{\ln 2} \frac{p_2(x)/p_1(x) - 1}{t_i (p_2(x)/p_1(x)-1) + 1} \\
-                                           &= -\sum_x \sum_{i=1}^m \frac{w_i}{\ln 2} \frac{p_1(x) (p_2(x) - p_1(x))}{t_i p_2(x) - t_i p_1(x) + p_1(x)} \\
-                                           &= -\sum_x \sum_{i=1}^m \frac{w_i}{\ln 2} \frac{-{p_1(x)}^2 + p_1(x)(t_i p_2(x) + (1-t_i) p_1(x))}{t_i (t_i p_2(x) + (1-t_i) p_1(x)) } \\
-                                           &= -\sum_x \sum_{i=1}^m \frac{w_i}{t_i \ln 2}\left( \frac{-{p_1(x)}^2}{t_i p_2(x) + (1-t_i) p_1(x)} + p_1(x) \right)\\
-                                           &= -\sum_{i=1}^m \frac{w_i}{t_i \ln 2}\left( \sum_x \frac{-{p_1(x)}^2}{t_i p_2(x) + (1-t_i) p_1(x)} + p_1(x) \right)~\label{eqn:logratbound},
-                  \end{align}
-                  where, of course, \(\sum_x p_1(x) = 1\) if \(p_1\) is normalised. This simplifies the numerator of each fraction considerably. 
-
-                  However, both of these approximations give us rational objective functions. Nonetheless, we can use the methods of polynomial optimisation if we reformulate the problem, introducing a new variable \(R\) for each rational term \(P/Q\), with the polynomial constraint that \(P - QR = 0\). This is referred to as the \emph{epigraph approach} in TODO cite.
-
-                  \subsection{Relation to States and Measurements}\label{sec:ubound_statemeas}
-
-                  The pmfs are related to the quantum states and measurements by
-                  \begin{align}
-                    P_{\crv{V_1V_2J}}(v_1v_2j) &= \sum_{e}  P_{\crv{V_1V_2E}}(v_1v_2e) P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\
-                                               &= \sum_{e} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\
-                    P'_{\crv{V}_1\crv{V}_2\crv{J}}(v_1v_2j) &= P_{\crv{V_1|V_2}}(v_1|v_2) P_{\crv{V}_2|\crv{J}}(v_2|j) P_{\crv{J}}(j) \\
-                                                            &= P_{\crv{V_1|V_2}}(v_1|v_2) P_{\crv{V_2J}}(v_2j) \\
-                                                            &= \sum_{v_1' e} P_{\crv{V_1|V_2}}(v_1|v_2) \Tr\left[\rho_{ABE} \left(M_{v_1'} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1'v_2e) \\
-                    P_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je) &= P_{\crv{V_1V_2JE}}(v_1v_2je) \\
-                                                             &= \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\
-                    P''_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je) &= P_{\crv{V_1V_2|E}}(v_1v_2|e) P_{\crv{J|E}}(j|e) P_{\crv{E}}(e) \\
-                                                               &= \sum_{v_1' v_2'} P_{\crv{V_1V_2E}}(v_1v_2e) P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e) P_{\crv{V_1V_2}}(v_1'v_2') \\
-                                                               &= \sum_{v_1' v_2'} \Tr\left[\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)\right] P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e) P_{\crv{V_1V_2}}(v_1'v_2'),
-                  \end{align}
-                  where \(O_e\) is Eve's measurement operator for outcome \(e\), \(\crv{V}_1 = (\crv{A,X})\) and \(\crv{V}_2 = (\crv{B,Y})\). In this most general setting, we assume that Alice and Bob do not announce their measurement settings, and Eve's measurement operator is hence independent of \(x\) and \(y\).
-
-                  However, observe that we require the full joint distribution \(P_{\crv{V_1V_2}}(v_1v_2) = \prin(x,y)p(ab|xy)\). While \(p(ab|xy)\) is given, we cannot include the distribution \(\prin(x,y)\) as a variable to be minimised, since, to provide a valid upper bound, Alice and Bob must be allowed to choose the best possible \(\prin(x,y)\) (although we note that, unless their inputs are independent, they must have some pre-existing shared secret). Therefore, without involving ourselves in the complications of bilevel optimisation, we can only fix a distribution \(\prin(x,y)\) and claim that our upper bound is valid for protocols and experiments using that distribution. Fortunately, this simplifies the optimisation somewhat by fixing the joint distribution \(P_{\crv{V_1V_2}}(v_1v_2)\), allowing conditional and marginal distributions to be easily calculated.
-
-                  Although we cannot bound the cardinality \(o_E\) of \(\crv{E}\), we will have to fix it to some finite number in order to specify the number of measurement operators \(O_e\). This will still provide a valid upper bound, but we lose some tightness. The cardinality \(o_{\crv{J}}\) of \(\crv{J}\) can be upper bounded by the product of the cardinalities of \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\), as explained in TODO cite, and the conditional distribution \(P_{\crv{J|V_1V_2E}}\) can then be parametrised by \(o_{\crv{J}} i_A o_A i_B o_B o_E = o_{\crv{J}}^2\) probabilities, with the corresponding normalisation conditions.
-
-                  In order to parametrise states and measurements, we work with a parametrisation of \(d\)-dimensional operators in terms of \(d^2\) angles \(\{\lambda_{1,1},\ldots,\lambda_{d,d}\}\) (TODO cite):
-                  \begin{equation}
-                    U = \left[ \prod_{j=1}^{d-1} \left(\prod_{k={j+1}}^d \underbrace{\exp\left(i\lambda_{k,j}\ket{k}\bra{k}\right)\exp\left(i\lambda_{j,k}\sigma_{j,k}\right)}_{\Lambda_{j,k}} \right) \right] \left[ \prod_{l=1}^d \exp\left(i\lambda_{l,l}\ket{l}\bra{l}\right) \right],
-                  \end{equation}
-                  where \(\lambda_{j,k} \in \ccintv{0}{\pi/2}\) for \(j<k\) and \(\lambda_{j,k} \in \ccintv{0}{2\pi}\) otherwise, and \(\sigma_{j,k}\) is the anti-symmetric matrix \(\sigma_{j,k} = -i\ket{j}\bra{k} +i\ket{k}\bra{j}\). Each matrix \(\Lambda_{j,k}\) rotates the two columns \(\ket{j}\) and \(\ket{k}\), and can be explicitly expressed as
-                  \begin{equation}
-                    \Lambda_{j,k} = \cos(\lambda_{j,k})\ket{j}\bra{j} + e^{i\lambda_{k,j}}\cos(\lambda_{j,k})\ket{k}\bra{j} + \sin(\lambda_{j,k})\ket{j}\bra{k} + e^{i\lambda_{k,j}}\cos(\lambda_{j,k})\ket{k}\bra{k}.
-                  \end{equation}
-                  Each matrix \(\exp\left(i\lambda_{l,l}\ket{l}\bra{l}\right)\) multiplies column \(l\) by a phase factor, and so their product can be explicitly expressed as
-                  \begin{equation}
-                    \prod_{l=1}^d \exp\left(i\lambda_{l,l}\ket{l}\bra{l}\right) = \sum_{l=1}^d e^{i\lambda_{l,l}}\ket{l}\bra{l}.
-                  \end{equation}
-
-                  A density matrix \(\rho\), being a positive-semidefinite trace-1 operator, can be expressed via the spectral theorem as
-                  \begin{equation}
-                    \rho = \sum_j p_j \ket{\rho_j}\bra{\rho_j} = \sum_j p_j U_{\rho}\ket{j}\bra{j}U_{\rho}^{\dagger},
-                  \end{equation}
-                  where \(\{\ket{\rho_j}\}\) is the eigenbasis of \(\rho\), \(\{\ket{j}\}\) is the computational basis, and \(U_{\rho} = \sum_{j} e^{i\phi_j} \ket{\rho_j}\bra{j}\) is some unitary matrix. The value \(p_j\) form a probability distribution over the eigenbasis, and can either be parametrised as \(d\) positive numbers summing to 1, or as \(d-1\) angles \(\{\theta_j\}\) such that
-                  \begin{equation}
-                    p_j = \cos^2\theta_j\prod_{k=1}^{j-1}\sin^2\theta_k,
-                  \end{equation}
-                  where \(\theta_d \coloneqq 0\) and \(\prod_{k=1}^{0}\sin^2\theta_k \coloneqq 1\), in either case yielding \(d-1\) independent real parameters. However, expressing the density matrix in terms of the unitary operators shows that the \(d\) parameters \(\lambda_{j,j}\) can be neglected (TODO cite), allowing an arbitrary density matrix to be fully parametrised by \(d^2 -d + d - 1 = d^2-1\) real numbers.
-
-                  The parametrisation of POVMs is more involved, but we can leverage our parametrisation of unitary matrices here as well. We begin with Naimark's dilation theorem, which tells us that an \(o\)-outcome POVM \(\{M_a\}\) on a \(d\)-dimensional Hilbert space \(A\) can be viewed as a projective measurement on a larger Hilbert space \(\Hs \cong O \otimes A\) of dimension \(od\). Throughout this section, kets and inner products without subscripts refer to the Hilbert space \(A\). We relate \(A\) to \(\Hs\) via the \(od \times d\) \emph{isometry}
-                  \begin{equation}
-                    V = \sum_{a=1}^o \ket{a}_O \otimes \sqrt{M_a} = \begin{bmatrix} \sqrt{M_1} \\ \sqrt{M_2} \\ \vdots \\ \sqrt{M_o} \end{bmatrix}.
-                  \end{equation}
-                  Each measurement operator can be written using its spectral decomposition as
-                  \begin{equation}
-                    M_a = \sum_{j=1}^d m_a^{(j)} U_a \ket{j}\bra{j} U_a^{\dagger} \Rightarrow \sqrt{M_a} = \sum_{j=1}^d \sqrt{m_a^{(j)}} U_a \ket{j}\bra{j} U_a^{\dagger},
-                  \end{equation}
-                  where, since all \(M_a\)'s are PSD and we require \(\sum_a M_a = I_A \Rightarrow (\sum_a M_a) U_a\ket{j} = 1\), we have \(m_a^{(j)}\in\ccintv{0}{1}\) for all \(a\) and \(j\), and further that \(\sqrt{M_a}\) is also PSD\@.
-
-                  Now, since
-                  \begin{equation}
-                    V^{\dagger}V = \begin{bmatrix} \sqrt{M_1}^{\dagger} & \sqrt{M_2}^{\dagger} & \cdots & \sqrt{M_o}^{\dagger} \end{bmatrix} \begin{bmatrix} \sqrt{M_1} \\ \sqrt{M_2} \\ \vdots \\ \sqrt{M_o} \end{bmatrix} = \sum_a \sqrt{M_a}^{\dagger}\sqrt{M_a} = \sum_a M_a = I_A,
-                  \end{equation}
-                  where we have used \(\sqrt{M_a}^{\dagger} = \sqrt{M_a}\), the columns of \(V\) form an orthonormal basis for a \(d\)-dimensional subspace of \(\Hs\). Although mapping the isometry to an orthonormal basis would seem to discard information about the phases between the columns of \(\sqrt{M_a}\), \(M_a\) does not change even if we multiply each column of \(\sqrt{M_a}\) by an arbitrary phase:
-                  \begin{gather}
-                    {\left(\left(\sum_j e^{i\phi_j} \ket{j}\bra{j}\right)\sqrt{M_a}\right)}^{\dagger} {\left(\left(\sum_k e^{i\phi_k} \ket{k}\bra{k}\right)\sqrt{M_a}\right)} \\
-                    = \sqrt{M_a}^{\dagger}\left(\sum_j e^{i\phi_j} \ket{j}\bra{j}\right) \left(\sum_k e^{-i\phi_k} \ket{k}\bra{k}\right)\sqrt{M_a} \\
-                    = \sqrt{M_a}^{\dagger}\sqrt{M_a}.
-                  \end{gather}
-                  Therefore, each POVM induces a unique \(k\)-dimensional basis in \(\Hs\).
-
-                  Conversely, any such basis \({\{\ket{\gamma^{(g)}}_{\Hs}\}}_{g=1}^d\) induces a unique valid POVM on \(A\). We decompose each vector as \(\ket{\gamma^{(g)}}_{\Hs} = \oplus_{a=1}^o g_a \ket{\gamma^{(g)}_a}\), with normalisation factors \(g_a\), and construct \(o\) \(d\times{d}\) operators 
-                  \begin{equation}
-                    \sqrt{\Gamma_a} = \sum_{g=1}^d g_a \ket{\gamma^{(g)}_a}\bra{g} = \begin{bmatrix} 1_a \ket{\gamma^{(1)}_a} & 2_a \ket{\gamma^{(2)}_a} & \cdots & d_a \ket{\gamma^{(d)}_a} \end{bmatrix},
-                  \end{equation}
-                  where \({\{\ket{g}_A\}}\) is the computational basis. The POVM elements are then 
-                  \begin{equation}
-                    \Gamma_a = \sqrt{\Gamma_a}^{\dagger}\sqrt{\Gamma_a} = \sum_{h=1}^d \sum_{g=1}^d h_a g_a \ket{h}\braket{\gamma^{(h)}_a|\gamma^{(g)}_a}\bra{g}.
-                  \end{equation}
-                  Since \(\bra{v}X^{\dagger}X\ket{v} = \abs{X\ket{v}}^2 \geq 0\) for any operator \(X\) and vector \(\ket{v}\), \(X^{\dagger}X\) is PSD for any \(X\), and so \(\Gamma_a\) is PSD. Further, if \(\Gamma = \sum_a \Gamma_a\), then 
-                  \begin{equation}
-                    \bra{h}\Gamma\ket{g} = \sum_a h_a g_a \braket{\gamma^{(h)}_a|\gamma^{(g)}_a} = \braket{\gamma^{(h)}|\gamma^{(g)}}_{\Hs} = \delta_{gh} \Rightarrow \Gamma = I_A
-                  \end{equation}
-                  and therefore any orthonormal basis for this subspace generates a unique POVM in this way. This is in agreement with~\cite{RandPOVM}, where a distribution over the isometries \(V\) is shown to recover the uniform distribution on the Lebesgue measure over the set of POVMs.
-
-                  The set of these bases can be parametrised, via the unitary that generates them from the computational basis \({\{\ket{g}_{\Hs}\}}_{g=1}^d\), using \(2d(od-d)\) real parameters \(\lambda_{j,k}\) as
-                  \begin{equation}
-                    U_{\gamma} = \prod_{j=1}^d \left( \prod_{k=j+1}^{od} \exp(i\lambda_{k,j}\ket{k}\bra{k}) \exp(i\lambda_{j,k}\sigma_{j,k}) \right),
-                  \end{equation}
-                  giving
-                  \begin{align}
-                    \ket{\gamma^{(g)}}_{\Hs} &= U_{\gamma}\ket{g}_{\Hs} \Rightarrow g_a\ket{\gamma^{(g)}_a} = \left(\bra{a}_O \otimes I_A\right)U_{\gamma}\ket{g}_{\Hs} \\
-                    \therefore \Gamma_a &= \sum_{gh} \ket{h}\bra{h}_{\Hs} U_{\gamma}^{\dagger} \left(\ket{a}_O \otimes I_A\right) \left(\bra{a}_O \otimes I_A\right)U_{\gamma}\ket{g}_{\Hs}\bra{g} \\
-                                        &= \underbrace{\left(\sum_{h} \ket{h}\bra{h}_{\Hs} U_{\gamma}^{\dagger}\right)}_{V^\dagger} \left(\ket{a}\bra{a}_O \otimes I_A\right) \underbrace{\left(\sum_{g} U_{\gamma}\ket{g}_{\Hs}\bra{g}\right)}_{V}.
-                  \end{align}
-
-                  TODO show that n = 1 is insufficient, cannot symbolically generate fully mixed POVM since \(re^{i\theta}se^{i\phi} \neq 0\) unless \(r=0\) or \(s=0\). 
-
-                  Additionally, we have
-                  \begin{align}
-                    P_{\crv{V_1V_2}}(v_1v_2) &= \sum_{e} \prin(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
-                                             &= \prin(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} \sum_e o_e^{(k_E)} p^{(k)} \\
-                                             &= \prin(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} p^{(k)} \\
-                    P_{\crv{V_2E}}(v_2e) &= \sum_{ax} \prin(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
-                                         &= \sum_{x} \prin(x,y) \sum_k n_{b|y}^{(k_B)} o_e^{(k_E)} \sum_a m_{a|x}^{(k_A)} p^{(k)} \\
-                                         &= \prin(y) \sum_k n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
-                    P_{\crv{E}}(e) &= \sum_{by} \prin(y) \sum_k n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
-                                   &= \sum_k o_e^{(k_E)} p^{(k)}.
-                  \end{align}
+                  We conclude that we are unable to find a computationally tractable way to optimise key rates over the space of wirings, aside from brute-force enumeration of extremal wirings. Another possible avenue for further research, harnessing the fact that the key rate is maximised on the extremal points of a polytope, is to try to modify techniques from linear programming, where the objective function is always maximised (or minimised) by an extremal point~\cite{LuenbergerYe}. However, we do not investigate this in detail here, and leave it for future work.
+                  \begin{question}
+                    Can linear programming techniques make the search for optimal wirings more efficient?
+                  \end{question}
 
                   \section{Wiring Monotones}\label{sec:wirmono}
 
@@ -2077,7 +2006,9 @@ Any[]
                   \begin{equation}
                     R_1 \leadsto R_2 \Rightarrow \mu(R_1) \succeq \mu(R_2)
                   \end{equation}
-                  for some pre-order \(\succeq\) defined on the codomain of the monotone. As mentioned in \Cref{sec:locwir}, wirings are \emph{multiple-copy conversions}~\cite{BellResourceTheory}. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under \(\sW_D\) defined in \Cref{sec:locwir}. However, its monotonicity under wirings with shared randomness (that is, \(\sW^n\)) was not proved. Nonetheless, we will review these results to see how they can help us.
+                  for some pre-order \(\succeq\) defined on the codomain of the monotone.
+
+                  As discussed in \Cref{sec:locwir}, wirings are multiple-copy local transformations. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under \(\sW_D^n\). However, its monotonicity under wirings with shared randomness (that is, \(\sW^n\)) was not proved. Nonetheless, we will review these results to see how they can help us.
 
                   \subsection{Maximal Correlation and Related Measures}\label{sec:wirmono_maxcorr}
 
@@ -2227,6 +2158,174 @@ Any[]
                   \end{equation}
                   in order to achieve the correct scaling for an estimate of the key rate.
 
+
+                  \section{Upper Bounds from Classical Attacks}
+
+                  In order to sidestep the complexity of dealing with quantum attacks, we can upper-bound the secret key capacity of a behaviour by considering only classical attacks. This is a problem that has been well-studied in classical information theory, and would still yield valid, although possibly loose, upper bounds, since the adversary is free to perform classical attacks as well.
+
+                  \subsection{Secret Key Capacity of a Classical Joint Distribution}
+
+                  Stepping for a moment into the generic setting of an arbitrary number of parties \(m\), \(u\) of whom transmit information while establishing the key, we define the classical random variable \(\crv{V}_j\) as the input and output provided by the \(j\)th party, and the classical random variable \(\crv{E}\) as Eve's classical side information. Then, given a classical joint distribution \(P_{\cvec{\crv{V}}^m\crv{E}}\), the expression
+                  \begin{equation}
+                    S(\crv{V}_1, \crv{V}_2, \ldots, \crv{V}_{u}, \crv{V}_{u+1}^{(s)}, \ldots, \crv{V}_{m}^{(s)} || \crv{E})
+                  \end{equation}
+                  is the \emph{classical secret key capacity} of the \(m\) honest parties against the adversary holding \(\crv{E}\), where the superscript \((s)\), for \emph{silent}, indicates the parties that do not broadcast anything while establishing the key. To apply bounds on this quantity to DIQKD protocols, we must optimise over all joint distributions compatible with the observed behaviour.
+
+                  TODO get to our bound
+
+                  \newcommand{\splitkey}[3][\crv{J}]{I_{#1}\left(#2||#3\right)}
+
+                  Focusing on the case \(m = u = 2\), that is, the simple case of two communicating parties trying to establish a secret key from some joint distribution, this bound specialises to
+                  \begin{align}
+                    S(\crv{V}_1, \crv{V}_2||\crv{E}) &\leq \inf_\crv{J} S(\crv{V}_1, \crv{V}_2||\crv{J}) + S(\crv{V}_1\crv{V}_2, \crv{J}^{(s)}||\crv{E}) \\
+                                                     &\leq \inf_\crv{J} S(\crv{V}_1\crv{J}, \crv{V}_2\crv{J}||\crv{J}) + S(\crv{V}_1\crv{V}_2, \crv{J}^{(s)}||\crv{E}) \\
+                                                     &= \inf_\crv{J} I(\crv{V}_1 : \crv{V}_2|\crv{J}) + S(\crv{V}_1\crv{V}_2, \crv{J}^{(s)}||\crv{E}) \\
+                                                     &\leq \inf_\crv{J} I(\crv{V}_1 : \crv{V}_2|\crv{J}) + I(\crv{V}_1\crv{V}_2 : \crv{J}|\crv{E}) \eqqcolon \inf_{\crv{J}} \splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}},
+                  \end{align}
+                  where \(\crv{J}\) can have an arbitrary joint distribution with \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\), and the last bound is strictly better than the reduced intrinsic information (\Cref{eqn:red_intr_info}).
+
+                  \subsection{Computing the Optimisation}
+
+                  An immediate temptation is to express this bound in terms of relative entropies and use the method of quasi-relative entropies to approximate it, while accounting for Eve's possible quantum attacks. However, the NPA hierarchy, used in~\cite{BFF_QRE} to lower bound the key rate, provides a sequence of \emph{outer approximations}, giving Eve \emph{more} power than she would actually have. Hence, upper bounds derived by this route will not be valid, as they could be lower than the true upper bound. We will instead provide an \emph{inner approximation} by considering fixed dimensions \(d_A\), \(d_B\) and \(d_E\) for the Hilbert space \(A\), \(B\) and \(E\) respectively, which allows us to parametrise the measurements and states used by scalar variables. We can then minimise \(\splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}}\) over \(\crv{J}\) and these scalar variables to compute an upper bound.
+
+                  It is possible to perform this optimisation directly using a nonlinear constrained optimisation program, such as MATLAB's \verb`fmincon`. However, such an optimisation would generally only be able to find local minima, which would still be valid upper bounds but may be very loose. Although we are unable to use the NPA hierarchy of relaxations, the equivalent of the NPA hierarchy for commutative variables, the Lasserre hierarchy, has been used and studied extensively for the purpose of approximating the global minima of polynomials (TODO cite). Further, there is a related hierarchy of upper bounds on global minima from semidefinite programs (TODO cite). Therefore, if we are able to express these optimisations as polynomial optimisation problems, we could apply these techniques to tighten the achievable bounds. As it turns out, the variational approximation to the logarithm used in~\cite{BFF_QRE} allows us to transform all logarithms in the expression into multivariate polynomials, bringing us very close to this objective. Even if Lasserre-hierarchy based approaches turn out to be infeasible, the polynomial approximation may still be easier to optimise than the original formulation.
+
+                  It is known that, for classical rvs \(\{\crv{X}, \crv{Y}, \crv{Z}\}\) with joint pmf \(P_{\crv{XYZ}}\),
+                  \[ I(\crv{X}:\crv{Y}|\crv{Z}) = D\left(P_{\crv{XYZ}}||P_{\crv{X}|\crv{Z}} P_{\crv{Y}|\crv{Z}} P_{\crv{Z}}\right). \]
+                  Rewriting \(\splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}}\) in terms of relative entropies, we obtain
+                  \begin{gather}
+                    \splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}} =  D(P_{\crv{V}_1\crv{V}_2\crv{J}}||P'_{\crv{V}_1\crv{V}_2\crv{J}})
+                    + D(P_{\crv{V}_1\crv{V}_2\crv{JE}}||P''_{\crv{V}_1\crv{V}_2\crv{JE}}) \\
+                    = \sum_{v_1v_2j} P_{\crv{V}_1\crv{V}_2\crv{J}}(v_1v_2j) \log \frac{P_{\crv{V}_1\crv{V}_2\crv{J}}(v_1v_2j)}{P'_{\crv{V}_1\crv{V}_2\crv{J}}(v_1v_2j)} + \sum_{v_1v_2je} P_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je) \log \frac{P_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je)}{P''_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je)},
+                  \end{gather}
+                  where \(P'_{\crv{V}_1\crv{V}_2\crv{J}} = P_{\crv{V_1|V_2}} P_{\crv{V}_2|\crv{J}} P_{\crv{J}}\) and \(P''_{\crv{V}_1\crv{V}_2\crv{JE}} = P_{\crv{V_1V_2|E}} P_{\crv{J|E}} P_{\crv{E}}\).
+
+                  Now, since these are logarithms of scalar values rather than operators, we can apply the Gauss-Radau approximation directly. Indeed, as mentioned in~\cite[Remark 2.10]{BFF_QRE}, the Gauss-Radau nodes and weights \({\{t'_i, w'_i\}}_{i=1}^m\) such that \(t'_1 = 0\), in contrast to \(t_m = 1\), can be used to provide upper bounds for the logarithms, and therefore the relative entropies. Writing \(p_1(x)\) and \(p_2(x)\) for two generic pmfs on an alphabet \(\{x\}\), we have
+                  \begin{align}
+                    D(p_1||p_2) &= \sum_x p_1(x) \log \frac{p_1(x)}{p_2(x)} \\
+                                &\leq \sum_x p_1(x) \sum_{i=1}^m \frac{w'_i}{\ln 2} \frac{p_1(x)/p_2(x) - 1}{t'_i (p_1(x)/p_2(x)-1) + 1} \\
+                                &= \sum_x \sum_{i=1}^m \frac{w'_i}{\ln 2} \frac{p_1(x)(p_1(x) - p_2(x))}{t'_i (p_1(x)- p_2(x)) + p_2(x)}.
+                  \end{align}
+                  However, we can also derive another approximation that may be simpler to optimise over, either through representing the pmfs as operators, as per \Cref{sec:logratbound}, or through simple manipulation of the approximation using the lower bound Gauss-Radau nodes and weights:
+                  \begin{align}
+                    p_1(p_2-p_1) &= p_1p_2 - p_1^2  = -\frac{1}{t} p_1^2 - \frac{t-1}{t} p_1^2 + \frac{t}{t} p_1p_2 \\
+                                 &= -\frac{p_1^2}{t} + \frac{p_1((1-t)p_1+tp_2)}{t}  \\
+                    \therefore D(p_1||p_2) &= -\sum_x p_1(x) \log \frac{p_2(x)}{p_1(x)} \\
+                                           &\leq -\sum_x p_1(x) \sum_{i=1}^m \frac{w_i}{\ln 2} \frac{p_2(x)/p_1(x) - 1}{t_i (p_2(x)/p_1(x)-1) + 1} \\
+                                           &= -\sum_x \sum_{i=1}^m \frac{w_i}{\ln 2} \frac{p_1(x) (p_2(x) - p_1(x))}{t_i p_2(x) - t_i p_1(x) + p_1(x)} \\
+                                           &= -\sum_x \sum_{i=1}^m \frac{w_i}{\ln 2} \frac{-{p_1(x)}^2 + p_1(x)(t_i p_2(x) + (1-t_i) p_1(x))}{t_i (t_i p_2(x) + (1-t_i) p_1(x)) } \\
+                                           &= -\sum_x \sum_{i=1}^m \frac{w_i}{t_i \ln 2}\left( \frac{-{p_1(x)}^2}{t_i p_2(x) + (1-t_i) p_1(x)} + p_1(x) \right)\\
+                                           &= -\sum_{i=1}^m \frac{w_i}{t_i \ln 2}\left( \sum_x \frac{-{p_1(x)}^2}{t_i p_2(x) + (1-t_i) p_1(x)} + p_1(x) \right)~\label{eqn:logratbound},
+                  \end{align}
+                  where, of course, \(\sum_x p_1(x) = 1\) if \(p_1\) is normalised. This simplifies the numerator of each fraction considerably. 
+
+                  However, both of these approximations give us rational objective functions. Nonetheless, we can use the methods of polynomial optimisation if we reformulate the problem, introducing a new variable \(R\) for each rational term \(P/Q\), with the polynomial constraint that \(P - QR = 0\). This is referred to as the \emph{epigraph approach} in TODO cite.
+
+                  \subsection{Relation to States and Measurements}\label{sec:ubound_statemeas}
+
+                  The pmfs are related to the quantum states and measurements by
+                  \begin{align}
+                    P_{\crv{V_1V_2J}}(v_1v_2j) &= \sum_{e}  P_{\crv{V_1V_2E}}(v_1v_2e) P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\
+                                               &= \sum_{e} \Tr{\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)} P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\
+                    P'_{\crv{V}_1\crv{V}_2\crv{J}}(v_1v_2j) &= P_{\crv{V_1|V_2}}(v_1|v_2) P_{\crv{V}_2|\crv{J}}(v_2|j) P_{\crv{J}}(j) \\
+                                                            &= P_{\crv{V_1|V_2}}(v_1|v_2) P_{\crv{V_2J}}(v_2j) \\
+                                                            &= \sum_{v_1' e} P_{\crv{V_1|V_2}}(v_1|v_2) \Tr{\rho_{ABE} \left(M_{v_1'} \otimes N_{v_2} \otimes O_e\right)} P_{\crv{J|V_1V_2E}}(j|v_1'v_2e) \\
+                    P_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je) &= P_{\crv{V_1V_2JE}}(v_1v_2je) \\
+                                                             &= \Tr{\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)} P_{\crv{J|V_1V_2E}}(j|v_1v_2e) \\
+                    P''_{\crv{V}_1\crv{V}_2\crv{JE}}(v_1v_2je) &= P_{\crv{V_1V_2|E}}(v_1v_2|e) P_{\crv{J|E}}(j|e) P_{\crv{E}}(e) \\
+                                                               &= \sum_{v_1' v_2'} P_{\crv{V_1V_2E}}(v_1v_2e) P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e) P_{\crv{V_1V_2}}(v_1'v_2') \\
+                                                               &= \sum_{v_1' v_2'} \Tr{\rho_{ABE} \left(M_{v_1} \otimes N_{v_2} \otimes O_e\right)} P_{\crv{J|V_1V_2E}}(j|v_1'v_2'e) P_{\crv{V_1V_2}}(v_1'v_2'),
+                  \end{align}
+                  where \(O_e\) is Eve's measurement operator for outcome \(e\), \(\crv{V}_1 = (\crv{A,X})\) and \(\crv{V}_2 = (\crv{B,Y})\). In this most general setting, we assume that Alice and Bob do not announce their measurement settings, and Eve's measurement operator is hence independent of \(x\) and \(y\).
+
+                  However, observe that we require the full joint distribution \(P_{\crv{V_1V_2}}(v_1v_2) = \prin(x,y)p(ab|xy)\). While \(p(ab|xy)\) is given, we cannot include the distribution \(\prin(x,y)\) as a variable to be minimised, since, to provide a valid upper bound, Alice and Bob must be allowed to choose the best possible \(\prin(x,y)\) (although we note that, unless their inputs are independent, they must have some pre-existing shared secret). Therefore, without involving ourselves in the complications of bilevel optimisation, we can only fix a distribution \(\prin(x,y)\) and claim that our upper bound is valid for protocols and experiments using that distribution. Fortunately, this simplifies the optimisation somewhat by fixing the joint distribution \(P_{\crv{V_1V_2}}(v_1v_2)\), allowing conditional and marginal distributions to be easily calculated.
+
+                  Although we cannot bound the cardinality \(o_E\) of \(\crv{E}\), we will have to fix it to some finite number in order to specify the number of measurement operators \(O_e\). This will still provide a valid upper bound, but we lose some tightness. The cardinality \(o_{\crv{J}}\) of \(\crv{J}\) can be upper bounded by the product of the cardinalities of \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\), as explained in TODO cite, and the conditional distribution \(P_{\crv{J|V_1V_2E}}\) can then be parametrised by \(o_{\crv{J}} i_A o_A i_B o_B o_E = o_{\crv{J}}^2\) probabilities, with the corresponding normalisation conditions.
+
+                  In order to parametrise states and measurements, we work with a parametrisation of \(d\)-dimensional operators in terms of \(d^2\) angles \(\{\lambda_{1,1},\ldots,\lambda_{d,d}\}\) (TODO cite):
+                  \begin{equation}
+                    U = \left[ \prod_{j=1}^{d-1} \left(\prod_{k={j+1}}^d \underbrace{\exp\left(i\lambda_{k,j}\ket{k}\bra{k}\right)\exp\left(i\lambda_{j,k}\sigma_{j,k}\right)}_{\Lambda_{j,k}} \right) \right] \left[ \prod_{l=1}^d \exp\left(i\lambda_{l,l}\ket{l}\bra{l}\right) \right],
+                  \end{equation}
+                  where \(\lambda_{j,k} \in \ccintv{0}{\pi/2}\) for \(j<k\) and \(\lambda_{j,k} \in \ccintv{0}{2\pi}\) otherwise, and \(\sigma_{j,k}\) is the anti-symmetric matrix \(\sigma_{j,k} = -i\ket{j}\bra{k} +i\ket{k}\bra{j}\). Each matrix \(\Lambda_{j,k}\) rotates the two columns \(\ket{j}\) and \(\ket{k}\), and can be explicitly expressed as
+                  \begin{equation}
+                    \Lambda_{j,k} = \cos(\lambda_{j,k})\ket{j}\bra{j} + e^{i\lambda_{k,j}}\cos(\lambda_{j,k})\ket{k}\bra{j} + \sin(\lambda_{j,k})\ket{j}\bra{k} + e^{i\lambda_{k,j}}\cos(\lambda_{j,k})\ket{k}\bra{k}.
+                  \end{equation}
+                  Each matrix \(\exp\left(i\lambda_{l,l}\ket{l}\bra{l}\right)\) multiplies column \(l\) by a phase factor, and so their product can be explicitly expressed as
+                  \begin{equation}
+                    \prod_{l=1}^d \exp\left(i\lambda_{l,l}\ket{l}\bra{l}\right) = \sum_{l=1}^d e^{i\lambda_{l,l}}\ket{l}\bra{l}.
+                  \end{equation}
+
+                  A density matrix \(\rho\), being a positive-semidefinite trace-1 operator, can be expressed via the spectral theorem as
+                  \begin{equation}
+                    \rho = \sum_j p_j \ket{\rho_j}\bra{\rho_j} = \sum_j p_j U_{\rho}\ket{j}\bra{j}U_{\rho}^{\dagger},
+                  \end{equation}
+                  where \(\{\ket{\rho_j}\}\) is the eigenbasis of \(\rho\), \(\{\ket{j}\}\) is the computational basis, and \(U_{\rho} = \sum_{j} e^{i\phi_j} \ket{\rho_j}\bra{j}\) is some unitary matrix. The value \(p_j\) form a probability distribution over the eigenbasis, and can either be parametrised as \(d\) positive numbers summing to 1, or as \(d-1\) angles \(\{\theta_j\}\) such that
+                  \begin{equation}
+                    p_j = \cos^2\theta_j\prod_{k=1}^{j-1}\sin^2\theta_k,
+                  \end{equation}
+                  where \(\theta_d \coloneqq 0\) and \(\prod_{k=1}^{0}\sin^2\theta_k \coloneqq 1\), in either case yielding \(d-1\) independent real parameters. However, expressing the density matrix in terms of the unitary operators shows that the \(d\) parameters \(\lambda_{j,j}\) can be neglected (TODO cite), allowing an arbitrary density matrix to be fully parametrised by \(d^2 -d + d - 1 = d^2-1\) real numbers.
+
+                  The parametrisation of POVMs is more involved, but we can leverage our parametrisation of unitary matrices here as well. We begin with Naimark's dilation theorem, which tells us that an \(o\)-outcome POVM \(\{M_a\}\) on a \(d\)-dimensional Hilbert space \(A\) can be viewed as a projective measurement on a larger Hilbert space \(\Hs \cong O \otimes A\) of dimension \(od\). Throughout this section, kets and inner products without subscripts refer to the Hilbert space \(A\). We relate \(A\) to \(\Hs\) via the \(od \times d\) \emph{isometry}
+                  \begin{equation}
+                    V = \sum_{a=1}^o \ket{a}_O \otimes \sqrt{M_a} = \begin{bmatrix} \sqrt{M_1} \\ \sqrt{M_2} \\ \vdots \\ \sqrt{M_o} \end{bmatrix}.
+                  \end{equation}
+                  Each measurement operator can be written using its spectral decomposition as
+                  \begin{equation}
+                    M_a = \sum_{j=1}^d m_a^{(j)} U_a \ket{j}\bra{j} U_a^{\dagger} \Rightarrow \sqrt{M_a} = \sum_{j=1}^d \sqrt{m_a^{(j)}} U_a \ket{j}\bra{j} U_a^{\dagger},
+                  \end{equation}
+                  where, since all \(M_a\)'s are PSD and we require \(\sum_a M_a = I_A \Rightarrow (\sum_a M_a) U_a\ket{j} = 1\), we have \(m_a^{(j)}\in\ccintv{0}{1}\) for all \(a\) and \(j\), and further that \(\sqrt{M_a}\) is also PSD\@.
+
+                  Now, since
+                  \begin{equation}
+                    V^{\dagger}V = \begin{bmatrix} \sqrt{M_1}^{\dagger} & \sqrt{M_2}^{\dagger} & \cdots & \sqrt{M_o}^{\dagger} \end{bmatrix} \begin{bmatrix} \sqrt{M_1} \\ \sqrt{M_2} \\ \vdots \\ \sqrt{M_o} \end{bmatrix} = \sum_a \sqrt{M_a}^{\dagger}\sqrt{M_a} = \sum_a M_a = I_A,
+                  \end{equation}
+                  where we have used \(\sqrt{M_a}^{\dagger} = \sqrt{M_a}\), the columns of \(V\) form an orthonormal basis for a \(d\)-dimensional subspace of \(\Hs\). Although mapping the isometry to an orthonormal basis would seem to discard information about the phases between the columns of \(\sqrt{M_a}\), \(M_a\) does not change even if we multiply each column of \(\sqrt{M_a}\) by an arbitrary phase:
+                  \begin{gather}
+                    {\left(\left(\sum_j e^{i\phi_j} \ket{j}\bra{j}\right)\sqrt{M_a}\right)}^{\dagger} {\left(\left(\sum_k e^{i\phi_k} \ket{k}\bra{k}\right)\sqrt{M_a}\right)} \\
+                    = \sqrt{M_a}^{\dagger}\left(\sum_j e^{i\phi_j} \ket{j}\bra{j}\right) \left(\sum_k e^{-i\phi_k} \ket{k}\bra{k}\right)\sqrt{M_a} \\
+                    = \sqrt{M_a}^{\dagger}\sqrt{M_a}.
+                  \end{gather}
+                  Therefore, each POVM induces a unique \(k\)-dimensional basis in \(\Hs\).
+
+                  Conversely, any such basis \({\{\ket{\gamma^{(g)}}_{\Hs}\}}_{g=1}^d\) induces a unique valid POVM on \(A\). We decompose each vector as \(\ket{\gamma^{(g)}}_{\Hs} = \oplus_{a=1}^o g_a \ket{\gamma^{(g)}_a}\), with normalisation factors \(g_a\), and construct \(o\) \(d\times{d}\) operators 
+                  \begin{equation}
+                    \sqrt{\Gamma_a} = \sum_{g=1}^d g_a \ket{\gamma^{(g)}_a}\bra{g} = \begin{bmatrix} 1_a \ket{\gamma^{(1)}_a} & 2_a \ket{\gamma^{(2)}_a} & \cdots & d_a \ket{\gamma^{(d)}_a} \end{bmatrix},
+                  \end{equation}
+                  where \({\{\ket{g}_A\}}\) is the computational basis. The POVM elements are then 
+                  \begin{equation}
+                    \Gamma_a = \sqrt{\Gamma_a}^{\dagger}\sqrt{\Gamma_a} = \sum_{h=1}^d \sum_{g=1}^d h_a g_a \ket{h}\braket{\gamma^{(h)}_a|\gamma^{(g)}_a}\bra{g}.
+                  \end{equation}
+                  Since \(\bra{v}X^{\dagger}X\ket{v} = \abs{X\ket{v}}^2 \geq 0\) for any operator \(X\) and vector \(\ket{v}\), \(X^{\dagger}X\) is PSD for any \(X\), and so \(\Gamma_a\) is PSD. Further, if \(\Gamma = \sum_a \Gamma_a\), then 
+                  \begin{equation}
+                    \bra{h}\Gamma\ket{g} = \sum_a h_a g_a \braket{\gamma^{(h)}_a|\gamma^{(g)}_a} = \braket{\gamma^{(h)}|\gamma^{(g)}}_{\Hs} = \delta_{gh} \Rightarrow \Gamma = I_A
+                  \end{equation}
+                  and therefore any orthonormal basis for this subspace generates a unique POVM in this way. This is in agreement with~\cite{RandPOVM}, where a distribution over the isometries \(V\) is shown to recover the uniform distribution on the Lebesgue measure over the set of POVMs.
+
+                  The set of these bases can be parametrised, via the unitary that generates them from the computational basis \({\{\ket{g}_{\Hs}\}}_{g=1}^d\), using \(2d(od-d)\) real parameters \(\lambda_{j,k}\) as
+                  \begin{equation}
+                    U_{\gamma} = \prod_{j=1}^d \left( \prod_{k=j+1}^{od} \exp(i\lambda_{k,j}\ket{k}\bra{k}) \exp(i\lambda_{j,k}\sigma_{j,k}) \right),
+                  \end{equation}
+                  giving
+                  \begin{align}
+                    \ket{\gamma^{(g)}}_{\Hs} &= U_{\gamma}\ket{g}_{\Hs} \Rightarrow g_a\ket{\gamma^{(g)}_a} = \left(\bra{a}_O \otimes I_A\right)U_{\gamma}\ket{g}_{\Hs} \\
+                    \therefore \Gamma_a &= \sum_{gh} \ket{h}\bra{h}_{\Hs} U_{\gamma}^{\dagger} \left(\ket{a}_O \otimes I_A\right) \left(\bra{a}_O \otimes I_A\right)U_{\gamma}\ket{g}_{\Hs}\bra{g} \\
+                                        &= \underbrace{\left(\sum_{h} \ket{h}\bra{h}_{\Hs} U_{\gamma}^{\dagger}\right)}_{V^\dagger} \left(\ket{a}\bra{a}_O \otimes I_A\right) \underbrace{\left(\sum_{g} U_{\gamma}\ket{g}_{\Hs}\bra{g}\right)}_{V}.
+                  \end{align}
+
+                  TODO show that n = 1 is insufficient, cannot symbolically generate fully mixed POVM since \(re^{i\theta}se^{i\phi} \neq 0\) unless \(r=0\) or \(s=0\). 
+
+                  Additionally, we have
+                  \begin{align}
+                    P_{\crv{V_1V_2}}(v_1v_2) &= \sum_{e} \prin(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
+                                             &= \prin(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} \sum_e o_e^{(k_E)} p^{(k)} \\
+                                             &= \prin(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} p^{(k)} \\
+                    P_{\crv{V_2E}}(v_2e) &= \sum_{ax} \prin(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
+                                         &= \sum_{x} \prin(x,y) \sum_k n_{b|y}^{(k_B)} o_e^{(k_E)} \sum_a m_{a|x}^{(k_A)} p^{(k)} \\
+                                         &= \prin(y) \sum_k n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
+                    P_{\crv{E}}(e) &= \sum_{by} \prin(y) \sum_k n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
+                                   &= \sum_k o_e^{(k_E)} p^{(k)}.
+                  \end{align}
+
                   \section{Summary and Outlook}
 
                   The study of distillation via wiring multiple boxes together has largely fallen by the wayside, and there has been little attention paid to the idea in DIQKD research. However, this review has uncovered a vast variety of related tools and approaches for ta)kling this problem, for studying the space of behaviours, the space of wirings, and upper and lower bounds on key rates. Having consolidated these techniques, we are ready to embark on a deeper and more focused attempt to apply them. We hope that we will be able to uncover some interesting insights about the structure of nonlocality by utilising these different approaches and techniques.
@@ -2255,7 +2354,7 @@ Any[]
 
                     Alice and Bob's quantum systems are represented by Hilbert spaces \(A\) and \(B\) of dimensions \(d_A\) and \(d_B\) respectively. The POVMs corresponding to inputs \(x\) and \(y\) are denoted \({\{M_{a|x}\}}_a\) and \({\{N_{b|y}\}}_b\) respectively, with \(M_{a|x} \in \Lin{A}\) and \(N_{b|y} \in \Lin{B}\) corresponding to outputs \(a\) and \(b\) respectively. However, the overall state of their shared system, denoted by \(\rho_{AB}\), lives in the Hilbert space \(A\otimes{B}\) of dimension \(d_A d_B\). 
                     \begin{equation}
-                      p(ab|xy) = \Tr\left[\rho_{AB} \left(M_{a|x} \otimes N_{b|y}\right) \right].
+                      p(ab|xy) = \Tr{\rho_{AB} \left(M_{a|x} \otimes N_{b|y}\right) }.
                     \end{equation}
 
                     CPTP maps
@@ -2279,24 +2378,24 @@ Any[]
                   \end{align*}
                   as expected.
 
-      where \(\Delta_{\Tr}(\rho,\sigma)\) is the \emph{trace distance}
+      where \(\Trdist{\rho}{\sigma}\) is the \emph{trace distance}
       \begin{equation}
-        \Delta_{\Tr}(\rho, \sigma) = \frac{1}{2}\norm{\rho - \sigma}_1,
+      \Trdist{\rho}{\sigma} = \frac{1}{2}\norm{\rho - \sigma}_1,
       \end{equation}
       which generalises the classical total variational distance
-      \[ \Delta_{\Tr}(p(x),q(x)) = \frac{1}{2} \sum_{x} \abs{p(x)-q(x)} \]
+      \[ \Trdist{p(x)}{q(x)} = \frac{1}{2} \sum_{x} \abs{p(x)-q(x)} \]
       and is written in terms of the \emph{trace norm}
       \begin{equation}
-        \norm{\rho}_1 = \Tr\left[ \sqrt{\rho^{\dagger}\rho} \right] = \Tr\abs{\rho}.
+        \norm{\rho}_1 = \Tr{ \sqrt{\rho^{\dagger}\rho} } = \Tr{\abs{\rho}}.
       \end{equation}
 
                     \subsection{Information Theory}\label{sec:prelim_infot}
 
-                    where \({H(\cdot)}_{\rho}\) is the von Neumann entropy of a system that is part of a state \(\rho\). The unconditional von Neumann entropy for a quantum system \(X\) in a state \(\rho\) is then \({H(X)}_{\rho} = -\Tr\left[\rho_{X}\log\rho_{X}\right]\). This reduces to the Shannon entropy for a classical system, which can be represented as a density matrix with the probabilities of the individual outcomes on the diagonal, and all other entries 0.
+                    where \({H(\cdot)}_{\rho}\) is the von Neumann entropy of a system that is part of a state \(\rho\). The unconditional von Neumann entropy for a quantum system \(X\) in a state \(\rho\) is then \({H(X)}_{\rho} = -\Tr{\rho_{X}\log\rho_{X}}\). This reduces to the Shannon entropy for a classical system, which can be represented as a density matrix with the probabilities of the individual outcomes on the diagonal, and all other entries 0.
 
                     defined in terms of the \emph{relative entropy}
                     \begin{equation}
-                      D(\rho||\sigma) = \Tr\left[ \rho (\log \rho - \log \sigma) \right],
+                      D(\rho||\sigma) = \Tr{ \rho (\log \rho - \log \sigma) },
                     \end{equation}
                     and 
 
@@ -2446,11 +2545,11 @@ Any[]
 
                     In finite-dimensional terms, then, this allows us to define a function of multiple operators as
                     \[f(A_1, A_2, \ldots, A_n) = \sum_{\cvec{\lambda}} f(\lambda^{(1)}, \lambda^{(2)}, \ldots, \lambda^{(n)}) \prod_i \Pi^{(i)}_{\lambda^{(i)}}, \]
-                    where \(\cvec{\lambda}\) ranges over all tuples of eigenvalues, \(\lambda^{(i)}\) is its \(i\)th element, an eigenvalue from \(A_i\), and \(\Pi^{(i)}_{\lambda}\) is the projector of \(A_i\) corresponding to eigenvalue \(\lambda\), and the analogies between the finite-dimensional and infinite-dimensional cases for a single spectral measure hold. In particular, the integral against the scalar measure \(\dif{\nu_{\rho,\sigma}(x,y)}\) used to bound the logarithm operates on a Hilbert space of bounded operators, uses the Hilbert-Schmidt norm \(\angleb{A, B} = \Tr\left[A^{\dagger}B\right]\) and has \(\phi = I\), so that we have
+                    where \(\cvec{\lambda}\) ranges over all tuples of eigenvalues, \(\lambda^{(i)}\) is its \(i\)th element, an eigenvalue from \(A_i\), and \(\Pi^{(i)}_{\lambda}\) is the projector of \(A_i\) corresponding to eigenvalue \(\lambda\), and the analogies between the finite-dimensional and infinite-dimensional cases for a single spectral measure hold. In particular, the integral against the scalar measure \(\dif{\nu_{\rho,\sigma}(x,y)}\) used to bound the logarithm operates on a Hilbert space of bounded operators, uses the Hilbert-Schmidt norm \(\angleb{A, B} = \Tr{A^{\dagger}B}\) and has \(\phi = I\), so that we have
                     \begin{align*}
                       \int_{\R_+^{2}} F(x,y) \dif{\nu_{\rho,\sigma}(x,y)} &= \angleb{I, \int_{\R_+^{2}} F(x,y) \dif{E_{\rho,\sigma}(x,y)} I} \\
-                                                                          &= \lim_{n\to\infty} \Tr\left[ \sum_{i=0}^{\infty}\sum_{j=0}^{\infty} F\left(\frac{j}{n}, \frac{i}{n}\right) E_{\rho}\left(\cointv*{\frac{j}{n}}{\frac{j+1}{n}}\right)
-                                                                          E_{\sigma}\left(\cointv*{\frac{i}{n}}{\frac{i+1}{n}}\right) \right],
+                                                                          &= \lim_{n\to\infty} \Tr{ \sum_{i=0}^{\infty}\sum_{j=0}^{\infty} F\left(\frac{j}{n}, \frac{i}{n}\right) E_{\rho}\left(\cointv*{\frac{j}{n}}{\frac{j+1}{n}}\right)
+                                                                          E_{\sigma}\left(\cointv*{\frac{i}{n}}{\frac{i+1}{n}}\right) },
                     \end{align*}
                     from which we recover the finite-dimensional behaviour for a discrete spectrum in~\Cref{eqn:finitedim_relent}. Note that the first argument of \(F\) corresponds to the second state involved, namely \(\sigma\): this confusing ordering is unfortunately unavoidable (without the cost of introducing more confusion elsewhere), because \(\sigma\) is associated with left-multiplication and \(\rho\) with right-multiplication in the proofs in~\cite{BFF_QRE}. The same results as discussed in~\Cref{sec:diqkd_qre} follow from this joint spectral measure for continuous spectra, justifying the validity of these results even in infinite dimensions. For simplicity, this exposition has sidestepped the entire operator algebra approach that generalises the technique of quasi-relative entropies even further. These details are not very relevant for our purposes, but can be found in~\cite{BFF_QRE}.
 
@@ -2462,16 +2561,16 @@ Any[]
                       + D(\rho_{\crv{V}_1\crv{V}_2\crv{JE}}||\rho''_{\crv{V}_1\crv{V}_2\crv{JE}}) \\
                                                               &\leq \begin{aligned}
                                                                 - & \sum_{i=1}^m  \frac{w_i}{t_i\ln{2}}  \inf_{Z} \left\{ \begin{gathered}
-                                                                    \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}}]
-                                                                    + \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z + Z^{\dagger})] \\
-                                                                    + (1-t_i) \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z^{\dagger}Z)] 
-                                                                    + t_i \Tr[\rho'_{\crv{V}_1\crv{V}_2\crv{J}} (ZZ^{\dagger})]
+                                                                  \Tr{\rho_{\crv{V}_1\crv{V}_2\crv{J}}}
+                                                                + \Tr{\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z + Z^{\dagger})} \\
+                                                              + (1-t_i) \Tr{\rho_{\crv{V}_1\crv{V}_2\crv{J}} (Z^{\dagger}Z)} 
+                                                            + t_i \Tr{\rho'_{\crv{V}_1\crv{V}_2\crv{J}} (ZZ^{\dagger})}
                                                                 \end{gathered} \right\} \\
                                                                     - & \sum_{i=1}^m \frac{w_i}{t_i\ln{2}} \inf_Z \left\{ \begin{gathered}
-                                                                        \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}}]
-                                                                        + \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z + Z^{\dagger})] \\
-                                                                        + (1-t_i) \Tr[\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z^{\dagger}Z)]
-                                                                        + t_i \Tr[\rho''_{\crv{V}_1\crv{V}_2\crv{JE}} (ZZ^{\dagger})]
+                                                                      \Tr{\rho_{\crv{V}_1\crv{V}_2\crv{JE}}}
+                                                                    + \Tr{\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z + Z^{\dagger})} \\
+                                                                  + (1-t_i) \Tr{\rho_{\crv{V}_1\crv{V}_2\crv{JE}} (Z^{\dagger}Z)}
+                                                                + t_i \Tr{\rho''_{\crv{V}_1\crv{V}_2\crv{JE}} (ZZ^{\dagger})}
                                                                     \end{gathered} \right\}
                                                                       \end{aligned},
                     \end{align}
@@ -2479,20 +2578,20 @@ Any[]
 
                     Since \(Z\) is defined on the finite-dimensional Hilbert spaces \(\crv{V}_1\crv{V}_2\crv{J}\) or \(\crv{V}_1\crv{V}_2\crv{JE}\), we can write \(Z = \sum_{i,i'} z_{i;i'} \ket{i}\bra{i'}\), where \(i\) and \(i'\) are indices of the classical basis states in those Hilbert spaces and \(z_{i;i'} \in \C\). Further, since the states \(\rho\) are classical, it suffices to consider the action of \(Z\) on the projectors. Therefore, we can expand the traces with \(Z\) generically as
                     \begin{align}
-                      \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (Z + Z^{\dagger})\right] &= 
-                      \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} \ket{i}\bra{i'} + {z_{i';i}^*} \ket{i}\bra{i'} \right] \\
+                      \Tr{\left(\sum_i p_i \ket{i}\bra{i}\right) (Z + Z^{\dagger})} &= 
+                      \Tr{ \sum_i p_i \sum_{i'} z_{i;i'} \ket{i}\bra{i'} + {z_{i';i}^*} \ket{i}\bra{i'} } \\
                                                                                                &= 
                                                                                                \sum_i p_i z_{i;i} + {z_{i;i}^*} \\
-                      \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (Z^{\dagger}Z)\right] &=
-                      \Tr\left[ \sum_i p_i \sum_{i'} {z_{i;i'}^*} z_{i';i} \ket{i}\bra{i'} \right] \\
+                      \Tr{\left(\sum_i p_i \ket{i}\bra{i}\right) (Z^{\dagger}Z)} &=
+                      \Tr{ \sum_i p_i \sum_{i'} {z_{i;i'}^*} z_{i';i} \ket{i}\bra{i'} } \\
                                                                                             &\geq 
                                                                                             \sum_i p_i \abs{z_{i;i}}^2 \\
-                      \Tr\left[\left(\sum_i p_i \ket{i}\bra{i}\right) (ZZ^{\dagger})\right] &= 
-                      \Tr\left[ \sum_i p_i \sum_{i'} z_{i;i'} {z_{i';i}^*} \ket{i}\bra{i'} \right] \\
+                      \Tr{\left(\sum_i p_i \ket{i}\bra{i}\right) (ZZ^{\dagger})} &= 
+                      \Tr{ \sum_i p_i \sum_{i'} z_{i;i'} {z_{i';i}^*} \ket{i}\bra{i'} } \\
                                                                                             &\geq 
                                                                                             \sum_i p_i \abs{z_{i;i}}^2
                     \end{align}
-                    where the lower bounds hold because \(\abs{z_{i;i'}}^2 \geq 0\), and since terms with \(i \neq i'\) do not occur in the expansion of the trace with \(Z + Z^{\dagger}\), they will be set to 0 in the minimisation. Further, since \(z_{i;i}\) only occurs as \(\abs{z_{i;i}}^2\) or \(z_{i;i} + {z_{i;i}^*}\), if \(\abs{z_{i;i}}^2\) is restricted to a fixed value \(w\), \(z_{i;i} + {z_{i;i}^*}\) is minimised by setting \(z_{i;i}\) to the real number \(-w\). We can therefore consider each \(z_i \coloneqq \Tr[\ket{i}\bra{i} Z] = z_{i;i}\) as a real, negative, scalar optimisation variable, yielding \(o_{\crv{J}} i_A o_A i_B o_B\) variables for \(I(\crv{V}_1 : \crv{V}_2|\crv{J})\) and \(o_{\crv{J}} i_A o_A i_B o_B o_E\) for \(I(\crv{V}_1\crv{V}_2 : \crv{J}|\crv{E})\). This gives us a polynomial optimisation problem, which is, however, likely intractable due to the number of variables.
+                  where the lower bounds hold because \(\abs{z_{i;i'}}^2 \geq 0\), and since terms with \(i \neq i'\) do not occur in the expansion of the trace with \(Z + Z^{\dagger}\), they will be set to 0 in the minimisation. Further, since \(z_{i;i}\) only occurs as \(\abs{z_{i;i}}^2\) or \(z_{i;i} + {z_{i;i}^*}\), if \(\abs{z_{i;i}}^2\) is restricted to a fixed value \(w\), \(z_{i;i} + {z_{i;i}^*}\) is minimised by setting \(z_{i;i}\) to the real number \(-w\). We can therefore consider each \(z_i \coloneqq \Tr{\ket{i}\bra{i} Z} = z_{i;i}\) as a real, negative, scalar optimisation variable, yielding \(o_{\crv{J}} i_A o_A i_B o_B\) variables for \(I(\crv{V}_1 : \crv{V}_2|\crv{J})\) and \(o_{\crv{J}} i_A o_A i_B o_B o_E\) for \(I(\crv{V}_1\crv{V}_2 : \crv{J}|\crv{E})\). This gives us a polynomial optimisation problem, which is, however, likely intractable due to the number of variables.
 
                     The connection to \Cref{eqn:logratbound} comes from observing that \(z_i\) is a scalar, and that we can therefore compute the optimal value analytically if we hold the other values fixed. The infimisation can be broken up into optimisation problems of the form
                     \begin{equation}
@@ -2517,14 +2616,14 @@ Any[]
                       and relating their eigenbases, we obtain
                       \begin{align*}
                         \ket{h} &= \sum_g h^{(g)} \ket{g} \Rightarrow H = \sum_h \mu^{(h)} \left(\sum_{gg'} h^{(g)} {h^{(g')}}^* \ket{g}\bra{g'}\right) \\
-                        \Tr[GH] &= \Tr\left[ \sum_h \mu^{(h)} \left( \sum_{gg'} \gamma^{(g)} h^{(g)} {h^{(g')}}^* \ket{g}\bra{g'} \right) \right] \\
+                      \Tr{GH} &= \Tr{ \sum_h \mu^{(h)} \left( \sum_{gg'} \gamma^{(g)} h^{(g)} {h^{(g')}}^* \ket{g}\bra{g'} \right) } \\
                                 &= \sum_{hg} \mu^{(h)} \gamma^{(g)} \abs{h^{(g)}}^2.
                       \end{align*}
                       However, if we consider instead the operator \(\tilde{H} = \sum_{g'} \nu_{g'} \ket{g'}\bra{g'}\), with \(\nu_{g'} = \sum_h \abs{g'_h}^2 \mu_h\), we obtain
                       \begin{align*}
-                        \Tr[G\tilde{H}] &= \Tr\left[ \sum_{g} \gamma^{(g)} \ket{g}\bra{g} \left( \sum_g \nu^{(g')} \ket{g'}\bra{g'} \right) \right] \\
-                                        &= \Tr\left[ \sum_{g} \gamma^{(g)}\nu^{(g)}\ket{g}\bra{g} \right] = \sum_{g} \gamma^{(g)}\nu^{(g)} \\
-                                        &= \sum_{g} \gamma^{(g)} \left(\sum_{h} \mu^{(h)} \abs{h^{(g)}}^2\right) = \Tr[GH]
+                      \Tr{G\tilde{H}} &= \Tr{ \sum_{g} \gamma^{(g)} \ket{g}\bra{g} \left( \sum_g \nu^{(g')} \ket{g'}\bra{g'} \right) } \\
+                                        &= \Tr{ \sum_{g} \gamma^{(g)}\nu^{(g)}\ket{g}\bra{g} } = \sum_{g} \gamma^{(g)}\nu^{(g)} \\
+                                        &= \sum_{g} \gamma^{(g)} \left(\sum_{h} \mu^{(h)} \abs{h^{(g)}}^2\right) = \Tr{GH}
                       \end{align*}
                       which means the trace is fully parametrised by the \(2d\) real numbers \({\{\gamma_g, \nu_{g}\}}_{g}\).
 
@@ -2537,7 +2636,7 @@ Any[]
                       \end{gather*}
                       Clearly, the coefficients of the operators \(\ket{g}\bra{g'}\) with \(g \neq g'\) must each sum to 0, since the operators do not appear on the left hand side, and we must have \(\sum_j \nu^{(g)}_j = 1\) for all \(g\).
 
-                      If \(G\) is a density matrix, then \(\Tr[GH_j]\) is the probability of outcome \(i\) when measuring \(G\) using the POVM \(\{H_j\}\). If we are only concerned with the probability distribution over the outcomes \(j\), then as illustrated above, each probability is parametrised fully by \({\{\gamma^{(g)}, \nu^{(g)}_j\}}_{g}\). Indeed, since \(\{\gamma^{(g)}\}\) is the same for all the probabilities, the overall distribution across \(i\) POVMs of \(o\) outcomes each is fully parametrised by the \((io+1)d\) real parameters \({\{\gamma^{(g)}, {\{\nu^{(g)}_j\}}_j \}}_{g}\). However, since the POVM conditions are satisfied by \(\{\tilde{H}_j \coloneqq \sum_g \nu^{(g)}_j \ket{g}\bra{g}\}\), which gives the same probability distribution, without loss of generality we can restrict ourselves to only POVM operators of this form.
+                    If \(G\) is a density matrix, then \(\Tr{GH_j}\) is the probability of outcome \(i\) when measuring \(G\) using the POVM \(\{H_j\}\). If we are only concerned with the probability distribution over the outcomes \(j\), then as illustrated above, each probability is parametrised fully by \({\{\gamma^{(g)}, \nu^{(g)}_j\}}_{g}\). Indeed, since \(\{\gamma^{(g)}\}\) is the same for all the probabilities, the overall distribution across \(i\) POVMs of \(o\) outcomes each is fully parametrised by the \((io+1)d\) real parameters \({\{\gamma^{(g)}, {\{\nu^{(g)}_j\}}_j \}}_{g}\). However, since the POVM conditions are satisfied by \(\{\tilde{H}_j \coloneqq \sum_g \nu^{(g)}_j \ket{g}\bra{g}\}\), which gives the same probability distribution, without loss of generality we can restrict ourselves to only POVM operators of this form.
 
                       The critical step that restricts our parametrisation, which was originally made as a mistake, is to assume that \(\rho_{ABE}\)'s eigenbasis consists of vectors that are product states across \(A\), \(B\) and \(E\):
                       \begin{equation}
@@ -2559,11 +2658,11 @@ Any[]
                       \end{equation}
                       in direct analogy to \(\nu_{g}^{(i)}\) above, and therefore the behaviour is given by
                       \begin{align}
-                        p(abe|xy) &= \Tr\left[\rho_{ABE} \left(M_{a|x} \otimes N_{b|y} \otimes O_e\right)\right] \\
+                        p(abe|xy) &= \Tr{\rho_{ABE} \left(M_{a|x} \otimes N_{b|y} \otimes O_e\right)} \\
                                   &= \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)}.
                       \end{align}
 
-                      It is clear, then, that \(p^{(k)}\) here plays the role of \(P_{\Lambda}(\lambda)\) in \Cref{eqn:localdef}, and that any behaviour of this form must therefore be contained in \(\Ls\). Hence, this parametrisation, although simpler than the one in \Cref{sec:ubound_statemeas}, cannot be used to examine behaviours outside of \(\Ls\).
+                      It is clear, then, that \(p^{(k)}\) here plays the role of \(P_{\Lambda}(\lambda)\) in the tripartite extension of \Cref{eqn:localdef}, and that any behaviour of this form must therefore be contained in \(\Ls\). Hence, this parametrisation, although simpler than the one in \Cref{sec:ubound_statemeas}, cannot be used to examine behaviours outside of \(\Ls\).
 
                       \section{Exploiting the Structure of the No-Signalling Polytope}\label{sec:nspoly}
 

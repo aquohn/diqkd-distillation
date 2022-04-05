@@ -216,7 +216,7 @@ function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname,
   Ti = eltype(eachindex(is))
   baseidxs = find_baseidxs(is, js, corrf, krf)
   basepts = [(is[ii], js[ji]) for (ii, ji) in baseidxs]
-  plt = plot(basepts, xlabel=iname, ylabel=jname, label="No wiring", xlims=(is[1], is[end]), ylims=(js[1], js[end]), legend=:topleft, size=(800,600))
+  plt = plot(basepts, xlabel=iname, ylabel=jname, label="No wiring", xlims=(is[1], is[end]), ylims=(js[1], js[end]); kwargs...)
 
   for wiring in wirings
     wirf, wirname = wiring
@@ -229,9 +229,9 @@ function wiring_plot(is::AbstractVector{T}, js::AbstractVector{T}, iname, jname,
         push!(jis, ji)
       end
       if isempty(posjis)
-        ji = argmax(ji -> rs[ii, ji], negjis)
+        ji = argmax(ji -> rps[ii, ji], negjis)
       else
-        ji = argmin(ji -> rs[ii, ji], posjis)
+        ji = argmin(ji -> rps[ii, ji], posjis)
       end
       push!(wirpts, (is[ii], js[ji]))
     end
@@ -421,9 +421,9 @@ function qset_wiring_plot(QLDsamples = 100, boundsamples = 100; kwargs...)
   return wiring_plot(fIs, fLDs, "Isotropic fraction", "Deterministic fraction", qset_corrf(); kwargs...)
 end
 
-function expt_wiring_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.925, ncstart=0.8, kwargs...)
-  ncs = range(ncstart, stop=1, length=ncsamples)
-  etas = range(etastart, stop=1, length=etasamples)
+function expt_wiring_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.925, ncstart=0.8, etastop=0.963, ncstop=0.999, kwargs...)
+  ncs = range(ncstart, stop=ncstop, length=ncsamples)
+  etas = range(etastart, stop=etastop, length=etasamples)
   corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
   return wiring_plot(ncs, etas, L"n_c", L"\eta", corrf; kwargs...)
 end
