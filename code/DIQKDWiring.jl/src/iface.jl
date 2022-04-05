@@ -81,6 +81,7 @@ function write_lrs_hrep(name, options, ineqAs::MaybeMat, ineqbs::MaybeVec, eqAs:
   write_lrs_hrep!(name, options, ineqAs, ineqbs, eqAs, eqbs)
 end
 # ineqAs[i,:] \dot x \leq ineqbs[i]; eqAs[i,:] \dot x = eqbs[i]
+# from LRSLib: As = -A[:, 2:end], bs = -A[:, 1], use linset to split
 function write_lrs_hrep!(name, options, ineqAs::AbstractMatrix, ineqbs::AbstractVector, eqAs::AbstractMatrix, eqbs::AbstractVector)
   ineqmat = hcat(ineqbs, -ineqAs)
   eqmat = hcat(eqbs, -eqAs)
@@ -145,13 +146,17 @@ function read_lrs_ratint_mat(ios::IOStream, n::Integer)
       isnothing(currmatch) && break
       sign = isnothing(m[:sign]) ? 1 : -1
       num = sign * parse(BigInt, m[:num])
-      (num > maxint) || num = Int(num)
+      if num <= maxint
+        num = Int(num)
+      end
       den = isnothing(m[:den]) ? 1 : parse(BigInt, m[:den][2:end])
 
       if den == 1
         push!(row, num)
       else
-        (den > maxint) || den = Int(den)
+        if den <= maxint
+          den = Int(den)
+        end
         push!(row, num // den)
       end
       curridx = length(currmatch.match) + currmatch.offset

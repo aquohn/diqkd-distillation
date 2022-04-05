@@ -1241,7 +1241,7 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
             \section{Preliminary Results}\label{sec:preres}
 
-            Our preliminary results found a revival of the standard protocol key rate for states that are generated according to a simple experimental model. We will be using it to illustrate the relevant issues and directions we wish to pursue in our analysis. In this model, we denote the density matrix of Alice's and Bob's quantum state as \(\rho_{AB}\), the dimensions of the Hilbert spaces of their systems \(A\) and \(B\) as \(d_A\) and \(d_B\), and the observables they measure given inputs \(x\) and \(y\) as \(A_x\) and \(B_y\).
+            Preliminary results~\cite{KTNotes} found a revival of the standard protocol key rate for states that are generated according to a simple experimental model. We will be using it to illustrate the relevant issues and directions we wish to pursue in our analysis. In this model, we denote the density matrix of Alice's and Bob's quantum state as \(\rho_{AB}\), the dimensions of the Hilbert spaces of their systems \(A\) and \(B\) as \(d_A\) and \(d_B\), and the observables they measure given inputs \(x\) and \(y\) as \(A_x\) and \(B_y\).
 
             We now model some possible experimental flaws. If our source of quantum states produces one state per time bin, then \(n_c\) is the probability that a state is not produced during a given time bin (where we assume this process to be iid). Further, Alice and Bob's detectors have efficiencies \(\eta_A\) and \(\eta_B\) respectively, which are the probabilities for them to detect a state given that one is produced. If nothing is detected, either due to no signal being produced or due to detector inefficiency, we assign the \(-1\) outcome. The detector failure events are independent, but if no signal is produced, both Alice and Bob will receive no signal.
 
@@ -1304,6 +1304,8 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
               \begin{question}
                 What separates quantum from classical operations? How closely can we approximate quantum effects with classical operations.
               \end{question}
+
+              Lastly, these results have previously been investigated in more detail in~\cite{JanLiThesis}. This work focused on a claimed class of extremal wirings, based on the work in~\cite{ShortEntangleSwap}, and studied their effect on the standard protocol key rate \(r_{\std}\). It was not able to establish that extremal wirings maximise \(r_{\std}\)~\cite[Sec. 7.2]{JanLiThesis}, but was able to establish that certain extremal wirings do not increase it, or are equivalent when the two boxes are iid~\cite[Sec. 7.3]{JanLiThesis}. It also attempted to find a parameter region in a more realistic experimental model where this revival is possible, but was unable to do so~\cite[Sec. 9]{JanLiThesis}. Although this project can be seen as a continuation of~\cite{JanLiThesis}, we wish to broaden our scope to consider the secret key capacity in general, not just for the standard protocol. Further, their extension of the results of~\cite{ShortEntangleSwap} to the QKD setting is incorrect, as we will demonstrate in \Cref{sec:locwir_SPG}. We will therefore refer minimally to this work in the course of our exploration.
 
               \section{Local Wirings}\label{sec:locwir}
 
@@ -1378,11 +1380,6 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                   \end{equation}
                   where \emph{ordered} refers to the fact that \(\pi\) is the identity permutation, and \emph{iid} to the fact that \(p_j = p\;\forall j\). We denote an ordered iid joint behaviour, consisting of \(c\) copies of a behaviour \(p\), as \(p^{\otimes c}\).
 
-                  Lastly, note that, while we work with the full behaviour instead of the Collins-Gisin representation for ease of interpretation and analysis, one possible extension that could simplify computational search would be to find a way to express the wirings in terms of their action on the Collins-Gisin coefficients, which would provide a more minimal representation. We leave this to future work.
-                  \begin{question}
-                    How can wirings be expressed in terms of the Collins-Gisin representation?
-                  \end{question}
-
               We turn now to the major constraint on possible wirings, namely the no-retrocausation conditions. They are more complex for wirings than in the case of LOSR operations, since later boxes can depend on the output of earlier boxes. If Alice and Bob interact with their boxes in increasing order of the index \(j\), we have the following constraints on quantities derived from summing \(\chi_{A|\lambda}\) and \(\chi_{B|\lambda}\) over \(\cvec{x}^{j+1:c}\) and \(\cvec{y}^{j+1:c}\) respectively:
               \begin{equation}
                 \begin{aligned}[c]
@@ -1410,21 +1407,21 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                   \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) = \chi_{A|\lambda}^{(c+1)}(a|\cvec{x}^c\cvec{a}^{c}x) \prod_{j=1}^c \chi_{A|\lambda}^{(j)}(x_j|\cvec{x}^{j-1}\cvec{a}^{j-1}x),
                 \end{equation}
                 and denote each map abstractly as \(\chi_{A|\lambda}^{(j)}(t^{(j)}|s^{(j)})\).
-                Select a particular \(k\in\dintv{1}{c+1}\), \(\hat{s}^{(k)}\) and \(\hat{t}^{(k)}\) such that \(\chi_{A|\lambda}^{(k)}(\hat{s}^{(k)}|\hat{t}^{(k)}) = 0 < q < 1\). If no such values exist, the wiring is already deterministic, and we are done.
+                Select a particular \(k\in\dintv{1}{c+1}\), \(\hat{t}^{(k)}\) and \(\hat{s}^{(k)}\) such that \(\chi_{A|\lambda}^{(k)}(\hat{t}^{(k)}|\hat{s}^{(k)}) = 0 < q < 1\). If no such values exist, the wiring is already deterministic, and we are done.
                 Now, consider wirings \(\chi_{A|\lambda,0}\) and \(\chi_{A|\lambda,1}\), such that
                 \begin{align*}
-                  \chi^{(k)}_{A|\lambda,0}(s^{(k)}|\hat{t}^{(k)}) &= \begin{cases}
-                    0 & \text{ if } s^{(k)} = \hat{s}^{(k)} \\
-                    \frac{1}{1-q} \chi_{A|\lambda}^{(k)}(s^{(k)}|\hat{t}^{(k)}) & \text{ otherwise,} \\
+                  \chi^{(k)}_{A|\lambda,0}(t^{(k)}|\hat{s}^{(k)}) &= \begin{cases}
+                    0 & \text{ if } t^{(k)} = \hat{t}^{(k)} \\
+                    \frac{1}{1-q} \chi_{A|\lambda}^{(k)}(t^{(k)}|\hat{s}^{(k)}) & \text{ otherwise,} \\
                   \end{cases} \\
-                      \chi^{(j)}_{A|\lambda,0}(s^{(j)}|\hat{t}^{(j)}) &= \chi_{A|\lambda}^{(j)}(s^{(j)}|\hat{t}^{(j)}) \text{ otherwise,} \\
-                    \chi^{(k)}_{A|\lambda,1}(s^{(k)}|\hat{t}^{(k)}) &= \begin{cases}
-                      1 & \text{ if } s^{(k)} = \hat{s}^{(k)} \\
+                      \chi^{(j)}_{A|\lambda,0}(t^{(j)}|\hat{s}^{(j)}) &= \chi_{A|\lambda}^{(j)}(t^{(j)}|\hat{s}^{(j)}) \text{ otherwise,} \\
+                    \chi^{(k)}_{A|\lambda,1}(t^{(k)}|\hat{s}^{(k)}) &= \begin{cases}
+                      1 & \text{ if } t^{(k)} = \hat{t}^{(k)} \\
                       0 & \text{ otherwise,} \\
                     \end{cases} \\
-                      \chi^{(j)}_{A|\lambda,1}(s^{(j)}|\hat{t}^{(j)}) &= \chi_{A|\lambda}^{(j)}(s^{(j)}|\hat{t}^{(j)}) \text{ otherwise.} \\
+                      \chi^{(j)}_{A|\lambda,1}(t^{(j)}|\hat{s}^{(j)}) &= \chi_{A|\lambda}^{(j)}(t^{(j)}|\hat{s}^{(j)}) \text{ otherwise.} \\
                     \end{align*}
-                    It is easily verified that both \(\chi_{A|\lambda,0}^{(k)}(s|t)\) and \(\chi_{A|\lambda,1}^{(k)}(s|t)\) are valid maps, and hence \(\chi_{A|\lambda,0}\) and \(\chi_{A|\lambda,1}\) are valid marginal wiring distributions. Then, we have \(\chi_{A|\lambda} = (1-q)\chi_{A|\lambda,0} + q\chi_{A|\lambda,1}\). We can repeat this process recursively on \(\chi_{A|\lambda,0}\) and \(\chi_{A|\lambda,1}\) until \(\chi_{A|\lambda}\) is decomposed completely into a weighted sum of deterministic wiring distributions
+                    It is easily verified that both \(\chi_{A|\lambda,0}^{(k)}(t^{(k)}|s^{(k)})\) and \(\chi_{A|\lambda,1}^{(k)}(t^{(k)}|s^{(k)})\) are valid maps, and hence \(\chi_{A|\lambda,0}\) and \(\chi_{A|\lambda,1}\) are valid marginal wiring distributions. Then, we have \(\chi_{A|\lambda} = (1-q)\chi_{A|\lambda,0} + q\chi_{A|\lambda,1}\). We can repeat this process recursively on \(\chi_{A|\lambda,0}\) and \(\chi_{A|\lambda,1}\) until \(\chi_{A|\lambda}\) is decomposed completely into a weighted sum of deterministic wiring distributions
                     \[ \chi_{A|\lambda} = \sum_{w=1}^m q_w \chi_{A|\lambda,w}. \]
 
                     Then, we define a discrete random variable \(\Lambda' = (\lambda, w)\), where \(w \in \dintv{1}{m}\), with pmf \(P_{\Lambda'}(\lambda, w) = q_w P_{\Lambda}(\lambda)\). Finally, we rewrite our joint wiring distribution\footnote{For concreteness and simplicity of notation, we restrict ourselves to \(n=2\). The proof generalises readily to \(n>2\).} as
@@ -1785,6 +1782,20 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
                   \subsection{The Short, Popescu and Gisin Classification}\label{sec:locwir_SPG}
 
+              \begin{table}
+                  \centering
+                      \begin{Tabular}{ccc} 
+                        \toprule
+                        Method & \(i = 2\) & \(i = 3\) \\
+                        \midrule
+                        \cite{ShortEntangleSwap} & \(82\), \(48\)  & ?, \(2816\) \\
+                        Positivity on general behaviours & \(58\), \(512\) & --, \(524288\) \\
+                        Causal constraints & \(128\), -- & \(432\), -- \\
+                        \bottomrule
+                      \end{Tabular}
+                      \caption{Number of marginal conditional wiring functions computed through different methods, followed by number of inequalities defining the polytope. -- means the value was not computed.}\label{tab:polys}
+              \end{table}
+
                   The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short, Popescu and Gisin~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. Their work attempts to generalise quantum joint measurements for general no-signalling systems, and finds a polytope of possible operations (termed \emph{couplers}) which happens to have local wirings at its extremal points. For the  \((2,2;2,2)\) setting, there are 82 extremal points, grouped into 5 possible types of wirings.
 
                   Using their notation, the coupler equation is~\cite[Eq. 29]{ShortEntangleSwap}
@@ -1793,24 +1804,48 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
                   \end{equation}
                   where the breve indicates the inputs and outputs corresponding to boxes that were not coupled together, and \(b'\) is the coupler output.
 
-                  TODO do the comparison properly.
+                  Comparing this expression to \Cref{eqn:jwirdistdef}, and based on the functional dependence of the coupler function \(\chi\), \(\chi\) would seem to correspond to a marginal wiring distribution with a given overall input, which we will term a \emph{marginal conditional wiring distribution}. Indeed, the authors seem to describe it as such:
+                  \textquote[{\cite[Foot. 19]{ShortEntangleSwap}}]{Note that we do not give the coupler an input, as we intend it to correspond to a specific measurement (analogous to the Bell measurement in quantum mechanics), whereas the standard box inputs correspond to a selection of possible measurements.}
+                  However, instead of analysing the coupler function as a representation of a sequence of probabilistic transformations, the authors instead verify that the transformed behaviour is a valid, normalised behaviour.
 
-                  Comparing this expression to \Cref{eqn:jwirdistdef}, we see that couplers seem to be more general than wirings. For couplers, Alice and Bob are allowed to have different numbers of boxes. The boxes are assumed to be arbitrarily related through some no-signalling behaviour, instead of iid rounds of a Bell test: if Alice and Bob have a total of \(\hat{c}\) boxes, \(P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y})\) can be any behaviour in the \(\hat{c}\)-partite \(\NSs\), not necessarily \(\hat{c}/2\) iid copies of the same behaviour. The output of the coupling operation is a set of new \(\hat{c}'\)-partite behaviours, with \(\hat{c}' < \hat{c}\), each tagged to a distinct value of the output \(b'\), but without specifying the overall input to the boxes that are coupled (i.e.\ the choice of the initial input for the sequence of outcomes assigned to a particular \(b'\) may not follow any consistent rule). Finally, this analysis does not include the causality restrictions that we have used to reduce the number of possible wirings.
+                  This is done by defining a polytope of valid couplers using multiple instances of the following relations:
+                  \begin{align}
+                    P'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}}) &\geq 0 \\
+                    \sum_{\cvec{a\breve{b}}b'} P'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}}) &= 1,
+                  \end{align}
+                  with the values of \(\chi(b',\cvec{by})\) for each possible set of inputs as the variables. The authors used the particular example of no boxes corresponding to \(\cvec{a}\) and \(\cvec{\breve{b}}\), and the extremal points of the \((2,2;2,2)\) version of \(\NSs\) as the joint behaviour \(P(b_1b_2|y_1y_2)\).  \(P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y}) = P(b_1b_2|y_1y_2)\) is then a behaviour in the familiar CHSH setting, except it describes the arbitrary no-signalling relationship between Bob's two boxes, rather than Alice and Bob's boxes.
 
-                  The one way in which couplers seem more restricted than wirings is that the coupler is applied to only one party, but this can be overcome by optimising the marginal wiring distributions in \Cref{eqn:mwirdistdef} over the space of possible couplers. The joint wiring distribution would then be an element of a polytope whose extremal points are products of the extremal points of the coupler polytope.
+                  TODO we have 144 vertices and 256 inequalities for coupling a \((2,2)\) and a \((2,3)\) box together
 
-                  Nonetheless, it does not seem feasible to use the unmodified coupler polytope beyond the simplest case. The authors defined the polytope of wirings by the normalisation constraints
-                  \begin{equation}
-                    P'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}}) \geq 0 \qquad \sum_{b'} P'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}}) = 1,
-                  \end{equation}
-                  with one set of these constraints for each extremal point of the relevant version of \(\NSs\). The value of \(\chi(b',\cvec{by})\) for each possible input is a variable, and \(P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y})\) is the behaviour of the extremal point. In particular, they considered the case where Alice has no boxes and Bob has two binary-input, binary-output boxes, where \(P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y}) = P(b_1b_2|y_1y_2)\) is then a behaviour in the familiar CHSH setting, except it describes the arbitrary no-signalling relationship between Bob's two boxes, rather than Alice and Bob's boxes. This approach is difficult to generalise to \(c > 2\). For example, for the simplest tripartite scenario of \((2,2; 2,2; 2,2)\), \(\NSs\) has 53856 extremal points~\cite{Tripartite}, and since the polytope of wirings is defined by two inequalities per extremal point, this would yield a polytope defined by 107712 inequalities.
+                  We have reproduced the authors' computations in the \verb`ns_couplers_hrep` function in \verb`polytope.jl`, using the \verb`Polyhedra.jl` interface~\cite{Polyhedra} and the \verb`lrs` library~\cite{LRS}. To simplify computations, the normalisation constraint is converted into an inequality by eliminating one value of \(b'\). A polytope with 82 vertices was recovered for the \((2,2;2,2)\) setting, agreeing with the authors' previous results, while a polytope with 144 vertices was derived by extending the above method to two boxes in the \((2,2;2,3)\) setting, disagreeing with the 176-vertex polytope identified in~\cite[Sec. 7.1]{JanLiThesis}. This latter polytope was derived by extending the functional definitions for the 5 classes of couplers identified in the \((2,2)\) case to \((2,3)\) and claiming them to be extremal, but there is no justification for such a claim, and as our computational results show, this claim is incorrect. The results in~\cite{JanLiThesis} on the claimed extremal classes of wirings (reviewed in \Cref{sec:preres}) are hence even more limited than they originally seemed.
 
-                  TODO classify the extremal points for the QKD setting
+                  It does not seem feasible to use this coupler polytope beyond the simplest case. The computation for the \((2,3)\) setting took 30 minutes on a standard laptop, running in single-threaded mode. If we wish to consider \(c=3\), for the simplest tripartite scenario of \((2,2; 2,2; 2,2)\), \(\NSs\) has 53856 extremal points~\cite{Tripartite}. Since the polytope of wirings is defined by two inequalities per extremal point, this would yield a polytope defined by 107712 inequalities, which is unlikely to be tractable.
 
-                  One possible approach is to adapt the methodology by only considering distributions consisting of independent boxes, instead of allowing an arbitrary nonsignalling relationship between the boxes. The different values of \(b'\) then correspond to different values of the overall output \(b\), while the distributions \(P(\cvec{b}|\cvec{y})\) must be the product of \(c\) deterministic single-box wirings, of which there are \(o_B^{i_B}\). Essentially, this approach allows us to explore the possible probability distributions that can arise from combining boxes across several independent rounds, without restricting ourselves to wirings that are physically realisable as a sequence of local operations that respect causality. It therefore contains \(\sW\), and also contains the polytope of couplers in this scenario, since the inequalities defining the latter are a strict superset of these inequalities.
+                  % NEXT classify the extremal points for the QKD setting
 
-                  Nonetheless, the utility of this polytope is questionable. While it will lead to an overapproximation to \(\sWB(p)\), some of these wirings may not be physically realisable even within a super-quantum no-signalling theory (since they are not checked against boxes with an arbitrary no-signalling relationship), and there is no guarantee that optimisations performed over this generated polytope will have any meaningful interpretation.
+                  Nonetheless, this approach could still lead to a simpler description for the space of wirings. We term the set of deterministic marginal conditional wiring distributions, with redundancies removed by expressing them as wiring functions, as \emph{marginal conditional wiring functions}. These sets, for \(c\) boxes, \(o\) outputs and \(i\) inputs, can be generated via the function \verb`cond_wir_fns` in \verb`wiring.jl`. While the \(i\)th power of the number of marginal conditional wiring functions is equal to the number of marginal wiring functions (\(128^2 = 16384\) and \(432^3 = 80621568\), agreeing with the values in \Cref{sec:locwir_func}), the number of these functions differs from the number of vertices in the coupler polytope, even though they should identify the same space of possible wirings.
 
+                  This might be caused by the use of the extremal no-signalling behaviours to derive the coupler polytope. To investigate this, we have implemented an alternative version of the authors' methods, where instead of checking positivity against the extremal no-signalling behaviours, we check it against all extremal behaviours, including signalling ones. The resultant polytope should be in better agreement with our wirings, since our wirings are not defined with reference to any specific class of behaviours. Indeed, given a physical configuration of wires and logic gates, there is no reason why they cannot be connected to a device with a signalling implementation. These extremal behaviours would consist of deterministic outcomes for each set of inputs, and this polytope is implemented in \verb`general_couplers_hrep` in \verb`wiring.jl` The results from our computations are summarised in \Cref{tab:polys}.
+
+                  The results are surprising: the polytope from general behaviours is different from that for no-signalling behaviours, and in fact strictly contained within it:
+                  \begin{lstlisting}
+julia> nscoup222 = polyhedron(ns_couplers_hrep(Rational{Int64},2,2,2)); vrep(nscoup222)
+82-element iterator of Vector{Rational{Int64}}:
+# output truncated
+julia> gencoup222 = polyhedron(general_couplers_hrep(Rational{Int64},2,2,2)); vrep(gencoup222)
+58-element iterator of Vector{Rational{Int64}}:
+# output truncated
+julia> collect(Iterators.filter(pt -> !in(pt, gencoup222), points(nscoup222)))
+52-element Vector{Any}:
+# output truncated
+julia> collect(Iterators.filter(pt -> !in(pt, nscoup222), points(gencoup222)))
+Any[]
+                  \end{lstlisting}
+                  cannot be that we violate the inequalities, nor can it be that their wirings violate our conditions. Must be the same polytope with degeneracies removed in theirs. Unclear why they got this result since they only considered no-signalling boxes but our definitions apply to arbitrary, possibly signalling behaviours
+
+                  TODO Complete positivity => causal?
+
+                  TODO One intriguing extension would be to analyse these couplers to see if they do, in fact, correspond to physically realisable wirings. The results of~\cite{ShortEntangleSwap} imply that all binary-input couplers are simply wirings, but since we have extended the number of inputs to 3, this implication does not apply to our scenario. Although we have the raw data necessary, we were not able to do this in the course of this project.
                   \subsection{Key Rates of Wired Behaviours}\label{sec:locwir_kr}
 
                   Let \(C^{W}_{\sk}(p)\) be the secret key capacity of a behaviour with wiring, that is

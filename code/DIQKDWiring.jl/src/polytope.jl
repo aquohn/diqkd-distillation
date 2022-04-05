@@ -3,6 +3,7 @@ using Printf
 using LazySets, Polyhedra, Symbolics, LRSLib, Combinatorics, SparseArrays
 
 # TODO: optimise for cache efficiency - iterate from last to first indices
+# TODO remove lazysets
 
 includet("helpers.jl")
 includet("nonlocality.jl")
@@ -18,30 +19,34 @@ positivities(s::Setting) = s.oA * s.oB * s.iA * s.iB
 
 # generating 
 
-function func_vec(::Type{T}, ::Type{Ti}, tupranges) where {T <: Real, Ti <: Integer}
-  shape = [rang.stop for rang in tupranges]
-  ntups = Ti(prod(shape))
+# create a lookup table for translating function arguments (args) to vectors
+# allows a function of integers (really a tensor of indices) to be represented
+# as a vector
+function func_vec(::Type{T}, ::Type{Ti}, argranges) where {T <: Real, Ti <: Integer}
+  shape = [rang.stop for rang in argranges]
+  nargvals = Ti(prod(shape))
   F = Array{SparseVector{T, Ti}}(undef, shape...)
   idx = 1
-  for tup in itprod(tupranges...)
-    F[tup...] = sparsevec([idx], 1, ntups)
+  for arg in itprod(argranges...)
+    F[arg...] = sparsevec([idx], 1, nargvals)
     idx += 1
   end
-  return F, ntups
+  return F, nargvals
 end
 
-full_polytope(sett::Setting, polylib=LRSLib.Library()) = full_polytope(2, [sett.iA, sett.iB], [sett.oA, sett.oB], polylib)
-full_polytope(n::Integer, i::Integer, o::Integer, polylib=LRSLib.Library()) = full_polytope(n, repeat([i], n), repeat([o], n), polylib)
-full_polytope(::Type{T}, n::Integer, i::Integer, o::Integer, polylib=LRSLib.Library()) where T = full_polytope(T, n, repeat([i], n), repeat([o], n), polylib)
-full_polytope(n, is, os, polylib=LRSLib.Library()) = full_polytope(Float64, n, is, os, polylib)
-function full_polytope(::Type{T}, n::Integer, is::AbstractVector{Ti}, os::AbstractVector{To}, polylib=LRSLib.Library()) where {T <: Real, Ti <: Integer, To <: Integer}
+# LRSLib seems quite slow; DefaultLibrary{T}() may work faster
+full_polytope(sett::Setting, polylib=DefaultLibrary{Rational{Int}}()) = full_polytope(2, [sett.oA, sett.oB], [sett.iA, sett.iB], polylib)
+full_polytope(n::Integer, o::Integer, i::Integer, polylib=DefaultLibrary{Rational{Int}}()) = full_polytope(n, repeat([o], n), repeat([i], n), polylib)
+full_polytope(::Type{T}, n::Integer, o::Integer, i::Integer, polylib=DefaultLibrary{T}()) where {T} = full_polytope(T, n, repeat([o], n), repeat([i], n), polylib)
+full_polytope(n, os, is, polylib=DefaultLibrary{Rational{Int}}()) = full_polytope(Rational{Int}, n, os, is, polylib)
+function full_polytope(::Type{T}, n::Integer, os::AbstractVector{To}, is::AbstractVector{Ti}, polylib=DefaultLibrary{T}()) where {T <: Real, Ti <: Integer, To <: Integer}
   # HalfSpace(a,b) => a \dot x \leq b
   # HyperPlane(a,b) => a \dot x = b
 
   Tn = promote_type(Ti, To, typeof(n))
   # ranges for the tuples of indices specifying a probability
-  otupranges = [1:i for i in is]
-  itupranges = [1:o for o in os]
+  itupranges = [1:i for i in is]
+  otupranges = [1:o for o in os]
   tupranges  = vcat(otupranges, itupranges)
   P, ntups = func_vec(T, Tn, tupranges)
   SV = SparseVector{T, Tn}
@@ -370,49 +375,55 @@ end
 # "Entaglement swapping for generalized non-local correlations"; Short, Popescu
 # and Gisin
 
-# hrep for polytope of couplers for two binary-output boxes
-function couplers_hrep(sett::Setting=Setting(2,2,2,2), ::Type{T}=Rational{Int}) where {T <: Real}
-  if sett.oA != 2 || sett.oB != 2
-    throw(ArgumentError("Setting must be binary-output!"))
-  end
-  poly = cg_polytope(sett, T)
-  vs = vertices_list(poly)
-  hss = Vector{Polyhedra.HalfSpace{T, Vector{T}}}()
-  for v in vs
-    pabxy = cg_to_full(v, sett).pabxy
-    hsu = Polyhedra.HalfSpace(vec(pabxy), 1)
-    hsl = Polyhedra.HalfSpace(-1 .* vec(pabxy), 0)
-    push!(hss, hsu)
-    push!(hss, hsl)
-  end
-  return hrep(hss)
-end
-
-function couplers_poly(sett::Setting=Setting(2,2,2,2), ::Type{T}=Rational{Int}, polylib=LRSLib.Library()) where {T <: Real}
-  hr = couplers_hrep(sett, T)
-  poly = polyhedron(hr, polylib)
-  vrep(poly)
-  return poly
-end
-
-
-function indep_rounds_couplers(::Type{T}, c::Integer, o::Integer, i::Integer) where {T <: Real}
+function general_couplers_sparse(::Type{T}, c::Integer, o::Integer, i::Integer, polylib=DefaultLibrary{T}()) where {T <: Real}
   tupranges = [1:o-1, repeat([1:o], c)..., repeat([1:i], c)...]
   Ti = promote_type(typeof(c), typeof(o), typeof(i))
   chi, nidxs = func_vec(T, Ti, tupranges)
   SV = SparseVector{T, Ti}
-  behav_iter = itprod(repeat([1:o], i)...)
+  allbs_iter = itprod(repeat([itprod(repeat([1:o], c)...)], i^c)...)
   ys_iter = itprod(repeat([1:i], c)...)
 
   lnormconstrs = SV[]
   unormconstrs = SV[]
-  for behav in behav_iter
+  for allbs in allbs_iter
     ps = SV[]
+    allbs_arr = reshape([allbs...], tuple(repeat([i], c)...))
     for bp in 1:o-1
       p = spzeros(T, nidxs)
       for ys in ys_iter
-        bs = [behav[y] for y in ys]
+        bs = allbs_arr[ys...]
         p += chi[bp, bs..., ys...]
+      end
+      push!(ps, p)
+      push!(lnormconstrs, -p)
+    end
+    push!(unormconstrs, sum(ps))
+  end
+
+  ineqconstrs = vcat([Polyhedra.HalfSpace(constr, 0) for constr in lnormconstrs], [Polyhedra.HalfSpace(constr, 1) for constr in unormconstrs])
+  hr = hrep(ineqconstrs)
+  poly = polyhedron(hr, polylib)
+  vr = vrep(poly)
+  return vr
+end
+general_couplers_sparse(c, o, i, polylib=DefaultLibrary{Rational{Int}}()) = general_couplers_sparse(Rational{Int}, c, o, i, polylib)
+
+function couplers_hrep(::Type{T}, c::Integer, o::Integer, i::Integer, behavs) where {T <: Real}
+  argranges = [1:o-1, repeat([1:o], c)..., repeat([1:i], c)...]
+  Ti = promote_type(typeof(c), typeof(o), typeof(i))
+  chi, nidxvals = func_vec(T, Ti, argranges)
+  SV = SparseVector{T, Ti}
+  bs_iter = itprod(repeat([1:o], c)...)
+  ys_iter = itprod(repeat([1:i], c)...)
+
+  lnormconstrs = SV[]
+  unormconstrs = SV[]
+  for behav in behavs
+    ps = SV[]
+    for bp in 1:o-1
+      p = spzeros(T, nidxvals)
+      for (bs, ys) in itprod(bs_iter, ys_iter)
+        p += chi[bp, bs..., ys...] * behav[bs..., ys...]
       end
       push!(ps, p)
       push!(lnormconstrs, -p)
@@ -423,8 +434,56 @@ function indep_rounds_couplers(::Type{T}, c::Integer, o::Integer, i::Integer) wh
   ineqconstrs = vcat([Polyhedra.HalfSpace(constr, 0) for constr in lnormconstrs], [Polyhedra.HalfSpace(constr, 1) for constr in unormconstrs])
   return hrep(ineqconstrs)
 end
-indep_rounds_couplers(c, o, i) = indep_rounds_couplers(Rational{Int}, c, o, i)
+couplers_hrep(c::Integer, o::Integer, i::Integer, behavs) = couplers_hrep(Rational{Int64}, c, o, i, behavs)
+function couplers_poly(::Type{T}, c::Integer, o::Integer, i::Integer, behavs, polylib=DefaultLibrary{T}()) where {T <: Real}
+  hr = couplers_hrep(T, c, o, i, behav)
+  poly = polyhedron(hr, polylib)
+  vrep(poly)
+  return poly
+end
+couplers_poly(c::Integer, o::Integer, i::Integer, behavs, polylib=DefaultLibrary{Int}()) = couplers_poly(Rational{Int}, c, o, i, behavs, polylib)
 
+struct GeneralExtrBehaviourIter{T <: Integer}
+  n::T
+  os::Vector{T}
+  is::Vector{T}
+  _it
+  _inputit
+  function GeneralExtrBehaviourIter(os::AbstractVector{<:Integer}, is::AbstractVector{<:Integer})
+    T = promote_type(eltype(os), eltype(is))
+    @assert length(os) == length(is)
+    n = length(os)
+    _it = itprod(repeat([itprod([1:o for o in os]...)], prod(is))...)
+    _inputit = itprod([1:i for i in is]...)
+    new{T}(n, os, is, _it, _inputit)
+  end
+end
+Base.length(gebit::GeneralExtrBehaviourIter) = length(gebit._it)
+Base.iterate(gebit::GeneralExtrBehaviourIter) = _iterate(gebit, iterate(gebit._it))
+Base.iterate(gebit::GeneralExtrBehaviourIter, state) = _iterate(gebit, iterate(gebit._it, state))
+_iterate(gebit::GeneralExtrBehaviourIter, itval::Nothing) = nothing
+function _iterate(gebit::GeneralExtrBehaviourIter{T}, itval) where T
+  pvec, state = itval
+  n, os, is = gebit.n, gebit.os, gebit.is
+  p = zeros(T, os..., is...)
+  allouts = reshape([pvec...], tuple(is...))
+  for ins in gebit._inputit
+    outs = allouts[ins...]
+    p[outs..., ins...] = 1
+  end
+  return p, state
+end
+
+function ns_couplers_hrep(::Type{T}, c::Integer, o::Integer, i::Integer) where {T <: Real}
+  poly = full_polytope(T, c, o, i)
+  vs = [reshape(v, tuple([repeat([o], c); repeat([i], c)]...)) for v in points(poly)]
+  return couplers_hrep(T, c, o, i, vs)
+end
+function general_couplers_hrep(::Type{T}, c::Integer, o::Integer, i::Integer) where {T <: Real}
+  return couplers_hrep(T, c, o, i, GeneralExtrBehaviourIter(repeat([o], c), repeat([i], c)))
+end
+
+#=
 const chsh_poly = cg_polytope(chshsett)
 const chsh_v = vertices_list(chsh_poly)
 const chsh_ldpoly = cg_polytope(chshsett)
@@ -434,6 +493,7 @@ const qkd_poly = cg_polytope(qkdsett)
 const qkd_v = vertices_list(qkd_poly)
 const qkd_ldpoly = ld_polytope(qkdsett)
 const qkd_ldconstr = constraints_list(qkd_ldpoly)
+=#
 
 #=
 -0.200 P(a = 1|x = 1) -0.200 P(b = 1|y = 1) +0.200 P(1,1|1,1) +0.200 P(1,1|1,2) +0.200 P(1,1|2,1) -0.200 P(1,1|2,2) <= 0.000

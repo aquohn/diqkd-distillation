@@ -110,14 +110,14 @@ function num_wirings_fns_fix(c, o, i, f)
   o^((i-f) * o^c) * prod(i^((i-f) * o^(j-1)) for j in 1:c)
 end
 
-struct WiringMapFnIter{T <: Integer}
+struct CondWiringMapFnIter{T <: Integer}
   c::T
   o::T
   i::T
   j::T
   _idxit
   _valit
-  function WiringMapFnIter(c::Integer, o::Integer, i::Integer, j::Integer)
+  function CondWiringMapFnIter(c::Integer, o::Integer, i::Integer, j::Integer)
     if j > c + 1
       throw(ArgumentError("There are only $(c+1) wiring maps for c = $c!"))
     end
@@ -133,20 +133,21 @@ struct WiringMapFnIter{T <: Integer}
     new{T}(c, o, i, j, idxit, valit)
   end
 end
-_iterate(wmfit::WiringMapFnIter, mapitcurr::Nothing) = nothing
-function _iterate(wmfit::WiringMapFnIter{T}, valitcurr) where T
+_iterate(cwmfit::CondWiringMapFnIter, mapitcurr::Nothing) = nothing
+function _iterate(cwmfit::CondWiringMapFnIter{T}, valitcurr) where T
   vals, state = valitcurr
-  c, o, i, j = wmfit.c, wmfit.o, wmfit.i, wmfit.j
+  c, o, i, j = cwmfit.c, cwmfit.o, cwmfit.i, cwmfit.j
   W = Array{T}(undef, repeat([o], j-1)...)
-  for (val, idx) in zip(vals, wmfit._idxit)
+  for (val, idx) in zip(vals, cwmfit._idxit)
     W[idx...] = val
   end
   return W, state
 end
-Base.length(wmfit::WiringMapFnIter) = length(wmfit._valit)
-Base.iterate(wmfit::WiringMapFnIter) = _iterate(wmfit, iterate(wmfit._valit))
-Base.iterate(wmfit::WiringMapFnIter, state) = _iterate(wmfit, iterate(wmfit._valit, state))
+Base.length(cwmfit::CondWiringMapFnIter) = length(cwmfit._valit)
+Base.iterate(cwmfit::CondWiringMapFnIter) = _iterate(cwmfit, iterate(cwmfit._valit))
+Base.iterate(cwmfit::CondWiringMapFnIter, state) = _iterate(cwmfit, iterate(cwmfit._valit, state))
 
+cond_wir_fns(c, o, i) = [cwf for cwf in itprod([CondWiringMapFnIter(c, o, i, j) for j in 1:c+1]...)]
 struct WiringFnIter{T <: Integer}
   c::T
   o::T
@@ -155,14 +156,19 @@ struct WiringFnIter{T <: Integer}
   _prodwfit
   function WiringFnIter(c::Integer, o::Integer, i::Integer, fix::Vector)
     T = promote_type(typeof(c), typeof(o), typeof(i))
+    # i cond wiring maps per step, c + 1 steps
     its = [
-           repeat([WiringMapFnIter(c, o, i, j)], i) for j in 1:c+1
+           repeat([CondWiringMapFnIter(c, o, i, j)], i) for j in 1:c+1
     ]
     for (cWmap, x, j) in fix
       # TODO check for validity
       its[j][x] = [cWmap]
     end
-    prodwfit = itprod([itprod(itj...) for itj in its]...)
+    # vector of the c+1 itprods, each of i cond wiring maps
+    # each itprod is a wiring map
+    mapits = [itprod(itj...) for itj in its]
+    # itprod of wiring maps
+    prodwfit = itprod(mapits...)
     new{T}(c, o, i, fix, prodwfit)
   end
   WiringFnIter(c, o, i) = WiringFnIter(c, o, i, [])
