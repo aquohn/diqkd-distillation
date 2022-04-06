@@ -60,7 +60,9 @@ end
 
 gchsh(s) = 1-phi(sqrt(s^2/4 - 1))
 
+QBER(behav::Behaviour) = QBER(Correlators(behav))
 QBER(C::Correlators) = (1 - C.Eabxy[1,3]) / 2
+CHSH(behav::Behaviour) = CHSH(Correlators(behav))
 CHSH(C::Correlators) = C.Eabxy[1,1] + C.Eabxy[1,2] + C.Eabxy[2,1] - C.Eabxy[2,2]
 HAB_oneway(behav::Behaviour) = HAB_oneway(Correlators(behav))
 function HAB_oneway(corrs::Correlators)

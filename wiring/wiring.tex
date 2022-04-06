@@ -1119,16 +1119,6 @@ E^{cc}_{sq,dev}(p,\prin) &= \inf_{\substack{\rho, \sM : \\ p = \behav{\rho}{ \sM
 
     The full derivation of this result involves the use of the operator algebra approach to quantum mechanics and spectral theory, which is generally not covered in undergraduate treatments of quantum mechanics and quantum information. An important practical result from their general approach is the extension to bounded infinite-dimensional operators. This has been reviewed (using more elementary methods, without the generality of operator algebras) in \Cref{sec:qretech}, but for this section, we write the expressions in finite-dimensional form, where all spectra are discrete.
 
-    The set of \emph{bounded operators} \(\mathcal{B}(\Hs)\) on the Hilbert space \(\Hs\) is the subset of \(\Lin{\Hs}\) such that the \emph{operator norm} of \(X \in \Lin{\Hs}\)
-    \begin{equation}
-    \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}}
-  \end{equation}
-    is finite. An operator \(X \in \mathcal{B}(\Hs)\) is \emph{trace-class} if, for the positive-semidefinite operator \(\sqrt{X^{\dagger}X}\),
-    \begin{equation}
-    \Tr{ \sqrt{X^{\dagger}X} } = \sum_{i} \angleb{e_i, Xe_i} \leq +\infty
-  \end{equation}
-    for any orthonormal basis \(\{e_j\}\) for \(\Hs\)~\cite{HallQuantumForMath}. 
-
     The natural logarithm has the integral representation
     \begin{equation}
       \ln\left(x\right) = \int_{0}^{1} \frac{x-1}{t(x-1) + 1} \dif{t}.\label{eqn:integral_log}
@@ -1888,7 +1878,7 @@ Any[]
                   \end{equation}
 
                   From this simple definition, and the linearity of wirings, we have another major result.
-                  \begin{theorem}
+                  \begin{theorem}\label{thm:extrcap}
                     The secret key capacity is convex, and is therefore maximised by extremal wirings.
                   \end{theorem}
                   \begin{proof}
@@ -1989,6 +1979,24 @@ Any[]
                   \begin{question}
                     Can linear programming techniques make the search for optimal wirings more efficient?
                   \end{question}
+                  We note also recent work on optimising \emph{trace polynomials}~\cite{TracePolyOpt}, which include polynomial functions of moments. These techniques may be useful for formulating a unified SDP including the wiring variables.
+
+                  TODO explain what an isotropic box is
+
+                    Another approach that might simplify a brute force search is that of~\cite{DistillationBounds}, where a computable upper bound is found for the CHSH value that can be \emph{distilled} by deterministic wirings on multiple copies of an isotropic box. As was shown in~\cite{JanLiThesis}, the CHSH value is maximised by extremal wirings, which are all deterministic. This follows from the linearity of the CHSH function in the behaviour, and the fact that wiring is also a linear operation. This bound is computable in time exponential in \(c\) using a dynamic programming algorithm, instead of doubly exponential time if we were to evaluate all wirings by brute force. We write \(S(p)\) for the CHSH value of a behaviour \(p\) and \(S^*_c(p)\) for the maximum CHSH value achievable by wiring \(c\) copies of \(p\) together.
+
+                    This bound can then be applied to a general nonlocal box with behaviour \(p\), by decomposing it as a convex combination of an isotropic box and a local box. Let
+                    \[ p_I' = \argmin_{p_I} S(p_I), \]
+                    where the optimisation is taken over all isotropic behaviours \(p_I\) that fulfill
+                    \[ p = (1-q)p_I + qp_L \]
+                    for some local behaviour \(p_L\) and scalar \(q \in\ccintv{0}{1}\). This optimisation can be done efficiently with a linear program~\cite{LocalPartLP}. Now, since we can mix \(p_I'\) with the corresponding local behaviour \(p_L'\) to obtain \(p\), we must have \(S^*_c(p) \leq S^*_c(p_I')\), otherwise we could perform this mixing and distill the resultant \(p\), which would contradict the assumption that \(S^*_c(p_I')\) is the maximum CHSH value obtainable.
+
+                    This is an important result, because later work has shown that the CHSH values of isotropic boxes are not distillable without shared randomness~\cite{NLMonotones}, and we will discuss the possibility of proving this even with shared randomness in \Cref{sec:wirmono_isodist}, giving hope that we can close a problem that has been open for over a decade~\cite{NLLimits, DistillationBounds}.
+
+                    More directly, we could adapt this methodology to come up with a dynamic programming approach to simplify the exhaustive search over \(\sW_D\), using bounds on key rates as a figure of merit instead of CHSH values.
+                  \begin{question}
+                    Can we express the search for optimal wirings as a dynamic programming problem?
+                  \end{question}
 
                   \section{Wiring Monotones}\label{sec:wirmono}
 
@@ -2008,7 +2016,7 @@ Any[]
                   \end{equation}
                   for some pre-order \(\succeq\) defined on the codomain of the monotone.
 
-                  As discussed in \Cref{sec:locwir}, wirings are multiple-copy local transformations. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under wirings under \(\sW_D^n\). However, its monotonicity under wirings with shared randomness (that is, \(\sW^n\)) was not proved. Nonetheless, we will review these results to see how they can help us.
+                  As discussed in \Cref{sec:locwir}, wirings are multiple-copy local transformations. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under \emph{locally random wirings}, the set of which we denote \(\sW_L^n\): Alice and Bob can use local randomness in their wiring, but not shared randomness. This set includes the set of deterministic wirings \(\sW_D^c\), but not general wirings with shared randomness \(\sW^c\). Each of the \(c\) boxes is assumed to be independent of each other, but the order in which they are used may be permuted~\cite[Sec. 3]{NLMonotones}. In contrast, recall that our definition (\Cref{sec:locwir}) focuses on the wirings themselves, rather than their action on any specific behaviour. Shared randomness in the choice of the wiring is permitted, and permutations of the boxes used are encoded in the joint behaviour the wirings act on. Nonetheless, we will review these results to see how they can help us.
 
                   \subsection{Maximal Correlation and Related Measures}\label{sec:wirmono_maxcorr}
 
@@ -2022,17 +2030,15 @@ Any[]
                                             & \text{s.t.} & \E[f(\crv{A})] = \E[g(\crv{B})] = 0 \\
                                             &             & \E[f(\crv{A})^2] = \E[g(\crv{B})^2] = 1,
                   \end{Array}
-                  where the equivalent description essentially enforces normalisation on the functions to simplify the expression. Further, it is know that \(\varrho(\crv{A},\crv{B}) = 0\) iff \(\crv{A}\) and \(\crv{B}\) are independent, while \(\varrho(\crv{A},\crv{B}) = 1\) iff \(\crv{A}\) and \(\crv{B}\) have a positive Gacs-Korner common information (TODO cite Witsenhausen), or equivalently, if the ranges \(\sA\) and \(\sB\) of \(\crv{A}\) and \(\crv{B}\) respectively can be decomposed into mutually exclusive subsets \(\sA_1 \cup \sA_2 = \sA\) and \(\sB_1 \cup \sB_2 = \sB\) such that \(\Pr(A \in \sA_1, B \in \sB_2) = 0\) and \(\Pr(A \in \sA_2, B \in \sB_1) = 0\). In such a case, the output of each random variable is sufficient to determine which subset the output of the other variable is in~\cite[Sec. V-C]{CorrReview}.
-
-                  % TODO proper accents for Gacs-Korner
+                  where the equivalent description essentially enforces normalisation on the functions to simplify the expression. Further, it is know that \(\varrho(\crv{A},\crv{B}) = 0\) iff \(\crv{A}\) and \(\crv{B}\) are independent, while \(\varrho(\crv{A},\crv{B}) = 1\) iff \(\crv{A}\) and \(\crv{B}\) have a positive Gacs-Korner common information~\cite{SeqPairsDepRV}, or equivalently, if the ranges \(\sA\) and \(\sB\) of \(\crv{A}\) and \(\crv{B}\) respectively can be decomposed into mutually exclusive subsets \(\sA_1 \cup \sA_2 = \sA\) and \(\sB_1 \cup \sB_2 = \sB\) such that \(\Pr(A \in \sA_1, B \in \sB_2) = 0\) and \(\Pr(A \in \sA_2, B \in \sB_1) = 0\). In such a case, the output of each random variable is sufficient to determine which subset the output of the other variable is in~\cite[Sec. V-C]{CorrReview}.
 
                   The maximal correlation is a nonlocality monotone because it possesses the \emph{tensorisation} property: if rvs \((\crv{A}_1, \crv{B}_1)\) are independent of \((\crv{A}_2,\crv{B}_2)\), that is, their pmfs obey \(P_{\crv{A}_1\crv{A}_2\crv{B}_1\crv{B}_2} = P_{\crv{A}_1\crv{B}_1}P_{\crv{A}_2\crv{B}_2}\), then~\cite[Cor. 4.i]{NLMonotones}
                   \begin{equation}
                     \varrho(\crv{A}_1\crv{A}_2,\crv{B}_1\crv{B}_2) = \max\{ \varrho(\crv{A}_1,\crv{B}_1), \varrho(\crv{A}_2,\crv{B}_2) \}.
                   \end{equation}
-                  In particular, this means that the maximal correlation of any number of iid copies of the pair \((\crv{A},\crv{B})\) is \(\varrho(\crv{A},\crv{B})\), even though the functions \(f\) and \(g\) can operate on all copies at once. Since wirings are functions of this form, this suggests that the maximal correlation constrains what wirings can achieve. While the proof of this fact is rather technical, this is indeed the case~\cite[Thm 8]{NLMonotones}, and extends even to wirings where the order in which the boxes are used is permuted, although the boxes are otherwise assumed to be iid, and the wirings are not permitted to use shared randomness. In contrast, our definition (\Cref{sec:locwir}) focuses on the wirings themselves, rather than their action on any specific behaviour. Shared randomness in the choice of the wiring is permitted, and permutations of the boxes used are encoded in the joint behaviour the wirings act on.
+                  In particular, this means that the maximal correlation of any number of iid copies of the pair \((\crv{A},\crv{B})\) is \(\varrho(\crv{A},\crv{B})\), even though the functions \(f\) and \(g\) can operate on all copies at once. Since wirings are functions of this form, this suggests that the maximal correlation constrains the behaviours that wirings can achieve. While the proof of this fact is rather technical, this is indeed the case for locally random wirings~\cite[Thm 8]{NLMonotones}. 
 
-                  The maximal correlation is particularly important because it can be efficiently computed given a distribution, despite its generality. We define the matrices
+                  The maximal correlation is particularly important because it can be efficiently computed for a given pmf, despite its generality. We define the matrices
                   \begin{align}
                     \matr[_{\crv{AB}|xy}]{P}_{ab} &= \Pr(\crv{A} = a, \crv{B} = b|\crv{X} = x, \crv{Y} = y) \\
                     \matr[_{\crv{A}|x}]{P}_{ab} &= \delta_{ab} \Pr(\crv{A} = a|\crv{X} = x) \\
@@ -2040,7 +2046,7 @@ Any[]
                     \matr[_{\crv{AB}|xy}]{\tilde{P}} &= \matr[_{\crv{A}|x}]{P}^{-1/2} \matr[_{\crv{AB}|xy}]{P} \matr[_{\crv{B}|y}]{P}^{-1/2} \\
                     \therefore \matr[_{\crv{AB}|xy}]{\tilde{P}}_{ab} &= \frac{p(a,b|x,y)}{\sqrt{p(a|x)p(b|y)}},
                   \end{align}
-                  where \(\matr[_{\crv{A}|x}]{P}_{ab}\), \(\matr[_{\crv{B}|y}]{P}_{ab}\), \(\matr[_{\crv{AB}|xy}]{P}_{ab}\) and \(\matr[_{\crv{AB}|xy}]{\tilde{P}}\) have dimensions \(o_A \times o_A\), \(o_B \times o_B\), \(o_A \times o_B\), \(o_A \times o_B\) respectively, and we take the Moore-Penrose pseudoinverse, which, since \(\matr[_{\crv{A}|x}]{P}_{ab}\) and \(\matr[_{\crv{B}|y}]{P}_{ab}\) are diagonal, involves inverting their non-zero diagonal entries and leaving the zero entries in place.
+                  where \(\matr[_{\crv{A}|x}]{P}_{ab}\), \(\matr[_{\crv{B}|y}]{P}_{ab}\), \(\matr[_{\crv{AB}|xy}]{P}_{ab}\) and \(\matr[_{\crv{AB}|xy}]{\tilde{P}}\) have dimensions \(o_A \times o_A\), \(o_B \times o_B\), \(o_A \times o_B\), \(o_A \times o_B\) respectively, and we take the \emph{Moore-Penrose pseudoinverse}, which, since \(\matr[_{\crv{A}|x}]{P}_{ab}\) and \(\matr[_{\crv{B}|y}]{P}_{ab}\) are diagonal, involves inverting their non-zero diagonal entries and leaving the zero entries in place.
 
                   Let the singular values of \(\matr[_{\crv{AB}|xy}]{\tilde{P}}\) be \(\sigma_i\) for \(i \in \dintv{1}{\min\{o_A, o_B\}}\) such that \(\sigma_{i} \geq \sigma_{i+1}\). Then,
                   \begin{equation}
@@ -2082,11 +2088,7 @@ Any[]
                     \sigma_1(\matr{M}) = & \max_{\cvec{f},\cvec{g}} & \rvec{f} \matr{M} \cvec{g} \\
                                          & \text{s.t.} & \norm{\cvec{f}}_2 = \norm{\cvec{g}}_2 = 1, \\
                   \end{Array}
-                  for an arbitrary matrix \(\matr{M}\) by using Lagrange multipliers to constrain \(\cvec{f}\) and \(\cvec{g}\). This maximum is achieved by \(\cvec{f} = \cvec{u}_1\), \(\cvec{g} = \cvec{v}_1\). With the additional constraint of \(\rvec{f} \cvec{u}_1 = \rvec{v}_1 \cvec{g} = 0\), the maximum is \(\sigma_2(\matr{M})\), achieved by \(\cvec{f} = \cvec{u}_2\), \(\cvec{g} = \cvec{v}_2\). We can apply this property directly to find the maximal correlation, and the functions which achieve it, from the singular value \(\sigma_2\) and its corresponding singular vectors.
-
-                  TODO \(C_{\sk}(p)\) maximised by extremal wirings which cannot have lower MC
-
-                  TODO MC ribbon is fully characterised by MC, phi-entropies
+                  for an arbitrary matrix \(\matr{M}\) by using Lagrange multipliers to constrain \(\cvec{f}\) and \(\cvec{g}\). This maximum is achieved by \(\cvec{f} = \cvec{u}_1\), \(\cvec{g} = \cvec{v}_1\). With the additional constraint of \(\rvec{f} \cvec{u}_1 = \rvec{v}_1 \cvec{g} = 0\), the maximum is \(\sigma_2(\matr{M})\), achieved by \(\cvec{f} = \cvec{u}_2\), \(\cvec{g} = \cvec{v}_2\). We can apply this property directly to find the maximal correlation, and the functions which achieve it, from the singular value \(\sigma_2\) and its corresponding singular vectors. These computations are implemented in \verb`maxcorr.jl` as the function \verb`maxcorrs`. A version of the maximal correlation for quantum states, based on the \emph{Schmidt decomposition} (an analogue of the SVD for pure states), is derived in~\cite{QuantumDPI}
 
                   In~\cite{NLMonotones}, these properties of the maximal correlation are proved using the properties of various related measures, that typically take the form of \emph{ribbons}: subsets of \({[0,1]}^2\). These include the hypercontractivity (HC) ribbon:
                   \begin{equation}
@@ -2119,45 +2121,42 @@ Any[]
                     \right\}.
                   \end{equation}
 
-                  The ribbon for a behaviour can be defined as the intersection of the ribbons for the individual conditional distributions. The ribbons have the tensorisation property, the ribbon of a post-wiring behaviour is a superset of the intersection of the ribbon of pre-wiring behaviours (that is, it expands under wirings), and the ribbons occupy the whole of \({[0,1]}^2\) for independent variables, while being restricted to \(\{(\nu_{\crv{A}}, \nu_{\crv{B}}) \st \nu_{\crv{A}} + \nu_{\crv{B}} \leq 1\}\) for perfectly correlated boxes. This makes them nonlocality monotones in the sense of monotonically changing under wirings, despite not fulfilling the resource-theoretic definition since they are not scalars.
+                  The ribbon for a behaviour can be defined as the intersection of the ribbons for the individual conditional distributions. The ribbons have the tensorisation property, the ribbon of a post-wiring behaviour is a superset of the intersection of the ribbon of pre-wiring behaviours (that is, it increases monotonically under locally random wirings), and the ribbons occupy the whole of \({[0,1]}^2\) for independent variables, while being restricted to \(\{(\nu_{\crv{A}}, \nu_{\crv{B}}) \st \nu_{\crv{A}} + \nu_{\crv{B}} \leq 1\}\) for perfectly correlated boxes. This makes them nonlocality monotones in the sense of monotonically changing under locally random wirings, despite not fulfilling the resource-theoretic definition since they are not scalars.
 
                   The relations between the measures discussed are
                   \begin{gather}
                     {\varrho(\crv{A},\crv{B})}^2 = \inf_{\substack{(\nu_{\crv{A}}, \nu_{\crv{B}}) \in \MC(\crv{A},\crv{B}) \\ \nu_{\crv{B}} \neq 0}} \frac{1 - \nu_{\crv{A}}}{\nu_{\crv{B}}} \\
                     \HC(\crv{A},\crv{B}) \subseteq \MC(\crv{A},\crv{B}) \\
-                    s^*(\crv{A},\crv{B}) \coloneqq \inf_{\substack{(\nu_{\crv{A}}, \nu_{\crv{B}}) \in \HC(\crv{A},\crv{B}) \\ \nu_{\crv{B}} \neq 0}} \frac{1 - \nu_{\crv{A}}}{\nu_{\crv{B}}} \geq {\varrho(\crv{A},\crv{B})}^2
+                    s^*(\crv{A},\crv{B}) \coloneqq \inf_{\substack{(\nu_{\crv{A}}, \nu_{\crv{B}}) \in \HC(\crv{A},\crv{B}) \\ \nu_{\crv{B}} \neq 0}} \frac{1 - \nu_{\crv{A}}}{\nu_{\crv{B}}} \geq {\varrho(\crv{A},\crv{B})}^2,
                   \end{gather}
+                  where the last measure \(s^*\) is something of an analogue of maximal correlation for the HC ribbon. The monotonicity of \(\varrho\) and \(s^*\) under locally random wirings follows from the monotonicity of the MC and HC ribbons: a decrease in these values would imply a contraction of the corresponding ribbons, which cannot happen using those wirings.
 
                   \subsection{CHSH Distillability of Isotropic Boxes}\label{sec:wirmono_isodist}
 
-                  In this work, it was proved that wirings without shared randomness cannot distill one isotropic box to another with a larger violation of CHSH. The case with shared randomness was proved for boxes with a PR fraction in \([1/\sqrt{2}, 1]\), which is precisely the part of the isotropic line outside of \(\Qs\). A crucial step of the proof was to show that isotropic boxes have the lowest maximal correlation of all boxes with a given CHSH value, the proof of which relied only worked for superquantum values of the PR fraction.
+                  In~\cite{NLMonotones}, it was proved that wirings without shared randomness cannot distill one isotropic box to another with a larger violation of CHSH. The case with shared randomness was proved for boxes with a PR fraction in \([1/\sqrt{2}, 1]\), which is precisely the part of the isotropic line outside of \(\Qs\). A crucial step of the proof was to show that isotropic boxes have the lowest maximal correlation of all boxes with a given CHSH value, the proof of which relied only worked for superquantum values of the PR fraction.
 
-                  Nonetheless, if we could characterise the impact of shared randomness on the maximal correlation, this part of the proof could be completed, since there does exist a wiring that uses shared randomness to turn any box into an isotropic box with the same CHSH value~\cite{NSTheories}. If we can show that wirings using shared randomness do not increase the maximal correlation, then we will be able to prove that isotropic boxes are not distillable, while also proving that maximal correlation is a monotone under \(\sW\), not just for \(\sW_D\).
-
-                  TODO CHSH is linear => shared randomness doesns't help
-
+                  Nonetheless, if we could characterise the impact of shared randomness on the maximal correlation, this part of the proof could be completed, since there does exist a wiring that uses shared randomness to turn any box into an isotropic box with the same CHSH value~\cite{NSTheories}. If we can show that wirings using shared randomness do not increase the maximal correlation, then we will be able to prove that isotropic boxes are not distillable, while also proving that maximal correlation is a monotone under \(\sW^n\), not just for \(\sW_D^n\).
                   \begin{question}
                     How does the use of shared randomness in wirings affect the maximal correlation and other related measures?
                   \end{question}
 
+                  Even though we were not able to analyse the effect of shared randomness in detail, we will comment on the relevance of our results to this problem. As mentioned in \Cref{sec:krwir_wiropt}, CHSH is maximised by extremal wirings. Since the extremal wirings are deterministic and therefore part of \(\sW_L^c\), the wirings that maximise the CHSH value of any box must map to a box of equal or lower maximal correlation. Nonetheless, without a proof that isotropic boxes have the lowest maximal correlation of all boxes with a given CHSH value, this would not help, since the box mapped to may have a higher CHSH value despite having an equal or lower maximal correlation.
+
                   \subsection{Evaluation}
+
+                  We first observe that, since \(C^{\otimes}_{\sk}(p)\) is maximised by extremal wirings (\Cref{thm:extrcap}), and these wirings are part of \(\sW_L^c\), these measures are genuine monotones for the secret key capacity under general wirings \(\sW^c\), despite the more limited definition. These measures therefore provide an upper bound on the possible enhancement in secret key capacity through wiring: it cannot exceed the maximal secret key capacity amongst all behaviours respecting these monotones, although we note that this maximisation may not be easy to do.
 
                   The ideal nonlocality monotone \(\mu\) would have the following desiderata:
                   \begin{enumerate}
                     \item Given a behaviour \(p\), it is easy to compute \(\mu(p)\)
-                    \item Given a value \(\mu'\), the set \(\{ p \st \mu(p) = \mu' \}\), the set can be efficiently optimised over
+                    \item Given a value \(\mu'\), the set \(\{ p \st \mu(p) = \mu' \}\) can be efficiently optimised over
                     \item It is tight in the sense that if \(\mu(p) = \mu(p')\) for behaviours \(p\) and \(p'\), there exists a wiring that will transform \(p \mapsto p'\)
                     \item Given \(p\) and \(p'\), if \(\mu(p) = \mu(p')\), we can explicitly construct the wiring that transforms \(p\) into \(p'\)
                   \end{enumerate}
 
-                  Property 1 is satisfied by the maximal correlation, but the extent to which it satisfies the other desiderata is still unclear. However, given that its monotonicity is derived from that of higher-dimensional monotones, namely the MC and HC ribbons, it is unlikely that the maximal correlation is tight (Property 3), since a transformation could change other regions of the ribbon without affecting the maximal correlation. Nonetheless, it would be helpful to see if these measures can satisfy these demands, or to find out why it might not be possible to meet them.
+                  Property 1 is satisfied by the maximal correlation, but the extent to which it satisfies the other desiderata is still unclear. However, given the many other monotones, it is possible that two boxes may have the same maximal correlation while the other monotones differ, which would mean that the maximal correlation is not tight (Property 3). Nonetheless, it would be helpful to see if these measures together can satisfy these demands, or to find out why it might not be possible to meet them.
 
-                  Another caveat arises when attempting to explicitly compute bounds on the key rate from the maximal correlation. Observe that, for \(\crv{K}_A\) and \(\crv{K}_B\), two perfectly correlated and uniformly distributed secret keys, we have \(\rho(\crv{K}_A, \crv{K}_B) = 1\), with the maximum achieved by mapping half of the keys to \(1\) and half to \(-1\) for both \(f\) and \(g\). However, if the two keys are independent, then \(\rho(\crv{K}_A,\crv{K}_B) = \E[f(\crv{K}_A)g(\crv{K}_B)] = \E[f(\crv{K}_A)]\E[g(\crv{K}_B)] = 0\). Likewise, if the two keys are deterministic (not secret), then \(f(\crv{K}_A) = g(\crv{K}_B) = 0\) and so \(\rho(\crv{K}_A, \crv{K}_B) = 0\). However, this poses an issue for longer keys. As long as \(\crv{K}_A\) and \(\crv{K}_B\) are uniformly distributed over \(N > 1\) values, \(\rho(\crv{K}_A, \crv{K}_B) = 1\), regardless of whether \(N = 2\) or (say) \(N = 10^{12}\). Therefore, we need to find a bound that looks something like
-                  \begin{equation}
-                    \max_{E|\crv{AB}} \frac{H(\crv{A}|E) - H(\crv{A}|\crv{B})}{H(\crv{A})} \leq f(\rho(\crv{A},\crv{B}))
-                  \end{equation}
-                  in order to achieve the correct scaling for an estimate of the key rate.
-
+                  Further, recent results have extended the MC and HC ribbons to multipartite correlations, generalised them by showing how they are part of a family of tensorising ribbons known as \emph{\(\Phi\)-ribbons}, and shown that the maximal correlation fully characterises the MC ribbon in the bipartite case~\cite{PhiEntropies}. It would be interesting to see if these results apply to nonlocal boxes as well, or if they can give any deeper insights.
 
                   \section{Upper Bounds from Classical Attacks}
 
@@ -2171,11 +2170,11 @@ Any[]
                   \end{equation}
                   is the \emph{classical secret key capacity} of the \(m\) honest parties against the adversary holding \(\crv{E}\), where the superscript \((s)\), for \emph{silent}, indicates the parties that do not broadcast anything while establishing the key. To apply bounds on this quantity to DIQKD protocols, we must optimise over all joint distributions compatible with the observed behaviour.
 
-                  TODO get to our bound
+                  % NEXT get to our bound in more detail
 
                   \newcommand{\splitkey}[3][\crv{J}]{I_{#1}\left(#2||#3\right)}
 
-                  Focusing on the case \(m = u = 2\), that is, the simple case of two communicating parties trying to establish a secret key from some joint distribution, this bound specialises to
+                  Focusing on the case \(m = u = 2\), that is, the simple case of two communicating parties trying to establish a secret key from some joint distribution, we have the following bound~\cite[Cor. 2]{ClassicalUpperBounds}
                   \begin{align}
                     S(\crv{V}_1, \crv{V}_2||\crv{E}) &\leq \inf_\crv{J} S(\crv{V}_1, \crv{V}_2||\crv{J}) + S(\crv{V}_1\crv{V}_2, \crv{J}^{(s)}||\crv{E}) \\
                                                      &\leq \inf_\crv{J} S(\crv{V}_1\crv{J}, \crv{V}_2\crv{J}||\crv{J}) + S(\crv{V}_1\crv{V}_2, \crv{J}^{(s)}||\crv{E}) \\
@@ -2186,9 +2185,13 @@ Any[]
 
                   \subsection{Computing the Optimisation}
 
-                  An immediate temptation is to express this bound in terms of relative entropies and use the method of quasi-relative entropies to approximate it, while accounting for Eve's possible quantum attacks. However, the NPA hierarchy, used in~\cite{BFF_QRE} to lower bound the key rate, provides a sequence of \emph{outer approximations}, giving Eve \emph{more} power than she would actually have. Hence, upper bounds derived by this route will not be valid, as they could be lower than the true upper bound. We will instead provide an \emph{inner approximation} by considering fixed dimensions \(d_A\), \(d_B\) and \(d_E\) for the Hilbert space \(A\), \(B\) and \(E\) respectively, which allows us to parametrise the measurements and states used by scalar variables. We can then minimise \(\splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}}\) over \(\crv{J}\) and these scalar variables to compute an upper bound.
+                  An immediate temptation is to express this bound in terms of relative entropies of quantum operators and use the method of quasi-relative entropies to approximate it. However, the NPA hierarchy, used in~\cite{BFF_QRE} to lower bound the key rate, provides a sequence of \emph{outer approximations}, giving Eve \emph{more} power than she would actually have. Hence, upper bounds derived by this route will not be valid, as they could be lower than the true upper bound. We will instead provide an \emph{inner approximation} by considering fixed dimensions \(d_A\), \(d_B\) and \(d_E\) for the Hilbert space \(A\), \(B\) and \(E\) respectively, which allows us to parametrise the measurements and states used by scalar variables. We can then minimise \(\splitkey{\crv{V}_1,\crv{V}_2}{\crv{E}}\) over \(\crv{J}\) and these scalar variables to compute an upper bound.
 
-                  It is possible to perform this optimisation directly using a nonlinear constrained optimisation program, such as MATLAB's \verb`fmincon`. However, such an optimisation would generally only be able to find local minima, which would still be valid upper bounds but may be very loose. Although we are unable to use the NPA hierarchy of relaxations, the equivalent of the NPA hierarchy for commutative variables, the Lasserre hierarchy, has been used and studied extensively for the purpose of approximating the global minima of polynomials (TODO cite). Further, there is a related hierarchy of upper bounds on global minima from semidefinite programs (TODO cite). Therefore, if we are able to express these optimisations as polynomial optimisation problems, we could apply these techniques to tighten the achievable bounds. As it turns out, the variational approximation to the logarithm used in~\cite{BFF_QRE} allows us to transform all logarithms in the expression into multivariate polynomials, bringing us very close to this objective. Even if Lasserre-hierarchy based approaches turn out to be infeasible, the polynomial approximation may still be easier to optimise than the original formulation.
+                  It is possible to perform this optimisation directly using a nonlinear constrained optimisation program, such as MATLAB's \verb`fmincon`. However, such an optimisation would generally only be able to find local minima, which would still be valid upper bounds but may be very loose. Although we are unable to use the NPA hierarchy of relaxations, the equivalent of the NPA hierarchy for commutative variables, the \emph{Lasserre hierarchy}, has been used and studied extensively for the purpose of approximating the global minima of polynomials~\cite{LasserreHierarchy}. Further, there is a related hierarchy of upper bounds on global minima from semidefinite programs~\cite{UpperBoundsHierarchy}, and a very recent modification of this approach which may prove more scalable~\cite{LasserreUpperBoundsPushForward}. Therefore, if we are able to express these optimisations as polynomial optimisation problems, we could apply these techniques to assess how close we are to global optimality.
+
+                  As it turns out, the variational approximation to the logarithm used in~\cite{BFF_QRE} allows us to transform all logarithms in the expression into either multivariate polynomials or rational functions, enabling the use of these techniques. Rational functions can be minimised using either Lasserre-type methods for upper~\cite{MinRational} or lower~\cite{MinRationalLower} bounds, or by introducing a new variable \(R\) for each rational term \(P/Q\), with the polynomial constraint that \(P - QR = 0\). This latter reformulation is referred to as the \emph{epigraph approach} in~\cite{MinRationalLower}.
+
+                  Even if Lasserre-hierarchy based approaches turn out to be infeasible, the polynomial or rational approximations may still be easier to optimise, using standard nonlinear local optimisers, than the original logarithmic formulation.
 
                   It is known that, for classical rvs \(\{\crv{X}, \crv{Y}, \crv{Z}\}\) with joint pmf \(P_{\crv{XYZ}}\),
                   \[ I(\crv{X}:\crv{Y}|\crv{Z}) = D\left(P_{\crv{XYZ}}||P_{\crv{X}|\crv{Z}} P_{\crv{Y}|\crv{Z}} P_{\crv{Z}}\right). \]
@@ -2200,7 +2203,9 @@ Any[]
                   \end{gather}
                   where \(P'_{\crv{V}_1\crv{V}_2\crv{J}} = P_{\crv{V_1|V_2}} P_{\crv{V}_2|\crv{J}} P_{\crv{J}}\) and \(P''_{\crv{V}_1\crv{V}_2\crv{JE}} = P_{\crv{V_1V_2|E}} P_{\crv{J|E}} P_{\crv{E}}\).
 
-                  Now, since these are logarithms of scalar values rather than operators, we can apply the Gauss-Radau approximation directly. Indeed, as mentioned in~\cite[Remark 2.10]{BFF_QRE}, the Gauss-Radau nodes and weights \({\{t'_i, w'_i\}}_{i=1}^m\) such that \(t'_1 = 0\), in contrast to \(t_m = 1\), can be used to provide upper bounds for the logarithms, and therefore the relative entropies. Writing \(p_1(x)\) and \(p_2(x)\) for two generic pmfs on an alphabet \(\{x\}\), we have
+                  At this point, we could express the rvs as classical states, and use variational expression for the relative entropy \Cref{eqn:qre_var} to express each relative entropy as a polynomial optimisation problem. As mentioned in~\cite[Remark 2.10]{BFF_QRE}, the Gauss-Radau nodes and weights \({\{t'_i, w'_i\}}_{i=1}^m\) such that \(t'_1 = 0\), in contrast to \(t_m = 1\), can be used to provide upper bounds for the logarithms, and therefore the relative entropies. In contrast to \Cref{eqn:bff_npa}, which encounters the aforementioned outer approximation problem, we make use of our dimension bound to explicitly specify the entries of the operators, rather than constraining their moments using the NPA hierarchy. The traces of the operators are then polynomial expressions. The beginnings of this approach are described in \Cref{sec:logratbound}, but it quickly became apparent that the operators \(Z\) would induce an extremely large number of optimisation variables.
+
+                  A different approach is to observe that, since these are logarithms of scalar values rather than operators, we can apply the Gauss-Radau approximation directly. Writing \(p_1(x)\) and \(p_2(x)\) for two generic pmfs on an alphabet \(\{x\}\), we have
                   \begin{align}
                     D(p_1||p_2) &= \sum_x p_1(x) \log \frac{p_1(x)}{p_2(x)} \\
                                 &\leq \sum_x p_1(x) \sum_{i=1}^m \frac{w'_i}{\ln 2} \frac{p_1(x)/p_2(x) - 1}{t'_i (p_1(x)/p_2(x)-1) + 1} \\
@@ -2217,9 +2222,7 @@ Any[]
                                            &= -\sum_x \sum_{i=1}^m \frac{w_i}{t_i \ln 2}\left( \frac{-{p_1(x)}^2}{t_i p_2(x) + (1-t_i) p_1(x)} + p_1(x) \right)\\
                                            &= -\sum_{i=1}^m \frac{w_i}{t_i \ln 2}\left( \sum_x \frac{-{p_1(x)}^2}{t_i p_2(x) + (1-t_i) p_1(x)} + p_1(x) \right)~\label{eqn:logratbound},
                   \end{align}
-                  where, of course, \(\sum_x p_1(x) = 1\) if \(p_1\) is normalised. This simplifies the numerator of each fraction considerably. 
-
-                  However, both of these approximations give us rational objective functions. Nonetheless, we can use the methods of polynomial optimisation if we reformulate the problem, introducing a new variable \(R\) for each rational term \(P/Q\), with the polynomial constraint that \(P - QR = 0\). This is referred to as the \emph{epigraph approach} in TODO cite.
+                  where, of course, \(\sum_x p_1(x) = 1\) if \(p_1\) is normalised. This simplifies the numerator of each fraction considerably, but leads to a blowup when using the upper bound nodes and weights, since we have \(t'_1 = 0\) as a denominator. Although this avoids introducing the variables associated with \(Z\), the resulting objective functions are no longer polynomial but rational. Nonetheless, they can be tackled using the methods discussed above. Both of these approximations to the relative entropy are implemented in \verb`upper.jl`.
 
                   \subsection{Relation to States and Measurements}\label{sec:ubound_statemeas}
 
@@ -2240,30 +2243,30 @@ Any[]
 
                   However, observe that we require the full joint distribution \(P_{\crv{V_1V_2}}(v_1v_2) = \prin(x,y)p(ab|xy)\). While \(p(ab|xy)\) is given, we cannot include the distribution \(\prin(x,y)\) as a variable to be minimised, since, to provide a valid upper bound, Alice and Bob must be allowed to choose the best possible \(\prin(x,y)\) (although we note that, unless their inputs are independent, they must have some pre-existing shared secret). Therefore, without involving ourselves in the complications of bilevel optimisation, we can only fix a distribution \(\prin(x,y)\) and claim that our upper bound is valid for protocols and experiments using that distribution. Fortunately, this simplifies the optimisation somewhat by fixing the joint distribution \(P_{\crv{V_1V_2}}(v_1v_2)\), allowing conditional and marginal distributions to be easily calculated.
 
-                  Although we cannot bound the cardinality \(o_E\) of \(\crv{E}\), we will have to fix it to some finite number in order to specify the number of measurement operators \(O_e\). This will still provide a valid upper bound, but we lose some tightness. The cardinality \(o_{\crv{J}}\) of \(\crv{J}\) can be upper bounded by the product of the cardinalities of \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\), as explained in TODO cite, and the conditional distribution \(P_{\crv{J|V_1V_2E}}\) can then be parametrised by \(o_{\crv{J}} i_A o_A i_B o_B o_E = o_{\crv{J}}^2\) probabilities, with the corresponding normalisation conditions.
+                  Although we cannot bound the cardinality \(o_E\) of \(\crv{E}\), we will have to fix it to some finite number in order to specify the number of measurement operators \(O_e\). This will still provide a valid upper bound, but we lose some tightness. The cardinality \(o_{\crv{J}}\) of \(\crv{J}\) can be upper bounded by the product of the cardinalities of \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\), as explained in~\cite[Cor. 2 Proof]{ClassicalUpperBounds}, and the conditional distribution \(P_{\crv{J|V_1V_2E}}\) can then be parametrised by \(o_{\crv{J}} i_A o_A i_B o_B o_E = o_{\crv{J}}^2\) probabilities, with the corresponding normalisation conditions.
 
-                  In order to parametrise states and measurements, we work with a parametrisation of \(d\)-dimensional operators in terms of \(d^2\) angles \(\{\lambda_{1,1},\ldots,\lambda_{d,d}\}\) (TODO cite):
+                  In order to parametrise states and measurements, we work with a parametrisation of \(d\)-dimensional operators in terms of \(d^2\) angles \(\{\theta_{1,1},\ldots,\theta_{d,d}\}\)~\cite{CompositeParam}:
                   \begin{equation}
-                    U = \left[ \prod_{j=1}^{d-1} \left(\prod_{k={j+1}}^d \underbrace{\exp\left(i\lambda_{k,j}\ket{k}\bra{k}\right)\exp\left(i\lambda_{j,k}\sigma_{j,k}\right)}_{\Lambda_{j,k}} \right) \right] \left[ \prod_{l=1}^d \exp\left(i\lambda_{l,l}\ket{l}\bra{l}\right) \right],
+                    U = \left[ \prod_{j=1}^{d-1} \left(\prod_{k={j+1}}^d \underbrace{\exp\left(i\theta_{k,j}\ket{k}\bra{k}\right)\exp\left(i\theta_{j,k}\sigma_{j,k}\right)}_{\Theta_{j,k}} \right) \right] \left[ \prod_{l=1}^d \exp\left(i\theta_{l,l}\ket{l}\bra{l}\right) \right],
                   \end{equation}
-                  where \(\lambda_{j,k} \in \ccintv{0}{\pi/2}\) for \(j<k\) and \(\lambda_{j,k} \in \ccintv{0}{2\pi}\) otherwise, and \(\sigma_{j,k}\) is the anti-symmetric matrix \(\sigma_{j,k} = -i\ket{j}\bra{k} +i\ket{k}\bra{j}\). Each matrix \(\Lambda_{j,k}\) rotates the two columns \(\ket{j}\) and \(\ket{k}\), and can be explicitly expressed as
+                  where \(\theta_{j,k} \in \ccintv{0}{\pi/2}\) for \(j<k\) and \(\theta_{j,k} \in \ccintv{0}{2\pi}\) otherwise, and \(\sigma_{j,k}\) is the anti-symmetric matrix \(\sigma_{j,k} = -i\ket{j}\bra{k} +i\ket{k}\bra{j}\). Each matrix \(\Theta_{j,k}\) rotates the two columns \(\ket{j}\) and \(\ket{k}\), and can be explicitly expressed as
                   \begin{equation}
-                    \Lambda_{j,k} = \cos(\lambda_{j,k})\ket{j}\bra{j} + e^{i\lambda_{k,j}}\cos(\lambda_{j,k})\ket{k}\bra{j} + \sin(\lambda_{j,k})\ket{j}\bra{k} + e^{i\lambda_{k,j}}\cos(\lambda_{j,k})\ket{k}\bra{k}.
+                    \Theta_{j,k} = \cos(\theta_{j,k})\ket{j}\bra{j} + e^{i\theta_{k,j}}\cos(\theta_{j,k})\ket{k}\bra{j} + \sin(\theta_{j,k})\ket{j}\bra{k} + e^{i\theta_{k,j}}\cos(\theta_{j,k})\ket{k}\bra{k}.
                   \end{equation}
-                  Each matrix \(\exp\left(i\lambda_{l,l}\ket{l}\bra{l}\right)\) multiplies column \(l\) by a phase factor, and so their product can be explicitly expressed as
+                  Each matrix \(\exp\left(i\theta_{l,l}\ket{l}\bra{l}\right)\) multiplies column \(l\) by a phase factor, and so their product can be explicitly expressed as
                   \begin{equation}
-                    \prod_{l=1}^d \exp\left(i\lambda_{l,l}\ket{l}\bra{l}\right) = \sum_{l=1}^d e^{i\lambda_{l,l}}\ket{l}\bra{l}.
+                    \prod_{l=1}^d \exp\left(i\theta_{l,l}\ket{l}\bra{l}\right) = \sum_{l=1}^d e^{i\theta_{l,l}}\ket{l}\bra{l}.
                   \end{equation}
 
                   A density matrix \(\rho\), being a positive-semidefinite trace-1 operator, can be expressed via the spectral theorem as
                   \begin{equation}
                     \rho = \sum_j p_j \ket{\rho_j}\bra{\rho_j} = \sum_j p_j U_{\rho}\ket{j}\bra{j}U_{\rho}^{\dagger},
                   \end{equation}
-                  where \(\{\ket{\rho_j}\}\) is the eigenbasis of \(\rho\), \(\{\ket{j}\}\) is the computational basis, and \(U_{\rho} = \sum_{j} e^{i\phi_j} \ket{\rho_j}\bra{j}\) is some unitary matrix. The value \(p_j\) form a probability distribution over the eigenbasis, and can either be parametrised as \(d\) positive numbers summing to 1, or as \(d-1\) angles \(\{\theta_j\}\) such that
+                  where \(\{\ket{\rho_j}\}\) is the eigenbasis of \(\rho\), \(\{\ket{j}\}\) is the computational basis, and \(U_{\rho} = \sum_{j} e^{i\phi_j} \ket{\rho_j}\bra{j}\) is some unitary matrix. The value \(p_j\) form a probability distribution over the eigenbasis, and can either be parametrised as \(d\) positive numbers summing to 1, or as \(d-1\) angles \(\{\phi_j\}\) such that
                   \begin{equation}
-                    p_j = \cos^2\theta_j\prod_{k=1}^{j-1}\sin^2\theta_k,
+                    p_j = \cos^2\phi_j\prod_{k=1}^{j-1}\sin^2\phi_k,
                   \end{equation}
-                  where \(\theta_d \coloneqq 0\) and \(\prod_{k=1}^{0}\sin^2\theta_k \coloneqq 1\), in either case yielding \(d-1\) independent real parameters. However, expressing the density matrix in terms of the unitary operators shows that the \(d\) parameters \(\lambda_{j,j}\) can be neglected (TODO cite), allowing an arbitrary density matrix to be fully parametrised by \(d^2 -d + d - 1 = d^2-1\) real numbers.
+                  where \(\phi_d \coloneqq 0\) and \(\prod_{k=1}^{0}\sin^2\phi_k \coloneqq 1\), in either case yielding \(d-1\) independent real parameters. However, expressing the density matrix in terms of the unitary operators shows that the \(d\) parameters \(\theta_{j,j}\) can be neglected~\cite{CompositeParam}, allowing an arbitrary density matrix to be fully parametrised by \(d^2 -d + d - 1 = d^2-1\) real numbers.
 
                   The parametrisation of POVMs is more involved, but we can leverage our parametrisation of unitary matrices here as well. We begin with Naimark's dilation theorem, which tells us that an \(o\)-outcome POVM \(\{M_a\}\) on a \(d\)-dimensional Hilbert space \(A\) can be viewed as a projective measurement on a larger Hilbert space \(\Hs \cong O \otimes A\) of dimension \(od\). Throughout this section, kets and inner products without subscripts refer to the Hilbert space \(A\). We relate \(A\) to \(\Hs\) via the \(od \times d\) \emph{isometry}
                   \begin{equation}
@@ -2283,9 +2286,9 @@ Any[]
                   \begin{gather}
                     {\left(\left(\sum_j e^{i\phi_j} \ket{j}\bra{j}\right)\sqrt{M_a}\right)}^{\dagger} {\left(\left(\sum_k e^{i\phi_k} \ket{k}\bra{k}\right)\sqrt{M_a}\right)} \\
                     = \sqrt{M_a}^{\dagger}\left(\sum_j e^{i\phi_j} \ket{j}\bra{j}\right) \left(\sum_k e^{-i\phi_k} \ket{k}\bra{k}\right)\sqrt{M_a} \\
-                    = \sqrt{M_a}^{\dagger}\sqrt{M_a}.
+                    = \sqrt{M_a}^{\dagger}\sqrt{M_a} = M_a.
                   \end{gather}
-                  Therefore, each POVM induces a unique \(k\)-dimensional basis in \(\Hs\).
+                  Therefore, each POVM induces a unique basis for a \(d\)-dimensional subspace in \(\Hs\).
 
                   Conversely, any such basis \({\{\ket{\gamma^{(g)}}_{\Hs}\}}_{g=1}^d\) induces a unique valid POVM on \(A\). We decompose each vector as \(\ket{\gamma^{(g)}}_{\Hs} = \oplus_{a=1}^o g_a \ket{\gamma^{(g)}_a}\), with normalisation factors \(g_a\), and construct \(o\) \(d\times{d}\) operators 
                   \begin{equation}
@@ -2301,9 +2304,9 @@ Any[]
                   \end{equation}
                   and therefore any orthonormal basis for this subspace generates a unique POVM in this way. This is in agreement with~\cite{RandPOVM}, where a distribution over the isometries \(V\) is shown to recover the uniform distribution on the Lebesgue measure over the set of POVMs.
 
-                  The set of these bases can be parametrised, via the unitary that generates them from the computational basis \({\{\ket{g}_{\Hs}\}}_{g=1}^d\), using \(2d(od-d)\) real parameters \(\lambda_{j,k}\) as
+                  Because we only need \(d\) basis vectors, the unitary that generates these bases admits the same parametrisation as the unitary for generating a rank \(d\) density matrix from the computational basis \({\{\ket{g}_{\Hs}\}}_{g=1}^{od}\) in~\cite{CompositeParam}, which uses \(d(2od-d-1)\) real parameters \(\theta_{j,k}\):
                   \begin{equation}
-                    U_{\gamma} = \prod_{j=1}^d \left( \prod_{k=j+1}^{od} \exp(i\lambda_{k,j}\ket{k}\bra{k}) \exp(i\lambda_{j,k}\sigma_{j,k}) \right),
+                    U_{\gamma} = \prod_{j=1}^d \left( \prod_{k=j+1}^{od} \exp(i\theta_{k,j}\ket{k}\bra{k}) \exp(i\theta_{j,k}\sigma_{j,k}) \right),
                   \end{equation}
                   giving
                   \begin{align}
@@ -2312,19 +2315,9 @@ Any[]
                                         &= \underbrace{\left(\sum_{h} \ket{h}\bra{h}_{\Hs} U_{\gamma}^{\dagger}\right)}_{V^\dagger} \left(\ket{a}\bra{a}_O \otimes I_A\right) \underbrace{\left(\sum_{g} U_{\gamma}\ket{g}_{\Hs}\bra{g}\right)}_{V}.
                   \end{align}
 
-                  TODO show that n = 1 is insufficient, cannot symbolically generate fully mixed POVM since \(re^{i\theta}se^{i\phi} \neq 0\) unless \(r=0\) or \(s=0\). 
+                  While code to generate computer algebra representations of these parametrisations is implemented in \verb`quantum.jl` using \verb`SymEngine.jl` and \verb`unitary.py` using Sympy~\cite{Sympy}, due to mistakenly spending an extensive amount of time trying to optimise the incorrect parametrisation in \Cref{sec:wrongparam}, we were not able to perform any optimisations using this parametrisation. The random POVM generation routines proposed in~\cite{RandPOVM} are also implemented in \verb`quantum.jl`, in order to facilitate future attempts at a Monte Carlo search for an upper bound.
 
-                  Additionally, we have
-                  \begin{align}
-                    P_{\crv{V_1V_2}}(v_1v_2) &= \sum_{e} \prin(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
-                                             &= \prin(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} \sum_e o_e^{(k_E)} p^{(k)} \\
-                                             &= \prin(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} p^{(k)} \\
-                    P_{\crv{V_2E}}(v_2e) &= \sum_{ax} \prin(x,y) \sum_k m_{a|x}^{(k_A)} n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
-                                         &= \sum_{x} \prin(x,y) \sum_k n_{b|y}^{(k_B)} o_e^{(k_E)} \sum_a m_{a|x}^{(k_A)} p^{(k)} \\
-                                         &= \prin(y) \sum_k n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
-                    P_{\crv{E}}(e) &= \sum_{by} \prin(y) \sum_k n_{b|y}^{(k_B)} o_e^{(k_E)} p^{(k)} \\
-                                   &= \sum_k o_e^{(k_E)} p^{(k)}.
-                  \end{align}
+                  % TODO show that n = 1 is insufficient, cannot symbolically generate fully mixed POVM since \(re^{i\theta}se^{i\phi} \neq 0\) unless \(r=0\) or \(s=0\). 
 
                   \section{Summary and Outlook}
 
@@ -2344,7 +2337,13 @@ Any[]
 
                     \subsection{Linear Algebra and Quantum Mechanics}\label{sec:prelim_linalg}
 
-                    The mathematical models of quantum mechanics are expressed in the language of linear algebra. This brief review will focus on explaining the correspondence between physical features of quantum systems and their mathematical expression. All statements made without citation in this section can be found in Chapter 2 of~\cite{NielsenChuang}.
+                    The mathematical models of quantum mechanics are expressed in the language of linear algebra. This brief review will focus on explaining the correspondence between physical features of quantum systems and their mathematical expression. All statements made without citation in this section can be found in~\cite{NielsenChuang}.
+
+    The set of \emph{bounded operators} \(\mathcal{B}(\Hs)\) on the Hilbert space \(\Hs\) is the subset of \(\Lin{\Hs}\) such that the \emph{operator norm} of \(X \in \Lin{\Hs}\)
+    \begin{equation}
+    \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}}
+  \end{equation}
+    is finite.~\cite{HallQuantumForMath}. 
 
                     The \emph{tensor product} of their Hilbert spaces
 
@@ -2607,7 +2606,7 @@ Any[]
                       \end{align}
                       which is the form of the terms in the sum in \Cref{eqn:logratbound}.
 
-                      \section{A Restricted Quantum Behaviour Parametrisation}
+                      \section{A Restricted Quantum Behaviour Parametrisation}\label{sec:wrongparam}
 
                       During the course of this research, a model for behaviours in \(\Qs\), given dimension bounds on Alice, Bob and Eve's systems, was considered, and extensive attempts were made to solve the model, which could be expressed as a set of polynomial equations, symbolically and numerically. Code for global optimisation of polynomial approximations of the logarithms in entropy functions is found in \verb`upoly.jl`, while code for direct local optimisation is found in \verb`udirect.jl`, with shared code in \verb`upper.jl`. Unfortunately, it was discovered that an error in the derivation meant that the model was only capable of generating probabilities in \(\Ls\). The derivation is preserved in this appendix as a record of work done and for pedagogical purposes, and may be of some independent interest in examining the recovery of \(\Ls\) from quantum states and measurements of a bounded dimension (cf.\ the results of~\cite{FiniteDimNonconvex} that, without shared randomness, \(\Qs\) can be nonconvex in bounded dimensions and may not recover \(\Ls\)).
 
@@ -2883,22 +2882,6 @@ Any[]
                     \end{enumerate}
 
                     The function \verb`HAE_CHSHa` in \verb`keyrates.jl` provides an untested implementation using the \verb`JuMP` modelling language for mathematical optimisation~\cite{JuMP}.
-
-                    \subsection{Dynamic Programming for Wirings}
-
-                    Another approach that might simplify a brute force search is that of~\cite{DistillationBounds}, where a computable upper bound is found for the CHSH value that can be \emph{distilled} using LOSR on multiple copies of an isotropic box. This bound is computable in time exponential in \(c\) using a dynamic programming algorithm, instead of doubly exponential time if we were to compute all the boxes by brute force. We write \(S(p)\) for the CHSH value of a behaviour \(p\) and \(S^*_c(p)\) for the maximum CHSH value achievable by wiring \(c\) copies of \(p\) together.
-
-                    This bound can then be applied to a general nonlocal box with behaviour \(p\), by decomposing it as a convex combination of an isotropic box and a local box. Let
-                    \[ p_I' = \argmin_{p_I} S(p_I), \]
-                    where the optimisation is taken over all isotropic behaviours \(p_I\) that fulfill
-                    \[ p = (1-q)p_I + qp_L \]
-                    for some local behaviour \(p_L\) and scalar \(q \in\ccintv{0}{1}\). This optimisation can be done efficiently with a linear program~\cite{LocalPartLP}. Now, since we can mix \(p_I'\) with the corresponding local behaviour \(p_L'\) to obtain \(p\), we must have \(S^*_c(p) \leq S^*_c(p_I')\), otherwise we could perform this mixing and distill the resultant \(p\), which would contradict the assumption that \(S^*_c(p_I')\) is the maximum CHSH value obtainable.
-
-                    TODO rewrite below, we have proved this
-
-                    This is an important result, because later work has shown that the CHSH values of isotropic boxes are not distillable without shared randomness~\cite{NLMonotones}, and we discuss the possibility of proving this even with shared randomness in \Cref{sec:wirmono_isodist}, giving hope that we can close a problem that has been open for over a decade~\cite{NLLimits, DistillationBounds}.
-
-                    More directly, we could adapt this methodology to come up with a dynamic programming approach to simplify the exhaustive search over \(\sW_D\), using bounds on key rates as a figure of merit instead of CHSH values.
 
                     \subsection{Lie Algebra Basis for Hermitian Operators}\label{sec:addtech_liealg}
 

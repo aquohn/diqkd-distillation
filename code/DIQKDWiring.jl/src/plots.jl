@@ -477,6 +477,17 @@ function expt_maxcorr_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23
   return ij_xyz_plot(ncs, etas, dataf, names; addplotf=DW_frontier_plot, contourzf = (lvl, _xs, _ys) -> 0 .* _xs, kwargs...)
 end
 
+function expt_maxcorr_QS_plot(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi], ncsamples=100, etasamples=100, etastart=0.65, ncstart=0.0, kwargs...) 
+  names = Dict{Symbol, String}(:x => "QBER", :y => "CHSH", :z => "Maximal Correlation",
+                               :i => L"n_c", :j => L"\eta", :set => "Experimental Model"
+                              )
+  ncs = range(ncstart, stop=1, length=ncsamples)
+  etas = range(etastart, stop=1, length=etasamples)
+  corrf = expt_corrf(theta=theta, mus=mus, nus=nus)
+  dataf = (is, js; kwargs...) -> maxcorr_3ddata(is, js, QBER, CHSH, corrf; kwargs...)
+  return ij_xyz_plot(ncs, etas, dataf, names; contourzf = (lvl, _xs, _ys) -> 0 .* _xs, kwargs...)
+end
+
 function qset_maxcorr_plot(QLDsamples = 100, boundsamples = 100; kwargs...) 
   names = Dict{Symbol, String}(:x => "H(A|B)", :y => "H(A|E)", :z => "Maximal Correlation",
                                :i => L"f_I", :j => L"f_{LD}", :set => "Polytope Slice"
@@ -487,6 +498,18 @@ function qset_maxcorr_plot(QLDsamples = 100, boundsamples = 100; kwargs...)
   dataf = (is, js; kwargs...) -> maxcorr_3ddata(is, js, HAB_oneway, HAE_CHSH, corrf; kwargs...)
   return ij_xyz_plot(fIs, fLDs, dataf, names; addplotf=DW_frontier_plot, contourzf = (lvl, _xs, _ys) -> 0 .* _xs, kwargs...)
 end
+
+function qset_maxcorr_QS_plot(QLDsamples = 100, boundsamples = 100; kwargs...) 
+  names = Dict{Symbol, String}(:x => "QBER", :y => "CHSH", :z => "Maximal Correlation",
+                               :i => L"f_I", :j => L"f_{LD}", :set => "Polytope Slice"
+                              )
+  fIs = range(0,1,length=boundsamples)
+  fLDs = range(0,1,length=QLDsamples)
+  corrf = qset_corrf()
+  dataf = (is, js; kwargs...) -> maxcorr_3ddata(is, js, QBER, CHSH, corrf; kwargs...)
+  return ij_xyz_plot(fIs, fLDs, dataf, names; contourzf = (lvl, _xs, _ys) -> 0 .* _xs, kwargs...)
+end
+
 
 # %%
 # Widget code
