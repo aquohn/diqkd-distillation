@@ -768,17 +768,6 @@
   year={2018}
 }
 
-@article{CompositeParam,
-  title={A composite parameterization of unitary groups, density matrices and subspaces},
-  author={Spengler, Christoph and Huber, Marcus and Hiesmayr, Beatrix C},
-  journal={Journal of Physics A: Mathematical and Theoretical},
-  volume={43},
-  number={38},
-  pages={385306},
-  year={2010},
-  publisher={IOP Publishing}
-}
-
 @article{SquaringParam,
   title={Squaring parametrization of constrained and unconstrained sets of quantum states},
   author={Il'In, N and Shpagina, E and Uskov, F and Lychkovskiy, O},
@@ -1350,7 +1339,7 @@ doi={10.1007/s10107-020-01549-3},
 url={https://doi.org/10.1007/s10107-020-01549-3}
 }
 
-@article{Spengler_2010,
+@article{CompositeParam,
 	doi = {10.1088/1751-8113/43/38/385306},
 	url = {https://doi.org/10.1088/1751-8113/43/38/385306},
 	year = 2010,
@@ -1364,3 +1353,20 @@ url={https://doi.org/10.1007/s10107-020-01549-3}
 	journal = {Journal of Physics A: Mathematical and Theoretical},
 	abstract = {Unitary transformations and density matrices are central objects in quantum physics and various tasks require to introduce them in a parameterized form. In this paper we present a parameterization of the unitary group of arbitrary dimension d which is constructed in a composite way. We show explicitly how any element of can be composed of matrix exponential functions of generalized anti-symmetric σ-matrices and one-dimensional projectors. The specific form makes it considerably easy to identify and discard redundant parameters in several cases. In this way, redundancy-free density matrices of arbitrary rank k can be formulated. Our construction can also be used to derive an orthonormal basis of any k-dimensional subspaces of with the minimal number of parameters. As an example it is shown that this feature leads to a significant reduction of parameters in the case of investigating distillability of quantum states via lower bounds of an entanglement measure (the m-concurrence).}
 }
+﻿@Article{Avis2018,
+author={Avis, David
+and Jordan, Charles},
+title={mplrs: A scalable parallel vertex/facet enumeration code},
+journal={Mathematical Programming Computation},
+year={2018},
+month={Jun},
+day={01},
+volume={10},
+number={2},
+pages={267-302},
+abstract={We describe a new parallel implementation, mplrs, of the vertex enumeration code lrs that uses the MPI parallel environment and can be run on a network of computers. The implementation makes use of a C wrapper that essentially uses the existing lrs code with only minor modifications. mplrs was derived from the earlier parallel implementation plrs, written by G. Roumanis in C{\$}{\$}{\{}++{\}}{\$}{\$}which runs on a shared memory machine. By improving load balancing we are able to greatly improve performance for medium to large scale parallelization of lrs. We report computational results comparing parallel and sequential codes for vertex/facet enumeration problems for convex polyhedra. The problems chosen span the range from simple to highly degenerate polytopes. For most problems tested, the results clearly show the advantage of using the parallel implementation mplrs of the reverse search based code lrs, even when as few as 8 cores are available. For some problems almost linear speedup was observed up to 1200 cores, the largest number of cores tested. The software that was reviewed as part of this submission is included in lrslib-062.tar.gz which has MD5 hash be5da7b3b90cc2be628dcade90c5d1b9.},
+issn={1867-2957},
+doi={10.1007/s12532-017-0129-y},
+url={https://doi.org/10.1007/s12532-017-0129-y}
+}
+

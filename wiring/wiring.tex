@@ -450,17 +450,20 @@
     \section*{List of Symbols and Abbreviations}
 
     \begin{center}
-      \begin{tabular}{l|p{0.75\linewidth}}
-        \(\R_+, \R_{++}\) & Nonnegative and positive real numbers \\
-        \(\Z_+, \Z_{++}\) & Nonnegative and positive integers \\
-        \(\Lin{V}\) & Linear operators on the vector space \(V\) \\
+      \begin{longtable}{p{0.2\linewidth}|p{0.8\linewidth}}
+        \(\R_+\), \(\R_{++}\) & Nonnegative and positive real numbers \\
+        \(\Z_+\), \(\Z_{++}\) & Nonnegative and positive integers \\
+        \(\Lin{V}\), \(\Lin{U\to V}\) & Linear operators on the vector space \(V\), and from the vector space \(U\) to \(V\) \\
         \(\times\) & Cartesian product \\
-        \(\mathbb{X}^n\) & Cartesian product of \(n\) copies of the set \(\mathbb{X}\) \\
+        \(\log x\) & \(\log_2 x\) \\
         \(\exp_b(x)\) & \(b^x\) \\
         \(o(f(n))\) & The set of functions \(g(n)\) such that \(\lim_{n\to\infty} g(n)/f(n) = 0\); typically abused to mean ``some function in \(o(f(n))\)''. \\
         \(\cvec{x}^n\), \(\cvec{x}^{i:j}\), \(x_j\) & \(\cvec{x}^n\) is a vector of length \(n\), \(\cvec{x}^{i:j}\) are its elements from index \(i\) to index \(j\), one-based, and \(x_j\) is its \(j\)th element \\
+        \(\matr{M}\), \(\matr[^{\tpose}]{M}\), \(\matr{M}_{ij}\) & A matrix, its transpose, and its \((i,j)\)-th element, one-based indexing \\
+        \(\crv{X}\) & A classical random variable \\
+        \(\proj[AB]{ab}\), \(\proj[A]{a} \otimes \proj[B]{b}\), \({\ket{a}\bra{a}}_A \otimes {\ket{b}\bra{b}}_B\), \({\ket{ab}\bra{ab}}_{AB}\) & The tensor product of the projector for state \(a\) on Hilbert space \(A\), with the projector for state \(b\) on Hilbert space \(b\) \\
         \(\cong\) & Isomorphism \\
-        \(\subseteq\) & Subset \\
+        \(\subseteq\), \(\subsetneq\) & Subset and strict subset \\
         \(\indic{\angleb{proposition}}\) & The indicator function; 1 if the proposition is true and 0 otherwise \\
         iid & Independent and identically distributed \\
         pmf & Probability mass function \\
@@ -470,36 +473,24 @@
         PSK & Pre-shared key \\
         QKD & Quantum key distribution \\
         DIQKD & Device-independent quantum key distribution \\
-      \end{tabular}
+      \end{longtable}
     \end{center}
     \clearpage
 
     \pagenumbering{arabic}
     \section{Introduction}
 
-    Device-independent quantum key distribution (DIQKD) is a remarkable form of quantum key distribution (QKD) that relies on fundamental properties of causality in order to certify the security of a generated secret key, removing the need to characterise the physical devices involved in generating it. Wherease \emph{device-dependent} QKD is executed by devices that prepare specific states and perform specific measurements, DIQKD devices can be seen as black boxes with classical inputs and outputs, whose statistical correlations can certify the non-classical nature of the overall system, and the privacy of the generated data. This certification is done using \emph{Bell tests}, which detects the non-classical phenomenon of \emph{nonlocality}. As a more concrete example, in each round of a two-party (\emph{bipartite}) DIQKD protocol, the two parties Alice and Bob can provide inputs \(x\) and \(y\), respectively, to their devices, and obtain outputs \(a\) and \(b\), respectively. The joint conditional distribution that is observed over asymptotically many rounds is called the \emph{behaviour} \(p(ab|xy)\). The behaviour alone (with a few weak assumptions) is sufficient for Alice and Bob to generate secret keys.
+    Device-independent quantum key distribution (DIQKD) is a remarkable form of quantum key distribution (QKD) that relies on fundamental properties of causality in order to certify the security of a generated secret key, removing the need to characterise the physical devices involved in generating it. Wherease \emph{device-dependent} QKD is executed by devices that prepare specific states and perform specific measurements, DIQKD devices can be seen as black boxes with classical inputs and outputs, whose statistical correlations can certify the non-classical nature of the overall system, and the privacy of the generated data. This certification is done using \emph{Bell tests}, which detects the non-classical phenomenon of \emph{nonlocality}. As a more concrete example, in each round of a two-party (\emph{bipartite}) DIQKD protocol, the two parties Alice and Bob can provide inputs \(x\) and \(y\), respectively, to their devices, and obtain outputs \(a\) and \(b\), respectively. The joint conditional distribution that is observed over asymptotically many rounds is called the \emph{behaviour} \(p(ab|xy)\). The behaviour alone (with a few weak assumptions) is sufficient for Alice and Bob to generate secret keys, and so in the study of nonlocality a device with a certain behaviour is referred to abstractly as a behaviour, or conversely behaviours might be described as \emph{boxes}.
 
-    Despite this extraordinary guarantee of security, progress in understanding and implementing DIQKD has been slow. For example, given a particular behaviour, we do not have a tight expression for the amount of secrecy that can be extracted per use of the devices. This project aims to explore this aspect of DIQKD from two directions. Firstly, we aim to find an upper bound for the DIQKD key rate from a given behaviour, where each round undergoes independent classical post-processing. Secondly, we wish to see if classical post-processing that \emph{combines} multiple rounds to produce a new behaviour can lead to improvements over these upper bounds. This post-processing is referred to as \emph{wiring}, and can be seen as the act of connecting the inputs and outputs of multiple devices (typically referred to as \emph{boxes}) together, with arbitrary logic gates between them.
-
-    \subsection{Objectives}
-
-    TODO mention revival
-
-    Our ideal outcome from this project is to find an efficient algorithm that, given a behaviour, can specify the wiring that produces the behaviour with the largest possible key rate. A trivial, inefficient algorithm would be to simply compute all possible wirings by brute force, but there are an infinite number of possible wirings, since we can wire together arbitrarily many boxes. If no such algorithm exists, we would want to understand why. Is it that wiring multiple boxes together cannot give an advantage over post-processing a single box? Is the structure of achievable boxes simply too complex to navigate efficiently?
-
-    While this definition is still rather vague, we will specify the fundamental questions that our research must confront, as well as more specific questions that pertain to particular approaches, as we define and develop the relevant concepts throughout this report.
-
-    While this task is daunting, we hope that, even if we fall far short of this ideal outcome, this project can contribute to a better understanding of the mysterious phenomenon of nonlocality, and to the work of harnessing it for human benefit.
+    Despite this extraordinary guarantee of security, progress in understanding and implementing DIQKD has been slow. For example, given a particular behaviour, we do not have a tight expression for the amount of secrecy that can be extracted per use of the devices. This project aims to explore \emph{distillation} of nonlocal behaviours through \emph{wirings}: using classical post-processing to combine multiple boxes in order to derive a different box which is more useful for DIQKD\@. This is of practical relevance, because classical post-processing is easy to do, and these techniques can help bridge the gap between the theoretical development of DIQKD and its practical deployment. Our investigation of this phenomenon is motivated by the discovery of potential examples of \emph{revival}, where wiring together boxes that have zero key rate under certain DIQKD protocols produces a box with a non-zero key rate, as discussed in \Cref{sec:preres}. We intend to study and understand this phenomenon, to see if this is an artifact of the protocol used or the genuine distillation of a resource, and how those results can be generalised and made more applicable to the practical implementation of DIQKD.
 
     \subsection{Structure}
 
-    TODO discuss the actual structure, mention analytic and computational
+    We will approach this project from two directions: the theoretical development and definition of fundamental ideas, and their computational exploration. Preliminary material concerning linear algebra, quantum mechanics, and convex geometry and analysis can be found in \Cref{sec:prelim}, while our notational conventions are summarised in the table above. We begin by introducing and formalising nonlocality in \Cref{sec:nl}, as well as DIQKD in \Cref{sec:diqkd}, where we extend and generalise existing definitions to better identify the ultimate limits of what can be done with a nonlocal resource. After developing these ideas, we review the preliminary results suggesting the existence of revival in \Cref{sec:preres}.
 
-    Preliminary material concerning linear algebra, convex geometry and analysis, and optimisation can be found in \Cref{sec:prelim}.
+    We then define wirings formally in \Cref{sec:locwir}, with a mathematical description and derivation of fundamental properties in \Cref{sec:locwir_dist}, an operational one in \Cref{sec:locwir_func} that helps simplify the space of wirings, and a computational description in \Cref{sec:locwir_mat}. We compare our results to previous work on classifying wirings in \Cref{sec:locwir_SPG}. \Cref{sec:krwir_outdep} establishes our main results on the utility of wirings in DIQKD, while \Cref{sec:krwir_wiropt} attempts to formulate the optimisation of key rates over wirings as a computationally tractable problem.
 
-    Before proceeding, we establish a few notational conventions that are maintained throughout this paper. We write \(\log x\) for the base-2 logarithm of \(x\), and \(\exp_b(x)\) for \(b^x\). Vectors are written in boldface, and matrices in boldface inside square brackets, with a subscript outside the bracket denoting an element of the matrix. Classical rvs are denoted with sans-serif font. To simplify our notation, we will use the following notation for the 1-dimensional normalised projector of a state e.g.\ in the Hilbert space \(A \otimes B\):
-    \[ \proj[AB]{ab} = \proj[A]{a} \otimes \proj[B]{b} = {\ket{a}\bra{a}}_A \otimes {\ket{b}\bra{b}}_B = {\ket{ab}\bra{ab}}_{AB},\]
-    dropping the subscripts if there is no ambiguity.
+    Finally, \Cref{sec:wirmono} examines bounds on what wirings can achieve based on information-theoretic properties of behaviours, while \Cref{sec:ubound} studies upper bounds on behaviours from classical information theory. Incorrect attempts and unused reviewed material are collected in the appendices.
 
     \section{Nonlocality}\label{sec:nl}
 
@@ -517,7 +508,7 @@
     \end{defn}
     While the general definition in words applies to the multipartite scenario, we will focus on the bipartite scenario with two parties henceforth. The \verb`is_ns` function in the file \verb`nonlocality.jl` checks if a bipartite joint conditional probability, given as a 4-dimensional array, satisfies the no-signalling conditions.
 
-    Each party provides input to or receives it from a device or \emph{box}, and each box must have a concrete number of possible inputs and outputs. We refer to the choice of the number of inputs and outputs as the \emph{setting} \((i_A, o_A; i_B, o_B)\)\footnote{To be more general, we could let each input have its own number of outputs. In Alice's case (Bob's case being analogous), we would have a function \(\hat{o}_A(x)\) to determine the number of outputs from \(x\). However, these behaviours would be a subset of the behaviour with a constant \(o_A = \max_x \hat{o}_A(x)\), which can reproduce those behaviours by setting \(p(ab|xy) = 0\) for \(a > \hat{o}_A(x)\). There is hence no loss of generality in setting \(o_A\) to be a constant.}, where
+    Each party provides input to or receives an output from a box, and each box must have a concrete number of possible inputs and outputs. We refer to the choice of the number of inputs and outputs as the \emph{setting} \((i_A, o_A; i_B, o_B)\)\footnote{To be more general, we could let each input have its own number of outputs. In Alice's case (Bob's case being analogous), we would have a function \(\hat{o}_A(x)\) to determine the number of outputs from \(x\). However, these behaviours would be a subset of the behaviour with a constant \(o_A = \max_x \hat{o}_A(x)\), which can reproduce those behaviours by setting \(p(ab|xy) = 0\) for \(a > \hat{o}_A(x)\). There is hence no loss of generality in setting \(o_A\) to be a constant.}, where
     \[ x \in \dintv{1}{i_A} \qquad a \in \dintv{1}{o_A} \qquad y \in \dintv{1}{i_B} \qquad b \in \dintv{1}{o_B}. \]
     Naively, it would seem that we need \(o_A o_B i_A i_B\) values of the distribution \(p(ab|xy)\), one for each tuple \((a, b, x, y)\), to describe a no-signalling behaviour (that is, a behaviour that fulfills the no-signalling conditions). However, the \emph{Collins-Gisin (CG) representation} takes advantage of the no-signalling conditions to reduce this. For each \(x\), \(p(a|x)\) must be normalised, and so the value of one of the marginals for each \(x\), conventionally \(p(o_A|x)\), is no longer independent. The same applies to \(p(b|y)\), yielding \((o_A-1)i_A + (o_B-1)i_B\) marginals in total. Similarly, \(p(o_A o_B|xy)\) is fixed by normalisation for a given \((x,y)\).
 
@@ -1676,7 +1667,7 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
                         \toprule
                         Method & \(i = 2\) & \(i = 3\) \\
                         \midrule
-                        \cite{ShortEntangleSwap} & \(82\), \(48\)  & ?, \(2816\) \\
+                        \cite{ShortEntangleSwap} & \(82\), \(48\)  & --, \(2816\) \\
                         Positivity on general behaviours & \(58\), \(512\) & --, \(524288\) \\
                         Causal constraints & \(128\), -- & \(432\), -- \\
                         \bottomrule
@@ -1684,7 +1675,7 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
                       \caption{Number of marginal conditional wiring functions computed through different methods, followed by number of inequalities defining the polytope. -- means the value was not computed.}\label{tab:polys}
               \end{table}
 
-                  The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short, Popescu and Gisin~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. Their work attempts to generalise quantum joint measurements for general no-signalling systems, and finds a polytope of possible operations (termed \emph{couplers}) which happens to have local wirings at its extremal points. For the  \((2,2;2,2)\) setting, there are 82 extremal points, grouped into 5 possible types of wirings.
+                  The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short, Popescu and Gisin~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. Their work attempts to generalise quantum joint measurements for general no-signalling systems, and finds a polytope of possible operations (termed \emph{couplers}) which happens to have local wirings at its extremal points. For the  \((2,2;2,2)\) setting, there are 82 extremal points, grouped into 5 possible types of wirings, each of which admits a simple functional description (namely AND of two outputs, XOR of two outputs, use of only one box, deterministic output, and the use of one output as another box's input).
 
                   Using their notation, the coupler equation is~\cite[Eq. 29]{ShortEntangleSwap}
                   \begin{equation}
@@ -1703,11 +1694,11 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
                   \end{align}
                   with the values of \(\chi(b',\cvec{by})\) for each possible set of inputs as the variables. The authors used the particular example of no boxes corresponding to \(\cvec{a}\) and \(\cvec{\breve{b}}\), and the extremal points of the \((2,2;2,2)\) version of \(\NSs\) as the joint behaviour \(P(b_1b_2|y_1y_2)\).  \(P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y}) = P(b_1b_2|y_1y_2)\) is then a behaviour in the familiar CHSH setting, except it describes the arbitrary no-signalling relationship between Bob's two boxes, rather than Alice and Bob's boxes.
 
-                  TODO we have 144 vertices and 256 inequalities for coupling a \((2,2)\) and a \((2,3)\) box together
+                  We have reproduced the authors' computations in the \verb`ns_couplers_hrep` function in \verb`polytope.jl`, using the \verb`Polyhedra.jl` interface~\cite{Polyhedra} and the \verb`lrs` library~\cite{LRS}. To simplify computations, the normalisation constraint is converted into an inequality by eliminating one value of \(b'\). A polytope with 82 vertices was recovered for the \((2,2;2,2)\) setting, agreeing with the authors' previous results. The extension of this method to \((2,3;2,3)\), which corresponds to Bob wiring two boxes together in the QKD setting, yields a polytope with 2816 inequalities. Unfortunately, despite running \verb`mplrs`, a multithreaded version of \verb`lrs`, on these inequalities for several hours, only about 20 vertices were found. Nevertheless, a polytope with 256 inequalities and 144 vertices was derived by extending the above method to two boxes in the \((2,2;2,3)\) setting.
 
-                  We have reproduced the authors' computations in the \verb`ns_couplers_hrep` function in \verb`polytope.jl`, using the \verb`Polyhedra.jl` interface~\cite{Polyhedra} and the \verb`lrs` library~\cite{LRS}. To simplify computations, the normalisation constraint is converted into an inequality by eliminating one value of \(b'\). A polytope with 82 vertices was recovered for the \((2,2;2,2)\) setting, agreeing with the authors' previous results, while a polytope with 144 vertices was derived by extending the above method to two boxes in the \((2,2;2,3)\) setting, disagreeing with the 176-vertex polytope identified in~\cite[Sec. 7.1]{JanLiThesis}. This latter polytope was derived by extending the functional definitions for the 5 classes of couplers identified in the \((2,2)\) case to \((2,3)\) and claiming them to be extremal, but there is no justification for such a claim, and as our computational results show, this claim is incorrect. The results in~\cite{JanLiThesis} on the claimed extremal classes of wirings (reviewed in \Cref{sec:preres}) are hence even more limited than they originally seemed.
+                  Our results suggest that the 176-vertex polytope identified in~\cite[Sec. 7.1]{JanLiThesis} does not actually capture the possible couplers in \((2,3;2,3)\). This latter polytope was derived by extending the functional definitions for the 5 classes of couplers identified in the \((2,2;2,2)\) case to \((2,3;2,3)\) and claiming them to be extremal, but there is no justification for such a claim, and as our computational results show, this claim is likely to be incorrect. The results in~\cite{JanLiThesis} on the claimed extremal classes of wirings (reviewed in \Cref{sec:preres}) are hence even more limited than they originally seemed.
 
-                  It does not seem feasible to use this coupler polytope beyond the simplest case. The computation for the \((2,3)\) setting took 30 minutes on a standard laptop, running in single-threaded mode. If we wish to consider \(c=3\), for the simplest tripartite scenario of \((2,2; 2,2; 2,2)\), \(\NSs\) has 53856 extremal points~\cite{Tripartite}. Since the polytope of wirings is defined by two inequalities per extremal point, this would yield a polytope defined by 107712 inequalities, which is unlikely to be tractable.
+                  It does not seem feasible to use this coupler polytope beyond the simplest case. The computation for the \((2,2;2,3)\) setting took about 30 minutes on a standard laptop, running in single-threaded mode. If we wish to consider \(c=3\), for the simplest tripartite scenario of \((2,2; 2,2; 2,2)\), \(\NSs\) has 53856 extremal points~\cite{Tripartite}. Since the polytope of wirings is defined by two inequalities per extremal point, this would yield a polytope defined by 107712 inequalities, which is unlikely to be tractable.
 
                   % NEXT classify the extremal points for the QKD setting
 
@@ -1729,7 +1720,7 @@ julia> collect(Iterators.filter(pt -> !in(pt, gencoup222), points(nscoup222)))
 julia> collect(Iterators.filter(pt -> !in(pt, nscoup222), points(gencoup222)))
 Any[]
                   \end{lstlisting}
-                  The discrepancy between these three polytopes is puzzling. While the strict inclusion certainly cannot be the other way around, since no-signalling behaviours are a subset of general behaviours, and imposing more constraints can only make the feasible region smaller, this does not admit an easy physical interpretation. As argued above, a physically realisable wiring should not care if the boxes it acts on are signalling or not. Nonetheless, it seems that some couplers that are positive and normalised on no-signalling boxes cease to be well-behaved when used on signalling boxes. The simplest explanation, which is that these couplers do not correspond to physically realisable wirings, does not work because they were all explicitly shown to be physically realisable in~\cite{ShortEntangleSwap}.
+                  The discrepancy between these three polytopes is puzzling. While the strict inclusion certainly cannot be the other way around, since no-signalling behaviours are a subset of general behaviours, and imposing more constraints can only make the \emph{feasible region}, the region in the space of optimisation variables which satisfies the constraints, smaller, this does not admit an easy physical interpretation. As argued above, a physically realisable wiring should not care if the boxes it acts on are signalling or not. Nonetheless, it seems that some couplers that are positive and normalised on no-signalling boxes cease to be well-behaved when used on signalling boxes. The simplest explanation, which is that these couplers do not correspond to physically realisable wirings, does not work because they were all explicitly shown to be physically realisable in~\cite{ShortEntangleSwap}.
 
                   This phenomenon may be related to the results in~\cite[Sec. 1.5]{LocalTransformations}, where local transformations that are \emph{completely positive}, that is, the resultant behaviour is positive and normalised when the transformation is applied to one part of a behaviour while the other part is left unchanged, iff the transformation admits a causal decomposition as per \Cref{eqn:opmap}. Interestingly, they prove this fact using signalling behaviours, and also exhibit an example of a behaviour that is positive but not completely positive: it maps marginal behaviours to marginal behaviours, but when applied to part of a signalling behaviour, with no transformation done by the other party, the resultant joint behaviour is no longer valid. These results, together with our computational evidence, suggest that there is a deeper connection between complete positivity and no-signalling. In fact, a cursory analysis already suggests an answer: due to the signalling between the boxes, the local transformations performed by one party can influence the marginals of the other party, so that, even if one party does not physically modify or process his device, his observed marginal behaviour may be different, so that there is effectively some transformation being applied to his part of the system. Nonetheless, we leave the deeper exploration of this question to future work.
                   \begin{question}
@@ -1743,7 +1734,7 @@ Any[]
 
                   Finally, we can analyse the structure of the space of wirings using the other formulations established in this section in order to gain a deeper insight into these issues. A good first step would be to explicitly compute the polytope corresponding to the marginal conditional wiring functions based on our formulation, and to compare it with the coupler polytopes. Based on the results of~\cite{LocalTransformations} connecting completely positive transformations to causal transformations, we expect it to be equivalent to the polytope derived from general behaviours, rather than no-signalling behaviours. However, this leaves us with the anomalous fact that some physically-realisable wirings seem to lie outside this polytope. We leave the exploration of this issue to future work.
                   \begin{question}
-                    What are the polytopes defined by wirings?
+                    What are the minimal characterisations of the polytopes defined by wirings?
                   \end{question}
 
                   \section{Key Rates of Wired Behaviours}\label{sec:krwir}
@@ -2158,7 +2149,7 @@ Any[]
 
                   Further, recent results have extended the MC and HC ribbons to multipartite correlations, generalised them by showing how they are part of a family of tensorising ribbons known as \emph{\(\Phi\)-ribbons}, and shown that the maximal correlation fully characterises the MC ribbon in the bipartite case~\cite{PhiEntropies}. It would be interesting to see if these results apply to nonlocal boxes as well, or if they can give any deeper insights.
 
-                  \section{Upper Bounds from Classical Attacks}
+                  \section{Upper Bounds from Classical Attacks}\label{sec:ubound}
 
                   In order to sidestep the complexity of dealing with quantum attacks, we can upper-bound the secret key capacity of a behaviour by considering only classical attacks. This is a problem that has been well-studied in classical information theory, and would still yield valid, although possibly loose, upper bounds, since the adversary is free to perform classical attacks as well.
 
@@ -2321,7 +2312,16 @@ Any[]
 
                   \section{Summary and Outlook}
 
-                  The study of distillation via wiring multiple boxes together has largely fallen by the wayside, and there has been little attention paid to the idea in DIQKD research. However, this review has uncovered a vast variety of related tools and approaches for ta)kling this problem, for studying the space of behaviours, the space of wirings, and upper and lower bounds on key rates. Having consolidated these techniques, we are ready to embark on a deeper and more focused attempt to apply them. We hope that we will be able to uncover some interesting insights about the structure of nonlocality by utilising these different approaches and techniques.
+                  In the course of this work, we have developed more general definitions for DIQKD, particularly security and key rates outside the iid case, and incorporating the effect of the input distribution in \Cref{sec:diqkd_proto} and \Cref{sec:diqkd_behavsec}. In the course of the review in \Cref{sec:diqkd}, we have also clarified many distinctions and assumptions that are involved in discussing DIQKD, identified directions for future research, and investigated the seldom commented-on phenomenon of locking in DIQKD (\Cref{sec:diqkd_lock}).
+
+                  Our investigation of local wirings in \Cref{sec:locwir} relates it to prior work on single-copy local transformations, providing fundamental (\Cref{sec:locwir_dist}), operational (\Cref{sec:locwir_func}) and computational (\Cref{sec:locwir_mat}) formalisms for working with wirings. The comparison to prior work in \Cref{sec:locwir_SPG} has revealed many anomalous phenomena, although clearly suggesting a roadmap for investigating and resolving these issues.
+
+                  Our analysis of the iid secret key capacity of wired behaviours in \Cref{sec:krwir_outdep} has established two crucial results: that it is maximised by extremal deterministic wirings, and that it cannot be increased by wirings that do not use the outputs of some boxes to determine the inputs of others. This can be seen as a major generalisation of the results of~\cite{JanLiThesis} about classes of wirings that cannot increase the key rate, both of which are wirings without output dependency. The fact that there must be some output dependency in order for the key rate to be improved suggests a connection to measurement dependence in Bell tests, although we were not able to explore this further. The use of private shared randomness in wirings was also not studied, and we do not have much insight on how they affect our results.
+
+                  Unfortunately, our attempts in \Cref{sec:krwir_wiropt} to more efficiently optimise the secret key capacity over wirings did not manage to yield a computationally tractable approximation, although the approaches of linear and dynamic programming might still be possible. We were also unable to extract much insight from the wiring monotones studied in \Cref{sec:wirmono}. Although we have done some preliminary work to establish methods of upper bounding the secret key rate in \Cref{sec:ubound}, we were not able to execute them, and an order-of-magnitude estimate seems to suggest that the optimisation may be intractable. Alternatively, we could use Monte Carlo methods to explore the parameter space, but this provides no guarantee of optimality whatsoever.
+
+                  Despite the defeats on the computational front, we have established key theoretical results and foundations that can facilitate a better understanding of the possible transformations of behaviours via wirings. In particular, investigation of the anomalies between the coupler formulation and the wiring formulation would likely to be fruitful for coming to a deeper understanding of the structure of the space of wirings, and possibly facilitate computationally tractable optimisations over the space of wirings. Similarly, the study of measurement dependence could explain how output dependence can lead to an increase in secret key capacity. It would also be worthwhile to attempt direct polytope computations using our definitions of wirings, and to finish implementing our optimisations in \Cref{sec:ubound}. Amongst the many possible approaches highlighted in the course of this work, these would seem to be the most easily achievable, and are all likely to bear some fruit.
+
                   \clearpage
 
                   \phantomsection{}
