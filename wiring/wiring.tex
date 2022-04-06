@@ -401,6 +401,9 @@
     \phantomsection{}
     \addcontentsline{toc}{section}{Abstract}%
     \section*{Abstract}
+
+    Device independent quantum key distribution (DIQKD) allows secret keys to be securely established between distant parties, assuming only the laws of physics and relying only on classical statistical data to guarantee security, instead of requiring difficult-to-verify hardware guarantees as in device-dependent QKD\@. We initiate a foundational study of \emph{distillation} in DIQKD using \emph{wirings}: classical processing that combines multiple instances of DIQKD devices into one. We generalise existing definitions in the literature for DIQKD, identify various neglected issues, study the structure of the space of wirings, and establish key results and the potential for distillation within this broader framework: namely, a necessary condition for wirings to increase the secret key capacity of a DIQKD device, and the fact that extremal wirings maximise the secret key capacity. We also develop a computational representation for wirings, and examine computational methods for finding the wiring that maximises the secret key capacity and upper bounds on key rates without wiring.
+
     \clearpage
 
     \phantomsection{}
@@ -1972,9 +1975,9 @@ Any[]
                   \end{question}
                   We note also recent work on optimising \emph{trace polynomials}~\cite{TracePolyOpt}, which include polynomial functions of moments. These techniques may be useful for formulating a unified SDP including the wiring variables.
 
-                  TODO explain what an isotropic box is
+                    Another approach that might simplify a brute force search is that of~\cite{DistillationBounds}, which was developed to investigate the distillation of the CHSH value. In the \((2,2;2,2)\) setting, each of the 8 CHSH facets contains 8 deterministic points with \(S = 2\), and is violated to the algebraic maximum of \(S = 4\) by a \emph{Popescu–Rohrlich} (PR) box, whose outputs are always anti-correlated for one pair of inputs and always correlated otherwise. This behaviour is not within \(\Qs\), and so is not physically realisable as far as we know, but it still plays a crucial role in understanding nonlocality, and the geometry of \(\NSs\). For example, being the only extremal point of \(\NSs\) to have \(S > 2\), all behaviours that violate the corresponding CHSH inequality can be decomposed as a mixture of the PR box and a local box on the CHSH facet~\cite{GeomDecomp}. The line between the \emph{maximally mixed behaviour} \(p_{\varnothing}\), which has all correlators and marginals 0 and \(p_{\varnothing}(ab|xy) = 1/o_A o_B\; \forall a,b,x,y\), and a PR box is called the \emph{isotropic line}, and behaviours on the line (so-called \emph{isotropic boxes}) are convex combinations of the two. Notably, the quantum maximum of \(S = 2\sqrt{2}\) is achieved by a behaviour that is on this line.
 
-                    Another approach that might simplify a brute force search is that of~\cite{DistillationBounds}, where a computable upper bound is found for the CHSH value that can be \emph{distilled} by deterministic wirings on multiple copies of an isotropic box. As was shown in~\cite{JanLiThesis}, the CHSH value is maximised by extremal wirings, which are all deterministic. This follows from the linearity of the CHSH function in the behaviour, and the fact that wiring is also a linear operation. This bound is computable in time exponential in \(c\) using a dynamic programming algorithm, instead of doubly exponential time if we were to evaluate all wirings by brute force. We write \(S(p)\) for the CHSH value of a behaviour \(p\) and \(S^*_c(p)\) for the maximum CHSH value achievable by wiring \(c\) copies of \(p\) together.
+                    The authors of~\cite{DistillationBounds} find a computable upper bound for the CHSH value that can be \emph{distilled} by deterministic wirings on \(c\) copies of an isotropic box. As was shown in~\cite{JanLiThesis}, the CHSH value is maximised by extremal wirings, which are all deterministic. This follows from the linearity of the CHSH function in the behaviour, and the fact that wiring is also a linear operation. This bound is computable in time exponential in \(c\) using a dynamic programming algorithm, instead of doubly exponential time if we were to evaluate all wirings by brute force. We write \(S(p)\) for the CHSH value of a behaviour \(p\) and \(S^*_c(p)\) for the maximum CHSH value achievable by wiring \(c\) copies of \(p\) together.
 
                     This bound can then be applied to a general nonlocal box with behaviour \(p\), by decomposing it as a convex combination of an isotropic box and a local box. Let
                     \[ p_I' = \argmin_{p_I} S(p_I), \]
@@ -2662,175 +2665,6 @@ Any[]
                       \end{align}
 
                       It is clear, then, that \(p^{(k)}\) here plays the role of \(P_{\Lambda}(\lambda)\) in the tripartite extension of \Cref{eqn:localdef}, and that any behaviour of this form must therefore be contained in \(\Ls\). Hence, this parametrisation, although simpler than the one in \Cref{sec:ubound_statemeas}, cannot be used to examine behaviours outside of \(\Ls\).
-
-                      \section{Exploiting the Structure of the No-Signalling Polytope}\label{sec:nspoly}
-
-                  TODO shorten this discussion, maybe use the NL convertibility/geometric decomp papers
-
-                  \begin{table}
-                    \centering
-                    \begin{tabular}{|r|cccc|cc|cc|} \hline
-                      \diagbox{Type}{\(ab\)} & 00  & 01  & 10  & 11  & \(a=0|x\) & \(a=1|x\) & \(b=0|y\) & \(b=1|y\) \\ \hline
-                      Correlated             & 1/2 & 0   & 0   & 1/2 & 1/2     & 1/2     & 1/2     & 1/2 \\ 
-                      Anticorrelated         & 0   & 1/2 & 1/2 & 0   & 1/2     & 1/2     & 1/2     & 1/2 \\
-                      \(a=0\), \(b\) random  & 1/2 & 1/2 & 0   & 0   & 1/2     & 1/2     & 1       & 0 \\
-                      \(a=1\), \(b\) random  & 0   & 0   & 1/2 & 1/2 & 1/2     & 1/2     & 0       & 1 \\
-                      \(a\) random, \(b=0\)  & 1/2 & 0   & 1/2 & 0   & 1       & 0       & 1/2     & 1/2 \\
-                      \(a\) random, \(b=1\)  & 0   & 1/2 & 0   & 1/2 & 0       & 1       & 1/2     & 1/2 \\
-                      \(a=0\), \(b=0\)       & 1   & 0   & 0   & 0   & 1       & 0       & 1       & 0 \\
-                      \(a=0\), \(b=1\)       & 0   & 1   & 0   & 0   & 0       & 1       & 1       & 0 \\
-                      \(a=1\), \(b=0\)       & 0   & 0   & 1   & 0   & 1       & 0       & 0       & 1 \\
-                      \(a=1\), \(b=1\)       & 0   & 0   & 0   & 1   & 0       & 1       & 0       & 1 \\
-                      \hline
-                    \end{tabular}
-                    \caption[Possible conditional distributions in binary-output extremal boxes and their marginals]{Possible conditional distributions in binary-output extremal boxes and their marginals. All marginals \(p(a|x)\) (\(p(b|y)\)) must match across all \(y\)'s (\(x\)'s).}\label{tab:extr_cond}
-                  \end{table}
-
-                  \begin{table}
-                    \centering
-                    \begin{tabular}{|r|cccc|} \hline
-                      \diagbox{Type}{\(ab\)} & 00 & 01 & 10 & 11 \\ \hline
-                      Fully mixed & 1/4 & 1/4 & 1/4 & 1/4 \\
-                      Correlated + Random & 1/2 & 1/4 & 0 & 1/4 \\
-                      Correlated + Fixed & 3/4 & 0 & 0 & 1/4 \\
-                      Random + Fixed & 3/4 & 1/4 & 0 & 0 \\
-                      \hline
-                    \end{tabular}
-                    \caption[Possible conditional distributions arising in equal mixtures of extremal boxes]{Representative examples of the possible conditional distributions arising in equal mixtures of extremal boxes}\label{tab:extrmix_cond}
-                  \end{table}
-
-                  \begin{figure}
-                    \centering
-                    \begin{tikzpicture}[z={(0:1)}, x={(-55:0.5)}] % set projection of unit vectors onto screen
-                      \tikzmath{ \raylen = 3; }
-                      \draw[dotted] (0,0,0) node[name=boundbehav, point, label=\(p_{\Ls}^{(0)}\)] {} -- ++(0,\raylen,0) node[name=prbehav, point, label=\(p_{\PR}\)] {};
-                      \begin{scope}[canvas is xz plane at y=0]
-                        \tikzmath{
-                          coordinate \L;
-                        int \i;
-                      for \i in {1,2,...,8}{
-                        let \lname = lbehav\i;
-                      { \draw (22.5+45*\i:\raylen) node[point, name=\lname, label=\(p_{\Ls}^{(\i)}\)] {} -- (prbehav); };
-                    };
-                }
-                \begin{pgfonlayer}{background}
-                  \fill[draw,fill=blue!20,fill opacity=0.5] (lbehav1.center) -- (lbehav2.center) -- (lbehav3.center) -- (lbehav4.center) -- (lbehav5.center) -- (lbehav6.center) -- (lbehav7.center) -- (lbehav8.center) -- (lbehav1.center);
-                \end{pgfonlayer}
-              \end{scope}
-            \end{tikzpicture}
-            \caption[Representation of behaviours that violate CHSH inequality]{Representation of behaviours that violate \(S \leq 2\), with CHSH facet in blue}%
-                  \end{figure}
-
-                  NL interconversion: lifted PR boxes (extremal correlations in binary-output scenarios) are able to be converted into a form closely analogous to a PR box using local symmetry operations. They can then be used to simulate any extremal correlations. However, non-extremal correlations may have limited potential for symmetric conversion, since the symmetry operation would have to be applied to a mixture of behaviours. They would also be too noisy to use for simulating extremal correlations.
-
-                  There are three types of marginals, and each combination of marginals specifies a unique distribution, except \(1/2, 1/2, 1/2, 1/2\), which can be correlated or anticorrelated.
-
-                  In order to study the effects of wirings on arbitrary behaviours, we wish to characterise the space of possible behaviours in the QKD setting (that is, \((i_A=2,o_A=2;i_B=3,o_B=2)\)) so as to identify the notable behaviours we may wish to investigate further.
-
-                  We begin by characterising the facets of \(\Ls\), each of which corresponds to an inequality. If any inequality is violated by a behaviour, that behaviour lies outside \(\Ls\). As mentioned above, all inequalities \(p(ab|xy) \geq 0\) are constraints on the possible behaviours, and each of these inequalities corresponds to a facet. We therefore have \(i_A o_A i_B o_B = 24\) \emph{positivity facets}, one for each inequality.
-
-                  As mentioned in \Cref{sec:nl}, behaviours in the \((2,2;2,2)\) setting with \(S > 2\) are not contained in \(\Ls\). This is because \(S \leq 2\) defines a facet for \(\Ls\) in this setting. However, there are actually multiple versions of the CHSH inequality, which can generically by written as
-                  \[ \abs{\angleb{A_{x_0} B_{y_0}} + \angleb{A_{x_1} B_{y_0}} + \angleb{A_{x_0} B_{y_1}} - \angleb{A_{x_1} B_{y_1}}} \leq 2, \]
-                  where \(x_0, x_1, y_0, y_1 \in \{0,1\}\), with 4 possible assignments, while the absolute value induces 2 further linear variants. All of these can be obtained by permuting the labels for the inputs (\(i_A!i_B!\) possible permutations), and the outputs for each input (\(o_A!\) for each \(x\) and \(o_B\) for each \(y\)). Lastly, since \((i_A, o_A) = (i_B, o_B)\), we can permute the parties' names as well, giving 2 versions of each permutation. Since each of these permutations can be applied independently, the total number of overall permutations possible is \(2i_A!i_B!(o_A!)^{i_A}(o_B!)^{i_B} = 128\). However, the symmetry of the CHSH expression yields only \(2 \times 4 = 8\) variants in total.
-
-                  Now, moving to the QKD setting, if we pick two out of three values for \(y\), we can still calculate the CHSH value for those two settings, and Alice's two values of \(x\). Or, more operationally, we can delete the data for the rounds where Bob chooses \(y=2\), and the Bell test data will then be that for a \((2,2;2,2)\) test. However we compute it, the CHSH value still should not violate the inequality for a behaviour in \(\Ls\). Since there are \(\binom{3}{2} = 3\) ways to select Bob's settings, there are 3 \emph{liftings} of each CHSH facet in the QKD setting, and therefore we have 24 liftings of CHSH in total. This gives us 48 facets for \(\Ls\) in the QKD setting.
-
-                  \begin{table}
-                    \begin{minipage}{0.5\linewidth}
-                      \begin{center}
-                        \begin{tabular}{|r|cccccc|} \hline
-                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
-                          00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\
-                          01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
-                          10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
-                          11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\ \hline
-                        \end{tabular}
-                        \[Q_{02} = 1, S = 4\]
-                      \end{center}
-                    \end{minipage}
-                    \begin{minipage}{0.5\linewidth}
-                      \begin{center}
-                        \begin{tabular}{|r|cccccc|} \hline
-                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
-                          00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.5 \\
-                          01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.0 \\
-                          10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.0 \\
-                          11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.5 \\ \hline
-                        \end{tabular}
-                        \[Q_{02} = 1, S = 4\]
-                      \end{center}
-                    \end{minipage}
-                    \vspace{1em}
-
-                    \begin{minipage}{0.5\linewidth}
-                      \begin{center}
-                        \begin{tabular}{|r|cccccc|} \hline
-                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
-                          00 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.5 \\
-                          01 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.0 \\
-                          10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
-                          11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\ \hline
-                        \end{tabular}
-                        \[Q_{02} = 0.5, S = 4\]
-                      \end{center}
-                    \end{minipage}
-                    \begin{minipage}{0.5\linewidth}
-                      \begin{center}
-                        \begin{tabular}{|r|cccccc|} \hline
-                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
-                          00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\
-                          01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
-                          10 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.0 \\
-                          11 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.5 \\ \hline
-                        \end{tabular}
-                        \[Q_{02} = 0.5, S = 4\]
-                      \end{center}
-                    \end{minipage}
-                    \vspace{1em}
-
-                    \begin{minipage}{0.5\linewidth}
-                      \begin{center}
-                        \begin{tabular}{|r|cccccc|} \hline
-                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
-                          00 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.0 \\
-                          01 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.5 \\
-                          10 & 0.0 & 0.0 & 0.0 & 0.0 & 0.5 & 0.5 \\
-                          11 & 0.5 & 0.5 & 0.5 & 0.5 & 0.0 & 0.0 \\ \hline
-                        \end{tabular}
-                        \[Q_{02} = 0, S = 4\]
-                      \end{center}
-                    \end{minipage}
-                    \begin{minipage}{0.5\linewidth}
-                      \begin{center}
-                        \begin{tabular}{|r|cccccc|} \hline
-                          \diagbox{\(ab\)}{\(xy\)} & 00 & 01 & 02 & 10 & 11 & 12 \\ \hline
-                          00 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\
-                          01 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
-                          10 & 0.0 & 0.0 & 0.5 & 0.0 & 0.5 & 0.5 \\
-                          11 & 0.5 & 0.5 & 0.0 & 0.5 & 0.0 & 0.0 \\ \hline
-                        \end{tabular}
-                        \[Q_{02} = 0, S = 4\]
-                      \end{center}
-                    \end{minipage}
-                    \caption{\(p(ab|xy)\) for PR-box analogues in the QKD setting.}\label{tab:qkd_iso}
-                  \end{table}
-
-                  Using the \verb`LazySets.jl` package for the Julia programming language, we specified the deterministic behaviours as vertices of \(\Ls\), since all other local behaviours can be specified as probabilistic mixtures, that is, convex combinations, of the deterministic behaviours. For each \(x \in \dintv{1}{i_A}\), we have \(i_A\) choices for the output \(a\) to assign, with the analogous scenario for Bob. Therefore, there are \(i_A^{o_A}i_B^{o_B} = 32\) vertices. The GLPK solver was then used to identify the facets and their corresponding inequalities, and yielding 48 facets for our polytope. Therefore, all facets in the QKD setting are either liftings of CHSH or positivity facets, which is expected, since the next unique Bell inequality is \(I_{3322}\), in the \((3,2;3,2)\) setting.
-
-                  To generate \(\NSs\), we provided the aforementioned positivity, normalisation, and no-signalling constraints, which are also solved using GLPK to eliminate redundant constraints, and to find the vertices of the polytope. This yields 24 constraints (namely, the positivity constraints in the CG representation) and 128 vertices.
-
-                  In the \((2,2;2,2)\) setting, each of the 8 CHSH facets contains 8 deterministic points with \(S = 2\), and is violated to the algebraic maximum of \(S = 4\) by a \emph{Popescu–Rohrlich} (PR) box, whose outputs are always anti-correlated for one pair of inputs and always correlated otherwise. This behaviour is not within \(\Qs\), and so is not physically realisable as far as we know, but it still plays a crucial role in understanding nonlocality, and the geometry of \(\NSs\). For example, being the only extremal point of \(\NSs\) to have \(S > 2\), all behaviours that violate the corresponding CHSH inequality can be decomposed as a mixture of the PR box and a local box on the CHSH facet~\cite{GeomDecomp}. The line between the \emph{maximally mixed behaviour} \(p_{\varnothing}\), which has all correlators and marginals 0 and \(p_{\varnothing}(ab|xy) = 1/o_A o_B\; \forall a,b,x,y\), and a PR box is called the \emph{isotropic line}, and behaviours on the line (so-called \emph{isotropic boxes}) are convex combinations of the two. Notably, the quantum maximum of \(S = 2\sqrt{2}\) is achieved by a behaviour that is on this line.
-
-                  Most importantly, since the different versions of the CHSH inequality can be obtained simply by permuting labels, the PR boxes are effectively all equivalent up to relabelling. In this sense, we need only study one CHSH inequality and its corresponding PR box, since all other behaviours can be mapped into the corresponding part of \(\NSs\) by symmetry operations. We would like to see if this nice symmetry holds in the QKD setting as well, which we would expect since the only facets aside from positivity facets are liftings of CHSH.
-                  Indeed, we can identify an analogue for the PR box and an analogous structure for \(\NSs\) in the QKD setting. There are \(128 - 32 = 96\) extremal points of \(\NSs\) that are outside \(\Ls\). By checking if their isotropic lines intersect the facet corresponding to CHSH on \(x, y \in \{0,1\}\), we have found 6 extremal points violating it, as shown in \Cref{tab:qkd_iso}. Unlike the \((2,2;2,2)\) setting, we do not have one extremal point per CHSH facet, and the extremal points violate more than one facet. As can be seen from these behaviours, their distributions for \(x, y \in \{0,1\}\) are identical, and it is only the correlations when \(y = 2\) that distinguish the six PR analogues. However, this implies that there is information in these correlations that we are not using. In particular, other liftings of CHSH might be violated by a given behaviour. Could quantifying this improve our key rates?
-
-                  We have merely scratched the surface thus far in our analysis of \(\NSs\) in the QKD setting. Fortunately, it seems to just be slightly more complicated than the well-studied \((2,2;2,2)\) setting. We summarise our hope for investigations in this direction as follows:
-                  \begin{question}
-                    What other insights can be obtained from studying the structure and symmetry of \(\NSs\)? Can all behaviours be mapped into a region where the only nonlocal contributions are from a PR-analogue box? Can we improve our key rates if we consider other CHSH violations, or other aspects of the correlation when \(y=2\)?
-                  \end{question}
-
-                  TODO Since wirings are linear operations, can we study the effect on a general wiring from the effect on the PR box?
-
 
                       \section{Additional Techniques Considered}\label{sec:addtech}
 
