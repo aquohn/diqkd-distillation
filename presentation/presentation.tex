@@ -100,7 +100,7 @@
 \usepackage{fancyvrb} % robust verbatim
 \usepackage{siunitx} % allows SI units to be formatted
 
-\usepackage[backend=biber, style=ieee]{biblatex}  
+\usepackage[backend=biber, style=ieee-alphabetic]{biblatex}  
 \addbibresource{../wiring.bib}
 % \usepackage{hyperref} % hyperlinks
 % \hypersetup{%
@@ -109,37 +109,6 @@
 %   urlcolor=blue
 % }
 \graphicspath{ {../images/} }
-
-\newcommand{\concat}{\mathbin{\Vert}} % string concatenation operator
-\newcommand{\rep}{\stackrel{r}{=}} % enable stacked r and = for representation
-\newcommand{\?}{\mathrel{?}} % ternary operator
-
-\DeclareMathOperator*{\argmin}{argmin}
-\DeclareMathOperator*{\argmax}{argmax}
-\newcommand{\norm}[1]{\left\lVert#1\right\rVert} % define norm
-\newcommand{\abs}[1]{\left\lvert#1\right\rvert} % define abs
-\newcommand{\Dif}{\mathop{}\!\mathrm{D}} % Difference operator
-\newcommand{\dif}{\mathop{}\!\mathrm{d}} % differential d
-\newcommand{\ceil}[1]{\left\lceil#1\right\rceil} % enables \ceil{} for ceil delimiter
-\newcommand{\floor}[1]{\left\lfloor#1\right\rfloor} % enables \floor{} for floor delimiter
-\newcommand{\cvec}[1]{\boldsymbol{\mathbf{#1}}}    % shortcut for column vectors
-\newcommand{\rvec}[1]{\boldsymbol{\mathbf{#1}}^{T}} % shortcut for transposed row vectors
-\newcommand{\Z}{\mathbb{Z}} % for integers
-\newcommand{\R}{\mathbb{R}} % for reals
-\newcommand{\C}{\mathbb{C}} % for complex
-\newcommand{\dintv}[2]{\left\{#1,\ldots,#2\right\}}
-\newcommand{\ocintv}[2]{\left(#1,#2\right]}
-\newcommand{\cointv}[2]{\left[#1,#2\right)}
-\newcommand{\ccintv}[2]{\left[#1,#2\right]}
-\newcommand{\oointv}[2]{\left(#1,#2\right)}
-\newcommand{\matr}[1]{\left[\mathbf{#1}\right]} % shortcut for matrices
-\newcommand{\matrp}[2]{\left[\mathbf{#1}#2\right]} % shortcut for matrices with subscripts/superscripts
-\newcommand{\rv}[1]{\boldsymbol{\mathbf{#1}}} % random variable
-\newcommand{\Tr}{\mathrm{Tr}} % enables trace operator
-\newcommand{\id}{\mathrm{id}} % enables id operator
-\newcommand{\E}{\mathbb{E}} % expectation
-\newcommand{\angleb}[1]{\left\langle #1 \right\rangle} % physicist's notation for mean
-\newcommand{\Var}{\mathrm{Var}} % variance
 
 \newenvironment{Tabular}[1] % less cramped tables
 {\def\arraystretch{1.75}\begin{tabular}{#1}}
@@ -245,67 +214,124 @@
   },
 }
 
-\newcommand{\frI}{\mathfrak{I}}
-\newcommand{\frX}{\mathfrak{X}}
-\newcommand{\rvX}{\rv{X}}
-\newcommand{\frA}{\mathfrak{A}}
-\newcommand{\frC}{\mathfrak{C}}
-\newcommand{\frR}{\mathfrak{R}}
-\newcommand{\Dist}{\mathcal{D}}
-\newcommand{\DistRI}{\Dist(\frR, \frI)}
-\newcommand{\Fail}{\mathcal{F}}
-\newcommand{\IdealObsv}{\mathcal{I}}
+    % analysis and calculus
+    \DeclareMathOperator*{\argmin}{argmin}
+    \DeclareMathOperator*{\argmax}{argmax}
+    \newcommand{\norm}[1]{\mathop{}\left\lVert#1\right\rVert}
+    \newcommand{\abs}[1]{\mathop{}\left\lvert#1\right\rvert}
+    \newcommand{\indif}{{\mathop{}\!\mkern3mu\mathchar'26\mkern-12mu \mathrm{d}}}
+    \newcommand{\Dif}{\mathop{}\!\mathrm{D}} % Difference operator
+    \newcommand{\dif}{\mathop{}\!\mathrm{d}} % differential d
+    \newcommand{\dintv}[2]{\mathopen\{#1,\ldots,#2\mathclose\}}
+    \DeclarePairedDelimiterX{\ocintv}[2]{(}{]}{#1,#2}
+    \DeclarePairedDelimiterX{\cointv}[2]{[}{)}{#1,#2}
+    \DeclarePairedDelimiterX{\ccintv}[2]{[}{]}{#1,#2}
+    \DeclarePairedDelimiterX{\oointv}[2]{(}{)}{#1,#2}
 
-\newcommand{\psubs}{p_{\rm subs}}
-\newcommand{\pimpr}{p_{\rm impr}}
+    % CS, discrete maths, algebra
+    \DeclareMathSymbol{\lneg}{\mathord}{symbols}{"18} % tildes for negation
+    \newcommand{\st}{\mathrel{:}} % 'such that'
+    \newcommand{\?}{\mathrel{?}} % ternary operator
+    \newcommand{\concat}{\mathbin{\Vert}} % string concatenation operator
+    \newcommand{\Mod}{~\mathbf{mod}~} % for mod operator
+    \newcommand{\Div}{~\mathbf{div}~} % for div operator
+    \newcommand{\Rem}{~\mathbf{rem}~} % for rem operator
+    \newcommand{\Z}{\mathbb{Z}} % for integers
+    \newcommand{\R}{\mathbb{R}} % for reals
+    \newcommand{\C}{\mathbb{C}} % for complex
+    \newcommand{\ceil}[1]{\left\lceil#1\right\rceil} % enables \ceil{} for ceil delimiter
+    \newcommand{\floor}[1]{\left\lfloor#1\right\rfloor} % enables \floor{} for floor delimiter
 
-\newcommand{\sM}{\mathcal{M}}
-\newcommand{\sN}{\mathcal{N}}
-\newcommand{\sS}{\mathcal{S}}
-\newcommand{\sK}{\mathcal{K}}
-\newcommand{\sT}{\mathcal{T}}
-\newcommand{\sH}{\mathcal{H}}
-\newcommand{\sV}{\mathcal{V}}
-\newcommand{\sW}{\mathcal{W}}
-\newcommand{\sX}{\mathcal{X}}
-\newcommand{\sY}{\mathcal{Y}}
-\newcommand{\sZ}{\mathcal{Z}}
-\newcommand{\cE}{\mathcal{E}}
-\newcommand{\cF}{\mathcal{F}}
-\newcommand{\cP}{\mathcal{P}}
+    % linear algebra
+    \newcommand{\Lin}[1]{\mathbb{L}\left(#1\right)}
+    \newcommand{\tpose}{\mathrm{T}}
+    \newcommand{\cvec}[1]{\boldsymbol{\mathbf{#1}}}    % column vectors
+    \newcommand{\rvec}[1]{\boldsymbol{\mathbf{#1}}^\tpose} % row vectors (transposed from column vectors)
+    \newcommand{\bvec}[1]{\hat{\boldsymbol{\mathbf{#1}}}} % basis vectors
+    \newcommand{\matr}[2][]{\left[\mathbf{#2}#1\right]} % matrices
+    \newcommand{\inner}[2]{\left\langle#1,#2\right\rangle} % inner product
+    % \newcommand{\dim}{\rm dim} % dimension
 
-\newcommand{\AU}{\mathrm{AU}_{2}}
-\newcommand{\AXU}{\mathrm{AXU}_{2}}
-\newcommand{\ASU}{\mathrm{ASU}_{2}}
-\newcommand{\eAU}{\epsilon\text{-}\AU}
-\newcommand{\eAXU}{\epsilon\text{-}\AXU}
-\newcommand{\eASU}{\epsilon\text{-}\ASU}
+    % probability and statistics
+    \newcommand{\rv}[1]{\boldsymbol{\mathbf{#1}}} % random variable
+    \newcommand{\E}{\mathbb{E}} % expectation
+    \newcommand{\angleb}[1]{\left\langle #1 \right\rangle} % physicist's notation for mean
+    \newcommand{\Var}{\mathrm{Var}} % variance
+    \newcommand{\indep}{\mathrel{\perp \!\!\! \perp}} % independence symbol
+    \newcommand{\indic}[1]{\delta{\left\{#1\right\}}} % indicator function
+    \newcommand*\markov{\mathrel{\ooalign{\hidewidth$\circ$\hidewidth\cr$-$\cr}}} % Markov chain
 
-\newcommand{\meas}{\rm meas}
-\newcommand{\perm}{\rm perm}
-\newcommand{\pe}{\rm pe}
-\newcommand{\pa}{\rm pa}
-\newcommand{\ir}{\rm ir}
-\newcommand{\leakir}{\mathrm{leak}_{\ir}}
-\newcommand{\auth}{\rm auth}
-\newcommand{\key}{\rm key}
-\newcommand{\rob}{\rm rob}
-\newcommand{\cor}{\rm cor}
-\newcommand{\secur}{\rm sec}
-\newcommand{\erob}[1]{\epsilon_{\rob}^{(#1)}}
+    % quantum physics
+    \newcommand{\Tr}[2][]{\mathop{\mathrm{Tr}#1}\left[ #2 \right]} % enables Trace operator
+    \newcommand{\Trdist}[2]{\mathop{}\Delta_\mathrm{Tr}\left(#1, #2\right)}
+    \newcommand{\Hs}{\mathcal{H}} % enables H for Hilbert space
 
-\newcommand{\HC}{\mathrm{HC}}
-\newcommand{\MC}{\mathrm{MC}}
+    % category theory
+    % \newcommand{\hom}{\mathrm{hom}} % collection of morphisms in a category
+    \newcommand{\Hom}{\mathrm{Hom}} % collection of between two objects
+    \newcommand{\ob}{\mathrm{ob}} % collection of objects
+    \newcommand{\id}{\mathrm{id}} % identity morphism
 
-\newcommand{\Ls}{\mathcal{L}}
-\newcommand{\Qs}{\mathcal{Q}}
-\newcommand{\NSs}{\mathcal{NS}}
-\newcommand{\PR}{\mathrm{PR}}
-\newcommand{\sWB}{\mathcal{WB}}
-\newcommand{\sk}{\rm sk}
-\newcommand{\DW}{\rm DW}
-\newcommand{\std}{\rm std}
-\newcommand{\crit}{\rm crit}
+    \newcommand{\sM}{\mathcal{M}}
+    \newcommand{\sN}{\mathcal{N}}
+    \newcommand{\sS}{\mathcal{S}}
+    \newcommand{\sK}{\mathcal{K}}
+    \newcommand{\sT}{\mathcal{T}}
+
+    \newcommand{\sA}{\mathcal{A}}
+    \newcommand{\sB}{\mathcal{B}}
+    \newcommand{\sC}{\mathcal{C}}
+    \newcommand{\sD}{\mathcal{D}}
+    \newcommand{\sP}{\mathcal{P}}
+    \newcommand{\sV}{\mathcal{V}}
+    \newcommand{\sW}{\mathcal{W}}
+    \newcommand{\sX}{\mathcal{X}}
+    \newcommand{\sY}{\mathcal{Y}}
+    \newcommand{\sZ}{\mathcal{Z}}
+    \newcommand{\cE}{\mathcal{E}}
+    \newcommand{\cF}{\mathcal{F}}
+
+    \newcommand{\cP}{\mathbb{P}}
+
+    \newcommand{\rA}{\mathrm{A}}
+    \newcommand{\rB}{\mathrm{B}}
+    \newcommand{\rX}{\mathrm{X}}
+    \newcommand{\rY}{\mathrm{Y}}
+
+    \newcommand{\crv}[1]{\mathsf{#1}}
+    \newcommand{\proj}[2][]{{[#2]}_{#1}}
+    \newcommand{\LCxE}[1]{\mathrm{LCxE}\left(#1\right)}
+    \newcommand{\meas}{\rm meas}
+    \newcommand{\perm}{\rm perm}
+    \newcommand{\pe}{\rm pe}
+    \newcommand{\pa}{\rm pa}
+    \newcommand{\ir}{\rm ir}
+    \newcommand{\leakir}{\mathrm{leak}_{\ir}}
+    \newcommand{\auth}{\rm auth}
+    \newcommand{\key}{\rm key}
+    \newcommand{\rob}{\rm rob}
+    \newcommand{\cor}{\rm cor}
+    \newcommand{\secur}{\rm sec}
+    \newcommand{\erob}[1][]{\epsilon^{\rob}_{#1}}
+
+    \newcommand{\HC}{\mathrm{HC}}
+    \newcommand{\MC}{\mathrm{MC}}
+
+    \newcommand{\Ls}{\mathcal{L}}
+    \newcommand{\Qs}{\mathcal{Q}}
+    \newcommand{\NSs}{\mathcal{NS}}
+    \newcommand{\PR}{\mathrm{PR}}
+    \newcommand{\sWB}{\mathcal{WB}}
+    \newcommand{\compatstates}[3][]{\hat{\mathcal{P}}#1(#2,#3)}
+    \newcommand{\proto}[2][_{\Omega,\ell}]{\mathfrak{#2}#1}
+    \newcommand{\qproto}[2][_{\Omega,\ell}]{\hat{\mathfrak{#2}}#1}
+    \newcommand{\prin}[1][p]{#1_{\mathrm{in}}}
+    \newcommand{\behav}[2]{\mathbb{P}\left[#1, #2\right]}
+    \newcommand{\sk}{\rm sk}
+    \newcommand{\DW}{\rm DW}
+    \newcommand{\std}{\rm std}
+    \newcommand{\crit}{\rm crit}
+
 
 \setbeameroption{hide notes} % Only slides
 % \setbeameroption{show only notes} % Only notes
@@ -523,7 +549,7 @@
 \begin{frame}{Nonlocal Behaviours}
   \begin{itemize}[<+->]
     \item \emph{Local set} \(\Ls\): \(p(ab|xy) = \int Q(\lambda) p_{\lambda}(a|x)p_{\lambda}(b|y) \dif{\lambda} \)
-    \item \emph{Quantum set} \(\Qs\): \(p(ab|xy) = \Tr\left[ \left(M_{a|x} \otimes N_{b|y}\right) \rho_{AB} \right]\)
+    \item \emph{Quantum set} \(\Qs\): \(p(ab|xy) = \Tr{ \left(M_{a|x} \otimes N_{b|y}\right) \rho_{AB} }\)
     \item \emph{No-signalling set} \(\NSs\) defined by no-signalling conditions
     \item \(\Ls \subsetneq \Qs \subsetneq \NSs\)
     \item \(\abs{S(p_{\Ls})} \leq 2\), \(\abs{S(p_{\Qs})} \leq 2\sqrt{2}\), \(\abs{S(p_{\NSs})} \leq 4\)
@@ -536,8 +562,8 @@
     \item \emph{Local operations and public communication} (LOPC) protocol \(\mathfrak{P}_{\omega}\) with public data in \(D\) and key of length \(\ell\)
       \[ \mathfrak{P}_{\omega}\left[\rho_{A^n B^n E^n}\right] \mapsto \omega_{K_A K_B E^n D} \]
     \item \emph{Universally composable} \(\epsilon\)-security
-      \[ (1-\erob{n})\Delta_{\Tr}(\omega_{K_A K_B E^n D}, \tau_{K_A K_B}^{\ell} \otimes \rho_{E^n} \otimes \omega_D) \leq \epsilon \]
-    \item \emph{Robustness} \(\erob{n}\), \emph{trace distance} \(\Delta_{\Tr}(\rho, \sigma) = \frac{1}{2}\norm{\rho - \sigma}_1\), \emph{ideal key} \(\tau_{K_A K_B}^{\ell}\)
+    \[ \Trdist{ \omega_{K_A K_B E^n D}}{\tau_{K_A K_B}^{\ell} \otimes \rho_{E^n} \otimes \omega_D } \leq \epsilon \]
+    \item \emph{Robustness} \(\erob{n}\), \emph{trace distance} \(\Trdist{ \rho}{\sigma } = \frac{1}{2}\norm{\rho - \sigma}_1\), \emph{ideal key} \(\tau_{K_A K_B}^{\ell}\)
       \[ \tau_{K_A K_B}^{\ell} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{K_A} \otimes \ket{j}\bra{j}_{K_B} \]
   \end{itemize}
 \end{frame}
@@ -548,7 +574,7 @@
     \item \emph{Asymptotic key rate}
       \[ r(\mathfrak{P}_{\omega}, \rho) = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\erob{n}) \frac{\ell_n}{n} \]
       over all sequences \(\{\ell_n\}\) with asymptotically vanishing \(\epsilon\)
-    \[ \lim_{n\to\infty} (1-\erob{n})\Delta_{\Tr}(\omega_{K_A K_B E^n D}, \tau_{K_A K_B}^{\ell_n} \otimes \rho_{E^n} \otimes \omega_{D}) = 0 \]
+    \[ \lim_{n\to\infty} \Trdist{ \omega_{K_A K_B E^n D}}{\tau_{K_A K_B}^{\ell_n} \otimes \rho_{E^n} \otimes \omega_{D} } = 0 \]
     \item Rounds are effectively i.i.d.\ in asymptotic limit: \(\rho_{A^n B^n E^n} \approx_{n\to\infty} \rho_{ABE}^{\otimes n}\)
     \item \alert{Wiring breaks i.i.d.\ assumption!}
   \end{itemize}
@@ -559,7 +585,7 @@
     \[ \sum_{a} M_{a|x} = I_{Q_A}\;\forall x \qquad M_{a|x} \geq 0\;\forall a, x \]
     \[ \sum_{b} N_{b|y} = I_{Q_B}\;\forall y \qquad N_{b|y} \geq 0\;\forall b, y \]
   \item Behaviour given by
-      \[ p(ab|xy) = \cP(\rho, \sM) = \Tr\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right] \]
+      \[ p(ab|xy) = \cP(\rho, \sM) = \Tr{ \rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) } \]
     \item \emph{Secret key capacity} of a behaviour \(p\)
       \[ C_{\sk}(p) = \sup_{\mathfrak{P}_{\omega}} \inf_{ \substack{
             \cP(\rho, \sM) = p
@@ -607,81 +633,11 @@
 
 \begin{frame}{Result}
     \begin{figure}
-      \includegraphics[width=\linewidth]{exptplt.pdf}
+      \includegraphics[width=\linewidth]{and_plot.pdf}
     \end{figure}
 \end{frame}
 
 \section{Behaviours and Wirings}
-
-\subsection{The QKD Setting}
-
-\begin{frame}{Polytopes}
-  \begin{itemize}[<+->]
-    \item \emph{Half-space}: subset of \(\R^d\) that obeys \emph{affine constraint} \(\matr{A}\cvec{x} - \cvec{b} \leq 0\)
-    \item \emph{Polytopes} are unions of half-spaces
-    \item \(\NSs\) and \(\Ls\) are polytopes, \alert{\(\Qs\) is not}
-    \item Polytopes completely specified by either \emph{vertices} or half-space inequalities (constraints/\emph{facets})
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Nonlocal Behaviours}
-  \begin{onlyenv}<1>
-    \begin{figure}
-      \centering
-      \begin{tikzpicture}[z={(0:1)}, x={(-55:0.5)}] % set projection of unit vectors onto screen
-        \tikzmath{ \raylen = 3; }
-        \draw[dotted] (0,0,0) node[name=boundbehav, point, label=\(p_{\Ls}^{(0)}\)] {} -- ++(0,\raylen,0) node[name=prbehav, point, label=\(p_{\PR}\)] {};
-        \begin{scope}[canvas is xz plane at y=0]
-          \tikzmath{
-            coordinate \L;
-            int \i;
-            for \i in {1,2,...,8}{
-              let \lname = lbehav\i;
-              { \draw (22.5+45*\i:\raylen) node[point, name=\lname, label=\(p_{\Ls}^{(\i)}\)] {} -- (prbehav); };
-            };
-          }
-        \begin{pgfonlayer}{background}
-        \fill[draw,fill=blue!20,fill opacity=0.5] (lbehav1.center) -- (lbehav2.center) -- (lbehav3.center) -- (lbehav4.center) -- (lbehav5.center) -- (lbehav6.center) -- (lbehav7.center) -- (lbehav8.center) -- (lbehav1.center);
-        \end{pgfonlayer}
-        \end{scope}
-      \end{tikzpicture}
-      \caption{Representation of behaviours that violate \(S \leq 2\), with CHSH facet in blue}%
-    \end{figure}
-  \end{onlyenv}
-
-  \begin{onlyenv}<2->
-    \begin{itemize}[<+(1)->]
-      \item Nonlocal behaviours are \emph{convex combinations} of PR behaviour and some local behaviour
-        \[ p = qp_{\PR} + (1-q)p_{\Ls} \]
-      \item 8 permutations of linear CHSH function
-      \[ \abs{\angleb{A_{x_0} B_{y_0}} + \angleb{A_{x_1} B_{y_0}} + \angleb{A_{x_0} B_{y_1}} - \angleb{A_{x_1} B_{y_1}}} \leq 2 \]
-      \item 8 corresponding PR boxes, each maximally violating 1 facet
-      \item All nonlocal behaviours can be mapped into this region by permuting labels
-    \end{itemize}
-  \end{onlyenv}
-\end{frame}
-
-\begin{frame}{The QKD Setting}
-  \begin{itemize}[<+->]
-    \item Standard DIQKD setting: \((i_A, o_A, i_B, o_B) = (2,2,3,2)\)
-    \item Can choose 2 of Bob's 3 inputs for CHSH \(\Rightarrow 3 \times 8 = 24\) \emph{liftings} of CHSH
-    \item These are the only nontrivial facets of \(\Ls\)
-    \item \(1 : 1\) ratio between facets and PR boxes is broken
-      \begin{itemize}
-        \item Different PR boxes violating a facet have different statistics for the irrelevant setting
-        \item Each PR box can violate multiple facets
-      \end{itemize}
-  \end{itemize}
-  \begin{block}{Possible Approach}<+->
-    Can all behaviours by mapped into a specific region by symmetry? Can statistics when \(y=2\) improve our estimate of Eve's information?
-  \end{block}
-\end{frame}
-
-% show key rates over polytope slice here
-
-\note{
-  In my report there's a bunch of very nicely formatted tables that give us the statistics for these PR analogue behaviours, but if I show this here your eyes are just going to glaze over, so you'll have to take my word for it.
-}
 
 \subsection{Local Wirings}
 
@@ -764,241 +720,6 @@
   \begin{block}{Possible Approach}<+->
     Does there exist a dynamic programming formulation for bounding the key rates achievable from a given behaviour?
   \end{block}
-\end{frame}
-
-\section{Key Rate Bounds}
-
-\subsection{Upper Bounds}
-
-\begin{frame}{Concepts for Upper Bounds}
-  \begin{itemize}[<+->]
-    \item \emph{Faithful} bounds \(> 0\) for all nonlocal behaviours/entangled states
-    \item Secret key capacity of a quantum state
-      \[ C_{\sk}(\rho_{Q_A Q_B E}) = \sup_{\mathfrak{P}_{\omega}} 
-      r(\mathfrak{P}_{\omega}, \rho_{Q_A Q_B E}) \]
-    \item \emph{Conditional mutual information}: how much information do \(A\) and \(B\) share that \(E\) does not have?
-        \[ I{(A:B|E)}_{\rho} = H{(A|E)}_{\rho} + H{(B|E)}_{\rho} - H{(AB|E)}_{\rho} \]
-    \item \emph{Locking}: removing a single bit/qubit of information from a party changes a measure arbitrarily much
-      \begin{itemize}
-        \item \(E\)-locking: removing information from Eve
-        \item \(AB\)-locking: removing information from Alice and/or Bob, possibly giving it to Eve
-      \end{itemize}
-  \end{itemize}
-\end{frame}
-
-\note{
-  The choice of the measurement strategy has been absorbed into \(\mathfrak{P}_{\omega}\)
-}
-
-\begin{frame}{Upper Bounds for States}
-  \begin{itemize}[<+->]
-    \item Intrinsic information: conditional mutual information with optimal post-processing by Eve
-      \[ I{(Q_A : Q_B \downarrow E)}_{\rho} = \inf_{\cE} I{(Q_A : Q_B|\hat{E})}_{\cE(\rho)} \]
-    \item Reduced intrinsic information: non-\(E\)-lockable intrinsic information; \(a = 1 + \delta\{E' \text{ classical}\}\)
-      \[ 
-        I{(Q_A : Q_B \downarrow\downarrow E)}_{\rho} = \inf_{\rho_{Q_A Q_B EE'}}
-        I{(Q_A : Q_B \downarrow EE')}_{\rho} + aH(E')
- \]
-    \item Squashed entanglement: conditional mutual information with best quantum state for Eve
-      \[ E_{sq}({\psi^{\rho}_{Q_A Q_B}}) = \frac{1}{2} \inf_{\psi^{\rho}_{Q_A Q_B E}} I{(Q_A:Q_B|E)}_{\psi^\rho} \]
-    \item Relative entropy of entanglement; \(\psi^{\sigma}_{Q_A Q_B}\) separable
-      \[ E_R\left({\psi^{\rho}_{Q_A Q_B}}\right) = \inf_{\psi^{\sigma}_{Q_A Q_B}} D(\psi^{\rho}_{Q_A Q_B}||\psi^{\sigma}_{Q_A Q_B}) \]
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Upper Bounds for Behaviours}
-  \begin{onlyenv}<1-2>
-    \begin{itemize}[<+->]
-      \item Local--nonlocal decomposition (general protocols)
-        % \[ C_{\sk}(p) \leq \inf_{\substack{\rho, \sM : \\ p = \cP(\rho, \sM) }} \inf_{\substack{q : \\ \rho = (1-q)\rho^{NL} + q\rho^L}} (1-q) E_R(\rho^{NL}) + q E_R(\rho^L) \]
-        \[ C_{\sk}(p) \leq \inf_{\substack{p^{L}, p^{NL} : \\ p = qp^{L} + (1-q)p^{NL}}} (1-q) \inf_{\substack{\rho^{NL}, \sM^{NL}}} E_R(\rho^{NL}) + q \inf_{\substack{\rho^{L}, \sM^{L}}} E_R(\rho^L) \]
-      \item Quantum intrinsic nonlocality (setting-broadcast protocols)
-        \begin{gather*}
-          N^Q{(A:B)}_p = \sup_{p(x,y)} \inf_{\rho_{ABXYE}} I{(A:B|XYE)}_{\rho} \\
-          \rho_{ABXYE} = \sum_{abxy} p(x,y) p(ab|xy) \ket{abxy}\bra{abxy}_{ABXY} \otimes \rho_{E|abxy} \\
-          p(ab|xy) \rho_{E|abxy} = \Tr_{Q_A Q_B}\left[\rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) \right]
-        \end{gather*}
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<3->
-      \begin{figure}
-        \centering
-        \includegraphics[height=0.7\textheight]{new_plot.pdf}
-        \caption{Comparison of upper bounds for CHSH-based protocols (Source:~\cite{CCSquashedEntangle})}
-      \end{figure}
-  \end{onlyenv}
-\end{frame}
-
-\note{ Unfortunately, all of these are faithful. }
-
-\begin{frame}{A Non-Faithful Upper Bound}
-  \begin{itemize}[<+->]
-    \item Werner states
-      \[ \rho^{W,v} = v{\ket{\Psi_-}\bra{\Psi_-}} + \frac{1-v}{4}I \]
-    \item No nonlocality for \(v < v_L \approx 0.6829\), nonlocality known for \(v \geq v_{NL} \approx 0.6964\)
-    \item \(I(A:B \downarrow E) = 0\) for \(v < v_{\crit} \approx 0.7263 > v_{NL}\) via \emph{convex combination attack}, which requires measurement settings to be broadcast
-  \end{itemize}
-
-  \begin{block}{Possible Approach}<+->
-    Can we prove the security of a non-broadcast protocol against quantum adversaries?
-  \end{block}
-\end{frame}
-
-\begin{frame}{A Convex Hull of Bounds}
-  \begin{itemize}[<+->]
-    \item \emph{Classical-classical (cc) squashed entanglement} \(E^{cc}_{sq,par}(\rho, \sM(x^*, y^*))\)
-      \[ \inf_{\substack{\sigma, \sN \cong \rho, \sM}} \inf_{\cE = \sN \otimes \Lambda_E} I{(A : B|E)}_{\cE(\psi^{\sigma})} \]
-    \item Convex lower bound for convex combination attack and Bell-diagonal intrinsic information
-    \item Upper bound for settings-broadcast protocols with one pair of key-generating settings
-    \item Exceeded by full-behaviour version \(E^{cc}_{sq,dev}(\rho, \sM, p(x,y))\), where choice of \(\cE\) then depends on \((x,y)\), but still limited to settings-broadcast
-  \end{itemize}
-
-  \begin{block}{Possible Approach}<+->
-      What bounds on general protocols can we achieve using the cc-squashed entanglement?
-  \end{block}
-\end{frame}
-
-\begin{frame}{Evaluation}
-  \begin{itemize}[<+->]
-    \item Most of these bounds are very difficult to compute
-    \item If all optimisations are infima, any fixed choice provides an upper bound
-    \item Many bounds are restricted to certain settings
-  \end{itemize}
-
-  \begin{block}{Possible Approach}<+->
-      Are there any choices of states/measurements that will give greater insights? Can the restricted-setting bounds be generalised?
-  \end{block}
-\end{frame}
-
-\subsection{Lower Bounds}
-
-\begin{frame}{Asymmetric CHSH}
-  \begin{itemize}[<+->]
-    \item Asymmetric CHSH function
-      \[ S_{\alpha} \coloneqq \alpha\angleb{A_0 B_0} + \alpha\angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1} \]
-    \item Able to incorporate noisy preprocesing with probability \(q\)
-    \item Requires three separate optimisations over different parameter regimes
-    \item Minor improvement to key rate, but proof covers useful techniques that might be generalisable
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Quasi-Relative Entropy}
-  \begin{onlyenv}<1-3>
-  \begin{itemize}[<+->]
-    \item Main idea: bound the conditional entropy directly
-    \item Express conditional entropy in terms of relative entropy
-      \[ H{(A|E)}_{\rho} = -D(\rho_{AE}||I_A \otimes \rho_{E}) \]
-    \item Use integral representation of logarithm
-      \[ \ln\left(\frac{x}{y}\right) = \int_{0}^{1} \frac{x-y}{t(x-y) + y} \dif{t} \]
-      in spectral integral representation of relative entropy
-      \[ D(\rho||\sigma) = -\frac{1}{\ln 2} \int_{\R^{2}_{+}} \underbrace{\int_{0}^{1} \frac{y(x-y)}{t(x-y)+y} \dif{t}}_{y\ln(x/y)} \dif{\nu_{\rho,\sigma}(x,y)} \]
-  \end{itemize}
-  \end{onlyenv}
-
-  \begin{onlyenv}<4->
-  \begin{itemize}[<+->]
-    \item Discretise integral representation of logarithm using \emph{Gauss-Radau quadrature} and commute the discrete sum with the spectral integral
-      \[ D(\rho||\sigma) \leq \sum_{i=1}^m -\frac{w_i}{\ln 2} \underbrace{\int_{\R^{2}_{+}} \frac{y(x-y)}{t_i(x-y)+y} \dif{\nu_{\rho,\sigma}(x,y)}}_{D_{F_{t_i}}} \]
-    \item Spectral integral of integral representation has a nice variational representation
-      \[ D_{F_{t_i}} = \frac{1}{t}  \inf_Z \Tr\left[ \rho + \rho(Z + Z^{\dagger}) + (1-t)\rho{}Z^{\dagger}Z + t\sigma{}ZZ^{\dagger} \right]\]
-  \end{itemize}
-  \end{onlyenv}
-\end{frame}
-
-\note{
-  If the phrase ``spectral integral'' scares you, just pretend that it's a normal evaluation of the expectation value of a function of two states, with \(x\) and \(y\) ranging over the eigenvalues, except it works for infinite-dimensional systems.
-}
-
-\begin{frame}{Calculating Conditional Entropy}
-  \begin{itemize}[<+->]
-    \item Need conditional entropy of classical Bell test data
-    \item Must inifimise over Alice's measurement operators \(M_{a|x}\) and quantum state \(\rho_{Q_A Q_B Q_E}\)
-    \item Can impose additional constraints with Bob's measurement operators \(N_{b|y}\)
-    \item Lower bound is always valid and converges for \(m\to\infty\)
-    \item However, not possible to optimise efficiently
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{The NPA Hierarchy}
-  \begin{itemize}[<+->]
-    \item Assume states are pure, and replace operator Hilbert space requirement with commutation requirement
-    \item Each sequence \(F\) of \(M_{a|x}\)'s and \(N_{b|y}\)'s is a \emph{monomial}, and \(F\ket{\psi}\) is a vector in the Hilbert space
-    \item Higher levels of hierarchy \(\Rightarrow\) more monomials
-    \item \emph{Gram matrix} with entries \(\braket{\psi|F_1^{\dagger}F_2|\psi}\) is \emph{positive semidefinite}
-    \item Such matrices \alert{can be efficiently optimised over!}
-    \item Some entries constrained by known statistics: \(\braket{\psi|M_{a|x}N_{b|y}|\psi} = p(ab|xy)\)
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Evaluation}
-  \begin{itemize}[<+->]
-    \item QRE method is general, powerful, and reasonably fast
-    \item Could possibly be adapted to compute upper bounds more efficiently
-    \item These are just \emph{tools}: search space is unbelievably vast
-    \item Closer analysis required to find structures
-  \end{itemize}
-  \begin{block}{Possible Approach}<+->
-    Can quasi-relative entropies be used to compute upper bounds? What general conclusions can we draw about DIQKD key rates from these bounds?
-  \end{block}
-\end{frame}
-
-\subsection{Nonlocality Monotones}
-
-\begin{frame}{Monotones}
-  \begin{itemize}[<+->]
-    \item Functions of resources that \emph{preserve the pre-order} of the resources
-      \[ R_1 \leadsto R_2 \Rightarrow \mu(R_1) \succeq \mu(R_2) \]
-    \item Establish fundamental limits on achievable behaviours
-      \[ \sWB(p) \subseteq \{ p' : \mu(p) \succeq \mu(p') \} \]
-    \item Provide insight into structure of behaviour and wiring spaces
-    \item Monotones known for MCLO, but not MCLOSR
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Maximal Correlation}
-  \begin{itemize}[<+->]
-    \item Maximal correlation of two classical rvs \(A\) and \(B\)
-      \[ \rho(A,B) = \max_{f,g} \frac{\E[(f(A)-\E[f(A)])(g(B)-\E[g(B)])]}{\sqrt{\Var[f(A)]\Var[g(B)]}} \]
-      \begin{Array*}{rcl}
-        \rho(A,B) = & \max_{f,g}  & \E[f(A)g(B)] \\
-                    & \text{s.t.} & \E[f(A)] = \E[g(B)] = 0 \\
-                    &             & \E[f(A)^2] = \E[g(B)^2] = 1,
-      \end{Array*}
-    \item Extend to conditional distributions: \(\rho(A,B|X,Y) = \max_{x,y} \rho(A,B|X=x,Y=y)\)
-    \item \emph{Tensorisation}: multiple i.i.d.\ copies do not increase \(\rho\) \(\Rightarrow\) \(\rho\) is a monotone with \(\succeq = \geq\)
-  \end{itemize}
-\end{frame}
-
-% show maxcorr over polytope slice here
-
-\begin{frame}{Related Measures}
-  \begin{itemize}[<+->]
-    \item Hypercontractivity (HC) and maximal correlation (MC) ribbons are subsets of \({[0,1]}^2\)
-    \item Ribbons expand under wiring:
-      \[ \HC(A,B) \subseteq \HC(A',B'), \MC(A,B) \subseteq \MC(A',B') \]
-    \item Ribbons are monotones with \(\succeq = \subseteq\)
-    \item Properties of \(\rho\) derived from ribbons
-    \item \(\rho\) can be efficiently computed, ribbons cannot!
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Desiderata}
-  \begin{enumerate}[<+->]
-    \item Easy to compute \(\mu(p)\)
-    \item \(\{ p : \mu(p) = \mu' \}\) can be efficiently optimised over
-    \item Tight: if \(\mu(p) = \mu(p')\), there exists a wiring \(p \mapsto p'\)
-    \item If \(\mu(p) = \mu(p')\), wiring for \(p \mapsto p'\) can be expicitly constructed
-  \end{enumerate}
-\end{frame}
-
-\begin{frame}{Evaluation}
-  \begin{itemize}[<+->]
-    \item \(\rho\) is easy to compute but probably not tight
-    \item Effect of shared randomness unclear
-    \item Potentially rich area to explore
-    \item Caveat: we want something like
-      \[ \max_{E|AB} \frac{H(A|E) - H(A|B)}{H(A)} \leq f(\rho(A,B)) \]
-  \end{itemize}
 \end{frame}
 
 \section*{Conclusion}
