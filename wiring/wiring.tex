@@ -4,6 +4,7 @@
 \usepackage{pdflscape} % make certain pages landscape
 \usepackage{geometry} % set page geometry
 \usepackage[indent=2em, skip=0.8em plus 0.1 em minus 0.2 em]{parskip} % set paragraph spacing
+\renewcommand{\floatpagefraction}{.8} % only floats taking up more than 80% of the page will get their own page
 
 % Font and Text
 \usepackage[utf8]{inputenc}
@@ -1323,138 +1324,18 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
               \begin{figure}
                 \centering
                 \begin{minipage}{0.3\linewidth}
-                  \begin{center}
-                    \begin{tikzpicture}[x=1pt,y=1pt]
-                      \tikzmath{\w1 = 3em; \h1 = 1.5em;
-                        \w2 = 5em; \h2 = 1.5em; \inflh = 0.2*\h2; \signalh = 0.5*\h1;
-                        \olap2 = 0.1*\w2; \hgap2 = 0.1*\w2; \vgap2 = \h2;
-                      \olap1 = 0.3*\w1; \hgap1 = 0.1*\w1; \vgap1 = 0.7*\h1;}
-                      \node[nclassbox,
-                        minimum width = \w{1},
-                        minimum height = \h{1},
-                        ] (state1) at (0,0) {\(\rho\)};
-
-                      \node[nclassbox,
-                        minimum width = \w{1},
-                        minimum height = \h{1},
-                        ] (N1) at ($ (state1.north east) + (0.5*\w1 + \hgap1, 0.5*\h1 + \vgap1 + 2*\inflh) $) {\(N_{b|y}\)};
-                      \draw[mid arrow, nclassinfl] (state1.north east) ++(-\olap1, 0) -- ++(0, \inflh) coordinate (temp1) (N1.south west) ++(\olap1, 0) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
-
-                      \node[nclassbox,
-                        minimum width = \w{1},
-                        minimum height = \h{1},
-                        ] (M1) at ($ (state1.north west) + (-0.5*\w1 - \hgap1, 0.5*\h1 + \vgap1 + 2*\inflh) $) {\(M_{a|x}\)};
-                      \draw[mid arrow, nclassinfl] (state1.north west) ++(\olap1, 0) -- ++(0, \inflh) coordinate (temp1) (M1.south east) ++(-\olap1, 0) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
-
-                      \draw[mid arrow, classinfl] (M1.south west) ++(\olap1, 0) coordinate (M1 in)
-                        (M1 in |- {{(0, -2*\h1)}}) -- ++(0, \signalh) node[right] {\(x_0\)} -- ++(0, \signalh) coordinate (temp1);
-                      \draw[classinfl] (temp1) -- (M1 in);
-                      \draw[mid arrow, classinfl] (M1 in |- M1.north) -- ++(0, \signalh) node[right] {\(a_0\)} -- ++(0, \signalh);
-
-                      \draw[mid arrow, classinfl] (N1.south east) ++(-\olap1, 0) coordinate (N1 in)
-                        (N1 in |- {{(0, -2*\h1)}}) -- ++(0, \signalh) node[left] {\(y_0\)} -- ++(0, \signalh) coordinate (temp1);
-                      \draw[classinfl] (temp1) -- (N1 in);
-                      \draw[mid arrow, classinfl] (N1 in |- N1.north) -- ++(0, \signalh) node[left] {\(b_0\)} -- ++(0, \signalh);
-                    \end{tikzpicture}
-                  \end{center}
+                  \centering
+                  \includegraphics{behav.tikz}
                 \end{minipage}
                 \begin{minipage}{0.6\linewidth}
-                  \begin{center}
-                  \begin{tikzpicture}[x=1pt,y=1pt]
-                    \tikzmath{\w1 = 3em; \h1 = 1.5em;
-                      \w2 = 5em; \h2 = 1.5em; \inflh = 0.2*\h2; \signalh = 0.5*\h1;
-                      \olap2 = 0.1*\w2; \hgap2 = 0.1*\w2; \vgap2 = \h2;
-                    \olap1 = 0.3*\w1; \hgap1 = 0.1*\w1; \vgap1 = 0.7*\h1;}
-
-                    \node[classbox,
-                      minimum width = \w{2},
-                      minimum height = \h{2},
-                      ] (SR) at (0, 0) {\(\Lambda\)};
-
-                    \node[classbox,
-                      minimum width = \w{2},
-                      minimum height = \h{2},
-                      ] (chiA 1) at (-\w2-\hgap2, \vgap2 + 0.5*\h2 + 2*\inflh) {\(\chi_A^{(1)}\)};
-                    \draw[classinfl, mid arrow] (SR.north) ++(-\olap2, 0) -- ++(0, \inflh) coordinate (temp1) (chiA 1.south east) ++(-\olap2, 0) -- ++(0, -\inflh) coordinate (temp2)
-                      (temp1) -- (temp2);
-
-                    \node[classbox,
-                      minimum width = \w{2},
-                      minimum height = \h{2},
-                      ] (chiB 1) at (\w2+\hgap2, \vgap2 + 0.5*\h2 + 2*\inflh) {\(\chi_B^{(1)}\)};
-                    \draw[classinfl, mid arrow] (SR.north) ++(\olap2, 0) -- ++(0, \inflh) coordinate (temp1) (chiB 1.south west) ++(\olap2, 0) -- ++(0, -\inflh) coordinate (temp2)
-                      (temp1) -- (temp2);
-
-                    % The first state
-                    \coordinate (temp1) at ($ (chiA 1.north) + (0, \vgap2) + (0, 0.5*\h1) $);
-                    \node[nclassbox,
-                      minimum width = \w{1},
-                      minimum height = \h{1},
-                      ] (state1) at (temp1 -| {{(0,0)}}) {\(\rho\)};
-
-                    % Alice's first measurement
-                    \node[nclassbox,
-                      minimum width = \w{1},
-                      minimum height = \h{1},
-                      ] (N1) at ($ (state1.north east) + (0.5*\w1 + \hgap1, 0.5*\h1 + \vgap1 + 2*\inflh) $) {\(N_{b|y}\)};
-                    \draw[mid arrow, nclassinfl] (state1.north east) ++(-\olap1, 0) -- ++(0, \inflh) coordinate (temp1) (N1.south west) ++(\olap1, 0) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
-
-                    % Bob's first measurement
-                    \node[nclassbox,
-                      minimum width = \w{1},
-                      minimum height = \h{1},
-                      ] (M1) at ($ (state1.north west) + (-0.5*\w1 - \hgap1, 0.5*\h1 + \vgap1 + 2*\inflh) $) {\(M_{a|x}\)};
-                    \draw[mid arrow, nclassinfl] (state1.north west) ++(\olap1, 0) -- ++(0, \inflh) coordinate (temp1) (M1.south east) ++(-\olap1, 0) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
-
-                    % Alice's classical data
-                    \draw[mid arrow, classinfl] (M1.south west) ++(\olap1, 0) coordinate (M1 in)
-                      (M1 in |- {{(0, -2*\h1)}}) -- ++(0, \signalh) node[right] {\(x\)} -- ++(0, \signalh) coordinate (temp1);
-                    \draw[classinfl] (temp1) -- (temp1 |- chiA 1.south);
-                    \draw[mid arrow, classinfl]  (temp1 |- chiA 1.north) -- ++(0, \signalh) node[right] {\(x_0\)} -- ++(0, \signalh) coordinate (temp1);
-                    \draw[classinfl] (temp1) -- (M1 in);
-                    \draw[mid arrow, classinfl] (M1 in |- M1.north) -- ++(0, \signalh) node[right] {\(a_0\)} -- ++(0, \signalh) coordinate (M1 out);
-
-                    % Bob's classical data
-                    \draw[mid arrow, classinfl] (N1.south east) ++(-\olap1, 0) coordinate (N1 in)
-                      (N1 in |- {{(0, -2*\h1)}}) -- ++(0, \signalh) node[left] {\(y\)} -- ++(0, \signalh) coordinate (temp1);
-                    \draw[classinfl] (temp1) -- (temp1 |- chiB 1.south);
-                    \draw[mid arrow, classinfl]  (temp1 |- chiB 1.north) -- ++(0, \signalh) node[left] {\(y_0\)} -- ++(0, \signalh) coordinate (temp1);
-                    \draw[classinfl] (temp1) -- (N1 in);
-                    \draw[mid arrow, classinfl] (N1 in |- N1.north) -- ++(0, \signalh) node[left] {\(b_0\)} -- ++(0, \signalh) coordinate (N1 out);
-
-                    % Alice's second wiring map
-                    \coordinate (temp1) at ($ (chiA 1.south west) + (-\olap2, -\inflh) $);
-                    \draw[mid arrow, classinfl] (SR.north west) ++(\olap2, 0) -- ++(0, \inflh) -- (temp1) coordinate (temp2);
-                    \draw[classinfl] (temp2) -- (temp2 |- M1 out) coordinate (temp1);
-                    \draw let \p{out} = ($ (temp1) - (M1 out) $),
-                      \n{dist} = {abs(\x{out}) + 2*\olap{2}}
-                      in
-                      (temp1) ++(-\olap2, 0) node[classbox, anchor=south west,
-                      minimum width = \n{dist},
-                      minimum height = \h{2}] (chiA 2) {\(\chi_A^{(2)}\)};
-                    \draw[mid arrow, classinfl] (chiA 1.north west) ++(\olap2, 0) coordinate (temp2) -- (temp2 |- chiA 2.south);
-                    \draw[mid arrow, classinfl] (M1 in |- chiA 2.north) -- ++(0, \signalh) node[right] {\(a\)} -- ++(0, \signalh);
-
-                    % Bob's second wiring map
-                    \coordinate (temp1) at ($ (chiB 1.south east) + (\olap2, -\inflh) $);
-                    \draw[mid arrow, classinfl] (SR.north east) ++(-\olap2, 0) -- ++(0, \inflh) -- (temp1) coordinate (temp2);
-                    \draw[classinfl] (temp2) -- (temp2 |- N1 out) coordinate (temp1);
-                    \draw let \p{out} = ($ (temp1) - (N1 out) $),
-                      \n{dist} = {abs(\x{out}) + 2*\olap{2}}
-                      in
-                      (temp1) ++(\olap2, 0) node[classbox, anchor=south east,
-                      minimum width = \n{dist},
-                      minimum height = \h{2}] (chiB 2) {\(\chi_B^{(2)}\)};
-                    \draw[mid arrow, classinfl] (chiB 1.north east) ++(-\olap2, 0) coordinate (temp2) -- (temp2 |- chiB 2.south);
-                    \draw[mid arrow, classinfl] (N1 in |- chiB 2.north) -- ++(0, \signalh) node[left] {\(b\)} -- ++(0, \signalh);
-                  \end{tikzpicture}
-                  \end{center}
+                  \centering
+                  \includegraphics{losr.tikz}
                 \end{minipage}
-                  \caption[Depiction of a generic LOSR operation.]{\label{fig:losr} A generic LOSR operation transforms an initial behaviour \(p(a_0 b_0|x_0 y_0)\), depicted on the left, into a new overall behaviour \(p'(ab|xy)\), using classical preprocessing and postprocessing, and shared randomness. The LOSR transformation is depicted in blue. (Adapted from~\cite{BellResourceTheory})}
+                  \caption[Causal influences in an LOSR operation on a quantum behaviour.]{\label{fig:losr} A generic LOSR operation transforms an initial behaviour \(p(a_0 b_0|x_0 y_0)\), depicted on the left, into a new overall behaviour \(p'(ab|xy)\), using classical preprocessing and postprocessing, and shared randomness, depicted on the right. These diagrams depict the causal influences between the systems in this scenario. Double lines indicate nonclassical causation (in this case, quantum effects). (Adapted from~\cite{BellResourceTheory})}
                 \end{figure}
 
                 % TODO better caption
-      
+
               Local operations involve each party locally preprocessing his inputs, sending the preprocessed input into the box, then postprocessing the received output to generate an overall output. The preprocessing and postprocessing steps can obviously only use data that is available at the point they are executed, so the most general local operations can be described as~\cite[Def. 4]{LocalTransformations}
               \begin{equation}
                 p'(a|x) = \sum_{a_0 x_0} p_o(a|x_0 a_0 x) p(a_0|x_0) p_i(x_0|x).
@@ -1490,147 +1371,11 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
 
               Applying the same analysis to the local operations that constitute a wiring, a wiring of \(c\) boxes would need to generate inputs for the \(c\) boxes, and combine the \(c\) outputs into one output. Therefore, the effect of a \emph{\(c\)-box local operation} is fully specified by the \(c+1\) maps \(\chi(a|\cvec{x}^c\cvec{a}^{c}x)\) and \(\chi(x_j|\cvec{x}^{j-1}\cvec{a}^{j-1}x)\), for \(j \in \dintv{1}{c}\), where there are no constraints on maps besides their cardinalities. We term these \(c\)-box local operations \emph{marginal wirings} and denote the set of marginal wirings as \(\sW\).
 
-              \begin{center}
-                \begin{tikzpicture}[x=1pt,y=1pt]
-                  \tikzmath{\w1 = 3em; \h1 = 1.5em;
-                    \w2 = 5em; \h2 = 1.5em; \inflh = 0.2*\h2; \signalh = 0.5*\h1;
-                    \olap2 = 0.1*\w2; \hgap2 = 0.1*\w2; \vgap2 = \h2;
-                  \olap1 = 0.3*\w1; \hgap1 = 0.1*\w1; \vgap1 = 0.7*\h1;}
-
-                  \node[classbox,
-                    minimum width = \w{2},
-                    minimum height = \h{2},
-                    ] (SR) at (0, 0) {\(\Lambda\)};
-
-                  % Alice's first wiring map
-                  \node[classbox,
-                    minimum width = \w{2},
-                    minimum height = \h{2},
-                    ] (chiA 1) at (-\w2-\hgap2, \vgap2 + 0.5*\h2 + 2*\inflh) {\(\chi_A^{(1)}\)};
-                  \draw[classinfl, mid arrow] (SR.north) ++(-\olap2, 0) -- ++(0, \inflh) coordinate (temp1) (chiA 1.south east) ++(-\olap2, 0) -- ++(0, -\inflh) coordinate (temp2)
-                    (temp1) -- (temp2);
-
-                  % Bob's first wiring map
-                  \node[classbox,
-                    minimum width = \w{2},
-                    minimum height = \h{2},
-                    ] (chiB 1) at (\w2+\hgap2, \vgap2 + 0.5*\h2 + 2*\inflh) {\(\chi_B^{(1)}\)};
-                  \draw[classinfl, mid arrow] (SR.north) ++(\olap2, 0) -- ++(0, \inflh) coordinate (temp1) (chiB 1.south west) ++(\olap2, 0) -- ++(0, -\inflh) coordinate (temp2)
-                    (temp1) -- (temp2);
-
-                  % The first state
-                  \coordinate (temp1) at ($ (chiA 1.north) + (0, -\vgap2) + (0, 0.5*\h1) $);
-                  \node[nclassbox,
-                    minimum width = \w{1},
-                    minimum height = \h{1},
-                    ] (state1) at (temp1 -| {{(0,0)}}) {\(\rho\)};
-
-                  % Alice's first measurement
-                  \node[nclassbox,
-                    minimum width = \w{1},
-                    minimum height = \h{1},
-                    ] (N1) at ($ (state1.north east) + (0.5*\w1 + \hgap1, 0.5*\h1 + \vgap1 + 2*\inflh) $) {\(N_{b|y}\)};
-                  \draw[mid arrow, nclassinfl] (state1.north east) ++(-\olap1, 0) -- ++(0, \inflh) coordinate (temp1) (N1.south west) ++(\olap1, 0) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
-
-                  % Bob's first measurement
-                  \node[nclassbox,
-                    minimum width = \w{1},
-                    minimum height = \h{1},
-                    ] (M1) at ($ (state1.north west) + (-0.5*\w1 - \hgap1, 0.5*\h1 + \vgap1 + 2*\inflh) $) {\(M_{a|x}\)};
-                  \draw[mid arrow, nclassinfl] (state1.north west) ++(\olap1, 0) -- ++(0, \inflh) coordinate (temp1) (M1.south east) ++(-\olap1, 0) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
-
-                  % Alice's classical data
-                  \draw[mid arrow, classinfl] (M1.south west) ++(\olap1, 0) coordinate (M1 in)
-                    (M1 in |- {{(0, -2*\h1)}}) -- ++(0, \signalh) node[right] {\(x\)} -- ++(0, \signalh) coordinate (temp1);
-                  \draw[classinfl] (temp1) -- (temp1 |- chiA 1.south);
-                  \draw[mid arrow, classinfl]  (temp1 |- chiA 1.north) -- ++(0, \signalh) node[right] {\(x_1\)} -- ++(0, \signalh) coordinate (temp1);
-                  \draw[classinfl] (temp1) -- (M1 in);
-                  \draw[mid arrow, classinfl] (M1 in |- M1.north) -- ++(0, \signalh) node[right] {\(a_1\)} -- ++(0, \signalh) coordinate (M1 out);
-
-                  % Bob's classical data
-                  \draw[mid arrow, classinfl] (N1.south east) ++(-\olap1, 0) coordinate (N1 in)
-                    (N1 in |- {{(0, -2*\h1)}}) -- ++(0, \signalh) node[left] {\(y\)} -- ++(0, \signalh) coordinate (temp1);
-                  \draw[classinfl] (temp1) -- (temp1 |- chiB 1.south);
-                  \draw[mid arrow, classinfl]  (temp1 |- chiB 1.north) -- ++(0, \signalh) node[left] {\(y_1\)} -- ++(0, \signalh) coordinate (temp1);
-                  \draw[classinfl] (temp1) -- (N1 in);
-                  \draw[mid arrow, classinfl] (N1 in |- N1.north) -- ++(0, \signalh) node[left] {\(b_1\)} -- ++(0, \signalh) coordinate (N1 out);
-
-                  % Alice's second wiring map
-                  \coordinate (chiA 2 SR) at ($ (chiA 1.south west) + (-\olap2-\hgap2, -\inflh) $);
-                  \draw[mid arrow, classinfl] (SR.north west) ++(\olap2, 0) -- ++(0, \inflh) -- (chiA 2 SR) coordinate (temp2);
-                  \draw[classinfl] (temp2) -- (temp2 |- M1 out) coordinate (temp1);
-                  \draw let \p{out} = ($ (temp1) - (M1 out) $),
-                    \n{dist} = {abs(\x{out}) + 2*\olap{2}}
-                    in
-                    (temp1) ++(-\olap2, 0) node[classbox, anchor=south west,
-                    minimum width = \n{dist},
-                    minimum height = \h{2}] (chiA 2) {\(\chi_A^{(2)}\)};
-                  \draw[mid arrow, classinfl] (chiA 1.north west) ++(\olap2+\hgap2, 0) coordinate (temp2) -- (temp2 |- chiA 2.south);
-                  \draw[mid arrow, classinfl] (M1 in |- chiA 2.north) -- ++(0, \signalh) node[right] {\(x_2\)} -- ++(0, \signalh) coordinate (x2);
-
-                  % Bob's second wiring map
-                  \coordinate (chiB 2 SR) at ($ (chiB 1.south east) + (\olap2, -\inflh) $);
-                  \draw[mid arrow, classinfl] (SR.north east) ++(-\olap2, 0) -- ++(0, \inflh) -- (chiB 2 SR) coordinate (temp2);
-                  \draw[classinfl] (temp2) -- (temp2 |- N1 out) coordinate (temp1);
-                  \draw let \p{out} = ($ (temp1) - (N1 out) $),
-                    \n{dist} = {abs(\x{out}) + 2*\olap{2}}
-                    in
-                    (temp1) ++(\olap2, 0) node[classbox, anchor=south east,
-                    minimum width = \n{dist},
-                    minimum height = \h{2}] (chiB 2) {\(\chi_B^{(2)}\)};
-                  \draw[mid arrow, classinfl] (chiB 1.north east) ++(-\olap2, 0) coordinate (temp2) -- (temp2 |- chiB 2.south);
-                  \draw[mid arrow, classinfl] (N1 in |- chiB 2.north) -- ++(0, \signalh) node[left] {\(y_2\)} -- ++(0, \signalh) coordinate (y2);
-
-                  % The second state
-                  \draw let \p{mid} = ($ 0.5*(x2) + 0.5*(y2) $)
-                    in
-                    (\p{mid}) ++(0, -\vgap2)
-                  node[nclassbox,
-                    minimum width = \w{1},
-                    minimum height = \h{1},
-                    ] (state2) {\(\rho\)};
-
-                  % Alice's second measurement
-                  \node[nclassbox,
-                    minimum width = \w{1},
-                    minimum height = \h{1},
-                    ] (N2) at ($ (state2.north east) + (0.5*\w1 + \hgap1, 0.5*\h1 + \vgap1 + 2*\inflh) $) {\(N_{b|y}\)};
-                  \draw[mid arrow, nclassinfl] (state2.north east) ++(-\olap1, 0) -- ++(0, \inflh) coordinate (temp1) (N2.south west) ++(\olap1, 0) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
-
-                  % Bob's second measurement
-                  \node[nclassbox,
-                    minimum width = \w{1},
-                    minimum height = \h{1},
-                    ] (M2) at ($ (state2.north west) + (-0.5*\w1 - \hgap1, 0.5*\h1 + \vgap1 + 2*\inflh) $) {\(M_{a|x}\)};
-                  \draw[mid arrow, nclassinfl] (state2.north west) ++(\olap1, 0) -- ++(0, \inflh) coordinate (temp1) (M2.south east) ++(-\olap1, 0) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
-
-                  % Alice's classical data
-                  \draw[classinfl] (M2.south west) ++(\olap1, 0) coordinate (M2 in)
-                    (x2) -- (M2 in);
-                  \draw[mid arrow, classinfl]  (x2 |- M2.north) -- ++(0, \signalh) node[right] {\(a_2\)} -- ++(0, \signalh) coordinate (a2);
-
-                  % Bob's classical data
-                  \draw[classinfl] (N2.south east) ++(-\olap1, 0) coordinate (N2 in)
-                    (y2) -- (N2 in);
-                  \draw[mid arrow, classinfl]  (y2 |- N2.north) -- ++(0, \signalh) node[left] {\(b_2\)} -- ++(0, \signalh) coordinate (b2);
-
-                  % Alice's third wiring map
-                  \coordinate (chiA 3 SR) at ($ (chiA 2 SR) + (-\olap2-\hgap2, 0) $);
-                  \draw[mid arrow, classinfl] (SR.west) -- (chiA 3 SR) coordinate (temp2);
-                  \draw[classinfl] (temp2) -- (temp2 |- a2) coordinate (temp1);
-                  \draw let \p{out} = ($ (temp1) - (a2) $),
-                    \n{dist} = {abs(\x{out}) + 2*\olap{2}}
-                    in
-                    (temp1) ++(-\olap2, 0) node[classbox, anchor=south west,
-                    minimum width = \n{dist},
-                    minimum height = \h{2}] (chiA 3) {\(\chi_A^{(3)}\)};
-                  \draw[mid arrow, classinfl] (chiA 2.north west) ++(\olap2, 0) coordinate (temp2) -- (temp2 |- chiA 3.south);
-                  \draw[mid arrow, classinfl] (M1 in |- chiA 3.north) -- ++(0, \signalh) node[right] {\(a\)} -- ++(0, \signalh) coordinate (a);
-
-
-
-                \end{tikzpicture}
-              \end{center}
+              \begin{figure}
+                \centering
+                \includegraphics{wiring.tikz}
+                \caption[Causal influences in a wiring between two iid quantum behaviours.]{\label{fig:wiring} Wirings combine multiple behaviours into one using local operations and shared randomness. We have depicted two iid quantum behaviours here for simplicity; our definitions allow wirings to be applied to any system that can be described by a joint conditional probability (that is, a behaviour).}
+              \end{figure}
 
               The space of \(n\)-partite wirings, which we denote \(\sW^n\), is derived in a similar way to the derivation of LOSR operations, although some care needs to be taken in defining and applying the tensor product of marginal wirings to compute the actual behaviour (see \Cref{sec:locwir_mat}). A bipartite wiring would then produce a new behaviour from \(c\) boxes with an arbitrary joint behaviour \(p^c\) wired together:
               \begin{gather}
@@ -2024,6 +1769,12 @@ Any[]
                   % NEXT bound the secret key capacity itself not the iid
                   % version
 
+              \begin{figure}
+                \centering
+                \includegraphics{outdep.tikz}
+                \caption[Causal influences in a wiring without output dependency between two iid quantum behaviours.]{\label{fig:outdep} In a wiring without output dependency, the intermediate outputs do not play a role in the inputs to the devices being wired together. These transformations are ``too simple'': their effect can be simulated by a judicious choice of states and measurements that have the same physical implementation as the original behaviour. They therefore cannot improve the secret key capacity.}
+              \end{figure}
+
                   From the wiring distribution description of wirings alone, we are able to derive a major result about the potential for wiring to improve key rates. In particular, we identify a class of wirings that are unable to increase the secret key capacity of a behaviour.
               \begin{lemma}\label{thm:outdep}
                 Define a \emph{wiring without output dependency} as a wiring for which all inputs are independent of previous outputs, that is, a wiring \(\chi\) that obeys
@@ -2076,7 +1827,7 @@ Any[]
           & P_{\Lambda}(\lambda) \proj[\crv{A}^c\crv{X}^c\crv{X}\Lambda_A \crv{B}^c\crv{Y}^c\crv{Y}\Lambda_B]{\cvec{a}^c\cvec{x}^c\lambda{x} \cvec{b}^c\cvec{y}^c\lambda{y}} \otimes \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
                  \end{aligned}
                  \end{align*}
-                 where the public shared randomness \(\Lambda\) is incorporated into Eve's system \(E^c\). Then, Alice and Bob can execute the local operations
+                 where the public shared randomness \(\Lambda\) is incorporated into Eve's system \(E^c\). Then, Alice and Bob can execute the classical stochastic maps \(\{V_{a|\cvec{a}^c\cvec{x}^c x\lambda}\}\) and \(\{V_{b|\cvec{b}^c\cvec{y}^c y\lambda}\}\)
                  \begin{align*}
                    V_{a|\cvec{a}^c\cvec{x}^c x\lambda} &= \sqrt{\chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^cx)} \ket{ax}\bra{\cvec{a}^c\cvec{x}^c x\lambda} \\
                    V_{b|\cvec{b}^c\cvec{y}^c y\lambda} &= \sqrt{\chi_{B|\lambda}(b|\cvec{y}^c\cvec{b}^cy)} \ket{by}\bra{\cvec{b}^c\cvec{y}^c y\lambda},
@@ -2741,7 +2492,7 @@ Any[]
 
                     Given a joint state, we may wish to focus only on one subsystem. The part of the joint state accessible to the subsystem is called its \emph{marginal} state, and is derived from the joint state by taking a \emph{partial trace}:
                     \begin{equation}
-                      \Tr[_B]{\ket{a_1}\bra{a_2} \otimes \ket{b_1}\bra{b_2}} = \ket{a_1}\bra{a_2} \Rightarrow \rho_A = \Tr[_B]{\rho_{AB}}.
+                      \Tr[_B]{\ket{a_1}\bra{a_2} \otimes \ket{b_1}\bra{b_2}} = \ket{a_1}\bra{a_2} \Tr{\ket{b_1}\bra{b_2}} \Rightarrow \rho_A = \Tr[_B]{\rho_{AB}}.
                     \end{equation}
 
                     Lastly, we describe the allowable operations on a quantum system. These are described by \emph{completely positive trace preserving (CPTP) maps}, which are simply any set of operators \(\{E_k\}\) such that \(\sum_k E_k^{\dagger}E_k = I\). The overall state after the application of a CPTP map is \(\sum_k E_k \rho E_k^{\dagger}\).
