@@ -463,11 +463,14 @@
         \(o(f(n))\) & The set of functions \(g(n)\) such that \(\lim_{n\to\infty} g(n)/f(n) = 0\); typically abused to mean ``some function in \(o(f(n))\)''. \\
         \(\cvec{x}^n\), \(\cvec{x}^{i:j}\), \(x_j\) & \(\cvec{x}^n\) is a vector of length \(n\), \(\cvec{x}^{i:j}\) are its elements from index \(i\) to index \(j\), one-based, and \(x_j\) is its \(j\)th element \\
         \(\matr{M}\), \(\matr[^{\tpose}]{M}\), \(\matr{M}_{ij}\) & A matrix, its transpose, and its \((i,j)\)-th element, one-based indexing \\
+        \(\Tr{M}\) & Trace of \(M\) \\
         \(\crv{X}\) & A classical random variable \\
         \(\proj[AB]{ab}\), \(\proj[A]{a} \otimes \proj[B]{b}\), \({\ket{a}\bra{a}}_A \otimes {\ket{b}\bra{b}}_B\), \({\ket{ab}\bra{ab}}_{AB}\) & The tensor product of the projector for state \(a\) on Hilbert space \(A\), with the projector for state \(b\) on Hilbert space \(b\) \\
+        \(\Trdist{\rho}{\sigma}\) & Trace distance between \(\rho\) and \(\sigma\) (\Cref{sec:prelim_infot}) \\
         \(\cong\) & Isomorphism \\
         \(\subseteq\), \(\subsetneq\) & Subset and strict subset \\
         \(\indic{\angleb{proposition}}\) & The indicator function; 1 if the proposition is true and 0 otherwise \\
+        \(\delta_{ij}\) & The Kronecker delta \(\indic{i = j}\) \\
         iid & Independent and identically distributed \\
         pmf & Probability mass function \\
         rv & Random variable \\
@@ -2336,94 +2339,7 @@ Any[]
 
                     \section{Preliminaries}\label{sec:prelim}
 
-                    As this report is expected to be read by a diverse audience, concepts that may be entirely elementary to some readers may be utterly unknown to others. Background information of this nature, from a variety of domains, is collected here, but assumed throughout the main text to avoid cluttering the exposition. The only assumptions for this section are a junior-college level grasp of probability, calculus, and vectors.
-
-                    \subsection{Linear Algebra and Quantum Mechanics}\label{sec:prelim_linalg}
-
-                    The mathematical models of quantum mechanics are expressed in the language of linear algebra. This brief review will focus on explaining the correspondence between physical features of quantum systems and their mathematical expression. All statements made without citation in this section can be found in~\cite{NielsenChuang}.
-
-    The set of \emph{bounded operators} \(\mathcal{B}(\Hs)\) on the Hilbert space \(\Hs\) is the subset of \(\Lin{\Hs}\) such that the \emph{operator norm} of \(X \in \Lin{\Hs}\)
-    \begin{equation}
-    \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}}
-  \end{equation}
-    is finite.~\cite{HallQuantumForMath}. 
-
-                    The \emph{tensor product} of their Hilbert spaces
-
-                    where the tensor product between operators in finite dimensions can be computed explicitly as the \emph{Kronecker product} of the corresponding matrices. 
-
-                    Quantum behaviours arise from selecting one of several possible \emph{measurements} (the input) to perform on a quanum system, and obtaining a \emph{measurement outcome} from the chosen measurement (the output). Quantum systems can be described abstractly by their \emph{state}, most generally a positive-semidefinite \emph{density operator} typically denoted by \(\rho\), while each possible measurement\footnote{This is not the most general description of a measurement~\cite[Box 2.5]{NielsenChuang}, but is sufficient for describing the generated behaviour.} is described by a \emph{positive-operator valued measurement} (POVM), a collection of positive-semidefinite \emph{measurement operators} that sum to the identity operator. Generically, these are \emph{linear operators} \(\Lin{\Hs}\) on a \emph{complex separable Hilbert space} \(\Hs\), of possibly infinite dimensions. For simplicity, we will largely confine ourselves to the \emph{finite-dimensional} setting, where density and measurement operators are represented by square matrices with complex entries of a fixed, finite dimension \(d\), and the Hilbert space is isomorphic to \(\C^d\).
-
-                    Alice and Bob's quantum systems are represented by Hilbert spaces \(A\) and \(B\) of dimensions \(d_A\) and \(d_B\) respectively. The POVMs corresponding to inputs \(x\) and \(y\) are denoted \({\{M_{a|x}\}}_a\) and \({\{N_{b|y}\}}_b\) respectively, with \(M_{a|x} \in \Lin{A}\) and \(N_{b|y} \in \Lin{B}\) corresponding to outputs \(a\) and \(b\) respectively. However, the overall state of their shared system, denoted by \(\rho_{AB}\), lives in the Hilbert space \(A\otimes{B}\) of dimension \(d_A d_B\). 
-                    \begin{equation}
-                      p(ab|xy) = \Tr{\rho_{AB} \left(M_{a|x} \otimes N_{b|y}\right) }.
-                    \end{equation}
-
-                    CPTP maps
-                    
-                    One important class of CPTP maps, which we call \emph{classical stochastic maps}, represents classical mapping from one rv to another. 
-                    \begin{defn}[Classical Stochastic Maps]\label{def:classop}
-                      For an input rv \(\rho \sum_b p(b)\ket{b}\bra{b}\), a classical stochastic map is a CPTP map with the operator-sum representation:
-                    \begin{align*}
-                      V_{ab} = \sqrt{p(a|b)}\ket{a}\bra{b}.
-                    \end{align*}
-                  \end{defn}
-                  To see that these are CPTP maps, observe that
-                  \begin{align*}
-                    V_{ab}^{\dagger}V_{ab} &= p(a|b)\ket{b}\bra{b} \\
-                    \therefore \sum_{ab} V_{ab}^{\dagger}V_{ab} &= \sum_{ab} p(a|b)\ket{b}\bra{b} = \sum_{b} \ket{b}\bra{b} = I,
-                  \end{align*}
-                  as required, and their action on the input rv is
-                  \begin{align*}
-                    \sum_{ab} V_{ab}\rho V_{ab}^{\dagger} &= \sum_{abb'} p(a|b)p(b') \ket{a}\braket{b|b'}\braket{b'|b}\bra{a}  \\
-                                                          &= \sum_{ab} p(a|b)p(b) \ket{a}\bra{a} = \sum_{a} p(a) \ket{a}\bra{a},
-                  \end{align*}
-                  as expected.
-
-      where \(\Trdist{\rho}{\sigma}\) is the \emph{trace distance}
-      \begin{equation}
-      \Trdist{\rho}{\sigma} = \frac{1}{2}\norm{\rho - \sigma}_1,
-      \end{equation}
-      which generalises the classical total variational distance
-      \[ \Trdist{p(x)}{q(x)} = \frac{1}{2} \sum_{x} \abs{p(x)-q(x)} \]
-      and is written in terms of the \emph{trace norm}
-      \begin{equation}
-        \norm{\rho}_1 = \Tr{ \sqrt{\rho^{\dagger}\rho} } = \Tr{\abs{\rho}}.
-      \end{equation}
-
-                    \subsection{Information Theory}\label{sec:prelim_infot}
-
-                    where \({H(\cdot)}_{\rho}\) is the von Neumann entropy of a system that is part of a state \(\rho\). The unconditional von Neumann entropy for a quantum system \(X\) in a state \(\rho\) is then \({H(X)}_{\rho} = -\Tr{\rho_{X}\log\rho_{X}}\). This reduces to the Shannon entropy for a classical system, which can be represented as a density matrix with the probabilities of the individual outcomes on the diagonal, and all other entries 0.
-
-                    defined in terms of the \emph{relative entropy}
-                    \begin{equation}
-                      D(\rho||\sigma) = \Tr{ \rho (\log \rho - \log \sigma) },
-                    \end{equation}
-                    and 
-
-                    The conditional entropy, conditioned on a quantum system, is significantly more difficult to compute and interpret (it can be negative for entangled systems, for example), but \({H(\crv{A}|E)}_{\rho}\)
-
-                    We first define the \emph{conditional mutual information}, in multiple equivalent expressions
-                    \begin{align}
-                      I{(A:B|E)}_{\rho} &= H{(AE)}_{\rho} + H{(BE)}_{\rho} - H{(ABE)}_{\rho} + H{(E)}_{\rho} \\
-                                        &= H{(A|E)}_{\rho} + H{(B|E)}_{\rho} - H{(AB|E)}_{\rho} \\
-                                        &= H{(A|E)}_{\rho} - H{(A|BE)}_{\rho} \\
-                                        &= H{(B|E)}_{\rho} - H{(B|AE)}_{\rho}
-                    \end{align}
-                    where \(A\), \(B\) and \(E\) may be either classical or quantum, and their joint state is \(\rho_{ABE}\). 
-
-                  \(H{(\crv{A}|\crv{B})}_p\) is concave in \(p\), since for any \(p' = qp_1 + (1-q)p_2\), we have that, for any \(b\), \(qp_1(b)/p'(b) + (1-q)p_2(b)/p'(b) = 1\). Therefore, by the concavity of the Shannon entropy,
-                  \begin{align}
-                    H{(\crv{A}|\crv{B})}_{p'} &= \sum_b p'(b) H{(\crv{A}|\crv{B}=b)}_{p'} \\
-                    H{(\crv{A}|\crv{B}=b)}_{p'} &\geq \frac{qp_1(b)}{p'(b)}H{(\crv{A}|\crv{B}=b)}_{p_1} + \frac{(1-q)p_2(b)}{p'(b)}H{(\crv{A}|\crv{B}=b)}_{p_2} \\
-                    \therefore H{(\crv{A}|\crv{B})}_{p'} &\geq \sum_b p'(b) \left[ \frac{qp_1(b)}{p'(b)}H{(\crv{A}|\crv{B}=b)}_{p_1} + \frac{(1-q)p_2(b)}{p'(b)}H{(\crv{A}|\crv{B}=b)}_{p_2} \right] \\
-                                                         &= qH{(\crv{A}|\crv{B})}_{p_1} + (1-q)H{(\crv{A}|\crv{B})}_{p_2},
-                  \end{align}
-                  and hence \(H{(\crv{A}|\crv{B})}_p\) is concave in \(p\).
-
-                  Markov chains
-
-                    \subsection{Optimisation}\label{sec:prelim_optim}
+                    As this report is expected to be read by a diverse audience, concepts that may be entirely elementary to some readers may be utterly unknown to others. Background information of this nature, from a variety of domains, is collected here, but assumed throughout the main text to avoid cluttering the exposition. The only assumptions for this section are a junior-college level grasp of probability, calculus, vectors and complex numbers (although I heard they dropped that from the syllabus recently).
 
                     \subsection{Convex Geometry and Analysis}\label{sec:prelim_cvxgeom}
 
@@ -2492,6 +2408,146 @@ Any[]
                       \item An easy consequence: any point \(\cvec{x}\) such that \(\nabla{f}(\cvec{y}-\cvec{x}) \geq 0\;\forall \cvec{y}\in\Omega\) is a global minimiser
                       \item The global maximum of \(f\) is achieved by an extremal point of its domain
                     \end{itemize}
+
+                    \subsection{Linear Algebra and Quantum Mechanics}\label{sec:prelim_linalg}
+
+                    The mathematical models of quantum mechanics are expressed in the language of linear algebra. This brief review will focus on explaining the correspondence between physical features of quantum systems and their mathematical expression. All statements made without citation in this section can be found in~\cite{NielsenChuang}.
+
+                    While linear algebra is typically introduced as the study of operations in \(\R^n\), it can be generalised to \(\C^n\), and even infinite-dimensional vector spaces. Fundamentally, a vector space \(V\) over a field \(\mathbb{F}\), typically \(\R\) or \(\C\), is a collection of objects such that the following operations are defined:
+                    \begin{enumerate}
+                      \item \emph{Vector addition}: \(\forall \cvec{u}, \cvec{v} \in V : \cvec{u} + \cvec{v} \in V\)
+                      \item \emph{Scalar multiplication}: \(\forall a \in \mathbb{F}, \cvec{v} \in V : a\cvec{v} \in V\)
+                    \end{enumerate}
+                    with the usual arithmetic properties one would expect. Under such a definition, for example, (a class of) \emph{functions} can be considered an infinite dimensional vector space, and indeed they are used as such in quantum mechanics. The particular infinite-dimensional vector space being used is a \emph{complex separable Hilbert space}, but the typical parlance of physicists is to call even finite-dimensional vector spaces Hilbert spaces if they describe quantum systems. We follow this convention.
+
+                    In addition to vectors, we are concerned about the \emph{operators} that act on them. A linear operator \(M \in \Lin{V \to U}\) sends vectors from the vector space \(V\) to the vector space \(U\), but is linear in the sense that
+                    \begin{equation}
+                      M\left(\sum_i a_i\cvec{v}_i\right) = \sum_i a_i M\cvec{v}.
+                    \end{equation}
+                    In finite dimenstions, linear operators \(\Lin{\mathbb{F}^m \to \mathbb{F}^n}\) are represented by \(n \times m\) matrices. We write \(\Lin{V}\) for \(\Lin{V \to V}\). One important operator is the \emph{identity operator} \(I\), sometimes written \(I_A\), where \(A\) denotes the system it operates on. This is simply the identity matrix in finite dimensions.
+
+                    Quantum information theory, which we are dealing with, is mostly done in the finite-dimensional setting, where the vector space of interest is \(\C^n\). Many of the familiar properties of the Euclidean space \(\R^n\) carry over, with one important difference: in many of the places where we would take transposes in real linear algebra, we take the \emph{conjugate transpose} instead: the transpose, but with the complex conjugate applied to all elements. We denote the conjugate transpose of \(\cvec{v}\) as \(\cvec{v}^{\dagger}\). More formally, this is the \emph{Hermitian adjoint}, but in the context of finite dimensions we can keep the mental model of it being the conjugate transpose.
+
+                    The Hilbert space of a quantum system defines the possible states it can be in. For concreteness, we work in a Hilbert space \(\C^d\). A system in a \emph{pure state} is one we have perfect knowledge about. Pure states are represented by normalised vectors in the Hilbert space, and are written as \(\ket{\psi}\). To each vector is associated its \emph{dual}, basically its complex conjugate, \(\bra{\psi}\). The \emph{inner product} on a Hilbert space between two vectors \(\ket{\psi}\) and \(\ket{\phi}\) is \(\braket{\phi|\psi}\), where in the regular notation for vectors we would write \(\cvec{u} \cdot \cvec{v} = \cvec{u}^{\dagger}\cvec{v} = \sum_i u^*_i v_i\), where \(a^*\) is the complex conjugate. Pure states are normalised in that \(\braket{\psi|\psi}  = 1\). The \emph{norm} of a vector \(\norm{\ket{v}}\) is defined as \(\sqrt{\braket{v|v}}\), and is always nonnegative, even if \(\ket{v}\) is not a normalised state.
+
+                    To each pure state is associated a \emph{projector} \(\ket{\psi}\bra{\psi}\) (the product \(\cvec{v}\cvec{v}^{\dagger}\)), an operator that \emph{projects} whatever it multiplies onto \(\ket{\psi}\). This allows us to introduce the concept of eigenstates and eigenvalues: the \emph{eigenstates} of an operator \(A\) are the states \(\ket{a_i}\) such that \(A\ket{a_i} = \alpha_i\ket{a_i}\), for some \(\alpha_i \in \C\), the \emph{eigenvalue}. Clearly, \(\ket{\psi}\bra{\psi}\) has \(\ket{\psi}\) as an eigenstate, with eigenvalue 1, and no others.
+
+                    An \emph{orthonormal basis} (just ``basis'' for short) consists of \(d\) states \(\{\ket{e_i}\}\) such that \(\braket{e_i|e_j} = \delta_{ij}\). Given a basis, it is always possible to write all other vectors and operators in terms of the basis, by using the \emph{outer products} \(\ket{e_i}\bra{e_j}\) of the basis states to write the operators. The projector construction above is a special case of the outer product. Explicitly, the \(i\)th coefficient of the vector \(\psi\) in the basis \(\{\ket{e_i}\}\) is \(\braket{e_i|\psi}\), while the \((i,j)\)th coefficient of the operator \(A\) is \(\bra{e_i}A\ket{e_j}\). When working with an explicit representation of states and operators, the \emph{computational basis} refers to the basis the explicit representation is written it.
+
+                    A \emph{unitary operator} is a matrix whose columns form an orthonormal basis. It obeys \(U^{\dagger} = U^{-1}\), and represents a \emph{change of basis}. A \emph{Hermitian operator} is an operator that obeys \(H^{\dagger} = H\). It has all eigenvalues real.
+
+                    We are now ready to state a crucial result in linear algebra, the \emph{spectral theorem}.
+                    \begin{theorem}[The Spectral Theorem for Normal Operators]
+                      Normal operators, that is, operators with \(A^{\dagger}A = AA^{\dagger}\), admit a \emph{spectral decomposition}: they can be written as the sum of projectors onto their eigenstates, multiplied by their eigenvalues, and the eigenstates form an orthonormal basis. Symbolically,
+                      \begin{equation}
+                        A = \sum_j \lambda_j \ket{j}\bra{j}.
+                      \end{equation}
+                    \end{theorem}
+                    In particular, unitary and Hermitian operators are normal, and hence admit a spectral decomposition. Positive-definite, positive-semidefinite, negative-semidefinite and negative-definite matrices are special cases of Hermitian operators, that have all eigenvalues positive, nonnegative, nonpositive or negative, respectively. In particular, for any state \(\ket{\psi}\), we have \(\bra{\psi}A\ket{\psi}\) positive, nonnegative, nonpositive or negative accordingly.
+
+                    An important operation is the \emph{trace}:
+                    \begin{equation}
+                      \Tr{M} = \sum_i \bra{e_i}M\ket{e_i},
+                    \end{equation}
+                    for some basis \(\{e_i\}\). Remarkably, this operation is basis-independent: any basis will give the same answer, which is the sum of \(M\)'s eigenvalues, or in a matrix representation, the sum of the diagonal elements.
+
+                    While a pure state represents complete knowledge of a system, a \emph{mixed state} represents incomplete knowledge: for example, if I flip a coin and pick one of two quantum states, \(\ket{0}\) and \(\ket{1}\), to send to you, without revealing the outcome, you can model your knowledge of the system as a mixed state. The mixed state cannot be represented as a vector, but an operator, a \emph{density matrix}:
+                    \[ \rho = \frac{1}{2} \ket{0}\bra{0} + \frac{1}{2} \ket{1}\bra{1}. \]
+                    The mixing in a mixed state represents classical uncertainty, rather than any quantum phenomenon. However, if you had the coin, you would know which pure state you actually received: the coin is the \emph{purification} of the mixed state that reveals what it contains.
+
+                    Mathematically, a density operator is a positive-semidefinite operator whose trace sums to one. This represents a normalised probability distribution over the basis of its eigenstates. Even if the states that are actually mixed are not orthogonal, they are statistically indistinguishable from such a mixture.
+
+                    We can extract classical information about a quantum system by measuring it. The statistics from measurements are described by the state of the system and a \emph{positive-operator valued measurement} (POVM), a collection of positive-semidefinite \emph{measurement operators} \(\{M_a\}\) that sum to the identity operator\footnote{This is not the most general description of a measurement~\cite[Box 2.5]{NielsenChuang}, but is sufficient for describing the generated behaviour.}. The probability of obtaining the outcome \(a\) given state \(\rho\) is then
+                    \begin{equation}
+                      p(a) = \Tr{\rho M_a}.
+                    \end{equation}
+
+                    When discussing two Hilbert spaces \(A\) and \(B\) of dimensions \(d_A\) and \(d_B\) (Alice and Bob's, say), their joint state, denoted by \(\rho_{AB}\), lives in lives in the \emph{tensor product} of their Hilbert spaces \(A \otimes B\), of dimension \(d_A d_B\). The tensor product between operators in finite dimensions, representing two operations carried out independently on the two parts of the joint system, can be computed explicitly as the \emph{Kronecker product} of the corresponding matrices. Therefore, if Alice and Bob were to randomly pick from POVMs indexed by \(x\) and \(y\) respectively, this would be represented by The POVMs \({\{M_{a|x}\}}_a\) and \({\{N_{b|y}\}}_b\), with \(M_{a|x} \in \Lin{A}\) and \(N_{b|y} \in \Lin{B}\) corresponding to outputs \(a\) and \(b\) respectively. The conditional probability distribution is then
+                    \begin{equation}
+                      p(ab|xy) = \Tr{\rho_{AB} \left(M_{a|x} \otimes N_{b|y}\right) }.
+                    \end{equation}
+
+                    Given a joint state, we may wish to focus only on one subsystem. The part of the joint state accessible to the subsystem is called its \emph{marginal} state, and is derived from the joint state by taking a \emph{partial trace}:
+                    \begin{equation}
+                      \Tr[_B]{\ket{a_1}\bra{a_2} \otimes \ket{b_1}\bra{b_2}} = \ket{a_1}\bra{a_2} \Rightarrow \rho_A = \Tr[_B]{\rho_{AB}}.
+                    \end{equation}
+
+                    Lastly, we describe the allowable operations on a quantum system. These are described by \emph{completely positive trace preserving (CPTP) maps}, which are simply any set of operators \(\{E_k\}\) such that \(\sum_k E_k^{\dagger}E_k = I\). The overall state after the application of a CPTP map is \(\sum_k E_k \rho E_k^{\dagger}\).
+
+                    One important class of CPTP maps, which we call \emph{classical stochastic maps}, represents classical mapping from one rv to another. 
+                    \begin{defn}[Classical Stochastic Maps]\label{def:classop}
+                      For an input rv \(\rho \sum_b p(b)\ket{b}\bra{b}\), a classical stochastic map is a CPTP map with the operator-sum representation:
+                    \begin{align*}
+                      V_{ab} = \sqrt{p(a|b)}\ket{a}\bra{b}.
+                    \end{align*}
+                  \end{defn}
+                  To see that these are CPTP maps, observe that
+                  \begin{align*}
+                    V_{ab}^{\dagger}V_{ab} &= p(a|b)\ket{b}\bra{b} \\
+                    \therefore \sum_{ab} V_{ab}^{\dagger}V_{ab} &= \sum_{ab} p(a|b)\ket{b}\bra{b} = \sum_{b} \ket{b}\bra{b} = I,
+                  \end{align*}
+                  as required, and their action on the input rv is
+                  \begin{align*}
+                    \sum_{ab} V_{ab}\rho V_{ab}^{\dagger} &= \sum_{abb'} p(a|b)p(b') \ket{a}\braket{b|b'}\braket{b'|b}\bra{a}  \\
+                                                          &= \sum_{ab} p(a|b)p(b) \ket{a}\bra{a} = \sum_{a} p(a) \ket{a}\bra{a},
+                  \end{align*}
+                  as expected.
+
+                  One definition we need when moving to the infinite-dimensional setting is the following: the set of \emph{bounded operators} \(\mathcal{B}(\Hs)\) on the Hilbert space \(\Hs\) is the subset of \(\Lin{\Hs}\) such that the \emph{operator norm} of \(X \in \Lin{\Hs}\)
+    \begin{equation}
+    \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}}
+  \end{equation}
+    is finite~\cite{HallQuantumForMath}. 
+
+                    \subsection{Information Theory}\label{sec:prelim_infot}
+
+                    In this section, we discuss information measures on classical and quantum systems. The most important observation is that a classical random variable with \(d\) outcomes can be represented as a density matrix in \(d\) dimensions \(\sum_i p_i \ket{i}\bra{i}\). This gives us a unified way to treat classical and quantum systems. The information here is taken from~\cite{NielsenChuang,ElemInfo}.
+
+                    The basic way to measure the information content of a random variable \(\crv{X}\) is its \emph{Shannon entropy} \(H(\crv{X}) = \sum_{x} - P_{\crv{X}}(x) \log P_{\crv{X}}(x)\). Intuitively, this is a measure of ``how unexpected on average'' the outcome of the random variable is, or how \emph{uncertain} the variable is given our current state of knowledge. It can be extended to quantum systems by defining the \emph{von Neumann entropy} for a quantum system \(X\) in a state \(\rho\) as \({H(A)}_{\rho} = -\Tr{\rho_{A}\log\rho_{A}}\), and functions are evaluated on the eigenvalues of a state, that is, \(f(\rho) = \sum_i f(\lambda_i) \ket{i}\bra{i}\) for an operator admitting a spectral decomposition. This definition then reduces to the Shannon entropy for a classical system. Further, the Shannon entropy is concave in the pmf, which is an incredibly useful fact in information theory
+
+                    A few extensions are immediate. The joint entropy \(H{(AB)}_{\rho}\) is straightforwardly
+                    \begin{equation}
+                      H{(AB)}_{\rho} = -\Tr{\rho_{AB}\log\rho_{AB}}
+                    \end{equation}
+                    The conditional entropy quantifies how much uncertainty we have about \(A\) given that we have access to system \(B\). When conditioning on a quantum system, however, it is significantly more difficult to compute and interpret (it can be negative for entangled systems, for example). There is an explicit expression for the classical case:
+                    \begin{equation}
+                      H(\crv{X}|\crv{Y}) = \sum_{xy} - P_{\crv{XY}}(x,y) \log P_{\crv{X}|\crv{Y}}(x|y).
+                    \end{equation}
+                    Also, we have that \(H{(\crv{A}|\crv{B})}_p\) is concave in \(p\), since for any \(p' = qp_1 + (1-q)p_2\), we have that, for any \(b\), \(qp_1(b)/p'(b) + (1-q)p_2(b)/p'(b) = 1\). Therefore, by the concavity of the Shannon entropy,
+                  \begin{align}
+                    H{(\crv{A}|\crv{B})}_{p'} &= \sum_b p'(b) H{(\crv{A}|\crv{B}=b)}_{p'} \\
+                    H{(\crv{A}|\crv{B}=b)}_{p'} &\geq \frac{qp_1(b)}{p'(b)}H{(\crv{A}|\crv{B}=b)}_{p_1} + \frac{(1-q)p_2(b)}{p'(b)}H{(\crv{A}|\crv{B}=b)}_{p_2} \\
+                    \therefore H{(\crv{A}|\crv{B})}_{p'} &\geq \sum_b p'(b) \left[ \frac{qp_1(b)}{p'(b)}H{(\crv{A}|\crv{B}=b)}_{p_1} + \frac{(1-q)p_2(b)}{p'(b)}H{(\crv{A}|\crv{B}=b)}_{p_2} \right] \\
+                                                         &= qH{(\crv{A}|\crv{B})}_{p_1} + (1-q)H{(\crv{A}|\crv{B})}_{p_2},
+                  \end{align}
+                  and hence \(H{(\crv{A}|\crv{B})}_p\) is concave in \(p\). For the quantum case, it can be computed using the identity \(H{(A|B)}_{\rho} = H{(AB)}_{\rho} - H{(B)}_{\rho}\): the amount of uncertainty about \(A\) and \(B\) assuming we have all the knowledge about \(B\).
+
+                    The \emph{conditional mutual information} \(I{(A:B|E)}_{\rho}\) is a measure of how much information \(A\) and \(B\) share about each other that is not contained in \(E\). We give multiple equivalent expressions for it, and note that by letting \(E\) be the trivial system (``nothing''), we recover the unconditional mutual information.
+                    \begin{align}
+                      I{(A:B|E)}_{\rho} &= H{(AE)}_{\rho} + H{(BE)}_{\rho} - H{(ABE)}_{\rho} + H{(E)}_{\rho} \\
+                                        &= H{(A|E)}_{\rho} + H{(B|E)}_{\rho} - H{(AB|E)}_{\rho} \\
+                                        &= H{(A|E)}_{\rho} - H{(A|BE)}_{\rho} \\
+                                        &= H{(B|E)}_{\rho} - H{(B|AE)}_{\rho}
+                    \end{align}
+
+                  Many information-theoretic quantities can be expressed in terms of the \emph{relative entropy}
+                  \begin{equation}
+                    D(\rho||\sigma) = \Tr{ \rho (\log \rho - \log \sigma) }.
+                  \end{equation}
+
+                  Three random variables \(\crv{U}\), \(\crv{V}\) and \(\crv{W}\) form a Markov chain \(\crv{U} \markov \crv{V} \markov \crv{W}\) iff all their joint distribution is such that each variable is independent of all other variables conditioned on the one adjacent to it. Symbolically, \(P_{\crv{U}|\crv{VW}} = P_{\crv{U}|\crv{V}}\) and \(P_{\crv{W}|\crv{UV}} = P_{\crv{W}|\crv{V}}\).
+
+      The maximal probability of distinguishing between two states \(\rho\) and \(\sigma\) of a system is given by the \emph{trace distance} \(\Trdist{\rho}{\sigma}\) 
+      \begin{equation}
+      \Trdist{\rho}{\sigma} = \frac{1}{2}\norm{\rho - \sigma}_1,
+      \end{equation}
+      which generalises the classical total variational distance
+      \[ \Trdist{p(x)}{q(x)} = \frac{1}{2} \sum_{x} \abs{p(x)-q(x)} \]
+      and is written in terms of the \emph{trace norm}
+      \begin{equation}
+        \norm{\rho}_1 = \Tr{ \sqrt{\rho^{\dagger}\rho} } = \Tr{\abs{\rho}}.
+      \end{equation}
+
 
                     \section{Technicalities for Quasi-Relative Entropies}\label{sec:qretech}
 
