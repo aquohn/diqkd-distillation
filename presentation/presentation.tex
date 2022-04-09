@@ -94,11 +94,13 @@
 
 \usepackage{braket}
 \usepackage{multirow}
+\usepackage{diagbox} % diagonal box in table
 \usepackage{adjustbox} % allow tables to take up the space they need
 \usepackage{graphicx} % allows figures to be inserted and scaled
 \usepackage{listings} % allows for source code blocks
 \usepackage{fancyvrb} % robust verbatim
 \usepackage{siunitx} % allows SI units to be formatted
+\usepackage{booktabs} % nice lines at top and bottom of tables
 
 \usepackage[backend=biber, style=ieee-alphabetic]{biblatex}  
 \addbibresource{../wiring.bib}
@@ -131,40 +133,67 @@
   \expandafter#1\expandafter{\the\numexpr#2\relax}%
 }
 
-\tikzset{%
-  >={Stealth}, % makes the arrow heads bold
-  node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
-  every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
-  initial text=$ $, % sets the text that appears on the start arrow
-  % style to apply some styles to each segment of a path
-  on each segment/.style={
-    decorate,
-    decoration={
-      show path construction,
-      moveto code={},
-      lineto code={
-        \path [#1]
-        (\tikzinputsegmentfirst) -- (\tikzinputsegmentlast);
+    \tikzset{%
+      >={Stealth[width=4pt, length=6pt]}, % makes the arrow heads bold
+      node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
+      % style to apply some styles to each segment of a path
+      on each segment/.style={
+        decorate,
+        decoration={
+          show path construction,
+          moveto code={},
+          lineto code={
+            \path [#1]
+            (\tikzinputsegmentfirst) -- (\tikzinputsegmentlast);
+          },
+          curveto code={
+            \path [#1] (\tikzinputsegmentfirst)
+            .. controls
+            (\tikzinputsegmentsupporta) and (\tikzinputsegmentsupportb)
+            ..
+            (\tikzinputsegmentlast);
+          },
+          closepath code={
+            \path [#1]
+            (\tikzinputsegmentfirst) -- (\tikzinputsegmentlast);
+          },
+        },
       },
-      curveto code={
-        \path [#1] (\tikzinputsegmentfirst)
-        .. controls
-        (\tikzinputsegmentsupporta) and (\tikzinputsegmentsupportb)
-        ..
-        (\tikzinputsegmentlast);
+      set mid arrow/.code={\pgfqkeys{/tikz/mid arrow}{#1}},
+      set mid arrow={pos/.initial=.5, end/.initial=stealth},
+      mid arrow/.style={
+        set mid arrow={#1},
+        postaction={
+          decorate,
+          decoration={
+            markings,
+            mark=at position \pgfkeysvalueof{/tikz/mid arrow/pos}
+                 with \arrow{\pgfkeysvalueof{/tikz/mid arrow/end}}
+          }
+        }
       },
-      closepath code={
-        \path [#1]
-        (\tikzinputsegmentfirst) -- (\tikzinputsegmentlast);
-      },
-    },
-  },
-  % style to add an arrow in the middle of a path
-  mid arrow/.style={postaction={decorate,decoration={
-        markings,
-        mark=at position .5 with {\arrow[#1]{stealth}}
-  }}},
-}
+      % simple black circle at node
+      point/.style={circle,draw,inner sep=0pt,minimum size=3pt,fill=black},
+      % nonclassical causation
+      classbox/.style={rectangle, draw, line width=1pt},
+      nclassbox/.style={rectangle, double, draw, rounded corners},
+      classinfl/.style={-, line width=1pt},
+      nclassinfl/.style={double},
+      % coin with label and colours
+      % TODO DOES NOT WORK
+      set coin/.code={\pgfqkeys{/tikz/coin}{#1}},
+      set coin={bg/.initial=black, fg/.initial=white},
+      coin/.style={
+        set coin={#1},
+        postaction={
+          circle,draw=\pgfkeysvalueof{/tikz/coin/fg},
+          text=\pgfkeysvalueof{/tikz/coin/fg},
+          fill=\pgfkeysvalueof{/tikz/coin/bg}
+        }
+      }
+    }
+
+
 
 
 \tikzset{%
@@ -213,6 +242,9 @@
     3d box foreground style={/pgfplots/on layer=axis foreground},%
   },
 }
+
+    \usepackage{mleftright} % fix spacing issues in \left and \right
+    \mleftright % rename left/right -> mleft/mright
 
     % analysis and calculus
     \DeclareMathOperator*{\argmin}{argmin}
@@ -369,10 +401,6 @@
   \titlepage
 \end{frame}
 
-\begin{frame}{Outline}
-  \tableofcontents
-\end{frame}
-
 \section*{Introduction}
 \begin{frame}{Quantum Key Distribution (QKD)}
   \begin{itemize}[<+->]
@@ -403,24 +431,29 @@
 
 \begin{frame}{Wiring}
   \begin{itemize}[<+->]
-    \item Connect multiple boxes together with wires
+    \item Combine multiple boxes with classical local processing
     \item Overall system \alert{can still be used for DIQKD}
     \item Will have different statistics
     \item \alert{Can this be helpful for DIQKD?}
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Objective}
+\begin{frame}{Results}
   \begin{itemize}[<+->]
-    \item The dream: \alert{efficient algorithm} to find \alert{best wiring}
-    \item If not possible, \alert{find out why}
-    \item Interim presentation: review approaches and techniques tried
+    \item Explored \alert{definitions of security}
+    \item Computational and analytic \alert{descriptions for wirings}
+    \item Main result: simple wirings \alert{cannot help}
+    \item Preliminary work towards \alert{optimsiing and bounding key rates}
   \end{itemize}
 \end{frame}
 
-\section{Preliminaries}
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
 
-\subsection{Review}
+\section{Foundations}
+
+\subsection{Nonlocality}
 
 \begin{frame}{Bell Tests}
   \begin{onlyenv}<1>
@@ -518,7 +551,6 @@
 \end{frame}
 
 \begin{frame}{Nonlocal Statistics}
-  \begin{onlyenv}<1-4>
   \begin{itemize}[<+->]
     \item Alice: input \(x\), output \(a\); Bob: input \(y\), output \(b\)
     \item Full statistics: \emph{behaviour} \(p(ab|xy)\) (aka \emph{state}/\emph{box})
@@ -527,189 +559,301 @@
         \sum_b p(ab|xy) = p(a|xy) = p(a|x)\;\forall a,x,y \\
         \sum_a p(ab|xy) = p(b|xy) = p(b|y)\;\forall b,x,y
       \end{gather*}
-    \item \emph{Setting}: \((i_A, o_A, i_B, o_B)\)
-    \[ x \in \dintv{1}{i_A}, a \in \dintv{1}{o_A}, y \in \dintv{1}{i_B}, b \in \dintv{1}{o_B} \]
+    \item \emph{Setting}: \((i_A, o_A; i_B, o_B)\)
+      \[ x \in \dintv{1}{i_A}, a \in \dintv{1}{o_A} \]
+      \[ y \in \dintv{1}{i_B}, b \in \dintv{1}{o_B} \]
   \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<5->
-  \begin{itemize}[<+->]
-    \item Focus on \emph{binary-output} settings
-    \item \emph{Marginals}:
-      \[ \angleb{A_x} \coloneqq p(a=1|x) - p(a=0|x), \angleb{B_y} \coloneqq p(b=1|y) - p(b=0|y) \]
-    \item \emph{Correlators}:
-      \[ \angleb{A_x B_y} \coloneqq p(a=b|xy) - p(a\neq b|xy) \]
-    \item \emph{Quantum bit error rate} (QBER):
-      \[ Q_{xy} \coloneqq p(a \neq b|xy) = \frac{1-\angleb{A_x B_y}}{2} \]
-    \item \emph{Clauser-Horne-Shimony-Holt} (CHSH) function in \((2,2,2,2)\):
-      \[ S \coloneqq \angleb{A_0 B_0} + \angleb{A_1 B_0} + \angleb{A_0 B_1} - \angleb{A_1 B_1} \]
-  \end{itemize}
-  \end{onlyenv}
 \end{frame}
 
 \begin{frame}{Nonlocal Behaviours}
   \begin{itemize}[<+->]
-    \item \emph{Local set} \(\Ls\): \(p(ab|xy) = \int Q(\lambda) p_{\lambda}(a|x)p_{\lambda}(b|y) \dif{\lambda} \)
-    \item \emph{Quantum set} \(\Qs\): \(p(ab|xy) = \Tr{ \left(M_{a|x} \otimes N_{b|y}\right) \rho_{AB} }\)
+    \item \emph{Local set} \(\Ls\): \(p(ab|xy) = \int P_{\Lambda}(\lambda) p_{\lambda}(a|x)p_{\lambda}(b|y) \dif{\lambda} \)
+    \item \emph{Quantum set} \(\Qs\): \(p(ab|xy) = \Tr{ \rho_{AB} \left(M_{a|x} \otimes N_{b|y}\right) }\)
     \item \emph{No-signalling set} \(\NSs\) defined by no-signalling conditions
     \item \(\Ls \subsetneq \Qs \subsetneq \NSs\)
-    \item \(\abs{S(p_{\Ls})} \leq 2\), \(\abs{S(p_{\Qs})} \leq 2\sqrt{2}\), \(\abs{S(p_{\NSs})} \leq 4\)
+  \end{itemize}
+\end{frame}
+
+\subsection{DIQKD}
+
+\begin{frame}{Device Independent Security}
+  \begin{itemize}[<+->]
+    \item Consider
+      \[ p(ab|xy) \sum_e p_E(e) p_e(ab|xy) \]
+    \item Eve can deduce \((a,b)\) from \((x,y)\) if \(p_e\)'s are \emph{deterministic}
+    \item This is precisely \(\Ls\)
+    \item Quantum processes provide fundamental indeterminism
+  \end{itemize}
+\end{frame}
+
+\note{ The following argument gives an intuition for the security of DIQKD\@. }
+
+\begin{frame}{DIQKD Assumptions}
+  \begin{itemize}[<+->]
+        \item \emph{Sealed laboratories}: information transmission is controlled
+        \item \emph{Trusted local randomness}: for generating inputs
+        \item \emph{Authenticated classical channel}: distinct from \emph{confidentiality}
+        \item \emph{Correctness} of quantum physics: for validity of proofs
   \end{itemize}
 \end{frame}
 
 \begin{frame}{DIQKD Security}
   \begin{itemize}[<+->]
-    \item \(\rho_{A^n B^n E^n}\): Alice--Bob--Eve ccq state after \(n\) Bell tests
-    \item \emph{Local operations and public communication} (LOPC) protocol \(\mathfrak{P}_{\omega}\) with public data in \(D\) and key of length \(\ell\)
-      \[ \mathfrak{P}_{\omega}\left[\rho_{A^n B^n E^n}\right] \mapsto \omega_{K_A K_B E^n D} \]
+    \item \(\rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n}\): Alice--Bob--Eve ccq state after \(n\) Bell tests
+          \[ \sum_{\cvec{a}^n\cvec{b}^n \cvec{x}^n\cvec{y}^n} \begin{aligned}[c]
+          & \prin^n(\cvec{x}^n,\cvec{y}^n) p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \proj[\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n]{\cvec{a}^n\cvec{b}^n\cvec{x}^n\cvec{y}^n} \\
+            \otimes & \rho_{E^n|\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n}
+          \end{aligned} \]
+        \item \emph{Local operations and public communication} (LOPC) protocol \(\proto{P}\) with public data in \(\crv{D}^n\) and key of length \(\ell_n\)
+      \[ \rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n} \mapsto {\Omega[\rho]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n} 
+ \]
+    \item \emph{Trace distance} \(\Trdist{ \rho}{\sigma } = \frac{1}{2}\norm{\rho - \sigma}_1\), \emph{ideal key} \(\tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}}\)
+      \[ \tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \proj[\crv{K}_{A}^{\ell}]{j} \otimes \proj[\crv{K}_{B}^{\ell}]{j} \]
     \item \emph{Universally composable} \(\epsilon\)-security
-    \[ \Trdist{ \omega_{K_A K_B E^n D}}{\tau_{K_A K_B}^{\ell} \otimes \rho_{E^n} \otimes \omega_D } \leq \epsilon \]
-    \item \emph{Robustness} \(\erob{n}\), \emph{trace distance} \(\Trdist{ \rho}{\sigma } = \frac{1}{2}\norm{\rho - \sigma}_1\), \emph{ideal key} \(\tau_{K_A K_B}^{\ell}\)
-      \[ \tau_{K_A K_B}^{\ell} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \ket{j}\bra{j}_{K_A} \otimes \ket{j}\bra{j}_{K_B} \]
+    \[ \Trdist{{\Omega[\rho]}_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}^n}}{\tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}} \otimes \rho_{E^n} \otimes {\Omega[\rho]}_{\crv{D}^n}} \leq \epsilon \]
   \end{itemize}
 \end{frame}
 
 \begin{frame}{Asymptotic DIQKD Security}
-  \begin{onlyenv}<1-3>
-    \begin{itemize}[<+->]
-    \item \emph{Asymptotic key rate}
-      \[ r(\mathfrak{P}_{\omega}, \rho) = \sup_{\{\ell_n\}} \lim_{n\to\infty} (1-\erob{n}) \frac{\ell_n}{n} \]
-      over all sequences \(\{\ell_n\}\) with asymptotically vanishing \(\epsilon\)
-    \[ \lim_{n\to\infty} \Trdist{ \omega_{K_A K_B E^n D}}{\tau_{K_A K_B}^{\ell_n} \otimes \rho_{E^n} \otimes \omega_{D} } = 0 \]
-    \item Rounds are effectively i.i.d.\ in asymptotic limit: \(\rho_{A^n B^n E^n} \approx_{n\to\infty} \rho_{ABE}^{\otimes n}\)
-    \item \alert{Wiring breaks i.i.d.\ assumption!}
+  \begin{itemize}[<+->]
+    \item \emph{Asymptotic key rate} of a sequence of states \(\{\rho^n\}\)
+      \[ r(\proto{P}, \{\rho^n\}) = \lim_{n\to\infty} \frac{\ell_n - L_{\Omega}(\prin^n)}{n} \]
+      if \(\epsilon\) is asymptotically vanishing:
+      \[ \lim_{n\to\infty} \Trdist{{\Omega[\rho^n]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n}}{\tau_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n}} \otimes \rho_{E^n} \otimes {\Omega[\rho^n]}_{\crv{D}^n}} = 0 \]
+    \item \(L_{\Omega}(\prin^n)\): minimum cost for generating \(\prin^n\) (\alert{novel definition})
+    \item Upper bounded by \emph{Wyner common information} if iid
+    \item Dependent on protocol in general
   \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<4->
-    \begin{itemize}[<+->]
-    \item qqq state \(\rho_{Q_A Q_B E}\) measured using measurement strategy \(\sM\), a set of POVMs \({\{{\{M_{a|x}\}}_{a}, {\{N_{b|y}\}}_{b}\}}_{x,y}\)
-    \[ \sum_{a} M_{a|x} = I_{Q_A}\;\forall x \qquad M_{a|x} \geq 0\;\forall a, x \]
-    \[ \sum_{b} N_{b|y} = I_{Q_B}\;\forall y \qquad N_{b|y} \geq 0\;\forall b, y \]
-  \item Behaviour given by
-      \[ p(ab|xy) = \cP(\rho, \sM) = \Tr{ \rho_{Q_A Q_B E} \left(M_{a|x} \otimes N_{b|y} \otimes I_{E}\right) } \]
-    \item \emph{Secret key capacity} of a behaviour \(p\)
-      \[ C_{\sk}(p) = \sup_{\mathfrak{P}_{\omega}} \inf_{ \substack{
-            \cP(\rho, \sM) = p
-        }
-      } r(\mathfrak{P}_{\omega}, \rho_{ABE}) \]
-  \end{itemize}
-  \end{onlyenv}
 \end{frame}
+\note{ \(\prin^n\) is typically assumed to be independent but we want to probe fundamental limits. Dependent inputs can avoid sifting factor (though this is multiplicative, not additive). This constrains the possible \(\prin^n\), since it must be generated with asymptotically zero error, or else the error needs to be accounted for in some other way. Protocols may allow recovery of input secrecy, so \(L_{\Omega}\) may be zero for dependent inputs. }
 
-\begin{frame}{Established Security Results}
+\begin{frame}{Security from Behaviours}
     \begin{itemize}[<+->]
-    \item \emph{Devetak-Winter key rate}
-      \[ r_{\DW}(p) \coloneqq {H(A|E)}_{\rho} - {H(A|B)}_{\rho} \leq C_{\sk}(p) \]
-    \item \emph{Standard protocol} in \((i_A, o_A, i_B, o_B) = (2,2,3,2)\)
-      \begin{itemize}
-        \item Randomly and publicly flip half of the outputs
-        \item CHSH test on \(x, y \in \{0,1\}\)
-        \item Generate key on \(x=0\), \(y=2\)
-      \end{itemize}
-    \item Bound Eve's knowledge using CHSH
-      \[ {H(A|E)}_{\rho} \geq {H_S(A|E)}_{\rho} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right) \]
-    \item Standard protocol key rate
-      \[ r_{\DW} \geq r_{\std} \coloneqq \max \left\{ 0, {H_S(A|E)}_{\rho} - h_2(Q_{02}) \right\} \]
+      \item Optimise over \emph{states compatible with classical data} \(\compatstates[^n]{p}{\prin[\hat{p}^n]}\)
+        \begin{itemize}
+          \item Generated by valid qqq states and measurements
+          \item Average behaviour matches \(p\)
+          \item Input distribution is \(\prin[\hat{p}^n]\)
+        \end{itemize}
+      \item Well-established methods for reducing to iid
+      \item Focus on \emph{iid secret key capacity}
+        \[ C_{\sk}^{\otimes}(p) = \sup_{\proto{P}} \sup_{\prin} \inf_{\substack{\rho : \\ \rho \in \compatstates{p}{\prin}}} r(\proto{P}, \{\rho^{\otimes{n}}\}) \]
     \end{itemize}
 \end{frame}
 
-\subsection{Preliminary Results}
+\section{Wirings}
 
-\begin{frame}{Experimental Model}
-  \begin{itemize}[<+->]
-    \item Probability \(n_c\) for source to not produce anything
-    \item Efficiency \(\eta\): probability that detector will detect signal
-    \item Error conditions assigned to outcome \(0\)
-  \end{itemize}
-\end{frame}
+\subsection{Wiring Distributions}
 
-\begin{frame}{N-AND Wiring}
-  \begin{itemize}[<+->]
-    \item Overall input \(x\) and overall output \(a\) for \(N\) boxes
-    \item Broadcast input and AND-gate output
-      \[ x_i = x\;\forall i \in \dintv{1}{i} \]
-      \[ a = \prod_{i=1}^N a_i \]
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Result}
-    \begin{figure}
-      \includegraphics[width=\linewidth]{and_plot.pdf}
-    \end{figure}
-\end{frame}
-
-\section{Behaviours and Wirings}
-
-\subsection{Local Wirings}
-
-\begin{frame}{Resource Theory}
-  \begin{itemize}[<+->]
-    \item \emph{Converting} between \emph{nonfree resources} using \emph{free actions} and \emph{free resources}
-    \item \(R_1\) can be converted into \(R_2\): \(R_1 \leadsto R_2\)
-    \item \emph{Multi-copy local operations with shared randomness} (MCLOSR) for \(c\) copies:
-      \[ p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \]
-      \[ \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \sum_{r_A r_B} \chi_A(a\cvec{x}^c r_A|\cvec{a}^cx) \chi_B(b\cvec{y}^c r_B|\cvec{b}^cy) p_r(r_A r_B) \]
-    \item Proceed with DIQKD protocol using \(p'\)
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Randomness in Wirings}
-  \begin{itemize}[<+->]
-    \item \emph{Private randomness} does not help
-    \item WLOG, image of \(\chi_A\) and \(\chi_B\) is \(\{0,1\}\)
-    \item All randomness can be moved into \(p_r\)
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Possible Wirings}
-  \begin{itemize}[<+->]
-    \item \(j\)th box can only depend on previous \(j-1\) boxes
-    \[ x_1 = x \qquad x_j = W^{(j)}_A(\cvec{x}^{j-1}, \cvec{a}^{j-1}) \qquad
-      a = W_A(\cvec{x}^{c}, \cvec{a}^{c}) \]
-    \item \(\chi_A = 1\) for sequences obeying these constraints, \(0\) otherwise
-    \item Deterministic wirings \(\sW_D^{(i,o)}\), wiring choice for a given round from \(\sW_D^{(i_A,o_A)} \times \sW_D^{(i_B,o_B)}\), polytope of generated behaviours \(\sWB(p)\)
-  \end{itemize}
-
-  \begin{block}{Possible Approach}<+->
-    Can we optimise efficiently over \(\sWB(p)\)?
-  \end{block}
-\end{frame}
-
-\begin{frame}{A Proposed Classification}
+\begin{frame}{Local Operations and Shared Randomness}
   \begin{onlyenv}<1-3>
-    \begin{itemize}
-      \item Deterministic: \(a = 0\)
-      \item One-sided: \(a = a_1\)
-      \item Sequential: \(x_2 = a_1, a = a_2\)
-      \item AND-gated: \(x_1 = x_2 = x, a = a_1a_2\)
-      \item<+-> XOR-gated: \(x_1 = x_2 = x, a = a_1 + a_2 \bmod 2\)
-      \item<+-> 82 wirings of this form are vertices of a polytope
-      \item<+-> This classification is \alert{wrong}!
+    \begin{itemize}[<+->]
+      \item Take overall input, generate physical input, generate overall output from physical output
+        \[ p'(a|x) = \sum_{a_0 x_0} p_o(a|x_0 a_0 x) p(a_0|x_0) p_i(x_0|x) \]
+      \item Combine into a map obeying \emph{no-retrocausation}
+        \[ \chi(a x_0 | x a_0) \coloneqq p_o(a|x_0a_0x) p_i(x_0|x) = p_o(a|x_0a_0x) p_i(x_0|x a_0) \]
+      \item Combine with other party using \emph{shared randomness}
+        \[ \chi(abx_0y_0|a_0b_0xy) = \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(ax_0|a_0x) \chi_{B|\lambda}(by_0|b_0y) \]
     \end{itemize}
   \end{onlyenv}
   \begin{onlyenv}<4->
-    \begin{itemize}[<+->]
-      \item Explicit counterexample:
-        \[ x_2 = \bar{a}_1x_1 \qquad a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2 \]
-      \item Work where this scheme was derived was not looking for wirings, but ``joint measurements''
-      \item However, polytope structure might still be useful
-    \end{itemize}
+    \begin{columns}
+      \begin{column}[c]{0.3\linewidth}
+        \centering
+        \includegraphics{behav.tikz}
+      \end{column}
+      \begin{column}[c]{0.7\linewidth}
+        \centering
+        \includegraphics{losr.tikz}
+      \end{column}
+    \end{columns}
   \end{onlyenv}
-  \begin{block}{Possible Approach}<+->
-    Can we reduce the degrees of freedom in \(\sW_D\) or \(\sWB(p)\)?
-  \end{block}
 \end{frame}
 
-\begin{frame}{Number of Distinct Wirings}
-  \begin{itemize}[<+->]
-    \item With \(c=2\), \(4096\) wirings for Alice, and \(\approx 2.48 \times 10^{10}\) for Bob
-    \item Fixing key-generating settings to AND gates gives \(1024\) wirings for Alice and \(\approx 3.10 \times 10^{9}\) for Bob
-    \item Without parametrising behaviours and/or wirings, brute force will be uninsightful
-    \item However, may answer fundamental question of whether revival is possible
-  \end{itemize}
-  \begin{block}{Possible Approach}<+->
-    Is there a simple way to identify unhelpful or redundant wirings?
-  \end{block}
+\begin{frame}{Local Operations and Shared Randomness}
+  \begin{onlyenv}<1-3>
+    \begin{itemize}[<+->]
+      \item Take overall input, generate physical input, generate overall output from physical output
+        \[ p'(a|x) = \sum_{a_0 x_0} p_o(a|x_0 a_0 x) p(a_0|x_0) p_i(x_0|x) \]
+      \item Combine into a map obeying \emph{no-retrocausation}
+        \[ \chi(a x_0 | x a_0) \coloneqq p_o(a|x_0a_0x) p_i(x_0|x) = p_o(a|x_0a_0x) p_i(x_0|x a_0) \]
+      \item Combine with other party using \emph{shared randomness}
+        \[ \chi(abx_0y_0|a_0b_0xy) = \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(ax_0|a_0x) \chi_{B|\lambda}(by_0|b_0y) \]
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<4->
+    \begin{columns}
+      \begin{column}[c]{0.3\linewidth}
+        \centering
+        \includegraphics{behav.tikz}
+      \end{column}
+      \begin{column}[c]{0.6\linewidth}
+        \centering
+        \includegraphics{losr.tikz}
+      \end{column}
+    \end{columns}
+  \end{onlyenv}
 \end{frame}
+
+\begin{frame}{Wirings}
+  \begin{onlyenv}<1-2>
+    \begin{itemize}[<+->]
+      \item Generalise to multiple boxes
+        \begin{align*}
+          p'(ab|xy) &= \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)\label{eqn:jwirdistdef} \\
+          \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) &= \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) \\
+          \chi_{A|\lambda}(\cvec{x}^j|\cvec{a}^cx) &= \chi_{A|\lambda}(\cvec{x}^j|\cvec{a}^{j-1}x),\,\forall j \in \dintv{1}{c} \\
+          \chi_{B|\lambda}(\cvec{y}^j|\cvec{b}^cy) &= \chi_{B|\lambda}(\cvec{y}^j|\cvec{b}^{j-1}y),\,\forall j \in \dintv{1}{c}
+        \end{align*}
+      \item \emph{Marginal wirings} are sequences of stochastic maps
+        \[ \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) = \chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^{c}x) \prod_{j=1}^c \chi_{A|\lambda}(x_j|\cvec{x}^{j-1}\cvec{a}^{j-1}x) \]
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<3->
+    \begin{center}
+      \includegraphics[height=0.85\textheight]{wiring.tikz}
+    \end{center}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Structure of the Space of Wirings}
+  \begin{itemize}[<+->]
+    \item In each round, \emph{some} deterministic process has to be executed
+      \begin{theorem}[Fine's Theorem for Wirings]
+        The set of marginal wirings \(\sW\) forms a polytope, whose vertices are the set of deterministic marginal wirings obeying the no-retrocausation relations \(\sW_D\). All \(n\)-partite wirings are then elements of the polytope generated by the vertices \(\sW_D^n\).
+      \end{theorem}
+    \item Recursively split non-deterministic marginal wirings into probabilistic mixtures of deterministic ones
+    \item Offload mixing into shared randomness
+  \end{itemize}
+\end{frame}
+
+\subsection{Computational Descriptions}
+
+\begin{frame}{Wiring Functions}
+  \begin{itemize}[<+->]
+    \item Objective: reduce no.\ of extremal wirings
+    \item Deterministic maps are functions
+    \item Combinatorics of sources and targets gives
+      \[ \exp_{o_A}(i_A^c o_A^c) \prod_{j=1}^c \exp_{i_A}(i_A^{j} o_A^{j-1}) \]
+      deterministic wirings
+    \item Expressing as Karnaugh maps reveals redundancy, reduces to
+      \[ \exp_{o_A}(i_A o_A^c) \prod_{j=1}^c \exp_{i_A}(i_A o_A^{j-1}) \]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Explicit Example}
+  \begin{table}
+    \begin{columns}
+      \begin{column}[c]{0.3\linewidth}
+      \begin{center}
+        \begin{tabular}{|r|cc|} \hline
+          \diagbox{\(x x_1\)}{\(a_1\)} & 0 & 1 \\ \hline
+          00 & 1 & 0 \\
+          01 & X & X \\
+          11 & 1 & 1 \\
+          10 & X & X \\ \hline
+        \end{tabular}
+      \end{center}
+    \end{column}
+    \begin{column}[c]{0.6\linewidth}
+      \begin{center}
+        \begin{tabular}{|r|cccc|} \hline
+          \diagbox{\(x x_1 x_2\)}{\(a_1 a_2\)} & 00 & 01 & 11 & 10 \\ \hline
+          000 & X & X & 1 & 0 \\
+          001 & 0 & 0 & X & X \\
+          011 & X & X & X & X \\
+          010 & X & X & X & X \\
+          110 & X & X & X & X \\
+          111 & 1 & 0 & X & X \\
+          101 & X & X & X & X \\
+          100 & X & X & 0 & 0 \\ \hline
+        \end{tabular}
+      \end{center}
+    \end{column}
+    \end{columns}
+    \caption{Lookup tables for \(x_1 = x\), \(x_2 = \bar{a}_1 + x_1\), and \(a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2\).}
+  \end{table}
+\end{frame}
+
+\begin{frame}{Wiring Matrices}
+  \begin{itemize}[<+->]
+    \item Wirings permute sources (\(S\)), then map to targets (\(R\)), then permute targets (\(T\))
+      \[ T_{c+1}R_{c+1}S_{c+1} \cdots T_2R_2S_2 T_1R_1S_1 p \]
+    \item We can combine \(T_j\) and \(S_{j+1}\) if iterating over possible wirings
+    \item Express each transformation as a matrix and multiply them together
+    \item Easily extendable to \(n\)-partite wirings\only<.->{\footnote{If your computer has enough RAM}}
+    \item Implemented and used to experiment with possible wirings
+    \item Unfortunately gives the exact same number of wirings
+  \end{itemize}
+\end{frame}
+
+\subsection{A Proposed Classification}
+
+\begin{frame}{Couplers}
+  \begin{itemize}[<+->]
+    \item \emph{Couplers} map \(P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y}) \mapsto P'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}})\)
+    \[ P'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}}) = \sum_{\cvec{by}} \chi(b',\cvec{by})P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y}) \]
+    \item Polytope found by checking consistency of couplers on \(P(\cvec{b}|\cvec{y}) \in \NSs\)
+    \item Wiring for a specific input: \emph{marginal conditional wiring distribution} (\(\chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx)\) for a given \(x\))
+    \item \(\#\text{ couplers} < \#\text{ marginal conditional wiring distributions!}\)
+    \item Could this simplify the space of wirings?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Number of Extremal Wirings}
+  \begin{table}
+    \begin{Tabular}{ccc} 
+      \toprule
+      Method & \(i = 2\) & \(i = 3\) \\
+      \midrule
+      Consistency on \(\NSs\) & \(82\), \(48\)  & --, \(2816\) \\
+      Consistency on general behaviours & \(58\), \(512\) & --, \(524288\) \\
+      Causal constraints & \(128\), -- & \(432\), -- \\
+      \bottomrule
+    \end{Tabular}
+    \caption{Number of extremal wirings and facets}
+  \end{table}
+\end{frame}
+
+\begin{frame}{Discussion}
+  \begin{itemize}[<+->]
+    \item Polytope for general behaviours contained within polytope for \(\NSs\)
+    \item But wirings should not care about what they act on
+    \item Hypothesis: signalling makes it impossible to implement certain transformations independently
+    \item Connection to complete positivity of LOSR transformations?
+    \item May be fruitful to analyse our own definitions for wirings
+  \end{itemize}
+\end{frame}
+
+\section{Key Rates}
+
+\subsection{Wirings without Output Dependency}
+
+\begin{frame}{Simple Wirings Cannot Help}
+  \begin{lemma}
+    Define a \emph{wiring without output dependency} as a wiring for which all inputs are independent of previous outputs, that is, a wiring \(\chi\) that obeys
+    \[
+      \chi(\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \chi(\cvec{x}^c\cvec{y}^c|xy).
+    \]
+    Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring with output dependency cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p]\), where \(\chi\) is a wiring without output dependency, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p)\).
+  \end{lemma}
+\end{frame}
+
+\begin{frame}{Proof Sketch}
+  \begin{onlyenv}<1-2>
+    \begin{itemize}[<+->]
+      \item Wirings without output dependency obey
+        \[ \chi(\cvec{x}^c\cvec{y}^c|xy) = \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y) \]
+    \end{itemize}
+  \end{onlyenv}
+  \begin{onlyenv}<3->
+    \begin{center}
+      \includegraphics[height=0.85\textheight]{outdep.tikz}
+    \end{center}
+  \end{onlyenv}
+\end{frame}
+
+\subsection{Optimising over Wirings}
 
 \begin{frame}{Dynamic Programming}
   \begin{itemize}[<+->]
@@ -721,6 +865,9 @@
     Does there exist a dynamic programming formulation for bounding the key rates achievable from a given behaviour?
   \end{block}
 \end{frame}
+
+
+\subsection{Other Bounds}
 
 \section*{Conclusion}
 

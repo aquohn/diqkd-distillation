@@ -1,6 +1,6 @@
 \begin{tikzpicture}[x=1pt,y=1pt]
   \tikzmath{\w1 = 3em; \h1 = 1.5em;
-    \w2 = 5em; \h2 = 1.5em; \inflh = 0.2*\h2; \signalh = 0.5*\h1;
+    \w2 = 4em; \h2 = 1.5em; \inflh = 0.2*\h2; \signalh = 0.5*\h1;
     \olap2 = 0.1*\w2; \hgap2 = 0.1*\w2; \vgap2 = \h2;
   \olap1 = 0.3*\w1; \hgap1 = 0.1*\w1; \vgap1 = 0.7*\h1;}
 
@@ -54,31 +54,31 @@
 
   % Alice's overall input
   \draw[mid arrow, classinfl] (M1.south west) ++(\olap1, 0) coordinate (M1 in)
-  (M1 in |- {{(0, -2*\h1)}}) -- ++(0, \signalh) node[right] {\(x\)} -- ++(0, \signalh) coordinate (temp1);
+  (M1 in |- {{(0, -\h1)}}) -- ++(0, \signalh) node[right] {\(x\)} -- ++(0, \signalh) coordinate (temp1);
   \draw[classinfl] (temp1) -- (temp1 |- chiA 1.south);
 
   % Alice's first I/O
   \draw[mid arrow, classinfl]  (M1 in |- chiA 1.north) -- ++(0, \signalh) node[right] {\(x_1\)} -- ++(0, \signalh) coordinate (temp1);
   \draw[classinfl] (temp1) -- (M1 in);
-  \draw[mid arrow, classinfl] (M1 in |- M1.north) -- ++(0, \signalh) node[right] {\(a_1\)} -- ++(0, \signalh) coordinate (M1 out);
+  \coordinate (M1 out) at ($ (M1 in |- M1.north) + (0, 2.5*\signalh) $);
 
   % Bob's overall input
   \draw[mid arrow, classinfl] (N1.south east) ++(-\olap1, 0) coordinate (N1 in)
-  (N1 in |- {{(0, -2*\h1)}}) -- ++(0, \signalh) node[left] {\(y\)} -- ++(0, \signalh) coordinate (temp1);
+  (N1 in |- {{(0, -\h1)}}) -- ++(0, \signalh) node[left] {\(y\)} -- ++(0, \signalh) coordinate (temp1);
   \draw[classinfl] (temp1) -- (temp1 |- chiB 1.south);
 
   % Bob's first I/O
   \draw[mid arrow, classinfl]  (temp1 |- chiB 1.north) -- ++(0, \signalh) node[left] {\(y_1\)} -- ++(0, \signalh) coordinate (temp1);
   \draw[classinfl] (temp1) -- (N1 in);
-  \draw[mid arrow, classinfl] (N1 in |- N1.north) -- ++(0, \signalh) node[left] {\(b_1\)} -- ++(0, \signalh) coordinate (N1 out);
+  \coordinate (N1 out) at ($ (N1 in |- N1.north) + (0, 2.5*\signalh) $);
 
   % Alice's second wiring map
   \coordinate (chiA 2 SR) at ($ (chiA 1.south west) + (-\olap2-\hgap2, -\inflh) $);
-  \draw[mid arrow, classinfl] (SR.north west) ++(\olap2, 0) -- ++(0, \inflh) -- (chiA 2 SR) -- (chiA 2 SR |- M1 out) coordinate (temp1);
-  \draw let \p{out} = ($ (temp1) - (M1 out) $),
-  \n{dist} = {abs(\x{out}) + 2*\olap{2}}
+  \draw[mid arrow={pos=0.6}, classinfl] (SR.north west) ++(\olap2, 0) -- ++(0, \inflh) -- (chiA 2 SR) -- (chiA 2 SR |- M1 out) coordinate (temp1);
+  \draw let \p{out} = ($ (temp1) - (chiA 1.north east) $),
+  \n{dist} = {abs(\x{out}) + \olap{2}}
   in
-  (temp1) ++(-\olap2, 0) node[classbox, anchor=south west,
+  (chiA 1.north east |- M1 out) node[classbox, anchor=south east,
   minimum width = \n{dist},
   minimum height = \h{2}] (chiA 2) {\(\chi_A^{(2)}\)};
   \draw[mid arrow, classinfl] (chiA 1.north west) ++(\olap2, 0) coordinate (temp2) -- (temp2 |- chiA 2.south);
@@ -86,11 +86,11 @@
 
   % Bob's second wiring map
   \coordinate (chiB 2 SR) at ($ (chiB 1.south east) + (\olap2+\hgap2, -\inflh) $);
-  \draw[mid arrow, classinfl] (SR.north east) ++(-\olap2, 0) -- ++(0, \inflh) -- (chiB 2 SR) -- (chiB 2 SR |- N1 out) coordinate (temp1);
-  \draw let \p{out} = ($ (temp1) - (N1 out) $),
-  \n{dist} = {abs(\x{out}) + 2*\olap{2}}
+  \draw[mid arrow={pos=0.6}, classinfl] (SR.north east) ++(-\olap2, 0) -- ++(0, \inflh) -- (chiB 2 SR) -- (chiB 2 SR |- N1 out) coordinate (temp1);
+  \draw let \p{out} = ($ (temp1) - (chiB 1.north west) $),
+  \n{dist} = {abs(\x{out}) + \olap{2}}
   in
-  (temp1) ++(\olap2, 0) node[classbox, anchor=south east,
+  (chiB 1.north west |- N1 out) node[classbox, anchor=south west,
   minimum width = \n{dist},
   minimum height = \h{2}] (chiB 2) {\(\chi_B^{(2)}\)};
   \draw[mid arrow, classinfl] (chiB 1.north east) ++(-\olap2, 0) coordinate (temp2) -- (temp2 |- chiB 2.south);
@@ -121,35 +121,39 @@
   \draw[mid arrow, nclassinfl] (state2.north west) ++(\olap1, 0) -- ++(0, \inflh) coordinate (temp1) (M2.south east) ++(-\olap1, 0) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
   \draw[classinfl] (M2.south west) ++(\olap1, 0) coordinate (M2 in)
   (x2) -- (M2 in);
-  \draw[mid arrow, classinfl]  (x2 |- M2.north) -- ++(0, \signalh) node[right] {\(a_2\)} -- ++(0, \signalh) coordinate (a2);
+  \draw[mid arrow, classinfl] (x2 |- M2.north) -- ++(0, \signalh) node[right] {\(a_2\)} -- ++(0, \signalh) coordinate (M2 out);
 
   % Bob's second I/O
   \draw[mid arrow, nclassinfl] (state2.north east) ++(-\olap1, 0) -- ++(0, \inflh) coordinate (temp1) (N2.south west) ++(\olap1, 0) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
   \draw[classinfl] (N2.south east) ++(-\olap1, 0) coordinate (N2 in)
   (y2) -- (N2 in);
-  \draw[mid arrow, classinfl]  (y2 |- N2.north) -- ++(0, \signalh) node[left] {\(b_2\)} -- ++(0, \signalh) coordinate (b2);
+  \draw[mid arrow, classinfl] (y2 |- N2.north) -- ++(0, \signalh) node[left] {\(b_2\)} -- ++(0, \signalh) coordinate (N2 out);
 
   % Alice's third wiring map
-  \coordinate (chiA 3 SR) at ($ (chiA 2 SR) + (-\olap2-\hgap2, 0) $);
+  \coordinate (chiA 3 SR) at ($ (chiA 2 SR -| chiA 2.south west) + (-\hgap2, 0) $);
   \draw[mid arrow, classinfl] (SR.west) -- (chiA 3 SR);
-  \draw[classinfl] (chiA 3 SR) -- (chiA 3 SR |- a2) coordinate (temp1);
-  \draw let \p{out} = ($ (temp1) - (a2) $),
-  \n{dist} = {abs(\x{out}) + 2*\olap{2}}
+  \draw[classinfl] (chiA 3 SR) -- (chiA 3 SR |- M2 out);
+  % direct feed-forward of a2
+  \draw[mid arrow={pos=0.6}, classinfl] (M1 in |- M1.north) -- ++(0, \signalh) node[right] {\(a_1\)} -- ($ (chiA 3 SR |- chiA 2.south) + (-1.5*\hgap2, 0) $) coordinate (a1 bend) -- (a1 bend |- M2 out) coordinate (temp1);
+  \draw let \p{out} = ($ (temp1) - (chiA 2.north east) $),
+  \n{dist} = {abs(\x{out}) + \olap{2}}
   in
-  (temp1) ++(-\olap2, 0) node[classbox, anchor=south west,
+  (chiA 2.north east |- M2 out) node[classbox, anchor=south east,
   minimum width = \n{dist},
   minimum height = \h{2}] (chiA 3) {\(\chi_A^{(3)}\)};
   \draw[mid arrow, classinfl] (chiA 2.north west) ++(\olap2, 0) coordinate (temp2) -- (temp2 |- chiA 3.south);
   \draw[mid arrow, classinfl] (M1 in |- chiA 3.north) -- ++(0, \signalh) node[right] {\(a\)} -- ++(0, \signalh) coordinate (a);
 
   % Bob's third wiring map
-  \coordinate (chiB 3 SR) at ($ (chiB 2 SR) + (\olap2+\hgap2, 0) $);
+  \coordinate (chiB 3 SR) at ($ (chiB 2 SR -| chiB 2.south east) + (\hgap2, 0) $);
   \draw[mid arrow, classinfl] (SR.east) -- (chiB 3 SR);
-  \draw[classinfl] (chiB 3 SR) -- (chiB 3 SR |- b2) coordinate (temp1);
-  \draw let \p{out} = ($ (temp1) - (b2) $),
-  \n{dist} = {abs(\x{out}) + 2*\olap{2}}
+  \draw[classinfl] (chiB 3 SR) -- (chiB 3 SR |- N2 out);
+  % direct feed-forward of b2
+  \draw[mid arrow={pos=0.6}, classinfl] (N1 in |- N1.north) -- ++(0, \signalh) node[left] {\(b_1\)} -- ($ (chiB 3 SR |- chiB 2.south) + (1.5*\hgap2, 0) $) coordinate (b1 bend) -- (b1 bend |- N2 out) coordinate (temp1);
+  \draw let \p{out} = ($ (temp1) - (chiB 2.north west) $),
+  \n{dist} = {abs(\x{out}) + \olap{2}}
   in
-  (temp1) ++(\olap2, 0) node[classbox, anchor=south east,
+  (chiB 2.north west |- N2 out) node[classbox, anchor=south west,
   minimum width = \n{dist},
   minimum height = \h{2}] (chiB 3) {\(\chi_B^{(3)}\)};
   \draw[mid arrow, classinfl] (chiB 2.north east) ++(-\olap2, 0) coordinate (temp2) -- (temp2 |- chiB 3.south);

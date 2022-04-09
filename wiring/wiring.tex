@@ -150,7 +150,7 @@
     }
 
     \tikzset{%
-      >={Stealth}, % makes the arrow heads bold
+      >={Stealth[width=4pt, length=6pt]}, % makes the arrow heads bold
       node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
       % style to apply some styles to each segment of a path
       on each segment/.style={
@@ -175,11 +175,19 @@
           },
         },
       },
-      % style to add an arrow in the middle of a path
-      mid arrow/.style={postaction={decorate,decoration={
+      set mid arrow/.code={\pgfqkeys{/tikz/mid arrow}{#1}},
+      set mid arrow={pos/.initial=.5, end/.initial=stealth},
+      mid arrow/.style={
+        set mid arrow={#1},
+        postaction={
+          decorate,
+          decoration={
             markings,
-            mark=at position .5 with {\arrow[#1]{stealth}}
-      }}},
+            mark=at position \pgfkeysvalueof{/tikz/mid arrow/pos}
+                 with \arrow{\pgfkeysvalueof{/tikz/mid arrow/end}}
+          }
+        }
+      },
       % simple black circle at node
       point/.style={circle,draw,inner sep=0pt,minimum size=3pt,fill=black},
       % nonclassical causation
@@ -1334,8 +1342,6 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
                   \caption[Causal influences in an LOSR operation on a quantum behaviour.]{\label{fig:losr} A generic LOSR operation transforms an initial behaviour \(p(a_0 b_0|x_0 y_0)\), depicted on the left, into a new overall behaviour \(p'(ab|xy)\), using classical preprocessing and postprocessing, and shared randomness, depicted on the right. These diagrams depict the causal influences between the systems in this scenario. Double lines indicate nonclassical causation (in this case, quantum effects). (Adapted from~\cite{BellResourceTheory})}
                 \end{figure}
 
-                % TODO better caption
-
               Local operations involve each party locally preprocessing his inputs, sending the preprocessed input into the box, then postprocessing the received output to generate an overall output. The preprocessing and postprocessing steps can obviously only use data that is available at the point they are executed, so the most general local operations can be described as~\cite[Def. 4]{LocalTransformations}
               \begin{equation}
                 p'(a|x) = \sum_{a_0 x_0} p_o(a|x_0 a_0 x) p(a_0|x_0) p_i(x_0|x).
@@ -1691,7 +1697,7 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
                         Method & \(i = 2\) & \(i = 3\) \\
                         \midrule
                         \cite{ShortEntangleSwap} & \(82\), \(48\)  & --, \(2816\) \\
-                        Positivity on general behaviours & \(58\), \(512\) & --, \(524288\) \\
+                        Consistency on general behaviours & \(58\), \(512\) & --, \(524288\) \\
                         Causal constraints & \(128\), -- & \(432\), -- \\
                         \bottomrule
                       \end{Tabular}

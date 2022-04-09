@@ -1,6 +1,6 @@
 \begin{tikzpicture}[x=1pt,y=1pt]
   \tikzmath{\w1 = 3em; \h1 = 1.5em;
-    \w2 = 5em; \h2 = 1.5em; \inflh = 0.2*\h2; \signalh = 0.5*\h1;
+    \w2 = 4em; \h2 = 1.5em; \inflh = 0.2*\h2; \signalh = 0.5*\h1;
     \olap2 = 0.1*\w2; \hgap2 = 0.1*\w2; \vgap2 = \h2;
   \olap1 = 0.3*\w1; \hgap1 = 0.1*\w1; \vgap1 = 0.7*\h1;}
 
@@ -75,10 +75,10 @@
   % Alice's second wiring map
   \coordinate (chiA 2 SR) at ($ (chiA 1.south west) + (-\olap2-\hgap2, -\inflh) $);
   \draw[mid arrow, classinfl] (SR.north west) ++(\olap2, 0) -- ++(0, \inflh) -- (chiA 2 SR) -- (chiA 2 SR |- M1 out) coordinate (temp1);
-  \draw let \p{out} = ($ (temp1) - (M1 out) $),
-  \n{dist} = {abs(\x{out}) + 2*\olap{2}}
+  \draw let \p{out} = ($ (temp1) - (chiA 1.north east) $),
+  \n{dist} = {abs(\x{out}) + \olap{2}}
   in
-  (temp1) ++(-\olap2, 0) node[classbox, anchor=south west,
+  (chiA 1.north east |- M1 out) node[classbox, anchor=south east,
   minimum width = \n{dist},
   minimum height = \h{2}] (chiA 2) {\(\chi_A^{(2)}\)};
   \draw[mid arrow, classinfl] (chiA 1.north west) ++(\olap2, 0) coordinate (temp2) -- (temp2 |- chiA 2.south);
@@ -87,10 +87,10 @@
   % Bob's second wiring map
   \coordinate (chiB 2 SR) at ($ (chiB 1.south east) + (\olap2+\hgap2, -\inflh) $);
   \draw[mid arrow, classinfl] (SR.north east) ++(-\olap2, 0) -- ++(0, \inflh) -- (chiB 2 SR) -- (chiB 2 SR |- N1 out) coordinate (temp1);
-  \draw let \p{out} = ($ (temp1) - (N1 out) $),
-  \n{dist} = {abs(\x{out}) + 2*\olap{2}}
+  \draw let \p{out} = ($ (temp1) - (chiB 1.north west) $),
+  \n{dist} = {abs(\x{out}) + \olap{2}}
   in
-  (temp1) ++(\olap2, 0) node[classbox, anchor=south east,
+  (chiB 1.north west |- N1 out) node[classbox, anchor=south west,
   minimum width = \n{dist},
   minimum height = \h{2}] (chiB 2) {\(\chi_B^{(2)}\)};
   \draw[mid arrow, classinfl] (chiB 1.north east) ++(-\olap2, 0) coordinate (temp2) -- (temp2 |- chiB 2.south);
