@@ -1,99 +1,115 @@
-\begin{tikzpicture}[x=1pt,y=1pt]
-  \tikzmath{\w1 = 3em; \h1 = 1.5em;
-    \w2 = 4em; \h2 = 1.5em; \inflh = 0.2*\h2; \signalh = 0.5*\h1;
-    \olap2 = 0.1*\w2; \hgap2 = 0.1*\w2; \vgap2 = \h2;
-  \olap1 = 0.3*\w1; \hgap1 = 0.1*\w1; \vgap1 = 0.7*\h1;}
+\begin{tikzpicture}
+  \tikzmath{\w1 = 1.2; \h1 = 0.5;
+    \w2 = 1.6; \h2 = 0.5;
+    \inflh = 0.2*\h2; \signalh = 0.5*\h1;
+    \wpt1 = \w1*1cm; \hpt1 = \h1*1cm;
+    \wpt2 = \w2*1cm; \hpt2 = \h2*1cm;
+    \olap1 = 0.3; \hgap1 = 0.0*\w1; \vgap1 = 0.7*\h1;
+    \olap2 = 0.2; \hgap2 = 0.1*\w2; \vgap2 = \h2;
+  }
 
   \node[classbox,
-  minimum width = \w{2},
-  minimum height = \h{2},
+  minimum width = \wpt{2},
+  minimum height = \hpt{2},
   ] (SR) at (0, 0) {\(\Lambda\)};
 
   % Alice's first wiring map
   \draw (SR.north west) ++(-\hgap2, \vgap2 + 2*\inflh)
   node[classbox,
-  minimum width = \w{2},
-  minimum height = \h{2},
+  minimum width = \wpt{2},
+  minimum height = \hpt{2},
   anchor = south east
   ] (chiA 1) {\(\chi_A^{(1)}\)};
-  \draw[classinfl, mid arrow] (SR.north) ++(-\olap2, 0) -- ++(0, \inflh) coordinate (temp1) (chiA 1.south east) ++(-\olap2, 0) -- ++(0, -\inflh) coordinate (temp2)
+  \draw[classinfl, mid arrow]
+  ($ (SR.north)!\olap{2}!(SR.north west) $) -- ++(0, \inflh) coordinate (temp1)
+  ($ (chiA 1.south east)!\olap{2}!(chiA 1.south) $) -- ++(0, -\inflh) coordinate (temp2) 
   (temp1) -- (temp2);
 
   % Bob's first wiring map
   \draw (SR.north east) ++(\hgap2, \vgap2 + 2*\inflh)
   node[classbox,
-  minimum width = \w{2},
-  minimum height = \h{2},
+  minimum width = \wpt{2},
+  minimum height = \hpt{2},
   anchor = south west
   ] (chiB 1) {\(\chi_B^{(1)}\)};
-  \draw[classinfl, mid arrow] (SR.north) ++(\olap2, 0) -- ++(0, \inflh) coordinate (temp1) (chiB 1.south west) ++(\olap2, 0) -- ++(0, -\inflh) coordinate (temp2)
+  \draw[classinfl, mid arrow]
+  ($ (SR.north)!\olap{2}!(SR.north east) $) -- ++(0, \inflh) coordinate (temp1)
+  ($ (chiB 1.south west)!\olap{2}!(chiB 1.south) $) -- ++(0, -\inflh) coordinate (temp2)
   (temp1) -- (temp2);
 
+  % Alice's overall input
+  \draw[mid arrow, classinfl] (chiA 1 |- SR.south) ++(0, -\h1) -- ++(0, \signalh) node[right] {\(x\)} -- ++(0, \signalh) coordinate (xin);
+
+  % Alice's first input
+  \draw[classinfl] (xin) -- (xin |- chiA 1.south);
+  \draw[mid arrow, classinfl]  ($ (chiA 1.north east)!2*\olap{2}!(chiA 1.north) $) -- ++(0, \signalh) node[right] {\(x_0\)} -- ++(0, \signalh) coordinate (x1);
+
+  % Bob's overall input
+  \draw[mid arrow, classinfl] (chiB 1 |- SR.south) ++(0, -\h1) -- ++(0, \signalh) node[left] {\(y\)} -- ++(0, \signalh) coordinate (yin);
+
+  % Bob's first input
+  \draw[classinfl] (yin) -- (yin |- chiB 1.south);
+  \draw[mid arrow, classinfl]  ($ (chiB 1.north west)!2*\olap{2}!(chiB 1.north) $) -- ++(0, \signalh) node[left] {\(y_0\)} -- ++(0, \signalh) coordinate (y1);
+
   % The first state
-  \draw let \p{mid} = ($ 0.5*(chiA 1.north) + 0.5*(chiB 1.north) $)
+  \draw let \p{mid} = ($ (chiA 1.north)!0.5!(chiB 1.north) $)
   in
   (\p{mid}) ++(0, -\vgap2 + 0.5*\h1)
   node[nclassbox,
-  minimum width = \w{1},
-  minimum height = \h{1},
+  minimum width = \wpt{1},
+  minimum height = \hpt{1},
   ] (state1) {\(\rho\)};
 
   % Alice's first measurement
   \node[nclassbox,
-  minimum width = \w{1},
-  minimum height = \h{1},
-  ] (N1) at ($ (state1.north east) + (0.5*\w1 + \hgap1, 0.5*\h1 + \vgap1 + 2*\inflh) $) {\(N_{b|y}\)};
-  \draw[mid arrow, nclassinfl] (state1.north east) ++(-\olap1, 0) -- ++(0, \inflh) coordinate (temp1) (N1.south west) ++(\olap1, 0) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
+  minimum width = \wpt{1},
+  minimum height = \hpt{1},
+  ] (M1) at ($ (state1.north west) + (-0.5*\w1 - \hgap1, 0.5*\h1 + \vgap1 + 2*\inflh) $) {\(M_{a|x}\)};
+  \draw[mid arrow, nclassinfl] ($ (state1.north west)!\olap{1}!(state1.north) $) -- ++(0, \inflh) coordinate (temp1)
+  ($ (M1.south east)!\olap{1}!(M1.south) $) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
 
   % Bob's first measurement
   \node[nclassbox,
-  minimum width = \w{1},
-  minimum height = \h{1},
-  ] (M1) at ($ (state1.north west) + (-0.5*\w1 - \hgap1, 0.5*\h1 + \vgap1 + 2*\inflh) $) {\(M_{a|x}\)};
-  \draw[mid arrow, nclassinfl] (state1.north west) ++(\olap1, 0) -- ++(0, \inflh) coordinate (temp1) (M1.south east) ++(-\olap1, 0) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
+  minimum width = \wpt{1},
+  minimum height = \hpt{1},
+  ] (N1) at ($ (state1.north east) + (0.5*\w1 + \hgap1, 0.5*\h1 + \vgap1 + 2*\inflh) $) {\(N_{b|y}\)};
+  \draw[mid arrow, nclassinfl] ($ (state1.north east)!\olap{1}!(state1.north) $) -- ++(0, \inflh) coordinate (temp1)
+  ($ (N1.south west)!\olap{1}!(N1.south) $) -- ++(0, -\inflh) coordinate (temp2) (temp1) -- (temp2);
 
-  % Alice's overall input
-  \draw[mid arrow, classinfl] (M1.south west) ++(\olap1, 0) coordinate (M1 in)
-  (M1 in |- {{(0, -2*\h1)}}) -- ++(0, \signalh) node[right] {\(x\)} -- ++(0, \signalh) coordinate (temp1);
-  \draw[classinfl] (temp1) -- (temp1 |- chiA 1.south);
+  % Alice's first output
+  \draw[classinfl] (x1) -- (x1 |- M1.south);
+  \draw[mid arrow, classinfl] (x1 |- M1.north) -- ++(0, \signalh) node[right] {\(a_0\)} -- ++(0, \signalh) coordinate (a1);
 
-  % Alice's first I/O
-  \draw[mid arrow, classinfl]  (M1 in |- chiA 1.north) -- ++(0, \signalh) node[right] {\(x_1\)} -- ++(0, \signalh) coordinate (temp1);
-  \draw[classinfl] (temp1) -- (M1 in);
-  \draw[mid arrow, classinfl] (M1 in |- M1.north) -- ++(0, \signalh) node[right] {\(a_1\)} -- ++(0, \signalh) coordinate (M1 out);
-
-  % Bob's overall input
-  \draw[mid arrow, classinfl] (N1.south east) ++(-\olap1, 0) coordinate (N1 in)
-  (N1 in |- {{(0, -2*\h1)}}) -- ++(0, \signalh) node[left] {\(y\)} -- ++(0, \signalh) coordinate (temp1);
-  \draw[classinfl] (temp1) -- (temp1 |- chiB 1.south);
-
-  % Bob's first I/O
-  \draw[mid arrow, classinfl]  (temp1 |- chiB 1.north) -- ++(0, \signalh) node[left] {\(y_1\)} -- ++(0, \signalh) coordinate (temp1);
-  \draw[classinfl] (temp1) -- (N1 in);
-  \draw[mid arrow, classinfl] (N1 in |- N1.north) -- ++(0, \signalh) node[left] {\(b_1\)} -- ++(0, \signalh) coordinate (N1 out);
+  % Bob's first output
+  \draw[classinfl] (y1) -- (y1 |- N1.south);
+  \draw[mid arrow, classinfl] (y1 |- N1.north) -- ++(0, \signalh) node[left] {\(b_0\)} -- ++(0, \signalh) coordinate (b1);
 
   % Alice's second wiring map
-  \coordinate (chiA 2 SR) at ($ (chiA 1.south west) + (-\olap2-\hgap2, -\inflh) $);
-  \draw[mid arrow, classinfl] (SR.north west) ++(\olap2, 0) -- ++(0, \inflh) -- (chiA 2 SR) -- (chiA 2 SR |- M1 out) coordinate (temp1);
+  \coordinate (chiA 2 SR) at ($ (chiA 1.south west) + (-\hgap2, -\inflh) $);
+  \draw[mid arrow={pos=0.6}, classinfl] ($ (SR.north west)!\olap{2}!(SR.north) $) -- ++(0, \inflh) -- (chiA 2 SR) -- (chiA 2 SR |- a1) coordinate (temp1);
   \draw let \p{out} = ($ (temp1) - (chiA 1.north east) $),
-  \n{dist} = {abs(\x{out}) + \olap{2}}
+  \n{mapw} = {abs(\x{out}) + \hgap{2}*1cm}
   in
-  (chiA 1.north east |- M1 out) node[classbox, anchor=south east,
-  minimum width = \n{dist},
-  minimum height = \h{2}] (chiA 2) {\(\chi_A^{(2)}\)};
-  \draw[mid arrow, classinfl] (chiA 1.north west) ++(\olap2, 0) coordinate (temp2) -- (temp2 |- chiA 2.south);
-  \draw[mid arrow, classinfl] (M1 in |- chiA 2.north) -- ++(0, \signalh) node[right] {\(a\)} -- ++(0, \signalh);
+  (chiA 1.north east |- a1) node[classbox, anchor=south east,
+  minimum width = \n{mapw},
+  minimum height = \hpt{2}] (chiA 2) {\(\chi_A^{(2)}\)};
 
   % Bob's second wiring map
-  \coordinate (chiB 2 SR) at ($ (chiB 1.south east) + (\olap2+\hgap2, -\inflh) $);
-  \draw[mid arrow, classinfl] (SR.north east) ++(-\olap2, 0) -- ++(0, \inflh) -- (chiB 2 SR) -- (chiB 2 SR |- N1 out) coordinate (temp1);
+  \coordinate (chiB 2 SR) at ($ (chiB 1.south east) + (\hgap2, -\inflh) $);
+  \draw[mid arrow={pos=0.6}, classinfl] ($ (SR.north east)!\olap{2}!(SR.north) $) -- ++(0, \inflh) -- (chiB 2 SR) -- (chiB 2 SR |- b1) coordinate (temp1);
   \draw let \p{out} = ($ (temp1) - (chiB 1.north west) $),
-  \n{dist} = {abs(\x{out}) + \olap{2}}
+  \n{mapw} = {abs(\x{out}) + \hgap{2}*1cm}
   in
-  (chiB 1.north west |- N1 out) node[classbox, anchor=south west,
-  minimum width = \n{dist},
-  minimum height = \h{2}] (chiB 2) {\(\chi_B^{(2)}\)};
-  \draw[mid arrow, classinfl] (chiB 1.north east) ++(-\olap2, 0) coordinate (temp2) -- (temp2 |- chiB 2.south);
-  \draw[mid arrow, classinfl] (N1 in |- chiB 2.north) -- ++(0, \signalh) node[left] {\(b\)} -- ++(0, \signalh);
+  (chiB 1.north west |- b1) node[classbox, anchor=south west,
+  minimum width = \n{mapw},
+  minimum height = \hpt{2}] (chiB 2) {\(\chi_B^{(2)}\)};
+
+  % Alice's overall output
+  \draw[classinfl] (a1) -- (a1 |- chiA 2.south);
+  \draw[mid arrow, classinfl]  ($ (chiA 2.north east)!2*\olap{2}!(chiA 2.north) $) -- ++(0, \signalh) node[right] {\(a\)} -- ++(0, \signalh);
+
+  % Bob's overall output
+  \draw[classinfl] (b1) -- (b1 |- chiB 2.south);
+  \draw[mid arrow, classinfl]  ($ (chiB 2.north west)!2*\olap{2}!(chiB 2.north) $) -- ++(0, \signalh) node[left] {\(b\)} -- ++(0, \signalh);
 
 \end{tikzpicture}

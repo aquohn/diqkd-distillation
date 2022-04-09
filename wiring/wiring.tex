@@ -1377,11 +1377,13 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
 
               Applying the same analysis to the local operations that constitute a wiring, a wiring of \(c\) boxes would need to generate inputs for the \(c\) boxes, and combine the \(c\) outputs into one output. Therefore, the effect of a \emph{\(c\)-box local operation} is fully specified by the \(c+1\) maps \(\chi(a|\cvec{x}^c\cvec{a}^{c}x)\) and \(\chi(x_j|\cvec{x}^{j-1}\cvec{a}^{j-1}x)\), for \(j \in \dintv{1}{c}\), where there are no constraints on maps besides their cardinalities. We term these \(c\)-box local operations \emph{marginal wirings} and denote the set of marginal wirings as \(\sW\).
 
+              % TODO update other figures and transfer to tikz files
+
               \begin{figure}
                 \centering
                 \includegraphics{wiring.tikz}
                 \caption[Causal influences in a wiring between two iid quantum behaviours.]{\label{fig:wiring} Wirings combine multiple behaviours into one using local operations and shared randomness. We have depicted two iid quantum behaviours here for simplicity; our definitions allow wirings to be applied to any system that can be described by a joint conditional probability (that is, a behaviour).}
-              \end{figure}
+            \end{figure}
 
               The space of \(n\)-partite wirings, which we denote \(\sW^n\), is derived in a similar way to the derivation of LOSR operations, although some care needs to be taken in defining and applying the tensor product of marginal wirings to compute the actual behaviour (see \Cref{sec:locwir_mat}). A bipartite wiring would then produce a new behaviour from \(c\) boxes with an arbitrary joint behaviour \(p^c\) wired together:
               \begin{gather}
