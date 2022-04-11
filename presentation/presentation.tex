@@ -680,7 +680,6 @@
   \end{itemize}
 \end{frame}
 
-% TODO KIV removal
 \begin{frame}{DIQKD Security}
   \begin{itemize}[<+->]
     \item \(\rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n}\): Alice--Bob--Eve ccq state after \(n\) Bell tests
@@ -688,22 +687,9 @@
           & \prin^n(\cvec{x}^n,\cvec{y}^n) p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \proj[\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n]{\cvec{a}^n\cvec{b}^n\cvec{x}^n\cvec{y}^n} \\
             \otimes & \rho_{E^n|\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n}
           \end{aligned} \]
-        \item \emph{Local operations and public communication} (LOPC) protocol \(\proto{P}\) with public data in \(\crv{D}^n\) and key of length \(\ell_n\)
-      \[ \rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n} \mapsto {\Omega[\rho]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n} 
- \]
-    \item \emph{Trace distance} \(\Trdist{ \rho}{\sigma } = \frac{1}{2}\norm{\rho - \sigma}_1\), \emph{ideal key} \(\tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}}\)
-      \[ \tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \proj[\crv{K}_{A}^{\ell}]{j} \otimes \proj[\crv{K}_{B}^{\ell}]{j} \]
-    \item \emph{Universally composable} \(\epsilon\)-security
-    \[ \Trdist{{\Omega[\rho]}_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}^n}}{\tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}} \otimes \rho_{E^n} \otimes {\Omega[\rho]}_{\crv{D}^n}} \leq \epsilon \]
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Asymptotic DIQKD Security}
-  \begin{itemize}[<+->]
     \item \emph{Asymptotic key rate} of a sequence of states \(\{\rho^n\}\)
       \[ r(\proto{P}, \{\rho^n\}) = \lim_{n\to\infty} \frac{\ell_n - L_{\Omega}(\prin^n)}{n} \]
-      if \(\epsilon\) is asymptotically vanishing:
-      \[ \lim_{n\to\infty} \Trdist{{\Omega[\rho^n]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n}}{\tau_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n}} \otimes \rho_{E^n} \otimes {\Omega[\rho^n]}_{\crv{D}^n}} = 0 \]
+      if \emph{trace distance} from ideal final state is asymptotically vanishing
     \item \(L_{\Omega}(\prin^n)\): minimum cost for generating \(\prin^n\) (\alert{novel definition})
     \item Upper bounded by \emph{Wyner common information} if iid
     \item Dependent on protocol in general
@@ -798,41 +784,6 @@
     \item Expressing as Karnaugh maps reveals redundancy, reduces to
       \[ \exp_{o_A}(i_A o_A^c) \prod_{j=1}^c \exp_{i_A}(i_A o_A^{j-1}) \]
   \end{itemize}
-\end{frame}
-
-% TODO KIV removal
-\begin{frame}{Explicit Example}
-  \begin{table}
-    \begin{columns}
-      \begin{column}[c]{0.3\linewidth}
-      \begin{center}
-        \begin{tabular}{|r|cc|} \hline
-          \diagbox{\(x x_1\)}{\(a_1\)} & 0 & 1 \\ \hline
-          00 & 1 & 0 \\
-          01 & X & X \\
-          11 & 1 & 1 \\
-          10 & X & X \\ \hline
-        \end{tabular}
-      \end{center}
-    \end{column}
-    \begin{column}[c]{0.6\linewidth}
-      \begin{center}
-        \begin{tabular}{|r|cccc|} \hline
-          \diagbox{\(x x_1 x_2\)}{\(a_1 a_2\)} & 00 & 01 & 11 & 10 \\ \hline
-          000 & X & X & 1 & 0 \\
-          001 & 0 & 0 & X & X \\
-          011 & X & X & X & X \\
-          010 & X & X & X & X \\
-          110 & X & X & X & X \\
-          111 & 1 & 0 & X & X \\
-          101 & X & X & X & X \\
-          100 & X & X & 0 & 0 \\ \hline
-        \end{tabular}
-      \end{center}
-    \end{column}
-    \end{columns}
-    \caption{Lookup tables for \(x_1 = x\), \(x_2 = \bar{a}_1 + x_1\), and \(a = x_1x_2\bar{a}_1\bar{a}_2 + \bar{x}_1\bar{x}_2a_1a_2\).}
-  \end{table}
 \end{frame}
 
 \begin{frame}{Wiring Matrices}
