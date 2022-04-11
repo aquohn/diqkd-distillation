@@ -172,10 +172,10 @@
 
   % Alice's overall output
   \draw[classinfl] (a2) -- (a2 |- chiA 3.south);
-  \draw[mid arrow, classinfl]  ($ (chiA 3.north east)!2*\olap{2}!(chiA 3.north) $) -- ++(0, \signalh) node[right] {\(a\)} -- ++(0, \signalh);
+  \draw[mid arrow, classinfl]  (chiA 3.north) -- ++(0, \signalh) node[right] {\(a\)} -- ++(0, \signalh);
 
   % Bob's overall output
   \draw[classinfl] (b2) -- (b2 |- chiB 3.south);
-  \draw[mid arrow, classinfl]  ($ (chiB 3.north west)!2*\olap{2}!(chiB 3.north) $) -- ++(0, \signalh) node[left] {\(b\)} -- ++(0, \signalh);
+  \draw[mid arrow, classinfl]  (chiB 3.north) -- ++(0, \signalh) node[left] {\(b\)} -- ++(0, \signalh);
 
 \end{tikzpicture}
