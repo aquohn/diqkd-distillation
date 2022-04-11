@@ -464,7 +464,7 @@
     \section*{List of Symbols and Abbreviations}
 
     \begin{center}
-      \begin{longtable}{p{0.2\linewidth}|p{0.8\linewidth}}
+      \begin{longtable*}{p{0.2\linewidth}|p{0.8\linewidth}}
         \(\R_+\), \(\R_{++}\) & Nonnegative and positive real numbers \\
         \(\Z_+\), \(\Z_{++}\) & Nonnegative and positive integers \\
         \(\Lin{V}\), \(\Lin{U\to V}\) & Linear operators on the vector space \(V\), and from the vector space \(U\) to \(V\) \\
@@ -490,7 +490,7 @@
         PSK & Pre-shared key \\
         QKD & Quantum key distribution \\
         DIQKD & Device-independent quantum key distribution \\
-      \end{longtable}
+      \end{longtable*}
     \end{center}
     \clearpage
 
@@ -538,11 +538,11 @@
     \[ d_{NS}(i_A, o_A, i_B, o_B) = (o_A-1)(o_B-1){i_A}{i_B} + (o_A-1)i_A + (o_B-1)i_B, \]
     and behaviours can be seen as vectors in \(\R^{d_{NS}}\), with all entries positive and normalised (that the remaining probabilities do not sum to more than 1 must still be enforced). In summary, the set of no-signalling behaviours is the \emph{no-signalling polytope} \(\NSs\), isomorphic to a subset of \(\R^{d_{NS}}\).
     \begin{defn}[The No-Signalling Polytope]
-      Given a vector \(\cvec{v} \in \R^{d_{NS}}\), we can formally construct a behaviour \(p\) by interpreting its coefficients as conditional probabilities and computing the remaining probabilities via \Cref{eqn:cgtofullA} and \Cref{eqn:cgtofullB}. Then, \(p \in \NSs\) iff the following are jointly true:
+      Given a vector \(\cvec{v} \in \R^{d_{NS}}\), we can construct a behaviour \(p\) by interpreting its coefficients as conditional probabilities and computing the remaining probabilities via \Cref{eqn:cgtofullA} and \Cref{eqn:cgtofullB}. Then, \(p \in \NSs\) iff the following are jointly true:
       \begin{enumerate}
-        \item \(p\) satisfies the no-signalling conditions (\Cref{def:nscond})
-        \item \(p(ab|xy) \geq 0\;\forall a,b,x,y\) (positivity)
-        \item \(\sum_{ab} p(ab|xy) = 1\;\forall a,b,x,y\) (normalisation)
+        \item The \emph{no-signalling conditions} (\Cref{def:nscond})
+        \item \emph{Positivity}: \(p(ab|xy) \geq 0\;\forall a,b,x,y\) 
+        \item \emph{Normalisation}: \(\sum_{ab} p(ab|xy) = 1\;\forall a,b,x,y\)
       \end{enumerate}
     \end{defn}
 
@@ -558,12 +558,12 @@
       \end{equation}
       where \(P_{\Lambda}\) is an arbitrary probability mass function over an alphabet \(\{\lambda\}\), whose elements parametrise the family of distributions \(\{p_{\lambda}(a|x), p_{\lambda}(b|y)\}\).\footnote{\(\Lambda\) could be a continuous random variable as well, but we will assume that it is a discrete random variable for simplicity.}
     \end{defn}
-    It is, of course, possible to define conditional pmfs \(p(a|x\lambda) = p(a|x\lambda)\) and \(p(b|y\lambda) = p(b|y\lambda)\), which Bayes' rule would give as the proper interpretation of the pmfs \(p_{\lambda}\). The choice to denote them as a family of distinct pmfs, as opposed to two pmfs conditioned on the same rv \(\Lambda\), will be made based on convenience for the exposition.
+    It is, of course, possible to define conditional pmfs \(p(a|x\lambda) = p_{\lambda}(a|x)\) and \(p(b|y\lambda) = p_{\lambda}(b|y)\), which Bayes' rule would give as the proper interpretation of the pmfs \(p_{\lambda}\). The choice to denote them as a family of distinct pmfs, as opposed to two pmfs conditioned on the same rv \(\Lambda\), will be made based on convenience for the exposition.
 
     There are a few ways to interpret the set of behaviours defined by this condition:
     \begin{itemize}
-      \item The original, physically motivated interpretation is that \(\Lambda\) is a \emph{local hidden variable} explaining the behaviour of quantum systems. A bipartite Bell test can be implemented as follows: two quantum particles, prepared in a particular state, are distributed to Alice and Bob who independently choose one measurement from a fixed set of possibilities. The measurement choice is the input, while the measurement outcome is the output. Quantum theory predicts that the choice of input of one party can instantaneously influence the output of the other party, although obeying the no-signalling conditions so that no information is transmitted and the correlation is only revealed when Alice and Bob share their inputs with each other. This influence seemed highly unphysical (and was famously derided by Einstein as ``spooky action at a distance''). One possible alternative is for the two particles to encode the value of a random variable, which then locally determines the outcomes of their measurements using only their respective inputs. This random variable would be the rv \(\Lambda\) in the definition of \(\Ls\), so this alternative proposal would imply that all quantum behaviours are in \(\Ls\). As will be seen in \Cref{sec:nl_Q}, \emph{pace} Einstein, this is not the case.
-      \item Slightly modifying this interpretation, \(\Lambda\) could represent a \emph{pre-shared sequence} of random numbers, generated according to the distribution \(p_{\Lambda}(\lambda)\), that Alice and Bob use to independently generate their outputs.
+      \item The original, physically motivated interpretation is that \(\Lambda\) is a \emph{local hidden variable} explaining the behaviour of quantum systems. A bipartite Bell test can be implemented as follows: two quantum particles, prepared in a particular state, are distributed to Alice and Bob who independently choose one measurement from a fixed set of possibilities. The measurement choice is the input, while the measurement outcome is the output. Quantum theory predicts that the choice of input of one party can instantaneously influence the output of the other party, although obeying the no-signalling conditions so that no information is transmitted and the correlation is only revealed when Alice and Bob share their inputs with each other. This influence seemed highly unphysical (and was famously derided by Einstein as ``spooky action at a distance''). One possible alternative is for the two particles to encode the value of a random variable, which then locally determines the outcomes of their measurements using only their respective inputs. This random variable would be the rv \(\Lambda\) in the definition of \(\Ls\), so this alternative proposal would imply that all quantum behaviours are in \(\Ls\). As will be seen in \Cref{sec:nl_Q}, this is not the case, and \emph{pace} Einstein, nonlocal influence is a feature of reality.
+      \item Slightly modifying this interpretation, \(\Lambda\) could represent a \emph{pre-shared sequence} of random numbers, generated according to the distribution \(P_{\Lambda}(\lambda)\), that Alice and Bob use to independently generate their outputs.
       \item A further modification views \(\Ls\) as the space of behaviours that can arise from the boxes being \emph{pre-programmed} with a list of apparently random numbers, or perhaps a seeded pseudorandom number generator, with the numbers, or the seed, corresponding to \(\Lambda\) and being held by the manufacturer of the boxes. The connection between \(\Ls\) (or more specifically, behaviours lying outside \(\Ls\)) and security becomes clearer in this interpretation, although a full explanation will only be given in \Cref{sec:diqkd_di}.
     \end{itemize}
 
@@ -585,17 +585,17 @@
         \sum_b p_D(ab|xy) &= \sum_b \delta_{a\hat{a}(x,y)}\delta_{b\hat{b}(x,y)} \\
         p_D(a|xy) &= \delta_{a\hat{a}(x,y)},
       \end{align}
-      and if the no-signalling conditions are satisfied, then \(p_D(a|xy) = p_D(a|xy') \Rightarrow \delta_{a\hat{a}(x,y)} = \delta_{a\hat{a}(x,y')}\) for any distinct \(y\) and \(y'\). Effectively, this means that \(\hat{a}(x,y)\) is independent of \(y\), so that \(p_D(a|xy) = p_D(a|x)\) for all \(y\). The same argument can be given for \(y\) with the sum over \(a\), so that \(p_D(b|y) = \delta_{b\hat{b}(x,y)}\), and therefore \(p_D(ab|xy) = p_D(a|x)p_D(b|y)\). 
+      and if the no-signalling conditions are satisfied, then \(p_D(a|xy) = p_D(a|xy') \Rightarrow \delta_{a\hat{a}(x,y)} = \delta_{a\hat{a}(x,y')}\) for any distinct \(y\) and \(y'\). Effectively, this means that \(\hat{a}(x,y)\) is independent of \(y\), so that \(p_D(a|xy) = p_D(a|x) = \delta_{a\hat{a}(x,y)}\) for all \(y\). The same argument can be given for \(y\) with the sum over \(a\), so that \(p_D(b|y) = \delta_{b\hat{b}(x,y)}\), and therefore \(p_D(ab|xy) = p_D(a|x)p_D(b|y)\). 
     \end{proof}
 
     \begin{theorem}[Fine's Theorem~\cite{FineThm}]
       Any behaviour in \(\Ls\) can be produced from a convex combination of LD behaviours, that is 
       \begin{equation}
-        p(ab|xy) = \sum_{\lambda} P_{\Lambda}(\lambda) p_{LD}^{(\lambda)}(a|x)p_{LD}^{(\lambda)}(b|y).
+        p(ab|xy) = \sum_{\lambda} P_{\Lambda}(\lambda) p_{LD|\lambda}(a|x)p_{LD|\lambda}(b|y).
       \end{equation}
     \end{theorem}
 
-    Fine's theorem additionally implies that all vertices of \(\Ls\) are LD behaviours, and that all LD behaviours are vertices of \(\Ls\). We will not prove this statement rigorously here, nor Fine's theorem itself, but the intuition is that any indeterminism can be shifted from the distributions \(p_{LD}^{(\lambda)}(a|x)\) and \(p_{LD}^{(\lambda)}(b|y)\) to \(P_{\Lambda}(\lambda)\). These observations will be used later to make the connection between nonlocality and security.
+    Fine's theorem additionally implies that all vertices of \(\Ls\) are LD behaviours, and that all LD behaviours are vertices of \(\Ls\). We will not prove this statement rigorously here, nor Fine's theorem itself, but the intuition is that any indeterminism can be shifted from the distributions \(p_{LD|\lambda}(a|x)\) and \(p_{LD|\lambda}(b|y)\) to \(P_{\Lambda}(\lambda)\). These observations will be used later to make the connection between nonlocality and security.
 
     \subsection{Quantum Behaviours}\label{sec:nl_Q}
 
@@ -651,7 +651,7 @@
       \angleb{B_y} &\coloneqq \Tr{\rho{B_y}} = p(b=1|y) - p(b=0|y).
     \end{align}
 
-    Note that, with \(o_A = o_B = 2\), we have \(d_{NS} = {i_A}{i_B} + i_A + i_B\), which is precisely the number of correlators and marginals. Since these are linear functions of the probabilities, a binary-output behaviour can be fully specified by giving its correlators and marginals and solving the linear system of equations consisting of the \(d_{NS}\) definitions for the correlators and marginals, and the \(o_A i_A i_B + o_B i_A i_B\) no-signalling conditions. Although defined in terms of the expectation values of quantum observables, the equivalent expressions in terms of probabilities allow them to be computed for behaviours that are not in \(\Qs\) as well.
+    Note that, with \(o_A = o_B = 2\), we have \(d_{NS} = {i_A}{i_B} + i_A + i_B\), which is precisely the number of marginals and correlators. Since these are linear functions of the probabilities, a binary-output behaviour can be fully specified by giving its correlators and marginals and solving the linear system of equations consisting of the \(d_{NS}\) definitions for the correlators and marginals, and the \(o_A i_A i_B + o_B i_A i_B\) no-signalling conditions. Although defined in terms of the expectation values of quantum observables, the equivalent expressions in terms of probabilities allow them to be computed for behaviours that are not in \(\Qs\) as well.
 
     For binary-output settings, some important statistics are the quantum bit error rate (QBER) \(Q_{xy}\) and the Clauser-Horne-Shimony-Holt (CHSH) value \(S_{x_0x_1y_0y_1}\):
     \begin{gather}
@@ -1902,7 +1902,7 @@ Any[]
 
                   Let \(C^{W}_{\sk}(p)\) be the iid secret key capacity of a behaviour with wiring, that is
                   \begin{equation}
-                    C^{W}_{\sk}(p) = \sup_{\chi\in\sW^2} C^{\otimes}_{\sk}(\chi[p]).
+                    C^{W}_{\sk}(p) \coloneqq \sup_{\chi\in\sW^2} C^{\otimes}_{\sk}(\chi[p]).
                   \end{equation}
 
                   From this simple definition, and the linearity of wirings, we have another major result.
@@ -1912,7 +1912,7 @@ Any[]
                   \begin{proof}
                     Suppose that \(p\) can be expressed as a convex combination \(p = \sum_j w_j p_j\), and fix the protocol \(\proto{P}\) and input distribution \(\prin\). Let the states \(\rho_j\) achieve
                     \[ r_j = \inf_{\rho \in \compatstates{p_j}{\prin}} r\left(\proto{P}, \{\rho^{\otimes n}\} \right) \]
-                    and observe that, if Eve uses a convex mixture of these states and the corresponding measurements, weighted according to \(\{w_j\}\), the average behaviour observed will be \(p\). Further, if we consider only the rounds where \(\rho_j\) is sent, the secret key rate cannot exceed \(r_j\), the asymptotic rate if all the rounds used \(\rho_j\), since Eve holds the purification that identifies the state and measurements being sent and can use her optimal strategy against it. Therefore, the key rate for this protocol, with these attacks, is
+                    and observe that, if Eve uses a convex mixture of these states and the corresponding measurements, weighted according to \(\{w_j\}\), the average behaviour observed will be \(p\). Further, if we consider only the rounds where \(\rho_j\) is sent, the secret key rate cannot exceed \(r_j\), the asymptotic rate if all the rounds used \(\rho_j\), since Eve holds the purification that identifies the implementation in each round and can use her optimal strategy against it. Therefore, the key rate for this protocol, with these attacks, is
                     \[ r \leq \sum_j w_j r_j. \]
                     Now, since this applies to any choice of protocol and input distribution, it applies to the ones which achieve \(C_{\sk}^{\otimes}(p)\). Additionally, we have optimised Eve's choices when choosing \(\rho_j\), but not Alice and Bob's choices, so \(r_j \leq C_{\sk}^{\otimes}(p_j)\). Therefore,
                     \[ C_{\sk}^{\otimes}(p) \leq \sum_j w_j r_j \leq \sum_j w_j C_{\sk}^{\otimes}(p_j) \]
@@ -1990,7 +1990,7 @@ Any[]
 
                     Given this construction, it is clear how the NPA hierarchy approximation to \Cref{eqn:bff_npa} can be encoded as an SDP in standard form: the objective function, the linear equalities and inequalities based on the behaviour, and commutation relations are linear functions of moments, while the normalisation to sum to identity allows one measurement operator to be eliminated, and the operator inequalities can be encoded as localising matrices, appended diagonally to the moment matrix (which enforces their positive-semidefiniteness), and with further equalities to enforce the required relations between the localising and moment matrices.
 
-                    However, even without explicitly constructing the complete dual objective function \(Q_{m,k}'(\cvec{\mu},\chi[p])\), it is evident that the some of the terms in the dual objective function would contain products between the dual variables \(\cvec{mu}\) and the variables representing the wiring \(\chi\), because the wiring variables would be part of the ``constants'', represented by \(b_i\) in the generic SDP above, in the linear equalities in the SDP\@. The product between these two variables makes the objective function neither convex nor concave under convex combinations of the vector of all optimisation variables variables \(\cvec{\mu} \oplus \cvec{\chi}\). The following example of \(f(\cvec{x}) = x_1x_2\) on vectors \(\cvec{x} = (x_1, x_2)\) and \(\cvec{y} = (y_1, y_2)\) illustrates this:
+                    However, even without explicitly constructing the complete dual objective function \(Q_{m,k}'(\cvec{\mu},\chi[p])\), it is evident that the some of the terms in the dual objective function would contain products between the dual variables \(\cvec{\mu}\) and the variables representing the wiring \(\chi\), because the wiring variables would be part of the ``constants'', represented by \(b_i\) in the generic SDP above, in the linear equalities in the SDP\@. The product between these two variables makes the objective function neither convex nor concave under convex combinations of the vector of all optimisation variables variables \(\cvec{\mu} \oplus \cvec{\chi}\). The following example of \(f(\cvec{x}) = x_1x_2\) on vectors \(\cvec{x} = (x_1, x_2)\) and \(\cvec{y} = (y_1, y_2)\) illustrates this:
                     \begin{align}
                       \lambda f(\cvec{x}) + (1-\lambda)f(\cvec{y}) &= \lambda{x_1x_2} + (1-\lambda){y_1y_2} \\
                       f(\lambda\cvec{x} + (1-\lambda)\cvec{y}) &= \lambda{x_1x_2} + \lambda(1-\lambda)\underbrace{(x_1y_2 + y_1x_2)}_{\text{unknown sign}} + (1-\lambda){y_1y_2}.
