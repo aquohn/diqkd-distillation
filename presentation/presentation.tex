@@ -147,7 +147,7 @@
 }
 
     \tikzset{%
-      >={Stealth[width=4pt, length=6pt]}, % makes the arrow heads bold
+      >={Stealth}, % makes the arrow heads bold
       node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
       % style to apply some styles to each segment of a path
       on each segment/.style={
@@ -173,7 +173,7 @@
         },
       },
       set mid arrow/.code={\pgfqkeys{/tikz/mid arrow}{#1}},
-      set mid arrow={pos/.initial=.5, end/.initial=stealth},
+      set mid arrow={pos/.initial=.5, end/.initial={Stealth[length=6pt, sep=-3pt]}},
       mid arrow/.style={
         set mid arrow={#1},
         postaction={
@@ -418,9 +418,8 @@
 \begin{frame}{Quantum Key Distribution (QKD)}
   \begin{itemize}[<+->]
     \item Quantum processes are \alert{fundamentally indeterministic}
-    \item This can be used for \alert{cryptographic purposes}
     \item Data from quantum processes can be \alert{guaranteed to be private}
-    \item We can \alert{extract unconditionally secure keys} using such data
+    \item We can \alert{distribute unconditionally secure keys} using such data
   \end{itemize}
 \end{frame}
 
@@ -428,6 +427,8 @@
   Like good engineers, the first thing we try to do is figure out how we can use this.
 
   The security of these keys is not dependent on the computational power of an adversary. Instead, it is proved that the process of generating the keys does not leak any information whatsoever about the keys to an adversary, so that he can do little better than randomly guessing the key.
+
+  Unconditional security can be achieved by the two parties meeting up to agree on a common key, but it is impossible to do remotely over an untrusted medium, except using QKD. This explains the D in QKD: it is not just about establish highly secure keys, but doing so in a distributed fashion, without requiring the cumbersome trusted channel of physical contact.
 }
 
 \begin{frame}[fragile]{Unconditional Security}
@@ -469,16 +470,16 @@
     \begin{center}
       \begin{tabular}{c|c}
             & \EscVerb*{WE WILL ATTACK AT 1200} \\
-        \(+_q\) & \EscVerb*{SPOOKY DISTANT ACTIONS} \\ \hline
-        \(=\)   & \EscVerb*{ 422UL9GQ BA0B9AEBQ20 } \\
+        \(+_q\) & \EscVerb*{7LP3CNZEI AALJAAUUSXY3} \\ \hline
+        \(=\)   & \EscVerb*{SPOOKY DISTANT ACTIONS} \\
       \end{tabular}
     \end{center}
 
     \uncover<4-5>{
       \begin{center}
         \begin{tabular}{c|c}
-            &       \EscVerb*{ 422UL9GQ BA0B9AEBQ20 } \\
-          \(-_q\) & \EscVerb*{25G2H3 GBV171477F\ \ Y0Y} \\ \hline
+            &       \EscVerb*{SPOOKY DISTANT ACTIONS} \\
+          \(-_q\) & \EscVerb*{KQ3O8FAD4DI7OL87DR2KNG} \\ \hline
           \(=\)   & \EscVerb*{I WANT APPLE ICE CREAM} \\
         \end{tabular}
       \end{center}
@@ -487,8 +488,8 @@
     \uncover<5>{
       \begin{center}
         \begin{tabular}{c|c}
-            & \EscVerb*{ 422UL9GQ BA0B9AEBQ20 } \\
-          \(-_q\) & \EscVerb*{O03GMAYHQRTAY2 AWC18AK} \\ \hline
+            & \EscVerb*{SPOOKY DISTANT ACTIONS} \\
+          \(-_q\) & \EscVerb*{7LP3CNZEI AALJAAUUTUY3} \\ \hline
           \(=\)   & \EscVerb*{WE WILL ATTACK AT 0500} \\
         \end{tabular}
       \end{center}
@@ -513,9 +514,9 @@
 
 \begin{frame}{Nonlocal Distillation}
   \begin{itemize}[<+->]
-    \item Combine multiple Bell test devices with classical local processing (``wiring'')
-    \item Will have different statistics
-    \item \alert{Distillation}: combining multiple resources to obtain a better resource
+    \item \emph{Wiring}: combining multiple Bell test devices using classical local processing
+    \item Will produce different statistics
+    \item \alert{Distillation}: achieving a superior resource from wiring of inferior resources
   \end{itemize}
 \end{frame}
 
@@ -582,11 +583,11 @@
           \foreach \h in {0,\ncolh,...,\twidth} {
             \tikzmath{int \a, \b, \x, \y;
               \x = random(0,1); \y = random(0,1);
-              if \x == 1 then { let \afg = black; let \abg = white; } else { let \afg = white; let \abg = black; };
-              if \y == 1 then { let \bfg = black; let \bbg = white; } else { let \bfg = white; let \bbg = black; };
+              if \x == 1 then { let \afg = black; let \abg = white; let \aval = H; } else { let \afg = white; let \abg = black; let \aval = T; };
+              if \y == 1 then { let \bfg = black; let \bbg = white; let \bval = H; } else { let \bfg = white; let \bbg = black; let \bval = T; };
             }
 
-            \draw (\h, \v) node[circle,draw=\afg, text=\afg, fill=\abg,] {H} ++(\intra,0) node[circle,draw=\bfg, text=\bfg, fill=\bbg, ] {H}; 
+            \draw (\h, \v) node[circle,draw=\afg, text=\afg, fill=\abg,] {\aval} ++(\intra,0) node[circle,draw=\bfg, text=\bfg, fill=\bbg, ] {\bval}; 
           }
         }
 
@@ -669,7 +670,13 @@
   \end{itemize}
 \end{frame}
 
-\note{ The following argument gives an intuition for the security of DIQKD\@. }
+\note{
+  One might wonder what nonlocality could have to do with security. The following intuitive argument explains the connection. Let's go back to the scenario with Alice and Bob, and let's say they play the coin-flipping game and use the outcomes \((a,b)\) to derive a shared secret key. However, this time, their jars are packed by an adversary, Eve, who is trying to steal their secret key, so that she determines the coins that are used in each round based on a random outcome \(e\), and is aware of the value of \(e\) in each round. Then, their behaviour will look like this.
+
+  Now, if the \(p_e\)'s are deterministic, such that knowing \(x, y\) and \(e\) would determine \(a, b\), then if Eve finds \(x, y\) out, she can use her knowledge of these values to determine \(a, b\), which would compromise the generated keys. Most DIQKD protocols involve announcing the values \(x, y\), so if the behaviour can be expressed as a mixture of deterministic behaviours in this way, then those protocols cannot generate a secret key. The set of behaviours that can be expressed in this way, however, is precisely \(\Ls\).
+
+  On the other hand, quantum behaviours are fundamentally indeterministic. If we are able to certify that some component of the behaviour was indeterministic even for Eve, then the outcomes \(a, b\) have some degree of security against her. This is the intuition behind DIQKD.
+}
 
 \begin{frame}{DIQKD Assumptions}
   \begin{itemize}[<+->]
@@ -680,19 +687,22 @@
   \end{itemize}
 \end{frame}
 
+\note{
+  As Charles Bennett once joked, DIQKD still has to be DIY-QKD: classical attacks on the classical processing are still possible.
+}
+
 \begin{frame}{DIQKD Security}
   \begin{itemize}[<+->]
     \item \(\rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n}\): Alice--Bob--Eve ccq state after \(n\) Bell tests
           \[ \sum_{\cvec{a}^n\cvec{b}^n \cvec{x}^n\cvec{y}^n} \begin{aligned}[c]
-          & \prin^n(\cvec{x}^n,\cvec{y}^n) p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \proj[\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n]{\cvec{a}^n\cvec{b}^n\cvec{x}^n\cvec{y}^n} \\
-            \otimes & \rho_{E^n|\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n}
+          & \prin^n(\cvec{x}^n,\cvec{y}^n) p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \proj[\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n]{\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n} \\
+            \otimes & \rho_{E^n|\cvec{a}^n\cvec{b}^n\cvec{x}^n\cvec{y}^n}
           \end{aligned} \]
     \item \emph{Asymptotic key rate} of a sequence of states \(\{\rho^n\}\)
       \[ r(\proto{P}, \{\rho^n\}) = \lim_{n\to\infty} \frac{\ell_n - L_{\Omega}(\prin^n)}{n} \]
-      if \emph{trace distance} from ideal final state is asymptotically vanishing
     \item \(L_{\Omega}(\prin^n)\): minimum cost for generating \(\prin^n\) (\alert{novel definition})
-    \item Upper bounded by \emph{Wyner common information} if iid
     \item Dependent on protocol in general
+    \item Upper bounded by \emph{Wyner common information} if iid
   \end{itemize}
 \end{frame}
 \note{ \(\prin^n\) is typically assumed to be independent but we want to probe fundamental limits. Dependent inputs can avoid sifting factor (though this is multiplicative, not additive). This constrains the possible \(\prin^n\), since it must be generated with asymptotically zero error, or else the error needs to be accounted for in some other way. Protocols may allow recovery of input secrecy, so \(L_{\Omega}\) may be zero for dependent inputs. }
@@ -701,13 +711,14 @@
     \begin{itemize}[<+->]
       \item Optimise over \emph{states compatible with classical data} \(\compatstates[^n]{p}{\prin[\hat{p}^n]}\)
         \begin{itemize}
-          \item Generated by valid qqq states and measurements
           \item Average behaviour matches \(p\)
           \item Input distribution is \(\prin[\hat{p}^n]\)
+          \item Generated by valid qqq states and measurements
         \end{itemize}
       \item Well-established methods for reducing to iid
       \item Focus on \emph{iid secret key capacity}
         \[ C_{\sk}^{\otimes}(p) = \sup_{\proto{P}} \sup_{\prin} \inf_{\substack{\rho : \\ \rho \in \compatstates{p}{\prin}}} r(\proto{P}, \{\rho^{\otimes{n}}\}) \]
+        over asymptotically secure protocols \(\proto{P}\)
     \end{itemize}
 \end{frame}
 
@@ -715,13 +726,14 @@
 
 \subsection{Wiring Distributions}
 
+% TODO update tikz to label behaviours and add |\lambda to wiring maps
 \begin{frame}{Local Operations and Shared Randomness}
   \begin{onlyenv}<1-3>
     \begin{itemize}[<+->]
-      \item Take overall input, generate physical input, generate overall output from physical output
+      \item Local operation: take overall input, generate physical input, generate overall output from physical output
         \[ p'(a|x) = \sum_{a_0 x_0} p_o(a|x_0 a_0 x) p(a_0|x_0) p_i(x_0|x) \]
       \item Combine into a map obeying \emph{no-retrocausation}
-        \[ \chi(a x_0 | x a_0) \coloneqq p_o(a|x_0a_0x) p_i(x_0|x) = p_o(a|x_0a_0x) p_i(x_0|x a_0) \]
+        \[ \chi_A(a x_0 | x a_0) \coloneqq p_o(a|x_0a_0x) p_i(x_0|x) = p_o(a|x_0a_0x) p_i(x_0|x a_0) \]
       \item Combine with other party using \emph{shared randomness}
         \[ \chi(abx_0y_0|a_0b_0xy) \coloneqq \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(ax_0|a_0x) \chi_{B|\lambda}(by_0|b_0y) \]
     \end{itemize}
@@ -746,7 +758,10 @@
       \item Generalise to multiple boxes
         \begin{align*}
           p'(ab|xy) &\coloneqq \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)\label{eqn:jwirdistdef} \\
-          \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) &\coloneqq \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) \\
+          \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) &\coloneqq \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy)
+        \end{align*}
+      \item Marginal wirings must obey \emph{no-retrocausation} conditions:
+        \begin{align*}
           \chi_{A|\lambda}(\cvec{x}^j|\cvec{a}^cx) &= \chi_{A|\lambda}(\cvec{x}^j|\cvec{a}^{j-1}x),\,\forall j \in \dintv{1}{c} \\
           \chi_{B|\lambda}(\cvec{y}^j|\cvec{b}^cy) &= \chi_{B|\lambda}(\cvec{y}^j|\cvec{b}^{j-1}y),\,\forall j \in \dintv{1}{c}
         \end{align*}
@@ -776,11 +791,14 @@
 
 \begin{frame}{Wiring Functions}
   \begin{itemize}[<+->]
-    \item Objective: reduce no.\ of extremal wirings
+    \item Objective: reduce \(\#\) of extremal wirings
     \item Deterministic maps are functions
-    \item Combinatorics of sources and targets gives
+      \begin{align*}
+        x_j &= W^{(j)}_{A}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x),\,j \in \dintv{1}{c} \\
+          a &= T_{A}(\cvec{x}^{c}, \cvec{a}^{c}, x)
+      \end{align*}
+    \item \(\#\) of deterministic marginal wirings by combinatorics:
       \[ \exp_{o_A}(i_A^c o_A^c) \prod_{j=1}^c \exp_{i_A}(i_A^{j} o_A^{j-1}) \]
-      deterministic wirings
     \item Expressing as Karnaugh maps reveals redundancy, reduces to
       \[ \exp_{o_A}(i_A o_A^c) \prod_{j=1}^c \exp_{i_A}(i_A o_A^{j-1}) \]
   \end{itemize}
@@ -788,12 +806,12 @@
 
 \begin{frame}{Wiring Matrices}
   \begin{itemize}[<+->]
+    \item Express each transformation as a matrix and multiply them together
     \item Wirings permute sources (\(S\)), then map to targets (\(R\)), then permute targets (\(T\))
       \[ T_{c+1}R_{c+1}S_{c+1} \cdots T_2R_2S_2 T_1R_1S_1 p \]
     \item We can combine \(T_j\) and \(S_{j+1}\) if iterating over possible wirings
-    \item Express each transformation as a matrix and multiply them together
-    \item Easily extendable to \(n\)-partite wirings\only<.->{\footnote{If your computer has enough RAM}}
     \item Implemented and used to experiment with possible wirings
+    \item Easily extendable to shared randomness and \(n\)-partite wirings\only<.->{\footnote{If your computer has enough RAM}}
     \item Unfortunately gives the exact same number of wirings
   \end{itemize}
 \end{frame}
@@ -806,7 +824,7 @@
     \[ P'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}}) = \sum_{\cvec{by}} \chi(b',\cvec{by})P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y}) \]
     \item Polytope found by checking consistency of couplers on \(P(\cvec{b}|\cvec{y}) \in \NSs\)
     \item Wiring for a specific input: \emph{marginal conditional wiring distribution} (\(\chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx)\) for a given \(x\))
-    \item \(\#\text{ couplers} < \#\text{ marginal conditional wiring distributions!}\)
+    \item \(\#\text{ extremal couplers} < \#\text{ extremal marginal conditional wiring distributions}\)
     \item Could this simplify the space of wirings?
   \end{itemize}
 \end{frame}
@@ -855,8 +873,8 @@
     \begin{itemize}[<+->]
       \item Wirings without output dependency obey
         \[ \chi(\cvec{x}^c\cvec{y}^c|xy) = \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y) \]
-      \item Measurements can generate \(\cvec{x}^c\) and \(\cvec{y}^c\) beforehand
       \item Can use same physical processes for \(p\) and \(p'\)
+      \item Measurements can generate \(\cvec{x}^c\) and \(\cvec{y}^c\) beforehand
     \end{itemize}
   \end{onlyenv}
   \begin{onlyenv}<4-7> % TODO KIV removal

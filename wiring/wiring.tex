@@ -150,7 +150,7 @@
     }
 
     \tikzset{%
-      >={Stealth[width=4pt, length=6pt]}, % makes the arrow heads bold
+      >={Stealth}, % makes the arrow heads bold
       node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
       % style to apply some styles to each segment of a path
       on each segment/.style={
@@ -176,7 +176,7 @@
         },
       },
       set mid arrow/.code={\pgfqkeys{/tikz/mid arrow}{#1}},
-      set mid arrow={pos/.initial=.5, end/.initial=stealth},
+      set mid arrow={pos/.initial=.5, end/.initial={Stealth[length=6pt, sep=-3pt]}},
       mid arrow/.style={
         set mid arrow={#1},
         postaction={
@@ -672,7 +672,7 @@
     \end{equation}
     If Eve wants to know the output of every round, each \(p_e\) must be deterministic, i.e.\ \(p_e(ab|xy) \in \{0, 1\}\;\forall a,b,x,y,e\). Then, knowing the behaviour in each round, from the value of \(e\), and the input settings \((x,y)\), which Alice and Bob typically announce in the course of a DIQKD protocol, Eve can deduce the outputs \((a,b)\). This implies that all behaviours in \(\Ls\), which can all be expressed as a convex sum of deterministic behaviours, can give Eve full knowledge of their outputs and are therefore not secure.\footnote{In fact, the reverse implication holds: all behaviours that are fully insecure in this way are contained in \(\Ls\), since by \Cref{thm:NSLD} all deterministic no-signalling behaviours are LD, and hence any convex sum of them must belong to \(\Ls\).}
 
-    On the other hand, if for a given \(e = e'\), \(p_{e'}(ab|xy)\) is random even for Eve, then she cannot know the outputs \((a,b)\) with certainty when \(e=e'\). Since quantum phenomena are capable of producing truly random outputs, such that it is impossible even in principle to predict those outcomes, they can provide a source for such true randomness if we wish to pessimistically grant Eve full control of the environment outside of Alice and Bob's detectors and information-processing devices. Note that, while Eve cannot have full control over the measurement devices, they can be arbitrarily flawed---nonlocal statistics will be detected \emph{only if} they are generated from a quantum measurement that extracts randomness, so nonlocal statistics are sufficient to guarantee secrecy. This is why these protocols are called \emph{device-independent}: the devices can be almost arbitrarily faulty, as long as they do not deliberately leak the input and output data, and the reported statistics will reveal a fault if it exists.
+    On the other hand, if for a given \(e = e'\), \(p_{e'}(ab|xy)\) is random even for Eve, then she cannot know the outputs \((a,b)\) with certainty when \(e=e'\). Since quantum systems are capable of producing truly random measurement outcomes, such that it is impossible, even with perfect knowledge of the system, to predict those outcomes, they can provide a source for such true randomness if we wish to pessimistically grant Eve full control of the environment outside of Alice and Bob's detectors and information-processing devices. Note that, while Eve cannot have full control over the measurement devices, they can be arbitrarily flawed---nonlocal statistics will be detected \emph{only if} they are generated from a quantum measurement that extracts randomness, so nonlocal statistics are sufficient to guarantee secrecy. This is why these protocols are called \emph{device-independent}: the devices can be almost arbitrarily faulty, as long as they do not deliberately leak the input and output data, and the reported statistics will reveal a fault if it exists.
 
     \subsection{DIQKD Protocols}\label{sec:diqkd_proto}
 
@@ -694,7 +694,7 @@
       \begin{equation}
         \restatableeq{\bellccq}{
           \rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n} = \sum_{\cvec{a}^n\cvec{b}^n \cvec{x}^n\cvec{y}^n} \begin{aligned}[c]
-          & \prin^n(\cvec{x}^n,\cvec{y}^n) p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \proj[\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n]{\cvec{a}^n\cvec{b}^n\cvec{x}^n\cvec{y}^n} \\
+          & \prin^n(\cvec{x}^n,\cvec{y}^n) p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \proj[\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n]{\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n} \\
             \otimes & \rho_{E^n|\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n},
           \end{aligned}
         }{eqn:bellccq}
@@ -774,11 +774,7 @@
     \begin{equation}
       r(\proto{P}, \{\rho^n\}) = \lim_{n\to\infty} \frac{\ell_n - L_{\Omega}(\prin^n)}{n}
     \end{equation}
-    where \(L_{\Omega}(\prin^n)\) is the minimum number of bits in Alice and Bob's existing shared secrecy that must be expended to sample from \(\prin^n\) with asymptotically vanishing error, taking into account the protocol \(\proto{P}\), and the protocols must fulfill
-    \begin{equation}
-    \lim_{n\to\infty} \Trdist{{\Omega[\rho^n]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n}}{\tau_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n}} \otimes \rho_{E^n} \otimes {\Omega[\rho^n]}_{\crv{D}^n}} = 0,
-    \end{equation}
-    which is to say that the generated key must be \(\epsilon\)-secure with \(\epsilon\) vanishing as \(n\to\infty\).
+    where \(L_{\Omega}(\prin^n)\) is the minimum number of bits in Alice and Bob's existing shared secrecy that must be expended to sample from \(\prin^n\) with asymptotically vanishing error, taking into account the protocol \(\proto{P}\).
   \end{defn}
 
     This definition is novel in allowing correlated inputs and considering the secrecy cost of generating the input, which must be private from Eve. It is therefore more general, and in fact can lead to greater achievable rates (e.g.\ in~\cite[Prot. 2]{DIQKD_FiniteSize}).
@@ -835,7 +831,7 @@
       \begin{enumerate}
         \item There exist POVMs \({\{ {\{ M_{\cvec{a}^n|\cvec{x}^n}\}}_{\cvec{a}^n} \}}_{\cvec{x}^n}\) and \({\{ {\{ N_{\cvec{b}^n|\cvec{y}^n}\}}_{\cvec{b}^n} \}}_{\cvec{y}^n}\) and a qqq state \(\rho_{A^n B^n E^n}\) such that
         \begin{equation}\label{eqn:probmeas}
-          p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \rho_{E|\cvec{a}^n\cvec{x}^n\cvec{b}^n\cvec{y}^n} = \Tr[_{A^n B^n}]{\rho_{A^n B^n E^n} \left(M_{\cvec{a}^n|\cvec{x}^n} \otimes N_{\cvec{b}^n|\cvec{y}^n} \otimes I_{E^n}\right) },
+          p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \rho_{E^n|\cvec{a}^n\cvec{b}^n \cvec{x}^n\cvec{y}^n} = \Tr[_{A^n B^n}]{\rho_{A^n B^n E^n} \left(M_{\cvec{a}^n|\cvec{x}^n} \otimes N_{\cvec{b}^n|\cvec{y}^n} \otimes I_{E^n}\right) },
         \end{equation}
         \item Its joint behaviour \(p^n\) satisfies
       \begin{equation}
@@ -862,8 +858,13 @@
     \begin{equation}
     C_{\sk}(p) = \sup_{\proto{P}} \sup_{\{\prin^n\}} \inf_{\substack{\{\rho^{n}\} : \\ \rho^{n} \in \compatstates[^n]{p}{\prin^n}}} r(\proto{P}, \{\rho^{n}\}),
     \end{equation}
-     The input distributions \(\prin^n\) are maximised over, since Alice and Bob are free to choose their inputs, but they cannot otherwise constrain Eve's choice of state, hence the inner minimisation on the state.
+    where the supremum is over all protocols that fulfill
+    \begin{equation}
+    \lim_{n\to\infty} \Trdist{{\Omega[\rho^n]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n}}{\tau_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n}} \otimes \rho_{E^n} \otimes {\Omega[\rho^n]}_{\crv{D}^n}} = 0,
+    \end{equation}
+    which is to say that the generated key must be \(\epsilon\)-secure with \(\epsilon\) vanishing as \(n\to\infty\).
     \end{defn}
+    The input distributions \(\prin^n\) are maximised over, since Alice and Bob are free to choose their inputs, but they cannot otherwise constrain Eve's choice of state, hence the inner minimisation on the state.
 
     Computing the secret key capacity is the fundamental question that DIQKD research is trying to answer:
     \begin{funqn}\label{fqn:cap}
@@ -1348,7 +1349,7 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
               \end{equation}
               The conditional probabilities expressing the effect of the local operation can be expressed as a single map:
               \begin{equation}\label{eqn:opmap}
-                \chi(a x_0 | x a_0) \coloneqq p_o(a|x_0a_0x) p_i(x_0|x) = p_o(a|x_0a_0x) p_i(x_0|x a_0)
+                \chi_A(a x_0 | x a_0) \coloneqq p_o(a|x_0a_0x) p_i(x_0|x) = p_o(a|x_0a_0x) p_i(x_0|x a_0)
               \end{equation}
               where the independence of \(p_i\) from \(a_0\) follows by causality: the production of the input \(x_0\) cannot depend on the value of the output \(a_0\), since the input must be produced before the output is received.
 
@@ -1376,8 +1377,6 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
               which is equivalent to enforcing that they can be decomposed into preprocessing and postprocessing maps as per \Cref{eqn:opmap}: that is, \(\chi_{A|\lambda}\) and \(\chi_{B|\lambda}\) must be local operations.
 
               Applying the same analysis to the local operations that constitute a wiring, a wiring of \(c\) boxes would need to generate inputs for the \(c\) boxes, and combine the \(c\) outputs into one output. Therefore, the effect of a \emph{\(c\)-box local operation} is fully specified by the \(c+1\) maps \(\chi(a|\cvec{x}^c\cvec{a}^{c}x)\) and \(\chi(x_j|\cvec{x}^{j-1}\cvec{a}^{j-1}x)\), for \(j \in \dintv{1}{c}\), where there are no constraints on maps besides their cardinalities. We term these \(c\)-box local operations \emph{marginal wirings} and denote the set of marginal wirings as \(\sW\).
-
-              % TODO update other figures and transfer to tikz files
 
               \begin{figure}
                 \centering
@@ -1864,7 +1863,7 @@ Any[]
                        &= \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c\lambda}
           P_{\Lambda}(\lambda) \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy)
           p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)
-          \rho_{E|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
+          \rho_{E|\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c\lambda},
       \end{align*}
       where Eve can adapt her state to \(\lambda\) since she holds the purification of Alice and Bob's state (which, by the construction explained in \Cref{thm:Qcvx}, gives her the value of \(\lambda\)). Now, since this state is equivalent to \(\hat{\rho}\), Alice and Bob can apply \(\proto['_{\Omega',\ell'}]{P}\) to \(\hat{\rho}\), generating keys of length \(\ell'_n\). Since the steps taken, namely Alice and Bob publicly generating \(\Lambda\) and applying local maps to their data, do not reveal or discard information about \(\crv{X}\) and \(\crv{Y}\), by assumption\footnote{This assumption is quite intuitive, and holds for well-studied cases such as independent input distributions, and the key recovery technique of~\cite[Prot. 2]{DIQKD_FiniteSize}. However, without a more formal model of the cost function \(L_{\Omega}\), we need to explicitly state this assumption.}, it would not constrain the generation or recovery of \(\prin'\), and so the cost to generate it would not be more than \(L_{\Omega'}(\prin'^{\otimes n})\). Therefore,
       \[ \hat{r} \geq \lim_{n\to\infty} \frac{\ell'_n - L_{\Omega'}(\prin'^{\otimes n})}{n} = r' \]

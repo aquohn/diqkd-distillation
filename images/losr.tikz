@@ -19,7 +19,7 @@
   minimum width = \wpt{2},
   minimum height = \hpt{2},
   anchor = south east
-  ] (chiA 1) {\(\chi_A^{(1)}\)};
+  ] (chiA 1) {\(\chi_{A|\lambda}^{(1)}\)};
   \draw[classinfl, mid arrow]
   ($ (SR.north)!\olap{2}!(SR.north west) $) -- ++(0, \inflh) coordinate (temp1)
   ($ (chiA 1.south east)!\olap{2}!(chiA 1.south) $) -- ++(0, -\inflh) coordinate (temp2) 
@@ -31,7 +31,7 @@
   minimum width = \wpt{2},
   minimum height = \hpt{2},
   anchor = south west
-  ] (chiB 1) {\(\chi_B^{(1)}\)};
+  ] (chiB 1) {\(\chi_{B|\lambda}^{(1)}\)};
   \draw[classinfl, mid arrow]
   ($ (SR.north)!\olap{2}!(SR.north east) $) -- ++(0, \inflh) coordinate (temp1)
   ($ (chiB 1.south west)!\olap{2}!(chiB 1.south) $) -- ++(0, -\inflh) coordinate (temp2)
@@ -92,7 +92,7 @@
   in
   (chiA 1.north east |- a1) node[classbox, anchor=south east,
   minimum width = \n{mapw},
-  minimum height = \hpt{2}] (chiA 2) {\(\chi_A^{(2)}\)};
+  minimum height = \hpt{2}] (chiA 2) {\(\chi_{A|\lambda}^{(2)}\)};
 
   % Bob's second wiring map
   \coordinate (chiB 2 SR) at ($ (chiB 1.south east) + (\hgap2, -\inflh) $);
@@ -102,7 +102,7 @@
   in
   (chiB 1.north west |- b1) node[classbox, anchor=south west,
   minimum width = \n{mapw},
-  minimum height = \hpt{2}] (chiB 2) {\(\chi_B^{(2)}\)};
+  minimum height = \hpt{2}] (chiB 2) {\(\chi_{B|\lambda}^{(2)}\)};
 
   % Alice's overall output
   \draw[classinfl] (a1) -- (a1 |- chiA 2.south);
