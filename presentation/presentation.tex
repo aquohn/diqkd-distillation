@@ -877,23 +877,7 @@
       \item Measurements can generate \(\cvec{x}^c\) and \(\cvec{y}^c\) beforehand
     \end{itemize}
   \end{onlyenv}
-  \begin{onlyenv}<4-7> % TODO KIV removal
-    \begin{itemize}[<+->]
-      \item Quantum behaviour given by
-        \[ p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) = \Tr{\rho_{AB} \left( M_{\cvec{a}^c|\cvec{x}^c} \otimes N_{\cvec{b}^c|\cvec{y}^c} \right) } \]
-      \item Wired behaviour given by
-        \[ p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \sum_{\lambda} \begin{aligned}[c]
-        & \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) \\
-        & P_{\Lambda}(\lambda) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)
-        \end{aligned} \]
-      \item Define \(M'_{a|x\lambda} \coloneqq \sum_{\cvec{a}^c\cvec{x}^c} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) M_{\cvec{a}^c|\cvec{x}^c}\)
-      \item These form a valid POVM with the same behaviour
-        \[ \begin{aligned}[c]
-          \sum_a M'_{a|x\lambda} &= \sum_a \sum_{\cvec{a}^c\cvec{x}^c} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) M_{\cvec{a}^c|\cvec{x}^c} = \sum_{\cvec{a}^c\cvec{x}^c} \chi_{A|\lambda}(\cvec{x}^c|x) M_{\cvec{a}^c|\cvec{x}^c} \\
-                                 &= \sum_{\cvec{x}^c} \chi_{A|\lambda}(\cvec{x}^c|x) I = I. \end{aligned} \]
-    \end{itemize}
-  \end{onlyenv}
-  \begin{onlyenv}<8->
+  \begin{onlyenv}<4->
     \begin{center}
       \includegraphics[height=0.85\textheight]{outdep.tikz}
     \end{center}
@@ -932,41 +916,11 @@
   \end{onlyenv}
 \end{frame}
 
-% TODO KIV removal
-\begin{frame}{Semidefinite Programming}
+\begin{frame}{Other Approaches}
   \begin{itemize}[<+->]
-    \item Computable lower bound of the form
-      \[ C^{\otimes}_{\sk}(p) \geq c_m(1) + \inf_{\matr{M}\in\sM} Q_{m,k}(p, \matr{M}) - H{(\crv{A}|\crv{B})}_{p} \]
-    \item Insert into definition of \(C_{\sk}^W\)
-      \[ C^{W}_{\sk}(p) \geq \sup_{\chi\in\sW^2} \left[ c_m(1) + \inf_{\matr{M}\in\sM} Q_{m,k}(\chi[p], \matr{M}) - H{(\crv{A}|\crv{B})}_{\chi[p]} \right] \]
-    \item \emph{Bilevel optimisation} (sup of inf): lower bound by replacing inner optimisation with dual
-      \[ C^{W}_{\sk}(p) \geq \sup_{\chi\in\sW^2} \left[ c_m(1) + \sup_{\cvec{\mu} \in \sM'} Q'_{m,k}(\cvec{\mu}, \chi[p]) - H{(\crv{A}|\crv{B})}_{\chi[p]} \right] \]
-    \item Unfortunately, dual objective function contains nonconvex terms
-  \end{itemize}
-\end{frame}
-
-% TODO KIV removal
-\subsection{Other Bounds}
-
-\begin{frame}{Wiring Monotones}
-  \begin{itemize}[<+->]
-    \item Computable functions that are \emph{monotone} under wiring
-    \item Only one so far: \emph{maximal correlation for wirings} \(\varrho\)
-    \item Caveat: only for wirings without shared randomness
-    \item Key rates maximised by deterministic wirings anyway
-    \item Therefore, upper bound on \(C_{\sk}^{\otimes}\) of behaviours below a certain \(\varrho\) is an upper bound on \(C_{\sk}^W\)
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Classical Upper Bounds}
-  \begin{itemize}[<+->]
-    \item Secret key rate from classical correlations is an upper bound
-    \item A computable(ish) upper bound:
-          \[ S(\crv{V}_1, \crv{V}_2||\crv{E}) \leq \inf_\crv{J} I(\crv{V}_1 : \crv{V}_2|\crv{J}) + I(\crv{V}_1\crv{V}_2 : \crv{J}|\crv{E}) \]
-    \item Parametrised dimension-bounded correlations using paramterisation for unitaries
-    \item Expressed objective function as polynomial/rational function using \emph{Gauss-Radau quadrature} and \emph{quasi-relative entropies}
-    \item Explored global bounds on objective functions through SDPs
-    \item Parameter space seems very large; may have to use Monte Carlo methods
+    \item Incorporating wiring optimisation into BFF using dualisation gives nonconvex problem
+    \item \emph{Maximal correlation} is monotone under wirings without shared randomness, but hard to optimise over and unclear if useful
+    \item Classical upper bounds from correlations with dimension bounds: large number of variables to optimise
   \end{itemize}
 \end{frame}
 
