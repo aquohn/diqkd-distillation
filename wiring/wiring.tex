@@ -117,7 +117,7 @@
   \usepackage{tikz} % programmatically draw stuff
   \usepackage{tikzscale} % include .tikz files with includegraphics and scale them
   \usetikzlibrary{shapes, shapes.geometric, automata, positioning, arrows.meta, decorations.markings,
-  decorations.pathreplacing, intersections, math, calc, 3d, backgrounds}
+  decorations.pathreplacing, intersections, math, calc, 3d, backgrounds, external}
 
   \RequirePackage{luatex85}
   % Default preamble
@@ -1320,9 +1320,9 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
 
               \section{Local Wirings}\label{sec:locwir}
 
-              Before proceeding with our analysis, we must define what we mean by ``wirings''. In other words, we must define our \emph{resource theory}. Our approach is based on that of~\cite{BellResourceTheory}. Taking inspiration from entanglement theory, which studies entanglement as a resource, a more general resource theory defines a set of \emph{free resources} and a set of \emph{free actions}, and studies how the resources in the theory can be converted between each other using only those free actions and free resources.
+              Before proceeding with our analysis, we must define what we mean by ``wirings''. In other words, we must define our \emph{resource theory}. Our approach is based on that of~\cite{NonclassicalCausation}. Taking inspiration from entanglement theory, which studies entanglement as a resource, a more general resource theory defines a set of \emph{free resources} and a set of \emph{free actions}, and studies how the resources in the theory can be converted between each other using only those free actions and free resources.
 
-              While there has been a recent resurgence of interest in developing resource theories of nonlocality and other unusual quantum phenomena, much of the recent work is too abstract and general to be directly applied by us~\cite{Monotones, TypeIndepLOSR}, or focuses only on \emph{single-copy conversions} using \emph{local operations and shared randomness} (LOSR) as the set of free actions~\cite{BellResourceTheory, TraceDistNL, NLMeas}, instead of the multiple-copy conversions that wirings perform (with a notable exception discussed in \Cref{sec:wirmono_maxcorr}).
+              While there has been a recent resurgence of interest in developing resource theories of nonlocality and other unusual quantum phenomena, much of the recent work is too abstract and general to be directly applied by us~\cite{Monotones, TypeIndepLOSR}, or focuses only on \emph{single-copy conversions} using \emph{local operations and shared randomness} (LOSR) as the set of free actions~\cite{NonclassicalCausation, TraceDistNL, NLMeas}, instead of the multiple-copy conversions that wirings perform (with a notable exception discussed in \Cref{sec:wirmono_maxcorr}).
 
               We generalise existing results on resource theories with LOSR as the set of free actions in order to define and study wirings. In this section, we derive three different mathematical representations of wirings, and use them to better understand the structure of the space of wirings, and how wirings impact the secret key capacity of a behaviour.
 
@@ -1340,7 +1340,7 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
                   \centering
                   \includegraphics{losr.tikz}
                 \end{minipage}
-                  \caption[Causal influences in an LOSR operation on a quantum behaviour.]{\label{fig:losr} A generic LOSR operation transforms an initial behaviour \(p(a_0 b_0|x_0 y_0)\), depicted on the left, into a new overall behaviour \(p'(ab|xy)\), using classical preprocessing and postprocessing, and shared randomness, depicted on the right. These diagrams depict the causal influences between the systems in this scenario. Double lines indicate nonclassical causation (in this case, quantum effects). (Adapted from~\cite{BellResourceTheory})}
+                  \caption[Causal influences in an LOSR operation on a quantum behaviour.]{\label{fig:losr} A generic LOSR operation transforms an initial behaviour \(p(a_0 b_0|x_0 y_0)\), depicted on the left, into a new overall behaviour \(p'(ab|xy)\), using classical preprocessing and postprocessing, and shared randomness, depicted on the right. These diagrams depict the causal influences between the systems in this scenario. Double lines indicate nonclassical causation (in this case, quantum effects). (Adapted from~\cite{NonclassicalCausation})}
                 \end{figure}
 
               Local operations involve each party locally preprocessing his inputs, sending the preprocessed input into the box, then postprocessing the received output to generate an overall output. The preprocessing and postprocessing steps can obviously only use data that is available at the point they are executed, so the most general local operations can be described as~\cite[Def. 4]{LocalTransformations}
@@ -1357,7 +1357,7 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
 
               Note also that each probability \(p'(a|x)\) is a linear function of the probabilities in the original behaviour \(p(a_0|x_0)\), and so a local operation is a linear map. It is easily verified that convex combinations of local operations are still local operations, and therefore the space of local operations is a convex subset of a vector space.
 
-              LOSR operations\footnote{Note that there are some articles which use a slightly different definition of LOSR, such that \(\chi\) is restricted to a nonconvex subset of \(\Ls\). One such article is~\cite{DIQKD_Limits}, which defines quantum intrinsic nonlocality (\Cref{sec:diqkd_ubehav}) and proves it is monotone under LOSR using the different definition. Fortunately, the result still holds using the definition of LOSR we use. See~\cite[Sec A.2]{BellResourceTheory} for more details, and a justification for the choice of this definition.} are the extension of local operations to a multipartite setting, where each party applies a local operation, but the choice of local operations between different parties can be correlated via \emph{shared randomness}. Formally, then, the set of \(n\)-partite LOSR operations is the convex hull of all possible \(n\)-times tensor products of \(n\) local operations~\cite{LocalTransformations}.\footnote{The spaces of local wiring distributions for different parties are not the same in general, although one could argue that all of them are subspaces of the version of the set of local operations with the maximal number of outputs and the maximal number of inputs, as per the argument in \Cref{sec:nl_ns}.} This tensor product of convex sets has been studied as the \emph{projective tensor product} in~\cite{AliceBobBanach}, but we do not require such a level of mathematical formality. As a concrete example, bipartite LOSR operations transform \(p(a_0 b_0|x_0 y_0) \mapsto p'(ab|xy)\) using a map \(\chi\)~\cite{BellResourceTheory}:
+              LOSR operations\footnote{Note that there are some articles which use a slightly different definition of LOSR, such that \(\chi\) is restricted to a nonconvex subset of \(\Ls\). One such article is~\cite{DIQKD_Limits}, which defines quantum intrinsic nonlocality (\Cref{sec:diqkd_ubehav}) and proves it is monotone under LOSR using the different definition. Fortunately, the result still holds using the definition of LOSR we use. See~\cite[Sec A.2]{NonclassicalCausation} for more details, and a justification for the choice of this definition.} are the extension of local operations to a multipartite setting, where each party applies a local operation, but the choice of local operations between different parties can be correlated via \emph{shared randomness}. Formally, then, the set of \(n\)-partite LOSR operations is the convex hull of all possible \(n\)-times tensor products of \(n\) local operations~\cite{LocalTransformations}.\footnote{The spaces of local wiring distributions for different parties are not the same in general, although one could argue that all of them are subspaces of the version of the set of local operations with the maximal number of outputs and the maximal number of inputs, as per the argument in \Cref{sec:nl_ns}.} This tensor product of convex sets has been studied as the \emph{projective tensor product} in~\cite{AliceBobBanach}, but we do not require such a level of mathematical formality. As a concrete example, bipartite LOSR operations transform \(p(a_0 b_0|x_0 y_0) \mapsto p'(ab|xy)\) using a map \(\chi\)~\cite{NonclassicalCausation}:
               \begin{equation}
                 p'(ab|xy) = \sum_{abxy} \chi(abx_0y_0|a_0b_0xy) p(a_0b_0|x_0y_0)
               \end{equation}
@@ -1699,7 +1699,7 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
                         \midrule
                         \cite{ShortEntangleSwap} & \(82\), \(48\)  & --, \(2816\) \\
                         Consistency on general behaviours & \(58\), \(512\) & --, \(524288\) \\
-                        Causal constraints & \(128\), -- & \(432\), -- \\
+                        No-retrocausation & \(128\), -- & \(432\), -- \\
                         \bottomrule
                       \end{Tabular}
                       \caption{Number of marginal conditional wiring functions computed through different methods, followed by number of inequalities defining the polytope. -- means the value was not computed.}\label{tab:polys}
@@ -1788,7 +1788,7 @@ Any[]
                 \begin{equation}\label{eqn:nooutputdep}
                   \chi(\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \chi(\cvec{x}^c\cvec{y}^c|xy).
                 \end{equation}
-                Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring with output dependency cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p]\), where \(\chi\) is a wiring without output dependency, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p)\).
+                Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring without output dependency cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p]\), where \(\chi\) is a wiring without output dependency, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p)\).
               \end{lemma}
               \begin{proof}
                 From \Cref{eqn:nooutputdep} and using \Cref{eqn:mwirdistdef}, for any given \(\cvec{a}^c\) and \(\cvec{b}^c\),
@@ -2029,7 +2029,7 @@ Any[]
 
                   Instead of trying to find the behaviours that can be achieved from a given behaviour, we can try to approach the problem from the opposite direction, by establishing fundamental limits on the achievable behaviours. To this end, we wish to find \emph{monotone measures under wiring}, which are functions of a behaviour that change monotonically when wiring is applied to them. Maximising the key rate over the set of behaviours with the same monotone would then provide an upper bound, and may help give insight into the fundamental limits of wiring.
 
-                  In the language of resource theories, monotones are functions that preserve the pre-order of a resource theory~\cite{BellResourceTheory}. If it is possible to convert a resource \(R_1\) into a resource \(R_2\), we write \(R_1 \leadsto R_2\), and we write \(R \not\leadsto S\) otherwise. This relation defines a \emph{pre-order} for the resource theory, such that, given any two resources \(R_1\) and \(R_2\), one of the following statements must hold:
+                  In the language of resource theories, monotones are functions that preserve the pre-order of a resource theory~\cite{NonclassicalCausation}. If it is possible to convert a resource \(R_1\) into a resource \(R_2\), we write \(R_1 \leadsto R_2\), and we write \(R \not\leadsto S\) otherwise. This relation defines a \emph{pre-order} for the resource theory, such that, given any two resources \(R_1\) and \(R_2\), one of the following statements must hold:
                   \begin{itemize}
                     \item \(R_1\) is \emph{strictly below} \(R_2\): \(R_1 \not\leadsto R_2\) and \(R_2 \leadsto R_1\)
                     \item \(R_1\) is \emph{strictly above} \(R_2\): \(R_1 \leadsto R_2\) and \(R_2 \not\leadsto R_1\)
@@ -2166,6 +2166,8 @@ Any[]
                   \begin{question}
                     How does the use of shared randomness in wirings affect the maximal correlation and other related measures?
                   \end{question}
+
+                  TODO SR to increase maximal correlation, then LO to increase key rate can be implemented as a wiring on the original behaviour with SR, so it doesn't circumvent
 
                   Even though we were not able to analyse the effect of shared randomness in detail, we will comment on the relevance of our results to this problem. As mentioned in \Cref{sec:krwir_wiropt}, CHSH is maximised by extremal wirings. Since the extremal wirings are deterministic and therefore part of \(\sW_L^c\), the wirings that maximise the CHSH value of any box must map to a box of equal or lower maximal correlation. Nonetheless, without a proof that isotropic boxes have the lowest maximal correlation of all boxes with a given CHSH value, this would not help, since the box mapped to may have a higher CHSH value despite having an equal or lower maximal correlation.
 

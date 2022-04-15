@@ -94,6 +94,7 @@
   (chiA 1.north east |- temp1) node[classbox, anchor=south east,
   minimum width = \n{mapw},
   minimum height = \hpt{2}] (chiA 2) {\(\chi_{A|\lambda}^{(2)}\)};
+  \draw[mid arrow, classinfl] ($ (chiA 1.north west)!\olap2!(chiA 1.north) $) coordinate (temp1) -- (temp1 |- chiA 2.south);
 
   % Bob's second wiring map
   \coordinate (chiB 2 SR) at ($ (chiB 1.south east) + (\hgap2, -\inflh) $);
@@ -104,6 +105,7 @@
   (chiB 1.north west |- temp1) node[classbox, anchor=south west,
   minimum width = \n{mapw},
   minimum height = \hpt{2}] (chiB 2) {\(\chi_{B|\lambda}^{(2)}\)};
+  \draw[mid arrow, classinfl] ($ (chiB 1.north east)!\olap2!(chiB 1.north) $) coordinate (temp1) -- (temp1 |- chiB 2.south);
 
   % Alice's second input
   % \draw[classinfl] (a1) -- (a1 |- chiA 2.south);
