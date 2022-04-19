@@ -413,7 +413,7 @@
     \addcontentsline{toc}{section}{Abstract}%
     \section*{Abstract}
 
-    Device independent quantum key distribution (DIQKD) allows secret keys to be securely established between distant parties, assuming only the laws of physics and relying only on classical statistical data to guarantee security, instead of requiring difficult-to-verify hardware guarantees as in device-dependent QKD\@. We initiate a foundational study of \emph{distillation} in DIQKD using \emph{wirings}: classical processing that combines multiple instances of DIQKD devices into one. We generalise existing definitions in the literature for DIQKD, identify various neglected issues, study the structure of the space of wirings, and establish key results and the potential for distillation within this broader framework: namely, a necessary condition for wirings to increase the secret key capacity of a DIQKD device, and the fact that extremal wirings maximise the secret key capacity. We also develop a computational representation for wirings, and examine computational methods for finding the wiring that maximises the secret key capacity and upper bounds on key rates without wiring.
+    Quantum key distribution (QKD) allows secret keys with the ultimate level of security to be agreed on over an insecure channel, something impossible in classical cryptography. Device-independent quantum key distribution (DIQKD) relies only on classical statistical data to guarantee security, instead of requiring difficult-to-verify hardware guarantees as in device-dependent QKD\@. We initiate a foundational study of \emph{distillation} in DIQKD using \emph{wirings}: classical processing that combines multiple instances of DIQKD devices into one. We generalise existing definitions in the literature for DIQKD, identify various neglected issues, study the structure of the space of wirings, and establish key results and the potential for distillation within this broader framework: namely, a necessary condition for wirings to increase the secret key capacity of a DIQKD device, and the fact that extremal wirings maximise the secret key capacity. We also develop a computational representation for wirings, and examine computational methods for finding, given a speciifc DIQKD device, the wiring that maximises the secret key capacity and upper bounds on key rates without wiring.
 
     \clearpage
 
@@ -497,13 +497,15 @@
     \pagenumbering{arabic}
     \section{Introduction}
 
-    Device-independent quantum key distribution (DIQKD) is a remarkable form of quantum key distribution (QKD) that relies on fundamental properties of causality in order to certify the security of a generated secret key, removing the need to characterise the physical devices involved in generating it. Wherease \emph{device-dependent} QKD is executed by devices that prepare specific states and perform specific measurements, DIQKD devices can be seen as black boxes with classical inputs and outputs, whose statistical correlations can certify the non-classical nature of the overall system, and the privacy of the generated data. This certification is done using \emph{Bell tests}, which detects the non-classical phenomenon of \emph{nonlocality}. As a more concrete example, in each round of a two-party (\emph{bipartite}) DIQKD protocol, the two parties Alice and Bob can provide inputs \(x\) and \(y\), respectively, to their devices, and obtain outputs \(a\) and \(b\), respectively. The joint conditional distribution that is observed over asymptotically many rounds is called the \emph{behaviour} \(p(ab|xy)\). The behaviour alone (with a few weak assumptions) is sufficient for Alice and Bob to generate secret keys, and so in the study of nonlocality a device with a certain behaviour is referred to abstractly as a behaviour, or conversely behaviours might be described as \emph{boxes}.
+    \emph{Quantum cryptography} refers to the use of \emph{quantum information} to perform cryptographic tasks~\cite{SecurityQKD, AdvancesQuantumCrypto}\footnote{In contrast to classical cryptography, which harnesses quantum \emph{mechanics} in the semiconductor devices used for computation.}. \emph{Quantum key distribution} (QKD) is a form of quantum cryptography that uses data from quantum measurements to generate a shared secret key between multiple parties, and to certify its security. What is remarkable about QKD is its ability to generate \emph{unconditionally secure} keys, where an attacker has essentially no advantage from any strategy beyond simply guessing the key from all possible keys. While unconditional security can be achieved by the classical means of the parties physically meeting to exchange a one-time pad (OTP), QKD represents a fundamental advance by allowing unconditionally secure keys to be established over an \emph{insecure channel}, unlike the secure channel of physically meeting up to exchange a one-time pad. This makes the use of unconditionally secure keys much more feasible.
 
-    Despite this extraordinary guarantee of security, progress in understanding and implementing DIQKD has been slow. For example, given a particular behaviour, we do not have a tight expression for the amount of secrecy that can be extracted per use of the devices. This project aims to explore \emph{distillation} of nonlocal behaviours through \emph{wirings}: using classical post-processing to combine multiple boxes in order to derive a different box which is more useful for DIQKD\@. This is of practical relevance, because classical post-processing is easy to do, and these techniques can help bridge the gap between the theoretical development of DIQKD and its practical deployment. Our investigation of this phenomenon is motivated by the discovery of potential examples of \emph{revival}, where wiring together boxes that have zero key rate under certain DIQKD protocols produces a box with a non-zero key rate, as discussed in \Cref{sec:preres}. We intend to study and understand this phenomenon, to see if this is an artifact of the protocol used or the genuine distillation of a resource, and how those results can be generalised and made more applicable to the practical implementation of DIQKD.
+    \emph{Device-independent quantum key distribution} (DIQKD) is a remarkable form of QKD that removes the need to characterise the physical devices involved in generating said data, that is, to give them a quantum-mechanical description and verify that they match the description. Whereas \emph{device-dependent} QKD is executed by devices that prepare specific states and perform specific measurements, DIQKD devices can be seen as black boxes with classical inputs and outputs. The statistical correlations in this classical data can certify the non-classical nature of the overall system, and the privacy of the generated data. This certification is done using \emph{Bell tests}, which detect the non-classical phenomenon of \emph{nonlocality}. As a more concrete example, in each round of a two-party (\emph{bipartite}) DIQKD protocol, the two parties Alice and Bob can provide inputs \(x\) and \(y\), respectively, to their devices, and obtain outputs \(a\) and \(b\), respectively. The joint conditional distribution that is observed over asymptotically many rounds is called the \emph{behaviour} \(p(ab|xy)\). The behaviour alone (with a few weak assumptions) is sufficient for Alice and Bob to generate secret keys, and so in the study of nonlocality, a device with a certain behaviour is referred to abstractly as that behaviour, or conversely behaviours might be described as \emph{boxes} that take inputs and give outputs.
+
+    Despite this extraordinary guarantee of security, progress in understanding and implementing DIQKD has been slow. For example, given a particular behaviour, we do not have a tight expression for the amount of secrecy that can be extracted per use of the devices. This project aims to explore \emph{distillation} of nonlocal behaviours through \emph{wirings}: using classical processing to combine multiple boxes in order to derive a different box which is more useful for DIQKD\@. This is of practical relevance, because classical processing is easy to do, and these techniques can help bridge the gap between the theoretical development of DIQKD and its practical deployment. Our investigation of this phenomenon is motivated by the discovery of potential examples of \emph{revival}, where wiring together boxes that have zero key rate under certain DIQKD protocols produces a box with a non-zero key rate, as discussed in \Cref{sec:preres}. We intend to study and understand this phenomenon, to see if this is an artifact of the protocol used or the genuine distillation of a resource, and how those results can be generalised and made more applicable to the practical implementation of DIQKD\@.
 
     \subsection{Structure}
 
-    We will approach this project from two directions: the theoretical development and definition of fundamental ideas, and their computational exploration. Preliminary material concerning linear algebra, quantum mechanics, and convex geometry and analysis can be found in \Cref{sec:prelim}, while our notational conventions are summarised in the table above. We begin by introducing and formalising nonlocality in \Cref{sec:nl}, as well as DIQKD in \Cref{sec:diqkd}, where we extend and generalise existing definitions to better identify the ultimate limits of what can be done with a nonlocal resource. After developing these ideas, we review the preliminary results suggesting the existence of revival in \Cref{sec:preres}.
+    We will approach this project from two directions: the theoretical development and definition of fundamental ideas, and their computational exploration. Preliminary material concerning convex geometry and analysis, linear algebra, quantum mechanics, and information theory can be found in \Cref{sec:prelim}, while our notational conventions are summarised in the table above. We begin by introducing and formalising nonlocality in \Cref{sec:nl}, as well as DIQKD in \Cref{sec:diqkd}, where we extend and generalise existing definitions to better identify the ultimate limits of what can be done with a nonlocal resource. After developing these ideas, we review the preliminary results suggesting the existence of revival in \Cref{sec:preres}.
 
     We then define wirings formally in \Cref{sec:locwir}, with a mathematical description and derivation of fundamental properties in \Cref{sec:locwir_dist}, an operational one in \Cref{sec:locwir_func} that helps simplify the space of wirings, and a computational description in \Cref{sec:locwir_mat}. We compare our results to previous work on classifying wirings in \Cref{sec:locwir_SPG}. \Cref{sec:krwir_outdep} establishes our main results on the utility of wirings in DIQKD, while \Cref{sec:krwir_wiropt} attempts to formulate the optimisation of key rates over wirings as a computationally tractable problem.
 
@@ -536,7 +538,7 @@
     \end{gather}
     Therefore, none of the probabilities \(p(ab|xy)\) with \(a = o_A\) or \(b = o_B\) are independent, and we have only \((o_A-1)(o_B-1){i_A}{i_B}\) independent probabilities of this form. Therefore, the number of independent parameters of a no-signalling behaviour is
     \[ d_{NS}(i_A, o_A, i_B, o_B) = (o_A-1)(o_B-1){i_A}{i_B} + (o_A-1)i_A + (o_B-1)i_B, \]
-    and behaviours can be seen as vectors in \(\R^{d_{NS}}\), with all entries positive and normalised (that the remaining probabilities do not sum to more than 1 must still be enforced). In summary, the set of no-signalling behaviours is the \emph{no-signalling polytope} \(\NSs\), isomorphic to a subset of \(\R^{d_{NS}}\).
+    and behaviours can be seen as vectors in \(\R^{d_{NS}}\), with all entries positive and normalised (that the remaining probabilities do not sum to more than 1 must still be enforced). In summary, the set of no-signalling behaviours is the \emph{no-signalling polytope} \(\NSs\), a subset of \(\R^{d_{NS}}\).
     \begin{defn}[The No-Signalling Polytope]
       Given a vector \(\cvec{v} \in \R^{d_{NS}}\), we can construct a behaviour \(p\) by interpreting its coefficients as conditional probabilities and computing the remaining probabilities via \Cref{eqn:cgtofullA} and \Cref{eqn:cgtofullB}. Then, \(p \in \NSs\) iff the following are jointly true:
       \begin{enumerate}
@@ -564,7 +566,7 @@
     \begin{itemize}
       \item The original, physically motivated interpretation is that \(\Lambda\) is a \emph{local hidden variable} explaining the behaviour of quantum systems. A bipartite Bell test can be implemented as follows: two quantum particles, prepared in a particular state, are distributed to Alice and Bob who independently choose one measurement from a fixed set of possibilities. The measurement choice is the input, while the measurement outcome is the output. Quantum theory predicts that the choice of input of one party can instantaneously influence the output of the other party, although obeying the no-signalling conditions so that no information is transmitted and the correlation is only revealed when Alice and Bob share their inputs with each other. This influence seemed highly unphysical (and was famously derided by Einstein as ``spooky action at a distance''). One possible alternative is for the two particles to encode the value of a random variable, which then locally determines the outcomes of their measurements using only their respective inputs. This random variable would be the rv \(\Lambda\) in the definition of \(\Ls\), so this alternative proposal would imply that all quantum behaviours are in \(\Ls\). As will be seen in \Cref{sec:nl_Q}, this is not the case, and \emph{pace} Einstein, nonlocal influence is a feature of reality.
       \item Slightly modifying this interpretation, \(\Lambda\) could represent a \emph{pre-shared sequence} of random numbers, generated according to the distribution \(P_{\Lambda}(\lambda)\), that Alice and Bob use to independently generate their outputs.
-      \item A further modification views \(\Ls\) as the space of behaviours that can arise from the boxes being \emph{pre-programmed} with a list of apparently random numbers, or perhaps a seeded pseudorandom number generator, with the numbers, or the seed, corresponding to \(\Lambda\) and being held by the manufacturer of the boxes. The connection between \(\Ls\) (or more specifically, behaviours lying outside \(\Ls\)) and security becomes clearer in this interpretation, although a full explanation will only be given in \Cref{sec:diqkd_di}.
+      \item A further modification views \(\Ls\) as the space of behaviours that can arise from the boxes being \emph{pre-programmed} with a list of apparently random numbers, or perhaps a seeded pseudorandom number generator, with the numbers, or the seed, corresponding to \(\Lambda\) and being held by the manufacturer of the boxes. The connection between \(\Ls\) and security becomes clearer in this interpretation, although a full explanation will only be given in \Cref{sec:diqkd_di}.
     \end{itemize}
 
     We will shortly turn to discuss the behaviours that quantum systems can actually achieve, but we first study some properties of \(\Ls\). A \emph{deterministic} behaviour \(p_D(ab|xy)\) takes only values in \(\{0,1\}\) for all \(a\), \(b\), \(x\) and \(y\); that is, it deterministically maps each \((x,y)\) to a fixed \((a,b)\):
@@ -1819,22 +1821,22 @@ Any[]
               \end{align}
                The analogous result follows for \({\{N'_{b|y\lambda}\}}_b\). The resultant implementation of \(p'\) requires the shared random variable \(\Lambda\), but by \Cref{thm:Qcvx}, an implementation without shared randomness can be constructed by expanding the Hilbert space.
 
-               Let \(C_{\sk}^{\otimes}(p') = r'\) (\Cref{def:seckeycapbehaviid}) and let \(\prin'\) achieve \(r'\). Then, Alice and Bob can generate \(\prin'\), share random variable \(\Lambda\), keeping local copies in \(\Lambda_A\) and \(\Lambda_B\), which they use to generate
-               \[ \prin^c(\cvec{x}^c, \cvec{y}^c) = \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(\cvec{x^c}|x)\chi_{B|\lambda}(\cvec{y^c}|y). \]
-               Let \(\rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E} \in \compatstates{p^c}{\prin^c}\) achieve
+               Now, consider Alice and Bob using a collection of \(c\) devices with joint behaviour \(p^c\) and average behaviour \(p\). For any given \(\prin[\hat{p}]\), using shared randomness \(\Lambda\), Alice and Bob can generate
+               \[ \prin^c(\cvec{x}^c, \cvec{y}^c) = \sum_{xy\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(\cvec{x^c}|x)\chi_{B|\lambda}(\cvec{y^c}|y) \prin[\hat{p}](x,y). \]
+               Let \(\rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E^c} \in \compatstates{p^c}{\prin^c}\) achieve
                \[ \sup_{\proto{P}} \inf_{\rho} r(\proto{P}, \{\rho^{\otimes n}\}), \]
-               where the choice of the protocol is optimised over all protocols of the above form. Note that, since \(\Lambda\) is exchanged prior to the input, Eve can adapt her state accordingly, and we can write the overall state as
+               where the choice of the protocol is optimised over all protocols where the input is generated in this manner, and let \(\proto{P}\) achieve the supremum. Note that, since \(\Lambda\) is shared prior to the input, Eve can adapt her state accordingly, and we can write the overall state as
                \begin{align*}
-                 \rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E} &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c} \begin{aligned}[c]
-          & \prin^c(\cvec{x}^c,\cvec{y}^c) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \proj[\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c]{\cvec{a}^c\cvec{x}^c\cvec{b}^c\cvec{y}^c} \\
-                   \otimes & \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c},
+                 \rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E^c} &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c} \begin{aligned}[c]
+          & \prin^c(\cvec{x}^c,\cvec{y}^c) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \proj[\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c]{\cvec{a}^c\cvec{x}^c\cvec{b}^c\cvec{y}^c} \otimes \\
+                    & \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c},
                  \end{aligned} \\
                                                                 &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c xy\lambda} \begin{aligned}[c]
-          & \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y) \prin'(x,y) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \\
-          & P_{\Lambda}(\lambda) \proj[\crv{A}^c\crv{X}^c\crv{X}\Lambda_A \crv{B}^c\crv{Y}^c\crv{Y}\Lambda_B]{\cvec{a}^c\cvec{x}^c\lambda{x} \cvec{b}^c\cvec{y}^c\lambda{y}} \otimes \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
+          & \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y) \prin[\hat{p}](x,y) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \\
+          & P_{\Lambda}(\lambda) \proj[\crv{A}^c\crv{X}^c\crv{X}\Lambda_A \crv{B}^c\crv{Y}^c\crv{Y}\Lambda_B]{\cvec{a}^c\cvec{x}^c{x}\lambda \cvec{b}^c\cvec{y}^c{y}\lambda} \otimes \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
                  \end{aligned}
                  \end{align*}
-                 where the public shared randomness \(\Lambda\) is incorporated into Eve's system \(E^c\). Then, Alice and Bob can execute the classical stochastic maps \(\{V_{a|\cvec{a}^c\cvec{x}^c x\lambda}\}\) and \(\{V_{b|\cvec{b}^c\cvec{y}^c y\lambda}\}\)
+                 where the public shared randomness \(\Lambda\) is incorporated into Eve's system \(E^c\). Then, Alice and Bob can execute the classical stochastic maps \(\{V_{a|\cvec{a}^c\cvec{x}^c x\lambda}\}\) and \(\{V_{b|\cvec{b}^c\cvec{y}^c y\lambda}\}\):
                  \begin{align*}
                    V_{a|\cvec{a}^c\cvec{x}^c x\lambda} &= \sqrt{\chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^cx)} \ket{ax}\bra{\cvec{a}^c\cvec{x}^c x\lambda} \\
                    V_{b|\cvec{b}^c\cvec{y}^c y\lambda} &= \sqrt{\chi_{B|\lambda}(b|\cvec{y}^c\cvec{b}^cy)} \ket{by}\bra{\cvec{b}^c\cvec{y}^c y\lambda},
@@ -1842,34 +1844,34 @@ Any[]
                  obtaining a state
                  \begin{align*}
                    \hat{\rho} &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c abxy\lambda} \begin{aligned}[c]
-          & \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y) \prin'(x,y) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \\
+          & \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y) \prin[\hat{p}](x,y) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \\
           & P_{\Lambda}(\lambda) \chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^cx) \chi_{B|\lambda}(b|\cvec{y}^c\cvec{b}^cy) \proj[\crv{AXBY}]{axby} \otimes \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
                    \end{aligned} \\
                               &= \sum_{\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c abxy\lambda} \begin{aligned}[c]
-          & \prin'(x,y) \proj[\crv{AXBY}]{axby} \otimes \\
+          & \prin[\hat{p}](x,y) \proj[\crv{AXBY}]{axby} \otimes \\
           & P_{\Lambda}(\lambda)  \chi_{A|\lambda}(a\cvec{x}|^c\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \rho_{E^c|\cvec{a}^c\cvec{x}^c \cvec{b}^c\cvec{y}^c\lambda},
                    \end{aligned}
                  \end{align*}
-                 and let the optimal rate amongst all protocols that begin with these steps be \(\hat{r}\), where \(\hat{r} \leq C_{\sk}^{\otimes}(p^c)\) since we have constrained Alice and Bob's actions but not Eve's.
+                 and let the optimal rate amongst all protocols that begin with these steps be \(\hat{r}\), where \(\hat{r} \leq C_{\sk}^{\otimes}(p)\) since we have constrained Alice and Bob's actions but not Eve's.
 
-               Now consider a state \(\rho_{\crv{AXBY}{E}}' \in \compatstates{p'}{\prin'}\) that uses the same physical implementation as \(\rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E}\), in the manner described above with the expanded Hilbert space, \(\prin'\) as above, and \(\proto['_{\Omega',\ell'}]{P}\) achieving
+               Now consider a state \(\rho_{\crv{AXBY}{E}}' \in \compatstates{p'}{\prin'}\) that uses the same physical implementation as \(\rho_{\crv{A}^c\crv{X}^c \crv{B}^c\crv{Y}^c E}\), in the manner described above, and \(\proto['_{\Omega',\ell'}]{P}\) and \(\prin'\) achieving
                \[
                  r' = \sup_{\proto['_{\Omega',\ell'}]{P}} \sup_{\prin'} r(\proto['_{\Omega',\ell'}]{P}, \{\rho'^{\otimes{n}}\}),
                \]
                where \(r' \geq C_{\sk}^{\otimes}(p')\) since we have fixed Eve's quantum implementation, rather than optimising it. Then we can write these states as
       \begin{align*}
-          \rho'_{\crv{A}\crv{X} \crv{B}\crv{Y} E} &= \sum_{abxy} \prin(x,y) \proj[\crv{A}\crv{X} \crv{B}\crv{Y}]{axby} \otimes p'(ab|xy) \rho_{E\Lambda|abxy} \\
+          \rho'_{\crv{A}\crv{X} \crv{B}\crv{Y} E} &= \sum_{abxy} \prin(x,y) \proj[\crv{A}\crv{X} \crv{B}\crv{Y}]{axby} \otimes p'(ab|xy) \rho_{E|abxy} \\
           p'(ab|xy) \rho_{E|abxy} &= \sum_{\lambda} P_{\Lambda}(\lambda) \Tr{ \rho_{ABE|\lambda} \left( M'_{a|x\lambda} \otimes N'_{b|y\lambda} \otimes I_{E} \right) } \\
                        &= \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c\lambda}
           P_{\Lambda}(\lambda) \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy)
           p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)
           \rho_{E|\cvec{a}^c\cvec{b}^c \cvec{x}^c\cvec{y}^c\lambda},
       \end{align*}
-      where Eve can adapt her state to \(\lambda\) since she holds the purification of Alice and Bob's state (which, by the construction explained in \Cref{thm:Qcvx}, gives her the value of \(\lambda\)). Now, since this state is equivalent to \(\hat{\rho}\), Alice and Bob can apply \(\proto['_{\Omega',\ell'}]{P}\) to \(\hat{\rho}\), generating keys of length \(\ell'_n\). Since the steps taken, namely Alice and Bob publicly generating \(\Lambda\) and applying local maps to their data, do not reveal or discard information about \(\crv{X}\) and \(\crv{Y}\), by assumption\footnote{This assumption is quite intuitive, and holds for well-studied cases such as independent input distributions, and the key recovery technique of~\cite[Prot. 2]{DIQKD_FiniteSize}. However, without a more formal model of the cost function \(L_{\Omega}\), we need to explicitly state this assumption.}, it would not constrain the generation or recovery of \(\prin'\), and so the cost to generate it would not be more than \(L_{\Omega'}(\prin'^{\otimes n})\). Therefore,
+      where Eve can adapt her state to \(\lambda\) since she holds the purification of Alice and Bob's state (which, by the construction explained in \Cref{thm:Qcvx}, gives her the value of \(\lambda\)). Now, since this state is equivalent to \(\hat{\rho}\) with \(\prin[\hat{p}] = \prin'\), Alice and Bob can apply \(\proto{P}\) to \(\hat{\rho}\), generating keys of length \(\ell'_n\). Since the steps taken, namely Alice and Bob publicly generating \(\Lambda\) and applying local maps to their data, do not reveal or discard information about \(\crv{X}\) and \(\crv{Y}\), by assumption\footnote{This assumption is quite intuitive, and holds for well-studied cases such as independent input distributions, and the key recovery technique of~\cite[Prot. 2]{DIQKD_FiniteSize}. However, without a more formal model of the cost function \(L_{\Omega}\), we need to explicitly state this assumption.}, they would not constrain the generation or recovery of \(\prin'\), and so the cost to generate \(\prin'^{\otimes n}\) would not be more than \(L_{\Omega'}(\prin'^{\otimes n})\). Therefore,
       \[ \hat{r} \geq \lim_{n\to\infty} \frac{\ell'_n - L_{\Omega'}(\prin'^{\otimes n})}{n} = r' \]
       and therefore
       \begin{equation}
-      C_{\sk}^{\otimes}(p^c) \geq \hat{r} \geq r' \geq C_{\sk}(p').
+      C_{\sk}^{\otimes}(p) \geq \hat{r} \geq r' \geq C_{\sk}(p').
       \end{equation}
     \end{proof}
 
@@ -2029,7 +2031,7 @@ Any[]
 
                   Instead of trying to find the behaviours that can be achieved from a given behaviour, we can try to approach the problem from the opposite direction, by establishing fundamental limits on the achievable behaviours. To this end, we wish to find \emph{monotone measures under wiring}, which are functions of a behaviour that change monotonically when wiring is applied to them. Maximising the key rate over the set of behaviours with the same monotone would then provide an upper bound, and may help give insight into the fundamental limits of wiring.
 
-                  In the language of resource theories, monotones are functions that preserve the pre-order of a resource theory~\cite{NonclassicalCausation}. If it is possible to convert a resource \(R_1\) into a resource \(R_2\), we write \(R_1 \leadsto R_2\), and we write \(R \not\leadsto S\) otherwise. This relation defines a \emph{pre-order} for the resource theory, such that, given any two resources \(R_1\) and \(R_2\), one of the following statements must hold:
+                  In the language of resource theories, monotones are functions that preserve the pre-order of a resource theory~\cite{NonclassicalCausation}. If it is possible to convert a resource \(R_1\) into a resource \(R_2\), we write \(R_1 \leadsto R_2\), and we write \(R \not\leadsto S\) otherwise. This relation defines a \emph{pre-order} for the resource theory (a reflexive and transitive relation). Given any two resources \(R_1\) and \(R_2\), one of the following statements must hold:
                   \begin{itemize}
                     \item \(R_1\) is \emph{strictly below} \(R_2\): \(R_1 \not\leadsto R_2\) and \(R_2 \leadsto R_1\)
                     \item \(R_1\) is \emph{strictly above} \(R_2\): \(R_1 \leadsto R_2\) and \(R_2 \not\leadsto R_1\)
@@ -2043,7 +2045,7 @@ Any[]
                   \end{equation}
                   for some pre-order \(\succeq\) defined on the codomain of the monotone.
 
-                  As discussed in \Cref{sec:locwir}, wirings are multiple-copy local transformations. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under \emph{locally random wirings}, the set of which we denote \(\sW_L^n\): Alice and Bob can use local randomness in their wiring, but not shared randomness. This set includes the set of deterministic wirings \(\sW_D^c\), but not general wirings with shared randomness \(\sW^c\). Each of the \(c\) boxes is assumed to be independent of each other, but the order in which they are used may be permuted~\cite[Sec. 3]{NLMonotones}. In contrast, recall that our definition (\Cref{sec:locwir}) focuses on the wirings themselves, rather than their action on any specific behaviour. Shared randomness in the choice of the wiring is permitted, and permutations of the boxes used are encoded in the joint behaviour the wirings act on. Nonetheless, we will review these results to see how they can help us.
+                  As discussed in \Cref{sec:locwir}, wirings are multiple-copy local transformations. Analysis of such conversions has typically consisted of arguments for why specific subsets of \(\NSs\) are or are not closed under wiring, for example by constructing explicit wirings that convert a behaviour in the set to one that is outside the set~\cite{ClosedCorrSets} or by arguments from the structure of the set to show that the set must be closed under wirings~\cite{NonlocalZoo}. Indeed, we were able to find only one reference,~\cite{NLMonotones}, providing concrete measures that are explicitly proved to be monotone under \emph{locally random wirings}, the set of which we denote \(\sW_L^n\): the parties can use private local randomness in their wiring, but not shared randomness. This set includes the set of deterministic wirings \(\sW_D\), but not general wirings with shared randomness \(\sW\). Each of the \(c\) boxes is assumed to be independent of each other, but the order in which they are used may be permuted~\cite[Sec. 3]{NLMonotones}. In contrast, recall that our definition (\Cref{sec:locwir}) focuses on the wirings themselves, rather than their action on any specific behaviour. Shared randomness in the choice of the wiring is permitted, and permutations of the boxes used are encoded in the joint behaviour the wirings act on. Nonetheless, we will review these results to see how they can help us.
 
                   \subsection{Maximal Correlation and Related Measures}\label{sec:wirmono_maxcorr}
 
@@ -2466,7 +2468,7 @@ Any[]
 
                     An \emph{orthonormal basis} (just ``basis'' for short) consists of \(d\) states \(\{\ket{e_i}\}\) such that \(\braket{e_i|e_j} = \delta_{ij}\). Given a basis, it is always possible to write all other vectors and operators in terms of the basis, by using the \emph{outer products} \(\ket{e_i}\bra{e_j}\) of the basis states to write the operators. The projector construction above is a special case of the outer product. Explicitly, the \(i\)th coefficient of the vector \(\psi\) in the basis \(\{\ket{e_i}\}\) is \(\braket{e_i|\psi}\), while the \((i,j)\)th coefficient of the operator \(A\) is \(\bra{e_i}A\ket{e_j}\). When working with an explicit representation of states and operators, the \emph{computational basis} refers to the basis the explicit representation is written it.
 
-                    A \emph{unitary operator} is a matrix whose columns form an orthonormal basis. It obeys \(U^{\dagger} = U^{-1}\), and represents a \emph{change of basis}. A \emph{Hermitian operator} is an operator that obeys \(H^{\dagger} = H\). It has all eigenvalues real.
+                  A \emph{unitary operator} is a matrix whose columns form an orthonormal basis. It obeys \(U^{\dagger} = U^{-1}\), and represents a \emph{change of basis}. A \emph{Hermitian operator} (also called a \emph{self-adjoint} operator) is an operator that obeys \(H^{\dagger} = H\). It has all eigenvalues real.
 
                     We are now ready to state a crucial result in linear algebra, the \emph{spectral theorem}.
                     \begin{theorem}[The Spectral Theorem for Normal Operators]
@@ -2475,13 +2477,15 @@ Any[]
                         A = \sum_j \lambda_j \ket{j}\bra{j}.
                       \end{equation}
                     \end{theorem}
-                    In particular, unitary and Hermitian operators are normal, and hence admit a spectral decomposition. Positive-definite, positive-semidefinite, negative-semidefinite and negative-definite matrices are special cases of Hermitian operators, that have all eigenvalues positive, nonnegative, nonpositive or negative, respectively. In particular, for any state \(\ket{\psi}\), we have \(\bra{\psi}A\ket{\psi}\) positive, nonnegative, nonpositive or negative accordingly.
+                    In particular, unitary and Hermitian operators are normal, and hence admit a spectral decomposition.
+
+                    Positive-definite, positive-semidefinite, negative-semidefinite and negative-definite operators are special cases of Hermitian operators, that have all eigenvalues positive, nonnegative, nonpositive or negative, respectively. In particular, for any state \(\ket{\psi}\), we have \(\bra{\psi}A\ket{\psi}\) positive, nonnegative, nonpositive or negative accordingly. Notably, PSD operators form a cone, and this cone is typically given the partial order \(\succeq\), where \(M \succeq 0\) implies that \(M\) is PSD, and \(M \succeq N\) implies that \(M-N \succeq 0\). 
 
                     An important operation is the \emph{trace}:
                     \begin{equation}
                       \Tr{M} = \sum_i \bra{e_i}M\ket{e_i},
                     \end{equation}
-                    for some basis \(\{e_i\}\). Remarkably, this operation is basis-independent: any basis will give the same answer, which is the sum of \(M\)'s eigenvalues, or in a matrix representation, the sum of the diagonal elements.
+                    for some basis \(\{e_i\}\). Remarkably, this operation is basis-independent: any basis will give the same answer, which is the sum of \(M\)'s eigenvalues, or in a matrix representation, the sum of the diagonal elements. A crucial property of the trace is that the trace is \emph{invariant under cyclic permutations}: \(\Tr{A_1 A_2 \cdots A_n} = \Tr{A_n A_1 \cdots A_{n-1}}\).
 
                     While a pure state represents complete knowledge of a system, a \emph{mixed state} represents incomplete knowledge: for example, if I flip a coin and pick one of two quantum states, \(\ket{0}\) and \(\ket{1}\), to send to you, without revealing the outcome, you can model your knowledge of the system as a mixed state. The mixed state cannot be represented as a vector, but an operator, a \emph{density matrix}:
                     \[ \rho = \frac{1}{2} \ket{0}\bra{0} + \frac{1}{2} \ket{1}\bra{1}. \]
@@ -2503,8 +2507,9 @@ Any[]
                     \begin{equation}
                       \Tr[_B]{\ket{a_1}\bra{a_2} \otimes \ket{b_1}\bra{b_2}} = \ket{a_1}\bra{a_2} \Tr{\ket{b_1}\bra{b_2}} \Rightarrow \rho_A = \Tr[_B]{\rho_{AB}}.
                     \end{equation}
+                    The convention for joint states is to label all their subsystems, so that the state \(\rho_{AB}\) has two subsystems corresponding to the Hilbert spaces \(A\) and \(B\). In that case, we obtain marginal state on \(A\) by tracing out \(B\): \(\Tr[_B]{\rho_{AB}} = \rho_{A}\); and the marginal state on \(B\) by tracing out \(A\): \(\Tr[_A]{\rho_{AB}} = \rho_{B}\).
 
-                    Lastly, we describe the allowable operations on a quantum system. These are described by \emph{completely positive trace preserving (CPTP) maps}, which are simply any set of operators \(\{E_k\}\) such that \(\sum_k E_k^{\dagger}E_k = I\). The overall state after the application of a CPTP map is \(\sum_k E_k \rho E_k^{\dagger}\).
+                    Lastly, we describe the allowable operations on a quantum system. These are described by \emph{completely positive trace preserving (CPTP) maps}, which are described simply by any set of operators \(\{E_k\}\) such that \(\sum_k E_k^{\dagger}E_k = I\). This is referred to as the \emph{operator-sum representation} of a CPTP map. The overall state after the application of the map is \(\sum_k E_k \rho E_k^{\dagger}\).
 
                     One important class of CPTP maps, which we call \emph{classical stochastic maps}, represents classical mapping from one rv to another. 
                     \begin{defn}[Classical Stochastic Maps]\label{def:classop}
@@ -2529,7 +2534,7 @@ Any[]
     \begin{equation}
     \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}}
   \end{equation}
-    is finite~\cite{HallQuantumForMath}. 
+  is finite~\cite{HallQuantumForMath}. For bounded operators in infinite dimensions, the trace may not exist. The set of operators on which the trace exists is referred to as the set of \emph{trace class} operators, and consists of all operators \(A \in \mathcal{B}{\Hs}\) where \(\sum_i \bra{e_i}\sqrt{A^{\dagger}A}\ket{e_i} < +\infty\). \(\sqrt{A^{\dagger}A}\) is PSD and self-adjoint, guaranteeing that this quantity will be real and non-negative. If \(A\) is trace class, then the trace is basis independent, and for any \(B \in \mathcal{B}(\Hs)\), \(AB\) and \(BA\) are also trace class, and the cyclic permutation invariance also applies~\cite[Sec. 19.2]{HallQuantumForMath}.
 
                     \subsection{Information Theory}\label{sec:prelim_infot}
 
@@ -2807,7 +2812,7 @@ Any[]
 
                     \subsection{Lie Algebra Basis for Hermitian Operators}\label{sec:addtech_liealg}
 
-                    The classic parametrisation for qubit states is the Bloch sphere, expressed in terms of the Pauli matrices
+                    The classic parametrisation for qubit states is the \emph{Bloch sphere}, expressed in terms of the Pauli matrices
                     \begin{equation}
                       \sigma_1 = \begin{bmatrix} 0 & 1 \\ 1 &  0 \end{bmatrix} \qquad \sigma_2 = \begin{bmatrix} 0 & -i \\ i & 0 \end{bmatrix} \qquad \sigma_3 = \begin{bmatrix} 1 & 0 \\ 0 & -1 \end{bmatrix}
                     \end{equation}
@@ -2815,7 +2820,7 @@ Any[]
                     \begin{equation}
                       \rho = \frac{1}{2}I_2 + \frac{1}{2} \sum_{j=1}^3 \lambda_j \sigma_j,
                     \end{equation}
-                    where the \(\lambda_j\)'s are real numbers such that \(\sqrt{\sum_{j=1}^3 \lambda_j^2}\), the latter condition being necessary to enforce positive-semidefiniteness~\cite{DensMatParam}. This has the very nice geometric interpretation as a vector inside the eponymous Bloch sphere.
+                    where the \(\lambda_j\)'s are real numbers such that \(\sqrt{\sum_{j=1}^3 \lambda_j^2}\), the latter condition being necessary to enforce positive-semidefiniteness~\cite{DensMatParam}. This has the very nice geometric interpretation as a vector inside a sphere, hence the name.
 
                     It turns out that this construction can be generalised to arbitrary dimensions, and the resulting parametrisation is typically called the \emph{generalised Bloch vector parametrisation}~\cite{DensMatParam}. Given an arbitrary \(d\)-dimensional Hermitian matrix \(X\) of trace \(t\), we can compute \(Y = X - \frac{t}{d}I\), where \(Y\) will have trace 0. Crucially, however, \(Y\) is also Hermitian, since
                     \[ Y^{\dagger} = X^{\dagger} - {\left(\frac{t}{d}I\right)}^{\dagger} = X - \frac{t}{d}I = Y. \]
@@ -2830,7 +2835,7 @@ Any[]
                       \sqrt{\frac{2}{l(l+1)}} \left( \sum_{j=1}^l \ket{j}\bra{j} - l\ket{l}\bra{k} \right), & 1 \leq l \leq d-1 \\
                     \end{Array}
 
-                    However, a major issue with this parametrisation for density matrices is that it is very difficult to check that the generated Hermitian matrix is PSD in general dimensions, which was accomplished by the simple normalisation constraint in the qubit case~\cite{DensMatParam}. In fact, the complexity of the generated parametrisation is both unavoidable~\cite{NoHigherEuclideanRepr} and of fundamental significance~\cite{InfoAsymStateSpace}. These and other issues related to state parametrisation are reviewed in~\cite{DensMatParam}, and a more recent parametrisation that automatically enforces PSD given by~\cite{SquaringParam}, at the cost of injectivity between parameters and states.
+                    However, a major issue with this parametrisation for density matrices is that it is very difficult to check that the generated Hermitian matrix is PSD in general dimensions, which was accomplished by the simple normalisation constraint in the qubit case~\cite{DensMatParam}. In fact, the complexity of the generated parametrisation is both unavoidable~\cite{NoHigherEuclideanRepr} and of fundamental significance~\cite{InfoAsymStateSpace}. These and other issues related to state parametrisation are reviewed in~\cite{DensMatParam}. A more recent parametrisation that automatically enforces PSD is given by~\cite{SquaringParam}, at the cost of injectivity between parameters and states.
 
                     One notable application of the Bloch vector parametrisation that may be relevant to us is the construction of generalised Werner and isotropic states in dimensions greater than 2~\cite{WernerIsotropicDecomp}. These states are somewhat easier to study due to their degree of symmetry, and may facilitate study of the behaviours generated by higher-dimensional states. 
 
