@@ -501,9 +501,10 @@
 
 \begin{frame}{Device-Independent Quantum Key Distribution (DIQKD)}
   \begin{itemize}[<+->]
-    \item Many \alert{assumptions} about devices needed for QKD security
+    \item QKD \alert{strictly necessary} for establishing unconditionally secure keys over untrusted channel
+    \item However, many \alert{assumptions} about devices needed for QKD security
     \item Cannot rule out \alert{all possible device flaws}
-    \item DIQKD:\ certify privacy using \alert{device statistics} from \alert{Bell tests}
+    \item DIQKD:\ certify security using \alert{device statistics} from \alert{Bell tests}
   \end{itemize}
 \end{frame}
 
@@ -526,7 +527,7 @@
     \item Explored \alert{definitions of security}
     \item Analytic and computational \alert{descriptions for wirings}
     \item Main result: simple wirings \alert{cannot help}
-    \item Preliminary work towards \alert{optimising and bounding key rates}
+    \item Preliminary work towards \alert{optimising key rates over wirings}
   \end{itemize}
 \end{frame}
 
@@ -661,43 +662,12 @@
 
 \subsection{DIQKD}
 
-\begin{frame}{Device Independent Security}
-  \begin{itemize}[<+->]
-    \item Consider
-      \[ p(ab|xy) = \sum_e p_E(e) p_e(ab|xy) \]
-    \item Eve can deduce \((a,b)\) from \((x,y)\) if \(p_e\)'s are \emph{deterministic}
-    \item This is precisely \(\Ls\)
-    \item Quantum processes provide \alert{fundamental indeterminism}
-  \end{itemize}
-\end{frame}
-
-\note{
-  One might wonder what nonlocality could have to do with security. The following intuitive argument explains the connection. Let's go back to the scenario with Alice and Bob, and let's say they play the coin-flipping game and use the outcomes \((a,b)\) to derive a shared secret key. However, this time, their jars are packed by an adversary, Eve, who is trying to steal their secret key, so that she determines the coins that are used in each round based on a random outcome \(e\), and is aware of the value of \(e\) in each round. Then, their behaviour will look like this.
-
-  Now, if the \(p_e\)'s are deterministic, such that knowing \(x, y\) and \(e\) would determine \(a, b\), then if Eve finds \(x, y\) out, she can use her knowledge of these values to determine \(a, b\), which would compromise the generated keys. Most DIQKD protocols involve announcing the values \(x, y\), so if the behaviour can be expressed as a mixture of deterministic behaviours in this way, then those protocols cannot generate a secret key. The set of behaviours that can be expressed in this way, however, is precisely \(\Ls\).
-
-  On the other hand, quantum behaviours are fundamentally indeterministic. If we are able to certify that some component of the behaviour was indeterministic even for Eve, then the outcomes \(a, b\) have some degree of security against her. This is the intuition behind DIQKD.
-}
-
-\begin{frame}{DIQKD Assumptions}
-  \begin{itemize}[<+->]
-        \item \emph{Sealed laboratories}: information transmission is controlled
-        \item \emph{Trusted local randomness}: for generating inputs
-        \item \emph{Authenticated classical channel}: distinct from \emph{confidentiality}
-        \item \emph{Correctness} of quantum physics: for validity of proofs
-  \end{itemize}
-\end{frame}
-
-\note{
-  As Charles Bennett once joked, DIQKD still has to be DIY-QKD: classical attacks on the classical processing are still possible.
-}
-
 \begin{frame}{DIQKD Security}
   \begin{itemize}[<+->]
     \item \(\rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n}\): Alice--Bob--Eve ccq state after \(n\) Bell tests
           \[ \sum_{\cvec{a}^n\cvec{b}^n \cvec{x}^n\cvec{y}^n} \begin{aligned}[c]
-          & \prin^n(\cvec{x}^n,\cvec{y}^n) p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \proj[\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n]{\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n} \\
-            \otimes & \rho_{E^n|\cvec{a}^n\cvec{b}^n\cvec{x}^n\cvec{y}^n}
+          & \prin^n(\cvec{x}^n,\cvec{y}^n) p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \proj[\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n]{\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n} \otimes \\
+            & \rho_{E^n|\cvec{a}^n\cvec{b}^n\cvec{x}^n\cvec{y}^n}
           \end{aligned} \]
     \item \emph{Asymptotic key rate} of a sequence of states \(\{\rho^n\}\)
       \[ r(\proto{P}, \{\rho^n\}) = \lim_{n\to\infty} \frac{\ell_n - L_{\Omega}(\prin^n)}{n} \]
@@ -727,13 +697,13 @@
 
 \subsection{Wiring Distributions}
 
-\begin{frame}{Local Operations and Shared Randomness\setcounter{footnote}{0}\footfullcite{NonclassicalCausation}}
+\begin{frame}{Local Operations and Shared Randomness\setcounter{footnote}{0}\footfullcite{NonclassicalCausation} (LOSR)}
   \begin{onlyenv}<1-3>
     \begin{itemize}[<+->]
       \item Local operation: take overall input, generate physical input, generate overall output from physical output
         \[ p'(a|x) = \sum_{a_0 x_0} p_o(a|x_0 a_0 x) p(a_0|x_0) p_i(x_0|x) \]
       \item Combine into a map obeying \emph{no-retrocausation}
-        \[ \chi_A(a x_0 | x a_0) \coloneqq p_o(a|x_0a_0x) p_i(x_0|x) = p_o(a|x_0a_0x) p_i(x_0|x a_0) \]
+        \[ \sum_a \chi_{A|\lambda}(ax_0|a_0x) = \sum_a p_o(a|x_0 a_0 x) p_i(x_0|x) = p_i(x_0|x) \]
       \item Combine with other party using \emph{shared randomness}
         \begin{align*}
           \chi(abx_0y_0|a_0b_0xy) &\coloneqq \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(ax_0|a_0x) \chi_{B|\lambda}(by_0|b_0y) \\
@@ -758,7 +728,7 @@
 \begin{frame}{Wirings}
   \begin{onlyenv}<1-3>
     \begin{itemize}[<+->]
-      \item Generalise to multiple boxes
+      \item Generalise to multiple boxes: \emph{wiring distributions} \(\chi\)
         \begin{align*}
           p'(ab|xy) &\coloneqq \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c)\label{eqn:jwirdistdef} \\
           \chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) &\coloneqq \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy)
@@ -768,7 +738,7 @@
           \chi_{A|\lambda}(\cvec{x}^j|\cvec{a}^cx) &= \chi_{A|\lambda}(\cvec{x}^j|\cvec{a}^{j-1}x),\,\forall j \in \dintv{1}{c} \\
           \chi_{B|\lambda}(\cvec{y}^j|\cvec{b}^cy) &= \chi_{B|\lambda}(\cvec{y}^j|\cvec{b}^{j-1}y),\,\forall j \in \dintv{1}{c}
         \end{align*}
-      \item Implies that marginal wirings are sequences of stochastic maps
+      \item No-retrocausation requires marginal wirings to be sequences of stochastic maps
         \[ \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) = \chi_{A|\lambda}(a|\cvec{x}^c\cvec{a}^{c}x) \prod_{j=1}^c \chi_{A|\lambda}(x_j|\cvec{x}^{j-1}\cvec{a}^{j-1}x) \]
     \end{itemize}
   \end{onlyenv}
@@ -781,9 +751,9 @@
 
 \begin{frame}{Structure of the Space of Wirings}
   \begin{itemize}[<+->]
-    \item In each round, \emph{some} deterministic process has to be executed
+    \item In each round, \emph{some} concrete sequence of mappings is be executed
     \item Each round consists of randomly selecting some permutation of deterministic marginal wirings for each of the parties
-    \item Probabilistic mixture can be expressed as convex sum of wirings
+    \item Effect of random selection is convex combination
       \begin{theorem}[Fine's Theorem for Wirings]
         The set of marginal wirings \(\sW\) forms a polytope, whose vertices are the set of deterministic marginal wirings obeying the no-retrocausation relations \(\sW_D\). All \(n\)-partite wirings are then elements of the polytope generated by the vertices \(\sW_D^n\).
       \end{theorem}
@@ -794,7 +764,6 @@
 
 \begin{frame}{Wiring Functions}
   \begin{itemize}[<+->]
-    \item Objective: reduce \(\#\) of extremal wirings
     \item Deterministic maps are functions
       \begin{align*}
         x_j &= W^{(j)}_{A}(\cvec{x}^{j-1}, \cvec{a}^{j-1}, x),\,j \in \dintv{1}{c} \\
@@ -807,11 +776,13 @@
   \end{itemize}
 \end{frame}
 
+\note{ Due to the determinism of the wirings, knowing \(x\) is sufficient to determine \(x_1\). Therefore, \(x_2\) depends only on \(a_1\) and \(x\), since \(x_1\) can be determined from \(x\). }
+
 \begin{frame}{Wiring Matrices}
   \begin{itemize}[<+->]
     \item Express each transformation as a matrix and multiply them together
+    \item Easily extendable to \(n\)-partite wirings\only<.->{\footnote{If your computer has enough RAM}} and shared randomness
     \item Implemented and used to experiment with possible wirings
-    \item Easily extendable to shared randomness and \(n\)-partite wirings\only<.->{\footnote{If your computer has enough RAM}}
     \item Unfortunately not able to reduce number of extremal wirings
   \end{itemize}
 \end{frame}
@@ -823,7 +794,7 @@
     \item \emph{Couplers} map \(P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y}) \mapsto P'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}})\)\only<.->{\footfullcite{ShortEntangleSwap}}
     \[ P'(\cvec{a\breve{b}}b'|\cvec{x\breve{y}}) = \sum_{\cvec{by}} \chi(b',\cvec{by})P(\cvec{a\breve{b}b}|\cvec{x\breve{y}y}) \]
     \item Polytope found by checking consistency of couplers on \(P(\cvec{b}|\cvec{y}) \in \NSs\)
-    \item Wiring for a specific input: \emph{marginal conditional wiring distribution} (\(\chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx)\) for a given \(x\))
+    \item Wiring for a specific input: \emph{marginal conditional wiring} (\(\chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx)\) for a given \(x\))
     \item \(\#\) extremal couplers \(<\) \(\#\) extremal marginal conditional wiring distributions
     \item Could this simplify the space of wirings?
   \end{itemize}
@@ -849,7 +820,12 @@
     \item Polytope for general behaviours contained within polytope for \(\NSs\)
     \item But wirings should not care about what they act on
     \item Hypothesis: signalling makes it impossible to implement certain transformations independently
-    \item Connection to complete positivity of LOSR transformations?\only<.->{\footfullcite{LocalTransformations}}
+    \item Connection to recent work on LOSR transformations?\only<.->{\footfullcite{LocalTransformations}}
+      \begin{itemize}
+        \item Transformation is \emph{completely positive} if each party's part can be implemented while the other parties do nothing
+        \item Complete positivity \(\Rightarrow\) causal
+        \item Proved using signalling behaviours
+      \end{itemize}
     \item May be fruitful to analyse our own definitions for wirings
   \end{itemize}
 \end{frame}
@@ -896,9 +872,12 @@
   \begin{itemize}[<+->]
     \item AND wiring is a wiring without output dependency \(\Rightarrow\) no increase in capacity
     \item Can generalise the argument about simulating the transformed statistics to other transformations
-    \item Private local randomness would be better used in noisy preprocessing
-    \item Private shared randomness: \alert{still open}
     \item Possible connection to \emph{measurement dependence}
+      \begin{itemize}
+        \item Measurement dependence studies correlated inputs
+        \item Output dependency would correlate inputs of parties
+        \item May explain why such wirings can increase capacity
+      \end{itemize}
   \end{itemize}
 \end{frame}
 
@@ -918,33 +897,25 @@
   \begin{onlyenv}<4-6>
     \begin{itemize}[<+->]
       \item Brute force search possible, but unclear how capacity changes with \(c\)
-      \item Possible simplifications using techniques from dynamic or linear programming
-      \item Caveat: bounds on capacity may not be convex
+      \item Caveat: lower bounds on capacity may not be convex
+      \item Other techniques for bounding capacity and optimising it over wirings not very promising
     \end{itemize}
   \end{onlyenv}
-\end{frame}
-
-\begin{frame}{Other Approaches}
-  \begin{itemize}[<+->]
-    \item Incorporating wiring optimisation into BFF using dualisation gives nonconvex problem
-    \item \emph{Maximal correlation} is monotone under wirings without shared randomness, but hard to optimise over and unclear if useful
-    \item Classical upper bounds from correlations with dimension bounds: large number of variables to optimise
-  \end{itemize}
 \end{frame}
 
 \section*{Summary and Outlook}
 
 \begin{frame}{DIQKD}
   \begin{itemize}[<+->]
-    \item Proposed new key rate definition dependent on input distribution
+    \item Proposed definition of key rate dependent on input distribution
     \item Proposed definition of secret key capacity in terms of all available classical data
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Behaviours}
+\begin{frame}{Wirings}
   \begin{itemize}[<+->]
     \item Wirings generalise local operations and shared randomness
-    \item Convex hull of deterministic wirings
+    \item Set of wirings is convex hull of deterministic wirings
     \item Implemented computational representation
     \item Next step: investigate connection to couplers and measurement dependence
   \end{itemize}
