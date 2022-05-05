@@ -1951,9 +1951,11 @@ Any[]
 
                   In~\cite{JanLiThesis}, it was observed that \(r_{\std}\) may not be maximised by extremal wirings. This is an important caveat: although the \emph{capacity} is convex, various methods of computing the key rate may not be similarly convex if they are not tight. Although fundamental, this result does not give us a concrete way to determine \emph{which} wirings achieve the wired secret key capacity, how to achieve it through the appropriate choice of protocols and input distributions, or what the value of the maximum capacity actually is.
 
-                  Nonetheless, our task is greatly simplified, because as long as we have an algorithm to compute the iid secret key capacity, or an approximation to it, we can evaluate it at all possible wired behaviours resulting from the extremal wirings in \(\sW_{D,c}\), in order to find the wiring that maximises it, giving a simple, if inefficient, brute force algorithm for maximising the secret key capacity. However, while \(\sW_{D,c}\) is a discrete and finite set, we must optimise over \(\cup_{c=2}^{\infty} \sW_{D,c}\) to find the highest possible capacity, which is still discrete, but infinite. We leave the question of how the secret key capacity changes with increasing \(c\) to future work, and focus on methods to maximise key rates given a fixed \(c\).
+                  Nonetheless, our task is greatly simplified, because as long as we have an algorithm to compute the iid secret key capacity, or an approximation to it, we can evaluate it at all possible wired behaviours resulting from the extremal wirings in \(\sW_{D,c}\), in order to find the wiring that maximises it. This is a simple, if inefficient, brute force algorithm for maximising the secret key capacity. However, while \(\sW_{D,c}\) is a discrete and finite set, we must optimise over \(\cup_{c=2}^{\infty} \sW_{D,c}\) to find the highest possible capacity, which is still discrete, but infinite.
+
+                  Nonetheless, we know that \(C_{\sk}^{W,c}\) can only increase with increasing \(c\). For \(c_1 < c_2\), we have \(C^{W,c_1}_{\sk}(p) \leq C^{W,c_2}_{\sk}(p)\) because we can always implement the optimal wiring for \(c = c_1\) using \(c_2\) boxes, by ignoring \(c_2 - c_1\) boxes. Still, we cannot say if \(\sup_c C_{\sk}^{W,c}(p)\) can be achieved by any finite value of \(c\). We leave this to future work, and focus on methods to maximise key rates given a fixed \(c\).
                   \begin{question}
-                    How does \(C_{\sk}^{W,c}\) change as we increase \(c\)?
+                    What are the conditions for achieving \(\sup_c C_{\sk}^{W,c}(p)\) at some finite \(c\)?
                   \end{question}
 
                   Instead of a brute-force search, we could try to incorporate the joint wiring distribution \(\chi(ab\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy)\) as an optimisation variable into the semidefinite program in \Cref{eqn:bff_npa}, the SDP for approximating \(H(\crv{A}|E)\), which may find the optimal wiring more efficiently. Since we know that the key rate is maximised by extremal wirings, however, we only need to introduce the marginal wiring distributions, with no need for shared randomness. We can decompose each marginal wiring distribution as per \Cref{eqn:mapdecomp}, and introduce variables for each combination of inputs that the \(c+1\) constituent maps can take. The only constraints we need add are positivity and normalisation, and we can remove the normalisation constraint by eliminating the variable corresponding to some outcome from each map. Given \(c\) boxes to wire together, this introduces
@@ -2187,25 +2189,31 @@ Any[]
 
                   \subsection{CHSH Distillability of Isotropic Boxes}\label{sec:wirmono_isodist}
 
-                  In~\cite{NLMonotones}, it was proved that wirings without shared randomness cannot distill one isotropic box to another with a larger violation of CHSH. The case with shared randomness was proved for boxes with a PR fraction in \([1/\sqrt{2}, 1]\), which is precisely the part of the isotropic line outside of \(\Qs\). A crucial step of the proof was to show that isotropic boxes have the lowest maximal correlation of all boxes with a given CHSH value, the proof of which relied only worked for superquantum values of the PR fraction.
+                  In~\cite{NLMonotones}, it was proved that wirings without shared randomness cannot distill one isotropic box to another with a larger violation of CHSH. The case with shared randomness was proved for boxes with a PR fraction in \([1/\sqrt{2}, 1]\), which is precisely the part of the isotropic line outside of \(\Qs\) (except at the boundary value of \(1/\sqrt{2}\)). A crucial step of the proof was to show that isotropic boxes have the lowest maximal correlation of all boxes with a given CHSH value. However, this was only shown for boxes with superquantum values of the PR fraction.
 
-                  Nonetheless, if we could characterise the impact of shared randomness on the maximal correlation, this part of the proof could be completed, since there does exist a wiring that uses shared randomness to turn any box into an isotropic box with the same CHSH value~\cite{NSTheories}. If we can show that wirings using shared randomness do not increase the maximal correlation, then we will be able to prove that isotropic boxes are not distillable, while also proving that maximal correlation is a monotone under \(\sW_c^n\), not just for \(\sW_{D,c}^n\).
+                  Nonetheless, if we could characterise the impact of shared randomness on the maximal correlation, this part of the proof could be completed, since there does exist a wiring that uses shared randomness to turn any box into an isotropic box with the same CHSH value~\cite{NSTheories}. If we can show that wirings using shared randomness do not increase the maximal correlation, then we will be able to prove that isotropic boxes are not distillable, while also proving that maximal correlation is a monotone under \(\sW_c^n\), not just \(\sW_{D,c}^n\).
                   \begin{question}
                     How does the use of shared randomness in wirings affect the maximal correlation and other related measures?
                   \end{question}
 
-                  TODO SR to increase maximal correlation, then LO to increase key rate can be implemented as a wiring on the original behaviour with SR, so it doesn't circumvent
-
-                  Even though we were not able to analyse the effect of shared randomness in detail, we will comment on the relevance of our results to this problem. As mentioned in \Cref{sec:krwir_wiropt}, CHSH is maximised by extremal wirings. Since the extremal wirings are deterministic and therefore part of \(\sW_{L,c}\), the wirings that maximise the CHSH value of any box must map to a box of equal or lower maximal correlation. Nonetheless, without a proof that isotropic boxes have the lowest maximal correlation of all boxes with a given CHSH value, this would not help, since the box mapped to may have a higher CHSH value despite having an equal or lower maximal correlation.
-
                   \subsection{Evaluation}
 
-                  We first observe that, since \(C^{\otimes}_{\sk}(p)\) is maximised by extremal wirings (\Cref{thm:extrcap}), and these wirings are part of \(\sW_{L,c}\), these measures are genuine monotones for the secret key capacity under general wirings \(\sW_c\), despite the more limited definition. These measures therefore provide an upper bound on the possible enhancement in secret key capacity through wiring: it cannot exceed the maximal secret key capacity amongst all behaviours bounded by these monotones, although we note that this maximal capacity may not be easy to find.
+                  We first observe that, since \(C^{W,c}_{\sk}(p)\) is maximised by extremal wirings (\Cref{thm:extrcap}), and these wirings are deterministic and therefore part of \(\sW_{L,c}\), for the wiring \(\chi\) which achieves \(C^{W,c}_{\sk}(p)\), we must have \(\mu(p) \succeq \mu(\chi[p^{\otimes c}])\) for any of the monotones discussed here. More generally,
+                  \begin{equation}
+                    C^{W,c}_{\sk}(p) \leq \max_{p' \in P} C^{\otimes}_{\sk}(p');\; P = \{ p' \st \mu(p) \succeq \mu(p') \}.
+                  \end{equation}
+                  However, we note that this maximisation may not be easy to do.
 
-                  The ideal nonlocality monotone \(\mu\) would have the following desiderata:
+                  % NEXT LOSR with c1 boxes to increase maximal correlation, then LO
+                  % with c2 boxes to increase key rate can be superseded by an
+                  % LO c1c2-box wiring on the original behaviour - can this help?
+
+                  As mentioned in \Cref{sec:krwir_wiropt}, the CHSH value is linear and hence is maximised by extremal wirings. By a similar argument, then, the wirings that maximise the CHSH value of any box must map to a box of equal or lower maximal correlation. However, this is still insufficient to prove anything conclusively about the distillability of isotropic boxes, without a proof that they have the lowest maximal correlation amongst all boxes of the same CHSH value.
+
+                  The ideal wiring monotone \(\mu\), relative to a figure of merit \(C\), would have the following desiderata:
                   \begin{enumerate}
                     \item Given a behaviour \(p\), it is easy to compute \(\mu(p)\)
-                    \item Given a value \(\mu'\), the set \(\{ p \st \mu(p) = \mu' \}\) can be efficiently optimised over
+                    \item Given a value \(\mu'\), we can efficiently optimise \(C\) over the set \(\{ p \st \mu' \succeq \mu(p) \}\)
                     \item It is tight in the sense that if \(\mu(p) = \mu(p')\) for behaviours \(p\) and \(p'\), there exists a wiring that will transform \(p \mapsto p'\)
                     \item Given \(p\) and \(p'\), if \(\mu(p) = \mu(p')\), we can explicitly construct the wiring that transforms \(p\) into \(p'\)
                   \end{enumerate}
