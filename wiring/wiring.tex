@@ -479,7 +479,7 @@
         \(\matr{M}\), \(\matr[^{\tpose}]{M}\), \(\matr{M}_{ij}\) & A matrix, its transpose, and its \((i,j)\)-th element, one-based indexing \\
         \(\Tr{M}\) & Trace of \(M\) \\
         \(\crv{X}\) & A classical random variable \\
-        \(\proj[AB]{ab}\), \(\proj[A]{a} \otimes \proj[B]{b}\), \({\ket{a}\bra{a}}_A \otimes {\ket{b}\bra{b}}_B\), \({\ket{ab}\bra{ab}}_{AB}\) & The tensor product of the projector for state \(a\) on Hilbert space \(A\), with the projector for state \(b\) on Hilbert space \(b\) \\
+        \(\proj[AB]{ab}\), \(\proj[A]{a} \otimes \proj[B]{b}\), \({\ket{a}\bra{a}}_A \otimes {\ket{b}\bra{b}}_B\), \({\ket{ab}\bra{ab}}_{AB}\) & Equivalent expressions for the tensor product of the projector for state \(a\) on Hilbert space \(A\), with the projector for state \(b\) on Hilbert space \(b\) \\
         \(\Trdist{\rho}{\sigma}\) & Trace distance between \(\rho\) and \(\sigma\) (\Cref{sec:prelim_infot}) \\
         \(\cong\) & Isomorphism \\
         \(\subseteq\), \(\subsetneq\) & Subset and strict subset \\
@@ -511,7 +511,7 @@
 
     We will approach this project from two directions: the theoretical development and definition of fundamental ideas, and their computational exploration. Preliminary material concerning convex geometry and analysis, linear algebra, quantum mechanics, and information theory can be found in \Cref{sec:prelim}, while our notational conventions are summarised in the table above. We begin by introducing and formalising nonlocality in \Cref{sec:nl}, as well as DIQKD in \Cref{sec:diqkd}, where we extend and generalise existing definitions to better identify the ultimate limits of what can be done with a nonlocal resource. After developing these ideas, we review the preliminary results suggesting the existence of revival in \Cref{sec:preres}.
 
-    We then define wirings formally in \Cref{sec:locwir}, with a mathematical description and derivation of fundamental properties in \Cref{sec:locwir_dist}, an operational one in \Cref{sec:locwir_func} that helps simplify the space of wirings, and a computational description in \Cref{sec:locwir_mat}. We compare our results to previous work on classifying wirings in \Cref{sec:locwir_SPG}. \Cref{sec:krwir_outdep} establishes our main results on the utility of wirings in DIQKD, while \Cref{sec:krwir_wiropt} attempts to formulate the optimisation of key rates over wirings as a computationally tractable problem.
+    We then define wirings formally in \Cref{sec:locwir}, with a mathematical description and derivation of fundamental properties in \Cref{sec:locwir_dist}, an operational one in \Cref{sec:locwir_func} that helps simplify the space of wirings, and a computational description in \Cref{sec:locwir_mat}. We compare our results to previous work on classifying wirings in \Cref{sec:locwir_SPG}. \Cref{sec:krwir_feedforward} establishes our main results on the utility of wirings in DIQKD, while \Cref{sec:krwir_wiropt} attempts to formulate the optimisation of key rates over wirings as a computationally tractable problem.
 
     Finally, \Cref{sec:wirmono} examines bounds on what wirings can achieve based on information-theoretic properties of behaviours, while \Cref{sec:ubound} studies upper bounds on behaviours from classical information theory. Incorrect attempts and unused reviewed material are collected in the appendices.
 
@@ -699,6 +699,8 @@
     \end{defn}
 
     We now state our definitions formally. We work within the framework for key distillation by local operations and public communication established in~\cite{CQKeyDistill}, which was adapted to DIQKD recently in~\cite{DIQKD_Limits}. However, we extend and generalise these definitions to apply to more classes of protocols. Let \(\crv{A}^{n}\crv{X}^{n}\), \(\crv{B}^{n}\crv{Y}^{n}\) and \(E^n\) be the systems of Alice, Bob, and Eve respectively after executing \(n\) rounds of Bell tests, with the inputs being recorded in \(\crv{X}^{n}\) and \(\crv{Y}^{n}\), and the outputs in \(\crv{A}^{n}\) and \(\crv{B}^{n}\). Let their joint \emph{ccq} (classical-classical-quantum) state be \(\rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n}\), so called because \(\crv{A}^n\crv{X}^n\) and \(\crv{B}^n\crv{Y}^n\) store classical data, while Eve's system is quantum. We write the systems in the order ``AXBY'', rather than the regular ``ABXY'', to emphasise the bipartition between Alice and Bob's systems.
+
+    TODO rework definitions to account for PSK (required for authentication etc.)
 
     \begin{defn}[General ccq States]\label{def:ccq_belltest}
       The most general definition of the joint state of Alice, Bob and Eve is given by
@@ -1792,24 +1794,24 @@ Any[]
 
                   Having established some facts about the structure of the space of wirings, and developed tools to represent them computationally, we turn now to the primary application of this research: to see if wiring can increase the secret key capacity of a behaviour.
 
-                  \subsection{Wirings without Output Dependency}\label{sec:krwir_outdep}
+                  \subsection{Wirings without Feedforward}\label{sec:krwir_feedforward}
 
                   % NEXT bound the secret key capacity itself not the iid
                   % version
 
               \begin{figure}
                 \centering
-                \includegraphics{outdep.tikz}
-                \caption[Causal influences in a wiring without output dependency between two iid quantum behaviours.]{\label{fig:outdep} In a wiring without output dependency, the intermediate outputs do not play a role in the inputs to the devices being wired together. These transformations are ``too simple'': their effect can be simulated by a judicious choice of states and measurements that have the same physical implementation as the original behaviour. They therefore cannot improve the secret key capacity.}
+                \includegraphics{feedforward.tikz}
+                \caption[Causal influences in a wiring without feedforward between two iid quantum behaviours.]{\label{fig:feedforward} In a wiring without feedforward, the intermediate outputs do not play a role in the inputs to the devices being wired together. These transformations are ``too simple'': their effect can be simulated by a judicious choice of states and measurements that have the same physical implementation as the original behaviour. They therefore cannot improve the secret key capacity.}
               \end{figure}
 
                   From the wiring distribution description of wirings alone, we are able to derive a major result about the potential for wiring to improve key rates. In particular, we identify a class of wirings that are unable to increase the secret key capacity of a behaviour.
-              \begin{lemma}\label{thm:outdep}
-                Define a \emph{wiring without output dependency} as a wiring for which all inputs are independent of previous outputs, that is, a wiring \(\chi\) that obeys
+              \begin{lemma}\label{thm:feedforward}
+                Define a \emph{wiring without feedforward} as a wiring for which all inputs are independent of previous outputs, that is, a wiring \(\chi\) that obeys
                 \begin{equation}\label{eqn:nooutputdep}
                   \chi(\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \chi(\cvec{x}^c\cvec{y}^c|xy).
                 \end{equation}
-                Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring without output dependency cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p^{\otimes c}]\), where \(\chi\) is a wiring without output dependency, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p)\).
+                Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring without feedforward cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p^{\otimes c}]\), where \(\chi\) is a wiring without feedforward, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p)\).
               \end{lemma}
               \begin{proof}
                 From \Cref{eqn:nooutputdep} and using \Cref{eqn:mwirdistdef}, for any given \(\cvec{a}^c\) and \(\cvec{b}^c\),
@@ -1827,7 +1829,7 @@ Any[]
               \begin{equation}
                 p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) = \Tr{\rho_{AB} \left( M_{\cvec{a}^c|\cvec{x}^c} \otimes N_{\cvec{b}^c|\cvec{y}^c} \right) }.
               \end{equation}
-              Then, for any behaviour \(p'\) that can be obtained from applying a wiring without output dependency \(\chi\) to \(p^c\), we have
+              Then, for any behaviour \(p'\) that can be obtained from applying a wiring without feedforward \(\chi\) to \(p^c\), we have
               \begin{gather}
                 p'(ab|xy) = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \sum_{\lambda} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) P_{\Lambda}(\lambda) p^c(\cvec{a}^c\cvec{b}^c|\cvec{x}^c\cvec{y}^c) \\
                 = \sum_{\cvec{a}^c\cvec{b}^c\cvec{x}^c\cvec{y}^c} \sum_{\lambda} \chi_{A|\lambda}(a\cvec{x}^c|\cvec{a}^cx) \chi_{B|\lambda}(b\cvec{y}^c|\cvec{b}^cy) P_{\Lambda}(\lambda) \Tr{\rho_{AB} \left( M_{\cvec{a}^c|\cvec{x}^c} \otimes N_{\cvec{b}^c|\cvec{y}^c} \right) }, \\
@@ -1896,18 +1898,18 @@ Any[]
 
     More generally, if the wiring produces a behaviour \(p'\) that can be produced by LOPC post-processing of Alice and Bob's Bell test data on \(p^c\), then by \Cref{def:seckeycapbehaviid}, we cannot have \(C_{\sk}^{\otimes}(p') \geq C_{\sk}^{\otimes}(p^c)\). On the other hand, if the wiring creates some correlation between the output of previous Bell test rounds and subsequent rounds, such an increase may be possible.
 
-    A direct application of this lemma to our project is to observe that, since the AND wiring in \Cref{sec:preres} simply broadcasts the input to all boxes, it is a wiring without output dependency, and therefore the increase in the key rate is not a fundamental increase in secret key capacity, but simply because the standard protocol key rate does not achieve the secret key capacity.
+    A direct application of this lemma to our project is to observe that, since the AND wiring in \Cref{sec:preres} simply broadcasts the input to all boxes, it is a wiring without feedforward, and therefore the increase in the key rate is not a fundamental increase in secret key capacity, but simply because the standard protocol key rate does not achieve the secret key capacity.
 
     Our description of wirings as multi-copy LOSR operations naturally motivates the question if there is any benefit to be gained from using \emph{private} randomness, unknown to Eve, beyond its necessary role in providing an authenticated classical channel (\Cref{def:diqkdassump}) and possibly its role in generating the inputs (\Cref{sec:diqkd_proto}). We distinguish between \emph{shared} private randomness, known to both Alice and Bob (that is, a PSK), and \emph{local} private randomness known to only one of them.
 
               Local private randomness would result in both Bob and Eve being unable to tell which wiring Alice used. From their perspective, then, Alice's output is effectively randomise, and the use of local private randomness would therefore have the same effect as noisy preprocessing. However, analyses of noisy preprocessing typically treat it as \emph{trusted noise}, rather than part of the behaviour of the system that might be caused by Eve, e.g.\ in~\cite{BFF_QRE, AsymmetricCHSH, DIQKD_FiniteSize}. We therefore do not consider local private randomness in wirings, since the benefit that can be derived from it would be inferior to the benefit from noisy preprocessing, which can be performed at the same cost.
 
-              Shared private randomness cannot be so easily dismissed. By \Cref{thm:dilock}, the effect of using shared private randomness \emph{before} the state is distributed cannot be ruled out by a lockability-type argument. It is also not quite equivalent to the use of a PSK for generating the input distribution, since the overall effect of the wiring would depend on the outputs as well. By \Cref{thm:outdep}, we can only see a benefit from considering wirings that interact with the outputs in a nontrivial way, but that necessitates a more involved analysis of this complex interaction. Therefore, we leave this question for future work, and focus on results that can be obtained without considering such wirings.
+              Shared private randomness cannot be so easily dismissed. By \Cref{thm:dilock}, the effect of using shared private randomness \emph{before} the state is distributed cannot be ruled out by a lockability-type argument. It is also not quite equivalent to the use of a PSK for generating the input distribution, since the overall effect of the wiring would depend on the outputs as well. By \Cref{thm:feedforward}, we can only see a benefit from considering wirings that interact with the outputs in a nontrivial way, but that necessitates a more involved analysis of this complex interaction. Therefore, we leave this question for future work, and focus on results that can be obtained without considering such wirings.
               \begin{question}
                 Is there be any benefit from using private shared randomness in wirings?
               \end{question}
 
-    \Cref{thm:outdep}, and the discussion of correlated inputs from private shared randomness in this section and in \Cref{sec:diqkd_behavsec}, suggests a connection between the advantage of wirings in DIQKD and the \emph{measurement dependent scenario}, first studied in~\cite{RelaxedBell}, where local statistics are described by~\cite[Eq. 2]{MDLBeyondIID}
+    \Cref{thm:feedforward}, and the discussion of correlated inputs from private shared randomness in this section and in \Cref{sec:diqkd_behavsec}, suggests a connection between the advantage of wirings in DIQKD and the \emph{measurement dependent scenario}, first studied in~\cite{RelaxedBell}, where local statistics are described by~\cite[Eq. 2]{MDLBeyondIID}
               \begin{equation}
                 p(abxy) = \sum_{\lambda} P_{\Lambda}(\lambda) p(a|x\lambda) p(b|y\lambda) p(xy|\lambda).
               \end{equation}
@@ -1947,7 +1949,7 @@ Any[]
 
                   In~\cite{JanLiThesis}, it was observed that \(r_{\std}\) may not be maximised by extremal wirings. This is an important caveat: although the \emph{capacity} is convex, various methods of computing the key rate may not be similarly convex if they are not tight. Although fundamental, this result does not give us a concrete way to determine \emph{which} wirings maximise the secret key capacity, how to achieve it through the appropriate choice of protocols and input distributions, or what it is quantitatively.
 
-                  Nonetheless, our task is greatly simplified, because as long as we have an algorithm to compute the secret key capacity, or an approximation to it, we can evaluate it at all possible wired behaviours resulting from extremal wirings \(\sW_D\), in order to find the wiring that maximises it, giving a simple, if inefficient, brute force algorithm for maximising the secret key capacity. However, while this is a discrete set, and some wirings can be eliminated \emph{a priori} via \Cref{thm:outdep}, we have not established that the maximum will be achieved for any finite \(c\). We leave the question of how the secret key capacity changes with increasing \(c\) to future work, and focus on methods to maximise key rates given a fixed \(c\).
+                  Nonetheless, our task is greatly simplified, because as long as we have an algorithm to compute the secret key capacity, or an approximation to it, we can evaluate it at all possible wired behaviours resulting from extremal wirings \(\sW_D\), in order to find the wiring that maximises it, giving a simple, if inefficient, brute force algorithm for maximising the secret key capacity. However, while this is a discrete set, and some wirings can be eliminated \emph{a priori} via \Cref{thm:feedforward}, we have not established that the maximum will be achieved for any finite \(c\). We leave the question of how the secret key capacity changes with increasing \(c\) to future work, and focus on methods to maximise key rates given a fixed \(c\).
                   \begin{question}
                     How does \(C_{\sk}^W\) change as we increase \(c\)?
                   \end{question}
@@ -2377,11 +2379,11 @@ Any[]
 
                   Our investigation of local wirings in \Cref{sec:locwir} relates it to prior work on single-copy local transformations, providing fundamental (\Cref{sec:locwir_dist}), operational (\Cref{sec:locwir_func}) and computational (\Cref{sec:locwir_mat}) formalisms for working with wirings. The comparison to prior work in \Cref{sec:locwir_SPG} has revealed many anomalous phenomena, although clearly suggesting a roadmap for investigating and resolving these issues.
 
-                  Our analysis of the iid secret key capacity of wired behaviours in \Cref{sec:krwir_outdep} has established two crucial results: that it is maximised by extremal deterministic wirings, and that it cannot be increased by wirings that do not use the outputs of some boxes to determine the inputs of others. This can be seen as a major generalisation of the results of~\cite{JanLiThesis} about classes of wirings that cannot increase the key rate, both of which are wirings without output dependency. The fact that there must be some output dependency in order for the key rate to be improved suggests a connection to measurement dependence in Bell tests, although we were not able to explore this further. The use of private shared randomness in wirings was also not studied, and we do not have much insight on how they affect our results.
+                  Our analysis of the iid secret key capacity of wired behaviours in \Cref{sec:krwir_feedforward} has established two crucial results: that it is maximised by extremal deterministic wirings, and that it cannot be increased by wirings that do not use the outputs of some boxes to determine the inputs of others. This can be seen as a major generalisation of the results of~\cite{JanLiThesis} about classes of wirings that cannot increase the key rate, both of which are wirings without feedforward. The fact that there must be some feedforward in order for the key rate to be improved suggests a connection to measurement dependence in Bell tests, although we were not able to explore this further. The use of private shared randomness in wirings was also not studied, and we do not have much insight on how they affect our results.
 
                   Unfortunately, our attempts in \Cref{sec:krwir_wiropt} to more efficiently optimise the secret key capacity over wirings did not manage to yield a computationally tractable approximation, although the approaches of linear and dynamic programming might still be possible. We were also unable to extract much insight from the wiring monotones studied in \Cref{sec:wirmono}. Although we have done some preliminary work to establish methods of upper bounding the secret key rate in \Cref{sec:ubound}, we were not able to execute them, and an order-of-magnitude estimate seems to suggest that the optimisation may be intractable. Alternatively, we could use Monte Carlo methods to explore the parameter space, but this provides no guarantee of optimality whatsoever.
 
-                  Despite the defeats on the computational front, we have established key theoretical results and foundations that can facilitate a better understanding of the possible transformations of behaviours via wirings. In particular, investigation of the anomalies between the coupler formulation and the wiring formulation would likely to be fruitful for coming to a deeper understanding of the structure of the space of wirings, and possibly facilitate computationally tractable optimisations over the space of wirings. Similarly, the study of measurement dependence could explain how output dependence can lead to an increase in secret key capacity. It would also be worthwhile to attempt direct polytope computations using our definitions of wirings, and to finish implementing our optimisations in \Cref{sec:ubound}. Amongst the many possible approaches highlighted in the course of this work, these would seem to be the most easily achievable, and are all likely to bear some fruit.
+                  Despite the defeats on the computational front, we have established key theoretical results and foundations that can facilitate a better understanding of the possible transformations of behaviours via wirings. In particular, investigation of the anomalies between the coupler formulation and the wiring formulation would likely to be fruitful for coming to a deeper understanding of the structure of the space of wirings, and possibly facilitate computationally tractable optimisations over the space of wirings. Similarly, the study of measurement dependence could explain how feedforward can lead to an increase in secret key capacity. It would also be worthwhile to attempt direct polytope computations using our definitions of wirings, and to finish implementing our optimisations in \Cref{sec:ubound}. Amongst the many possible approaches highlighted in the course of this work, these would seem to be the most easily achievable, and are all likely to bear some fruit.
 
                   \clearpage
 

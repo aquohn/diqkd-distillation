@@ -836,22 +836,22 @@
 
 \section{Key Rates}
 
-\subsection{Wirings without Output Dependency}
+\subsection{Wirings without Feedforward}
 
 \begin{frame}{Simple Wirings Cannot Help}
   \begin{lemma}
-    Define a \emph{wiring without output dependency} as a wiring for which all inputs are independent of previous outputs, that is, a wiring \(\chi\) that obeys
+    Define a \emph{wiring without feedforward} as a wiring for which all inputs are independent of previous outputs, that is, a wiring \(\chi\) that obeys
     \[
       \chi(\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \chi(\cvec{x}^c\cvec{y}^c|xy).
     \]
-    Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring without output dependency cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p]\), where \(\chi\) is a wiring without output dependency, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p)\).
+    Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring without feedforward cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p]\), where \(\chi\) is a wiring without feedforward, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p)\).
   \end{lemma}
 \end{frame}
 
 \begin{frame}{Proof Sketch}
   \begin{onlyenv}<1-3>
     \begin{itemize}[<+->]
-      \item Wirings without output dependency obey
+      \item Wirings without feedforward obey
         \[ \chi(\cvec{x}^c\cvec{y}^c|xy) = \sum_{\lambda} P_{\Lambda}(\lambda) \chi_{A|\lambda}(\cvec{x}^c|x) \chi_{B|\lambda}(\cvec{y}^c|y) \]
       \item Measurements can generate \(\cvec{x}^c\) and \(\cvec{y}^c\) beforehand
       \item Can use same physical processes for \(p\) and \(p'\)
@@ -859,7 +859,7 @@
   \end{onlyenv}
   \begin{onlyenv}<4->
     \begin{center}
-      \includegraphics[height=0.85\textheight]{outdep.tikz}
+      \includegraphics[height=0.85\textheight]{feedforward.tikz}
     \end{center}
   \end{onlyenv}
 \end{frame}
@@ -870,7 +870,7 @@
 
 \begin{frame}{Discussion}
   \begin{itemize}[<+->]
-    \item AND wiring is a wiring without output dependency \(\Rightarrow\) no increase in capacity
+    \item AND wiring is a wiring without feedforward \(\Rightarrow\) no increase in capacity
     \item Can generalise the argument about simulating the transformed statistics to other transformations
     \item Possible connection to \emph{measurement dependence}
       \begin{itemize}
