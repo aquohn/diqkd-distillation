@@ -96,7 +96,10 @@
 \newcommand{\restatableeq}[3]{\label{#3}#2\gdef#1{#2\tag{\ref{#3}}}} % macro for equations that need to be restated elsewhere. In math mode, write \restatableeq{<command for restating>}{<equation content>}{<label>}
 
 \newcommand{\tableline}[1]{\dimexpr #1\linewidth-2\tabcolsep}
-\newcommand{\lcaption}[2]{\caption[#1]{#1 #2}}
+\newcommand{\lcaption}[2]{\caption[#1]{#1 #2}} % long caption with only optional arg shown in table of figs
+\newcommand{\usenumber}{% opposite of nonumber
+  \refstepcounter{equation}\tag{\theequation}
+}
 
 % temporarily change margins
 \newenvironment{changemargin}[2]{% 
@@ -350,7 +353,7 @@
     \newcommand{\sWB}{\mathcal{WB}}
     \newcommand{\compatstates}[3][]{\hat{\mathcal{P}}#1(#2,#3)}
     \newcommand{\proto}[2][_{\Omega,\ell}]{\mathfrak{#2}#1}
-    \newcommand{\qproto}[2][_{\Omega,\ell}]{\hat{\mathfrak{#2}}#1}
+    \newcommand{\qproto}[2][_{\Omega,\ell}]{\tilde{\mathfrak{#2}}#1}
     \newcommand{\prin}[1][p]{#1_{\mathrm{in}}}
     \newcommand{\behav}[2]{\mathbb{P}\left[#1, #2\right]}
     \newcommand{\sk}{\rm sk}
@@ -485,6 +488,7 @@
         iid & Independent and identically distributed \\
         pmf & Probability mass function \\
         rv & Random variable \\
+        TVD & Total variation distance \\
         SDP & Semidefinite programming \\
         PSD & Positive semidefinite \\
         PSK & Pre-shared key \\
@@ -497,7 +501,7 @@
     \pagenumbering{arabic}
     \section{Introduction}
 
-    \emph{Quantum cryptography} refers to the use of \emph{quantum information} to perform cryptographic tasks~\cite{SecurityQKD, AdvancesQuantumCrypto}\footnote{In contrast to classical cryptography, which harnesses quantum \emph{mechanics} in the semiconductor devices used for computation.}. \emph{Quantum key distribution} (QKD) is a form of quantum cryptography that uses data from quantum measurements to generate a shared secret key between multiple parties, and to certify its security. What is remarkable about QKD is its ability to generate \emph{unconditionally secure} keys, where an attacker has essentially no advantage from any strategy beyond simply guessing the key from all possible keys. While unconditional security can be achieved by the classical means of the parties physically meeting to exchange a one-time pad (OTP), QKD represents a fundamental advance by allowing unconditionally secure keys to be established over an \emph{insecure channel}, unlike the secure channel of physically meeting up to exchange a one-time pad. This makes the use of unconditionally secure keys much more feasible.
+    \emph{Quantum cryptography} refers to the use of \emph{quantum information} to perform cryptographic tasks~\cite{SecurityQKD, AdvancesQuantumCrypto}\footnote{In contrast to classical cryptography, which harnesses quantum \emph{mechanics} in the semiconductor devices used for computation.}. \emph{Quantum key distribution} (QKD) is a form of quantum cryptography that uses data from quantum measurements to generate a shared secret key between multiple parties, and to certify its security. What is remarkable about QKD is its ability to generate \emph{unconditionally secure} keys, where an attacker has essentially no advantage from any strategy beyond simply guessing the key from all possible keys. While unconditional security can be achieved by the classical means of the parties physically meeting to exchange a one-time pad (OTP), QKD represents a fundamental advance by allowing unconditionally secure keys to be established over an \emph{insecure channel}, unlike the secure, but extremely inconvenient, channel of physically meeting up. This makes the use of unconditionally secure keys much more feasible.
 
     \emph{Device-independent quantum key distribution} (DIQKD) is a remarkable form of QKD that removes the need to characterise the physical devices involved in generating said data, that is, to give them a quantum-mechanical description and verify that they match the description. Whereas \emph{device-dependent} QKD is executed by devices that prepare specific states and perform specific measurements, DIQKD devices can be seen as black boxes with classical inputs and outputs. The statistical correlations in this classical data can certify the non-classical nature of the overall system, and the privacy of the generated data. This certification is done using \emph{Bell tests}, which detect the non-classical phenomenon of \emph{nonlocality}. As a more concrete example, in each round of a two-party (\emph{bipartite}) DIQKD protocol, the two parties Alice and Bob can provide inputs \(x\) and \(y\), respectively, to their devices, and obtain outputs \(a\) and \(b\), respectively. The joint conditional distribution that is observed over asymptotically many rounds is called the \emph{behaviour} \(p(ab|xy)\). The behaviour alone (with a few weak assumptions) is sufficient for Alice and Bob to generate secret keys, and so in the study of nonlocality, a device with a certain behaviour is referred to abstractly as that behaviour, or conversely behaviours might be described as \emph{boxes} that take inputs and give outputs.
 
@@ -513,7 +517,7 @@
 
     \section{Nonlocality}\label{sec:nl}
 
-    In this section, we briefly discuss the relevant notions of the theory of nonlocality. This exposition is primarily based on~\cite{BellNonlocality}, and unless otherwise noted, all uncited information in this section can be found there.
+    In this section, we briefly discuss the relevant notions of the theory of nonlocality. This exposition is primarily based on~\cite{BellNonlocality}, and all uncited information in this section can be found there.
 
     \subsection{The No-Signalling Conditions}\label{sec:nl_ns}
 
@@ -531,14 +535,15 @@
     \[ x \in \dintv{1}{i_A} \qquad a \in \dintv{1}{o_A} \qquad y \in \dintv{1}{i_B} \qquad b \in \dintv{1}{o_B}. \]
     Naively, it would seem that we need \(o_A o_B i_A i_B\) values of the distribution \(p(ab|xy)\), one for each tuple \((a, b, x, y)\), to describe a no-signalling behaviour (that is, a behaviour that fulfills the no-signalling conditions). However, the \emph{Collins-Gisin (CG) representation} takes advantage of the no-signalling conditions to reduce this. For each \(x\), \(p(a|x)\) must be normalised, and so the value of one of the marginals for each \(x\), conventionally \(p(o_A|x)\), is no longer independent. The same applies to \(p(b|y)\), yielding \((o_A-1)i_A + (o_B-1)i_B\) marginals in total. Similarly, \(p(o_A o_B|xy)\) is fixed by normalisation for a given \((x,y)\).
 
-    Further, the no-signalling conditions allow us to recover joint probabilities that involves either \(o_A\) or \(o_B\) as
+    Further, the no-signalling conditions allow us to recover joint probabilities that involve either \(o_A\) or \(o_B\) as
     \begin{gather}
       p(o_A b|xy) = p(b|y) - \sum_{a < o_A} p(ab|xy)\;\forall b,x,y\label{eqn:cgtofullA} \\
       p(ao_B|xy) = p(a|x) - \sum_{b < o_B} p(ab|xy)\;\forall a,x,y.\label{eqn:cgtofullB}
     \end{gather}
     Therefore, none of the probabilities \(p(ab|xy)\) with \(a = o_A\) or \(b = o_B\) are independent, and we have only \((o_A-1)(o_B-1){i_A}{i_B}\) independent probabilities of this form. Therefore, the number of independent parameters of a no-signalling behaviour is
-    \[ d_{NS}(i_A, o_A, i_B, o_B) = (o_A-1)(o_B-1){i_A}{i_B} + (o_A-1)i_A + (o_B-1)i_B, \]
-    and behaviours can be seen as vectors in \(\R^{d_{NS}}\), with all entries positive and normalised (that the remaining probabilities do not sum to more than 1 must still be enforced). In summary, the set of no-signalling behaviours is the \emph{no-signalling polytope} \(\NSs\), a subset of \(\R^{d_{NS}}\).
+    \begin{equation} d_{NS}(i_A, o_A; i_B, o_B) = (o_A-1)(o_B-1){i_A}{i_B} + (o_A-1)i_A + (o_B-1)i_B. \end{equation}
+
+    Since behaviours can be seen as vectors in \(\R^{d_{NS}}\), with all entries positive and normalised (that the remaining probabilities do not sum to more than 1 must still be enforced), and the no-signalling, positivity and normalisation constraints are linear, the set of no-signalling behaviours is the \emph{no-signalling polytope} \(\NSs\), a subset of \(\R^{d_{NS}}\).
     \begin{defn}[The No-Signalling Polytope]
       Given a vector \(\cvec{v} \in \R^{d_{NS}}\), we can construct a behaviour \(p\) by interpreting its coefficients as conditional probabilities and computing the remaining probabilities via \Cref{eqn:cgtofullA} and \Cref{eqn:cgtofullB}. Then, \(p \in \NSs\) iff the following are jointly true:
       \begin{enumerate}
@@ -560,13 +565,15 @@
       \end{equation}
       where \(P_{\Lambda}\) is an arbitrary probability mass function over an alphabet \(\{\lambda\}\), whose elements parametrise the family of distributions \(\{p_{\lambda}(a|x), p_{\lambda}(b|y)\}\).\footnote{\(\Lambda\) could be a continuous random variable as well, but we will assume that it is a discrete random variable for simplicity.}
     \end{defn}
-    It is, of course, possible to define conditional pmfs \(p(a|x\lambda) = p_{\lambda}(a|x)\) and \(p(b|y\lambda) = p_{\lambda}(b|y)\), which Bayes' rule would give as the proper interpretation of the pmfs \(p_{\lambda}\). The choice to denote them as a family of distinct pmfs, as opposed to two pmfs conditioned on the same rv \(\Lambda\), will be made based on convenience for the exposition.
+    It is, of course, possible to define conditional pmfs \(p(a|x\lambda) = p_{\lambda}(a|x)\) and \(p(b|y\lambda) = p_{\lambda}(b|y)\), which Bayes' rule would give as the proper interpretation of the pmfs \(p_{\lambda}\). The choice to denote them as a family of distinct pmfs, as opposed to two pmfs conditioned on the values \(\lambda\) of some rv \(\Lambda\), will be made based on convenience for the exposition.
 
-    There are a few ways to interpret the set of behaviours defined by this condition:
+    There are a few ways to interpret the set of behaviours defined by this set of equations.
     \begin{itemize}
-      \item The original, physically motivated interpretation is that \(\Lambda\) is a \emph{local hidden variable} explaining the behaviour of quantum systems. A bipartite Bell test can be implemented as follows: two quantum particles, prepared in a particular state, are distributed to Alice and Bob who independently choose one measurement from a fixed set of possibilities. The measurement choice is the input, while the measurement outcome is the output. Quantum theory predicts that the choice of input of one party can instantaneously influence the output of the other party, although obeying the no-signalling conditions so that no information is transmitted and the correlation is only revealed when Alice and Bob share their inputs with each other. This influence seemed highly unphysical (and was famously derided by Einstein as ``spooky action at a distance''). One possible alternative is for the two particles to encode the value of a random variable, which then locally determines the outcomes of their measurements using only their respective inputs. This random variable would be the rv \(\Lambda\) in the definition of \(\Ls\), so this alternative proposal would imply that all quantum behaviours are in \(\Ls\). As will be seen in \Cref{sec:nl_Q}, this is not the case, and \emph{pace} Einstein, nonlocal influence is a feature of reality.
-      \item Slightly modifying this interpretation, \(\Lambda\) could represent a \emph{pre-shared sequence} of random numbers, generated according to the distribution \(P_{\Lambda}(\lambda)\), that Alice and Bob use to independently generate their outputs.
-      \item A further modification views \(\Ls\) as the space of behaviours that can arise from the boxes being \emph{pre-programmed} with a list of apparently random numbers, or perhaps a seeded pseudorandom number generator, with the numbers, or the seed, corresponding to \(\Lambda\) and being held by the manufacturer of the boxes. The connection between \(\Ls\) and security becomes clearer in this interpretation, although a full explanation will only be given in \Cref{sec:diqkd_di}.
+      \item The original, physically motivated interpretation is that \(\Lambda\) is a \emph{local hidden variable} explaining the behaviour of quantum systems. A bipartite Bell test can be implemented as follows: two quantum particles, prepared in a particular state, are distributed to Alice and Bob who independently choose one measurement from a fixed set of possibilities. The measurement choice is the input, while the measurement outcome is the output. Quantum theory predicts that the choice of input of one party can instantaneously influence the output of the other party, although obeying the no-signalling conditions so that no information is transmitted and the correlation is only revealed when Alice and Bob share their inputs with each other.
+
+        This influence seemed highly unphysical (and was famously derided by Einstein as ``spooky action at a distance''). One possible alternative is for the state of the two particles to encode the value of a random variable, which then locally determines the outcomes of their measurements using only their respective inputs. This random variable would be the rv \(\Lambda\) in the definition of \(\Ls\), so this alternative proposal would imply that all quantum behaviours are in \(\Ls\). As will be seen in \Cref{sec:nl_Q}, this is not the case, and \emph{pace} Einstein, nonlocal influence is a feature of reality.
+      \item Slightly modifying this interpretation, \(\Lambda\) could represent a \emph{pre-shared sequence} of random numbers between Alice and Bob, generated according to the distribution \(P_{\Lambda}(\lambda)\), that Alice and Bob use to independently generate their outputs. In this interpretation, Alice and Bob are \emph{faking} their results, using the pre-shared data to simulate correlations arising from measurements on their quantum states, while not actually making use of the states.
+      \item A further modification views \(\Ls\) as the space of behaviours that can arise from the boxes being \emph{pre-programmed} with a list of apparently random numbers, or perhaps a seeded pseudorandom number generator, with the numbers, or the seed, corresponding to \(\Lambda\) and being held by the manufacturer of the boxes. In this case, \emph{the boxes} are faking the correlation, making it seem quantum when it is actually based on classical shared data. The connection between \(\Ls\) and security becomes clearer in this interpretation, although a full explanation will only be given in \Cref{sec:diqkd_di}.
     \end{itemize}
 
     We will shortly turn to discuss the behaviours that quantum systems can actually achieve, but we first study some properties of \(\Ls\). A \emph{deterministic} behaviour \(p_D(ab|xy)\) takes only values in \(\{0,1\}\) for all \(a\), \(b\), \(x\) and \(y\); that is, it deterministically maps each \((x,y)\) to a fixed \((a,b)\):
@@ -590,7 +597,7 @@
       and if the no-signalling conditions are satisfied, then \(p_D(a|xy) = p_D(a|xy') \Rightarrow \delta_{a\hat{a}(x,y)} = \delta_{a\hat{a}(x,y')}\) for any distinct \(y\) and \(y'\). Effectively, this means that \(\hat{a}(x,y)\) is independent of \(y\), so that \(p_D(a|xy) = p_D(a|x) = \delta_{a\hat{a}(x,y)}\) for all \(y\). The same argument can be given for \(y\) with the sum over \(a\), so that \(p_D(b|y) = \delta_{b\hat{b}(x,y)}\), and therefore \(p_D(ab|xy) = p_D(a|x)p_D(b|y)\). 
     \end{proof}
 
-    \begin{theorem}[Fine's Theorem~\cite{FineThm}]
+    \begin{theorem}[Fine's Theorem~\cite{FineThm}]\label{thm:finethm}
       Any behaviour in \(\Ls\) can be produced from a convex combination of LD behaviours, that is 
       \begin{equation}
         p(ab|xy) = \sum_{\lambda} P_{\Lambda}(\lambda) p_{LD|\lambda}(a|x)p_{LD|\lambda}(b|y).
@@ -630,14 +637,16 @@
       By increasing the dimension of the Hilbert space, we are able to express a convex combination of two quantum correlations in terms of a state and measurement strategy. This process can be applied recursively to a convex combination of arbitrarily many states and measurement strategies.
     \end{proof}
 
-    This proof relies on the fact that the dimension of the quantum systems cannot be bounded in the device-indepepndent setting, which obscures many of the subtleties that arise in dealing with \(\Qs\). For example, restricting the dimension of the parties' quantum system can result in a nonconvex set of behaviours~\cite{FiniteDimNonconvex}, and while this technique shows that all convex combinations of \(n\) behaviours in dimension \(d\) can be recovered using a system of dimension \(nd\), new behaviours outside this convexified set may be possible at dimension \(nd\), causing the behaviours at dimension \(nd\) to still be nonconvex. If this occurs for all dimensions, convexity may not be achieved for any finite dimension~\cite[Sec. 4]{FiniteDimNonconvex}.
+    This proof relies on the fact that the dimension of the quantum systems cannot be bounded in the device-indepepndent setting, which obscures many of the subtleties that arise in dealing with \(\Qs\). For example, restricting the dimension of the parties' quantum system can result in a nonconvex set of behaviours~\cite{FiniteDimNonconvex}, and while this technique shows that all convex combinations of \(n\) behaviours in dimension \(d\) can be recovered using a system of dimension \(nd\), new behaviours outside this convexified set may be possible at dimension \(nd\), causing the behaviours at dimension \(nd\) to still be nonconvex. This could occur for all dimensions, in which case convexity is not achieved for any finite dimension~\cite[Sec. 4]{FiniteDimNonconvex}.
 
     Another consequence is that states which are related through local unitaries, can all produce the same set of behaviours, because given a state \(U\rho{U^{\dagger}}\) with \(U = U_A \otimes U_B\), \(U_A^{\dagger} M_{a|x} U_A\) and \(U_B^{\dagger} N_{b|y} U_B\) are valid measurements that reproduce the original behaviour:
     \begin{equation}
       \Tr{{(U_A \otimes U_B)} \rho {(U_A \otimes U_B)}^{\dagger} \left(U_A M_{a|x} U_A^{\dagger} \otimes U_B N_{b|y} U_B^{\dagger} \right)} = \Tr{ \rho \left(M_{a|x} \otimes N_{b|y} \right)}.
     \end{equation}
 
-    In our analysis, we focus primarily on \emph{binary-output} settings, that is, settings where \(o_A = o_B = 2\), which are simpler to analyse and more helpful for applications. In this case, we can express many statistics of interest in language reminiscent of quantum theory. We define the \emph{observables} \(A_x\) and \(B_y\) for each value of \(x\) and \(y\), acting on Alice and Bob's respective Hilbert spaces\footnote{More formally, then, the observables are \(A_x \otimes I_B\) and \(I_A \otimes B_y\)}:
+    Instead of working with the full behaviour, we may choose to analyse behaviours by looking at functions of their probabilities, which we refer to as \emph{statistics}. This can simplify our analysis of behaviours significantly by allowing us to focus on a handful of scalar values instead of all the probabilities required to characterise the behaviour, and is sufficient for proving many powerful results, including the security of some DIQKD protocols (e.g.~\cite{DIQKD_StdProto}).
+
+    We also focus primarily on \emph{binary-output} settings, that is, settings where \(o_A = o_B = 2\), which are simpler to analyse and more helpful for applications. In this case, we can express many statistics of interest in language reminiscent of quantum theory. We define the \emph{observables} \(A_x\) and \(B_y\) for each value of \(x\) and \(y\), acting on Alice and Bob's respective Hilbert spaces\footnote{More formally, then, the observables are \(A_x \otimes I_B\) and \(I_A \otimes B_y\)}:
     \begin{equation} A_x \coloneqq -M_{a=0|x} + M_{a=1|x} \qquad B_y \coloneqq -N_{b=0|y} + N_{b=1|y}, \end{equation}
     where \(M_{a|x}\) and \(N_{b|y}\) are Alice and Bob's \emph{measurement operators}, respectively.
 
@@ -660,7 +669,7 @@
       Q_{xy} \coloneqq p(a \neq b|xy) = \frac{1-\angleb{A_x B_y}}{2} \\
       S_{x_0x_1y_0y_1} \coloneqq \angleb{A_{x_0} B_{y_0}} + \angleb{A_{x_1} B_{y_0}} + \angleb{A_{x_0} B_{y_1}} - \angleb{A_{x_1} B_{y_1}}.
     \end{gather}
-    The most commonly used version of \(S_{x_0x_1y_0y_1}\), simply referred to as \(S\), has \(x_0=0\), \(x_1=1\), \(y_0=0\) and \(y_1=1\). Behaviours with \(S > 2\) are not contained in \(\Ls\), while behaviours in \(\Qs\) are constrained to have \(S \leq 2\sqrt{2}\). Therefore, \(S \leq 2\) is referred to as the \emph{CHSH inequality}: violation of the inequality implies the presence of nonlocality. This is an example of a \emph{Bell inequality}: any inequality whose violation implies that a behaviour is outside of \(\Ls\)\footnote{Some authors reserve ``Bell inequality'' for only facet-defining/\emph{tight} inequalities; here we take a broader definition.}. Note that violation of any particular Bell inequality is a sufficient but not necessary condition for the behaviour to lie outside \(\Ls\): \(\abs{S_{x_0x_1y_0y_1}} \leq 2\) is a Bell inequality for any choice of parameters, but each behaviour in the \((2,2;2,2)\) setting can violate at most one such inequality~\cite{GeomDecomp}. It is, however, necessary that \emph{some} Bell inequality be violated if the behaviour is not in \(\Ls\).
+    The most commonly used version of \(S_{x_0x_1y_0y_1}\), simply referred to as \(S\), has \(x_0=0\), \(x_1=1\), \(y_0=0\) and \(y_1=1\). Behaviours with \(S > 2\) are not contained in \(\Ls\), while behaviours in \(\Qs\) are constrained to have \(S \leq 2\sqrt{2}\). Therefore, \(S \leq 2\) is referred to as the \emph{CHSH inequality}: violation of the inequality implies the presence of nonlocality. This is an example of a \emph{Bell inequality}: any inequality whose violation implies that a behaviour is outside of \(\Ls\)\footnote{Some authors reserve ``Bell inequality'' for only facet-defining/\emph{tight} inequalities; here we take a broader definition.}. Note that violation of any particular Bell inequality is a sufficient but not necessary condition for the behaviour to lie outside \(\Ls\): \(\abs{S_{x_0x_1y_0y_1}} \leq 2\) is a Bell inequality for any choice of parameters, but each behaviour in the \((2,2;2,2)\) setting can violate at most one such inequality~\cite{GeomDecomp}. It is, however, by definition necessary that \emph{some} Bell inequality be violated if the behaviour is not in \(\Ls\).
 
     \section{Device-Independent Quantum Key Distribution}\label{sec:diqkd}
 
@@ -668,7 +677,7 @@
 
     A typical device-independent protocol setup is as follows. Alice and Bob have measurement devices that can be arbitrarily \emph{flawed}, but not actively malicious (if they were actively malicious, they could simply leak the measurement results to Eve after the protocol is completed). The devices receive quantum signals (in essentially all practical cases, entangled photons) from a source that we pessimistically assume to be fully controlled by Eve, and input settings chosen independently and randomly by Alice and Bob. The devices then perform the quantum measurements corresponding to the input settings on the received signals, and output the measurement results as Bell test data. Alice selects her measurement setting using her private randomness, so that it is unknown to Bob at the time of measurement, \emph{mutatis mutandis} for Bob. The settings of both parties, then, are also unknown to Eve.
 
-    The behaviour, averaged over all Bell test rounds, is sufficient to prove the security of the protocol, hence the initial description of the measurement devices as black boxes characterised only by input--output statistics. We explain this using an intuitive argument based on~\cite[Sec. 1.3]{DIQKD_Lower}. If Eve chooses the behaviour for each round randomly, we can model this as her having a source of randomness that produces a value \(e\) with probability \(p_E(e)\) each round. She then selects the corresponding behaviour \(p_e(ab|xy)\), and the overall behaviour would then be
+    The behaviour, averaged over all Bell test rounds, is sufficient to prove the security of the protocol, hence the initial description of the measurement devices as black boxes characterised only by input--output statistics. We explain this using an intuitive argument based on~\cite[Sec. 1.3]{DIQKD_StdProto}. If Eve chooses the behaviour for each round randomly, we can model this as her having a source of randomness that produces a value \(e\) with probability \(p_E(e)\) each round. She then selects the corresponding behaviour \(p_e(ab|xy)\), and the overall behaviour would then be
     \begin{equation}\label{eqn:eveattack}
       p(ab|xy) = \sum_e p_E(e) p_e(ab|xy)
     \end{equation}
@@ -696,15 +705,15 @@
       \begin{equation}
         \restatableeq{\bellccq}{
           \rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n} = \sum_{\cvec{a}^n\cvec{b}^n \cvec{x}^n\cvec{y}^n} \begin{aligned}[c]
-          & \prin^n(\cvec{x}^n,\cvec{y}^n) p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \proj[\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n]{\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n} \\
-            \otimes & \rho_{E^n|\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n},
+          & \prin^n(\cvec{x}^n,\cvec{y}^n) p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) \proj[\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n]{\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n} \otimes \\
+            & \rho_{E^n|\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n},
           \end{aligned}
         }{eqn:bellccq}
       \end{equation}
       where \(\rho_{E^n|\cvec{a}^n\cvec{x}^n \cvec{b}^n\cvec{y}^n}\) is Eve's state conditioned on the input sequences \(\cvec{x}^n, \cvec{y}^n\) and output sequences \(\cvec{a}^n, \cvec{b}^n\), \(\prin^n(\cvec{x}^n, \cvec{y}^n)\) is the joint distribution of the input sequences for the Bell test, and \(p^n(\cvec{a}^n \cvec{b}^n|\cvec{x}^n \cvec{y}^n)\) is the joint conditional distribution for the outputs.
     \end{defn}
 
-    At the most general level, the execution of a DIQKD protocol consists of carrying out a finite sequence of operations within the set of \emph{local operations and public communication} (LOPC), that distills a key of length \(\ell_n\) from the data from \(n\) rounds of Bell tests. In the device-independent setting, where Alice and Bob only have classical data, ``local operations'' refer to \emph{classical} local operations, which can be considered as \emph{channels} in classical information theory, which are fully characterised by a conditional probability of each output symbol based on each input symbol. In contrast, local operations in a generic device-dependent protocol may be general CPTP maps, which are the sort discussed in~\cite{CQKeyDistill}. We provide here an explicit definition of the LOPC operations allowable in a DIQKD protocol, expressed in terms of operators acting on states.
+    At the most general level, the execution of a DIQKD protocol consists of carrying out a finite sequence of operations within the set of \emph{local operations and public communication} (LOPC), that distills a key of length \(\ell_n\) from the data from \(n\) rounds of Bell tests. In the device-independent setting, where Alice and Bob only have classical data, ``local operations'' refer to \emph{classical} local operations; that is, \emph{channels} or \emph{stochastic maps} in classical information theory, applied independently by each party. Channels are fully characterised by a conditional probability of each output symbol based on each input symbol. In contrast, local operations in a generic device-dependent protocol may be general CPTP maps, which are the sort discussed in~\cite{CQKeyDistill}. We provide here an explicit definition of the LOPC operations allowable in a DIQKD protocol, expressed in terms of operators acting on states.
     \begin{defn}[LOPC Operations]
       Before executing the \(k\)th step of a protocol, let \(\crv{S}_A^{(k)}\), and \(\crv{D}_A^{(k)}\) represent Alice's private data and her local copy of the publicly transmitted data, and let \(\crv{T}^{(k)}_A\) be her transmitted public data. Define \(\crv{S}_B^{(k)}\), \(\crv{D}_B^{(k)}\) and \(\crv{T}_B^{(k)}\) analogously for Bob. Note that \(\crv{D}^{(0)}_A\) is a trivial system, and \(\crv{S}_A^{(1)}\) is \(\crv{A}^{n}\crv{X}^{n}\), likewise for Bob. Further, let \(\crv{D}^{(k)}\) be the public record of all data exchanged thus far. Then, if the \(k\)th step is an LOPC operation \(\Omega^{(k)}\), its overall effect can be described as the composition of the following maps:
       \begin{enumerate}
@@ -754,7 +763,7 @@
       \begin{equation}
         \Trdist{{\Omega[\rho]}_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}^n}}{\tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}} \otimes \rho_{E^n} \otimes {\Omega[\rho]}_{\crv{D}^n}} \leq \epsilon,
       \end{equation}
-      where \(\tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}}\) is the \emph{ideal key}
+      where \(\Trdist{\cdot}{\cdot}\) is the trace distance (\Cref{sec:prelim_infot}), \(\tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}}\) is the \emph{ideal key}
       \begin{equation}
         \tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \proj[\crv{K}_{A}^{\ell}]{j} \otimes \proj[\crv{K}_{B}^{\ell}]{j},
       \end{equation}
@@ -781,9 +790,9 @@
 
     This definition is novel in allowing correlated inputs and considering the secrecy cost of generating the input, which must be private from Eve. It is therefore more general, and in fact can lead to greater achievable rates (e.g.\ in~\cite[Prot. 2]{DIQKD_FiniteSize}).
 
-    Note that \(L_{\Omega}\) is a very general expression that subsumes all modifications that must be made to the key rate in order to account for the generation of the inputs. For example, it might be possible to \emph{post-select} a fraction of the rounds based on the inputs used so that the effective input distribution simulates the desired \(\prin^n\), or to \emph{recover} the entropy of the input data, allowing it to be used in the final secret key generated, as was done in~\cite[Prot. 2]{DIQKD_FiniteSize}. This necessitates a dependence on the protocol, denoted via the subscript \(\Omega\), since the protocol will determine how much secrecy is irretrievably lost in establishing the correlation. We do not investigate such mechanisms and their impact on security further, but we make the note that for these particular examples, the resulting changes in the key rate are multiplicative, not additive, so they cannot bring the key rate of a behaviour from zero to non-zero or vice versa.
+    Note that \(L_{\Omega}\) is a very general expression that subsumes all modifications that must be made to the key rate in order to account for the generation of the inputs. For example, it might be possible to \emph{post-select} a fraction of the rounds based on the inputs used so that the effective input distribution simulates the desired \(\prin^n\), or to \emph{recover} the entropy of the input data, allowing it to be used in the final secret key generated, as was done in~\cite[Prot. 2]{DIQKD_FiniteSize}. This necessitates a dependence on the protocol, denoted via the subscript \(\Omega\), since the protocol will determine how much secrecy is irretrievably lost in establishing the correlation. We do not investigate such mechanisms and their impact on security further, but make the note that for these particular examples, the resulting changes in the key rate are multiplicative, not additive, so they cannot bring the key rate of a behaviour from zero to non-zero or vice versa.
 
-    One strategy that is available to Alice and Bob is to use a \emph{pre-shared key} (PSK) to generate their inputs. Alice and Bob must already have some shared secrecy to perform authentication (\Cref{def:diqkdassump}), so this is only a slight modification of the standard DIQKD scenario. Additionally, if we consider the DIQKD protocol being executed multiple times, the shared secrecy generated in previous rounds could be used to provide the inputs of subsequent rounds, relying on the universal composability of our security definitions to bound the overall security of such a system. Since DIQKD (and QKD in general) produces uniform randomness, and authentication schemes require uniform randomness anyway (see e.g.~\cite{AuthKeyRecycling} for a recent analysis), we make the natural assumption that the PSK is uniformly distributed.
+    One strategy that is available to Alice and Bob is to use a \emph{pre-shared key} (PSK) to generate their inputs. Alice and Bob must already have some shared secrecy to perform authentication (\Cref{def:diqkdassump}), so this is only a slight modification of the standard DIQKD scenario, as noted in~\cite{DIQKD_FiniteSize}. Additionally, if we consider the DIQKD protocol being executed multiple times, the shared secrecy generated in previous rounds could be used to provide the inputs of subsequent rounds, relying on the universal composability of our security definitions to bound the overall security of such a system. Since DIQKD (and QKD in general) produces uniform randomness, and authentication schemes require uniform randomness anyway (see e.g.~\cite{AuthKeyRecycling} for a recent analysis), we make the natural assumption that the PSK is uniformly distributed.
 
     The general problem of two independent parties generating a specific joint distribution from shared uniform randomness is well-studied in information theory, where it is called \emph{distributed source synthesis} or \emph{simulation}. The amount of shared randomness required is therefore an upper bound on the secrecy cost \(L_{\Omega}\), since, as discussed above, the expended secrecy could be recovered or generated more efficiently in the course of the protocol.
 
@@ -794,9 +803,9 @@
     In the general case, the entire sequences \(\cvec{x}^n\) and \(\cvec{y}^n\) are generated at once, so the appropriate characterisation would be a one-shot one. We do not require a precise characterisation for our results, so we do not investigate this thoroughly, but make a few remarks:
     \begin{itemize}
       \item The \emph{exact common information}~\cite{ExactCommonInfo}, which quantifies the amount of shared randomness required to exactly simulate a distribution, appears to be connected to this task, but relies on minimising over all possible shared rvs, while we only have shared uniform randomness, and would need to simulate the optimal shared rv exactly as well.
-      \item There is a one-shot achievability result, the \emph{soft covering lemma}, which was analysed in detail in~\cite[Lem. IV.1]{DistrChanSynth}. In its simplest form, it bounds the total variational distance of a desired output distribution \(P_{\crv{V}^m}\) from a distribution generated by sending random sequences from a subset of the alphabet of \(\crv{U}^{m}\) through \(m\) iid copies of a channel \(P_{\crv{V}|\crv{U}}\). If the sequences are sampled uniformly from a random subset of \(\mathcal{C} \subseteq \{\cvec{v}^m\}\) (the \emph{codebook}) such that \(\abs{\mathcal{C}} > \exp_2(mI(\crv{U}:\crv{V}))\), then the total variation distance vanishes exponentially in \(m\), and has an explicit bound for all \(m\).
+      \item There is a one-shot achievability result, the \emph{soft covering lemma}, which was analysed in detail in~\cite[Lem. IV.1]{DistrChanSynth}. In its simplest form, it bounds the total variation distance (TVD) of a desired output distribution \(P_{\crv{V}^m}\) from a distribution generated by sending random sequences from a subset of the alphabet of \(\crv{U}^{m}\) through \(m\) iid copies of a channel \(P_{\crv{V}|\crv{U}}\). If the sequences are sampled uniformly from a random subset of \(\mathcal{C} \subseteq \{\cvec{v}^m\}\) (the \emph{codebook}) such that \(\abs{\mathcal{C}} > \exp_2(mI(\crv{U}:\crv{V}))\), then the TVD vanishes exponentially in \(m\), and has an explicit bound for all \(m\).
 
-        This result can be applied to our problem, as explained in~\cite[Sec. V-B]{CorrReview} by setting \(\crv{V} = \crv{X^n Y^n}\) and 
+        This result can be applied to our problem, as explained in~\cite[Sec. V-B]{CorrReview}, by setting \(\crv{V} = \crv{X^n Y^n}\) and 
         \begin{equation}
         \crv{U} = \argmin_{\substack{
         \crv{X}^n \markov \crv{U} \markov \crv{Y}^n \\
@@ -804,8 +813,8 @@
       }
       } I(\crv{U}:\crv{X}^n\crv{Y}^n),
         \end{equation}
-        which can be achieved with a random variable of bounded cardinality~\cite[Sec. VI.A]{DistrChanSynth}. Then, the Markov chain condition imposes \(P_{\crv{X}^n\crv{Y}^n|\crv{U}} = P_{\crv{X}^n|\crv{U}} P_{\crv{Y}^n|\crv{U}}\). Alice and Bob can then use \(\log \abs{\mathcal{C}}\) bits of uniform shared secrecy to select a \emph{codeword} in the codebook and implement their respective parts \(P_{\crv{X}^n|\crv{U}}\) and \(P_{\crv{X}^n|\crv{U}}\) of the channel locally in order to find their required inputs. The soft covering lemma with \(m=1\) then bounds the total variational distance of the generated distribution from \(\prin^n\).
-      \item The requirement for vanishing single-shot error puts strong constraints on the possible form of the sequence \(\{\prin^n\}\), since one-shot bounds generally have non-vanishing error for \(m=1\), and so the property of vanishing error as \(n\to\infty\) must come from the choice of sequence, rather than the simulation scheme. As the preceding discussion demonstrates, non-correlated (independent) variables and iid pairs of variables are possible realisations for \(\prin^n\).
+        which can be achieved with a random variable of bounded cardinality~\cite[Sec. VI.A]{DistrChanSynth}. Then, the Markov chain condition imposes \(P_{\crv{X}^n\crv{Y}^n|\crv{U}} = P_{\crv{X}^n|\crv{U}} P_{\crv{Y}^n|\crv{U}}\). Alice and Bob can then use \(\log \abs{\mathcal{C}}\) bits of uniform shared secrecy to select a \emph{codeword} in the codebook and implement their respective parts \(P_{\crv{X}^n|\crv{U}}\) and \(P_{\crv{X}^n|\crv{U}}\) of the channel locally in order to find their required inputs. The soft covering lemma with \(m=1\) then bounds the TVD of the generated distribution from \(\prin^n\). Since the TVD is the trace distance restricted to classical rvs, if the TVD is upper-bounded by \(\delta\), the state prepared with \(\prin^n\) is \(\omega\), the ideal output state is \(\omega^*\), and the state obtained using this method for generating \(\prin^n\) is \(\omega^{(\delta)}\), we have that \(\Trdist{\omega^{(\delta)}}{\omega^*} \leq \Trdist{\omega^{(\delta)}}{\omega} + \Trdist{\omega}{\omega^*} = \delta + \Trdist{\omega}{\omega^*}\).
+      \item The requirement for vanishing error puts strong constraints on the possible form of the sequence \(\{\prin^n\}\), since one-shot bounds generally have non-vanishing error for \(m=1\), and so the property of vanishing error as \(n\to\infty\) must come from the choice of sequence, rather than the simulation scheme. As the preceding discussion demonstrates, non-correlated (independent) variables and iid pairs of variables are possible realisations for \(\prin^n\) with asymptotically vanishing error.
       \item It may be worth utilising more recently developed tools to establish better one-shot converse~\cite{BLIneqStrongConv} and achievability~\cite{PoissonMatch} results in order to obtain tighter bounds on \(L_{\Omega}\). In particular, there does not seem to be a one-shot converse for the Wyner common information problem (although, since a converse would give a lower bound to this upper bound on \(L_{\Omega}\), it is not clear how useful this would be).
     \end{itemize}
 
@@ -813,12 +822,12 @@
 
     A generic QKD protocol (see e.g.~\cite{PracticalQKD} for a review) consists of the following steps:
   \begin{enumerate}
-    \item \emph{Quantum communication}: Alice and Bob distribute and measure quantum systems, and identify part of their measurement statistics as their \emph{raw keys}.
+    \item \emph{Quantum communication}: Alice and Bob distribute and measure quantum systems, and identify parts of their measurement data as their \emph{raw keys}.
     \item \emph{Parameter estimation}: Alice and Bob examine their measurement statistics in order to estimate how much Eve has interfered with the system. They abort the protocol if their estimate shows Eve's interference could have compromised their key.
     \item \emph{Information reconciliation}: Alice and Bob map their raw keys to two \emph{reconciled keys}, that are identical with high probability. We include the step typically referred to as \emph{sifting}, where Alice and Bob choose which rounds to use to generate their key, as part of information reconciliation.
     \item \emph{Privacy amplification}: Alice and Bob map their reconciled keys, which may be partially known to Eve, to their final \emph{secret keys}, which are close to uniformly random for Eve, but of a shorter length than the reconciled keys.
 \end{enumerate}
-    Both parameter estimation and information reconciliation have a probability of failure even if the device's physical implementation is honest, due to errors arising from statistical fluctuations. Concrete examples would be when the behaviour averaged over all rounds is insecure, or if there is a decoding failure in the reconciliation scheme. When these steps fail, the protocol is \emph{aborted}. Therefore, in some definitions of the key rate, the probability \(\erob\) of aborting the protocol due to statistical fluctuations rather than an attack by Eve is included in the definition of the key rate (see e.g.~\cite{SecurityQKD, CompleteSecurityProof}). However, to simplify our discussion, and since we are working in the asymptotic regime, we can assume that the probability of such events vanishes asymptotically and that we therefore do not need to account for robustness.
+    Both parameter estimation and information reconciliation have a probability of failure even if the device's physical implementation is honest, due to errors arising from statistical fluctuations. Concrete examples would be when the behaviour averaged over all rounds happens to be insecure due to statistical fluctuations, or if there is a decoding failure in the reconciliation scheme. When these steps fail, the protocol is \emph{aborted}. Therefore, in some definitions of the key rate, the probability \(\erob\) of aborting the protocol due to statistical fluctuations rather than an attack by Eve is included in the definition of the key rate (see e.g.~\cite{SecurityQKD, CompleteSecurityProof}). However, to simplify our discussion, and since we are working in the asymptotic regime, we can assume that the probability of such events vanishes asymptotically and that we therefore do not need to account for robustness.
 
   \subsection{Security from Behaviours}\label{sec:diqkd_behavsec}
 
@@ -843,6 +852,8 @@
   \end{enumerate}
     \end{defn}
 
+    The set of POVMs used by the two players are jointly referred to as the \emph{measurement strategy}
+    \[ \sM = \left( {\{ {\{ M_{\cvec{a}^n|\cvec{x}^n}\}}_{\cvec{a}^n} \}}_{\cvec{x}^n}, {\{ {\{ N_{\cvec{b}^n|\cvec{y}^n}\}}_{\cvec{b}^n} \}}_{\cvec{y}^n} \right). \]
     We define the operator \(\behav{\rho}{\sM}\) as mapping the state and measurement strategy \(\sM\) to the behaviour they produce:
     \begin{equation}
       \behav{\rho_{A^n B^n E^n}}{\sM} = p \Leftrightarrow p^n(\cvec{a}^n\cvec{b}^n|\cvec{x}^n\cvec{y}^n) = \Tr{\rho_{A^n B^n E^n} \left(M_{\cvec{a}^n|\cvec{x}^n} \otimes N_{\cvec{b}^n|\cvec{y}^n} \otimes I_{E^n}\right) }.
@@ -868,13 +879,13 @@
     \end{defn}
     The input distributions \(\prin^n\) are maximised over, since Alice and Bob are free to choose their inputs, but they cannot otherwise constrain Eve's choice of state, hence the inner minimisation on the state.
 
-    Computing the secret key capacity is the fundamental question that DIQKD research is trying to answer:
+    Computation of the secret key capacity is a fundamental question that DIQKD research is grappling with.
     \begin{funqn}\label{fqn:cap}
       How can we compute the secret key capacity of an arbitrary behaviour?
     \end{funqn}
     While we do not have an algorithm to do so in general, we do have techniques for finding upper and lower bounds, although these bounds typically apply only to a subset of the possible protocols or input distributions. Almost all such techniques make a crucial simplifying assumption: we consider each round to be independent and identically distributed (iid). Iid attacks where Eve stores quantum information are referred to as \emph{collective attacks} in the literature, as opposed to \emph{individual attacks}, like the one characterised in \Cref{eqn:eveattack}, where Eve's information is purely classical.
 
-    Although this assumption seems extremely strong and unrealistic, remarkably, security against collective attacks can be extended to general, non-iid attacks, and the difference in the key rate from the collective case can be asymptotically vanishing. A framework for reductions from general to collective attacks was established in~\cite{DI_Proofs}, based on the \emph{entropy accumulation theorem} (EAT)~\cite{EntAcc}, and finds a difference of \(O(1/\sqrt{n})\) for protocols based on CHSH.\ While we cannot claim unconditionally that the key rates against collective and general attacks are always asymptotically equal, this framework is quite flexible, and a slightly modified version of this approach was recently applied to more advanced protocols involving the random choice of basis for key generation and noisy preprocessing\footnote{\emph{Noisy preprocessing} is a technique where Alice uses her private randomness to flip some of the bits of her key, decreasing her correlation with Eve and Bob, but doing so in a way that increases the net key rate, which can improve key rates in both device-dependent QKD~\cite{NoisyPreproc} and DIQKD~\cite{BFF_QRE, AsymmetricCHSH, DIQKD_FiniteSize}.}~\cite{DIQKD_FiniteSize}. 
+    Although this assumption seems extremely strong and unrealistic, remarkably, security against collective attacks can be extended to general, non-iid attacks, and the difference in the key rate from the collective case can be asymptotically vanishing. A framework for reductions from general to collective attacks was established in~\cite{DI_Proofs}, based on the \emph{entropy accumulation theorem} (EAT)~\cite{EntAcc}, and finds a difference of \(O(1/\sqrt{n})\) for protocols based on CHSH.\ While we cannot claim unconditionally that the key rates against collective and general attacks are always asymptotically equal, this framework is quite flexible, and a slightly modified version of this approach was recently applied to more advanced protocols~\cite{DIQKD_FiniteSize} involving the random choice of basis for key generation and noisy preprocessing, a technique where Alice uses her private randomness to flip some of the bits of her key, decreasing her correlation with Eve and Bob, but doing so in a way that increases the net key rate, which can improve key rates in both device-dependent QKD~\cite{NoisyPreproc} and DIQKD~\cite{BFF_QRE, AsymmetricCHSH, DIQKD_FiniteSize}.
 
     Therefore, we choose to focus on states of the form \( \rho_{\crv{AXBY}E}^{\otimes n} \), such that
     \begin{align}
@@ -893,7 +904,7 @@
     \begin{defn}[The iid Assumption]
       The iid secret key capacity of any behaviour is equal to its secret key capacity.
     \end{defn}
-    Note that, since we are changing both the allowable set of input distributions, and the allowable set of states for Eve, we cannot easily prove the seemingly obvious claim that \(C_{\sk}^{\otimes}(p) \geq C_{\sk}(p)\). One possible route for this would be to prove that the only sequences of input distributions \(\{\prin^n\}\) that can be simulated with vanishing error are iid distributions and distributions with \(\cvec{x}^n\) and \(\cvec{y}^n\) independent, and that the latter do not lead to an advantage over iid distributions. Nonetheless, we leave this technicality to future work and work in the much simpler analytical setting of the iid assumption.
+    Note that, since we are changing both the allowable set of input distributions, and the allowable set of states for Eve, we cannot easily prove the seemingly obvious claim that \(C_{\sk}^{\otimes}(p) \geq C_{\sk}(p)\). One possible route for this would be to prove that the only sequences of input distributions \(\{\prin^n\}\) that can be simulated with vanishing error are iid distributions and distributions with \(\cvec{x}^n\) and \(\cvec{y}^n\) independent, and that the latter do not lead to an advantage over iid distributions. Nonetheless, we leave this technicality to future work, and remain in the much simpler analytical setting of the iid assumption.
 
     \begin{question}
       Can the bound \(C_{\sk}^{\otimes}(p) \geq C_{\sk}(p)\) be proven rigorously?
@@ -901,18 +912,18 @@
 
     A lower bound for the iid secret key capacity is the \emph{Devetak-Winter key rate}~\cite{DevetakWinter} \(r_{\DW}\). Intuitively, the amount of information that Alice has which is secret to Eve is \({H(\crv{A}|E)}_{\rho}\): the uncertainty that Eve, who possess the \(E\) system, has about Alice's \(\crv{A}\) system, when the joint state of the two subsystems is \(\rho_{\crv{A}E}\).  On the other hand, \(\crv{B}\) may not be perfectly correlated with \(\crv{A}\). Then, with a one-way, non-interactive information reconciliation protocol to reconcile Alice and Bob's keys, the amount of information that has to be leaked to Eve during reconciliation is upper bounded by \({H(\crv{A}|\crv{B})}_{\rho}\). This gives us
     \begin{equation}
-      r_{\DW}(p) \coloneqq {H(\crv{A}|E)}_{\rho} - {H(\crv{A}|\crv{B})}_{\rho} \leq C_{\sk}^{\otimes}(p).
+      r_{\DW}(p) \coloneqq \sup_{\prin} \inf_{\substack{\rho : \\ \rho \in \compatstates{p}{\prin}}} {H(\crv{A}|E)}_{\rho} - {H(\crv{A}|\crv{B})}_{\rho} \leq C_{\sk}^{\otimes}(p).
     \end{equation}
 
     Much of the effort in bounding \(C_{\sk}^{\otimes}\) has focused on this definition, because two-way information reconciliation is much more poorly understood (although it can provide an advantage, see~\cite{AdvantageDistill}).  While \({H(\crv{A}|\crv{B})}_{\rho}\), being purely classical, can be estimated quite directly (and is typically taken as the quantum bit error rate \(Q\)), upper and lower bounds for \({H(\crv{A}|E)}_{\rho}\) are much harder to find.
 
-    Our computational investigations will mostly focus on what we refer to as the \emph{standard protocol}, proposed and proved secure in~\cite{DIQKD_Lower}. It was based on the first DIQKD protocol, E91~\cite{E91}, and is the first DIQKD protocol proven to be secure against collective attacks. This takes place in the \((2,2;3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}. The protocol uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key, while bounding Eve's information with the CHSH value for \(x,y \in \{0,1\}\) after symmetrising the marginals \(\angleb{A_x}\) and \(\angleb{B_y}\) for those values of \(x\) and \(y\). This was done by randomly choosing to flip the outcomes of half of the rounds, and publicly communicating this choice. Therefore, we have \({H(\crv{A}|\crv{B})}_{\rho} = Q_{02}\), and a CHSH-based lower bound for \({H(\crv{A}|E)}_{\rho}\) was proved:
+    Our computational investigations will mostly focus on what we refer to as the \emph{standard protocol}, proposed and proved secure in~\cite{DIQKD_StdProto}. It was based on the first DIQKD protocol, E91~\cite{E91}, and is the first DIQKD protocol proven to be secure against collective attacks. This takes place in the \((2,2;3,2)\) setting, which we henceforth refer to as the \emph{QKD setting}. The protocol uses Alice's and Bob's received outputs in the rounds with \(x = 0, y = 2\) as the key, while bounding Eve's information with the CHSH value for \(x,y \in \{0,1\}\) after symmetrising the marginals \(\angleb{A_x}\) and \(\angleb{B_y}\) for those values of \(x\) and \(y\). This was done by randomly choosing to flip the outcomes of half of the rounds, and publicly communicating this choice. Therefore, for any \(\prin\) and any \(\rho \in \compatstates{p}{\prin}\) we have \({H(\crv{A}|\crv{B})}_{\rho} = Q_{02}[p]\), and a CHSH-based lower bound for \({H(\crv{A}|E)}_{\rho}\) was proved:
     \begin{equation}
-      {H(\crv{A}|E)}_{\rho} \geq {H_S(\crv{A}|E)}_{\rho} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S/2)}^2-1}}{2} \right),
+      \forall \prin : \forall \rho \in \compatstates{p}{\prin} : {H(\crv{A}|E)}_{\rho} \geq {H_S(\crv{A}|E)}_{p} \coloneqq 1 - h_2\left( \frac{1 + \sqrt{{(S[p]/2)}^2-1}}{2} \right),
     \end{equation}
     where \(h_2(x) = - x \log x - (1-x) \log (1-x)\) is the binary entropy function, and where \(S\) is calculated from \(x,y \in \{0,1\}\). Therefore,
     \begin{equation}
-      r_{\DW} \geq r_{\std} = \max \left\{ 0, {H_S(\crv{A}|E)}_{\rho} - h_2(Q) \right\},
+      r_{\DW}(p) \geq r_{\std}(p) = \max \left\{ 0, {H_S(\crv{A}|E)}_{p} - h_2(Q[p]) \right\},
     \end{equation}
     where we refer to \(r_{\std}\) as the \emph{standard protocol key rate}, and \(S\) and \(Q\) are shorthand for \(S_{0101}\) and \(Q_{02}\) respectively (as defined in \Cref{sec:nl_Q}). Being the rate for an explicit, achievable protocol, this is a lower bound for the total secrecy extractable. However, because the proof of the bound involves explicitly constructing the states and measurements that give the greatest advantage to Eve while still producing the observed values of \(S\) and \(Q\), it is also an upper bound for any method for computing key rates for this protocol based only on \(S\) and \(Q\), since the observed \(S\) and \(Q\) could have been produced by those states.
 
@@ -923,9 +934,9 @@
     \begin{defn}[The Device-Dependent Secret Key Capacity]\label{def:seckeycapstate}
     The secret key capacity\footnote{Renner's seminal thesis~\cite{RennerQKD} proved that, in the device-dependent setting, the iid assumption is justified---that is, the asymptotic key rate against coherent and collective attacks is identical---under the assumption that permuting the rounds of the protocol will not change the overall initial state. Any protocol can be cast into this form by publicly agreeing on a random permutation of the rounds. Therefore, we write \(C_{\sk}(\rho)\) rather than \(C^{\otimes}_{\sk}(\rho)\).} of a qqq state \(\rho_{ABE}\) is~\cite{CQKeyDistill}:
     \begin{equation}
-      C_{\sk}(\rho_{A B E}) = \sup_{\hat{\mathfrak{P}}_{\omega}} r(\hat{\mathfrak{P}}_{\omega}, \{\rho_{ABE}^{\otimes n}\}),
+      C_{\sk}(\rho_{A B E}) = \sup_{\qproto{P}} r(\qproto{P}, \{\rho_{ABE}^{\otimes n}\}),
     \end{equation}
-    where \(\qproto{P}\) denotes a (possibly) device-dependent protocol (such that local operations are no longer constrained to be classical). The definitions of \(r\) and \(\hat{\mathfrak{P}}_{\omega}\) are identical to those given in \Cref{sec:diqkd_proto}, except on qqq states rather than ccq states.
+    where \(\qproto{P}\) denotes a (possibly) device-dependent protocol (such that local operations are no longer constrained to be classical). The definitions of \(r\) and \(\qproto{P}\) are identical to those given in \Cref{sec:diqkd_proto}, except on qqq states rather than ccq states.
   \end{defn}
 
     Therefore, we have the inequality
@@ -948,14 +959,14 @@
       C_{\sk}(\rho_{A B E}) \leq I{(A : B \downarrow E)}_{\rho}.
     \end{equation}
 
-    However, this bound is not tight, because the classical intrinsic information is \emph{\(E\)-lockable}: it can increase by arbitrarily much if Eve loses a single bit, while the device-dependent key rate is not \(E\)-lockable~\cite[Thm 5.1]{CQKeyDistill}. This motivates the definition of the \emph{reduced intrinsic information}
+    However, this bound is not tight, because the classical intrinsic information is \emph{\(E\)-lockable}: it can increase by arbitrarily much if Eve loses a single bit, while the device-dependent secret key capacity is not \(E\)-lockable~\cite[Thm 5.1]{CQKeyDistill}. This motivates the definition of the \emph{reduced intrinsic information}
     \begin{equation}\label{eqn:red_intr_info}
       I{(A : B \downarrow\downarrow E)}_{\rho} = \inf_{%
         \substack{\rho_{A B EE'} : \\ 
       \Tr[_{E'}]{\rho_{A B EE'}} = \rho_{A B E}}}
-      I{(A : B \downarrow EE')}_{\rho} + (1+\indic{E' \text{ classical}})H(E'),
+      I{(A : B \downarrow EE')}_{\rho} + (1+\indic{E' \text{ quantum}})H(E'),
     \end{equation}
-    The increase in the reduced intrinsic information from Eve's loss of \(E'\) is bounded by \((1+\indic{E' \text{ classical}})H(E')\).
+    The increase in the reduced intrinsic information from Eve's loss of \(E'\) is bounded by \((1+\indic{E' \text{ quantum}})H(E')\).
 
     Entanglement measures include the \emph{squashed entanglement}
     \begin{equation}
@@ -986,25 +997,27 @@
 
     \subsection{Locking}\label{sec:diqkd_lock}
 
-    It is known that, in the device-dependent QKD scenario, a PSK cannot increase the rate of a protocol~\cite[Cor. 5.3]{CQKeyDistill}, as a consequence of non-lockability of the device-dependent key rate (\Cref{sec:diqkd_ustate}). The proof proceeds by arguing that, given a protocol \(\qproto{P}\) for \(\rho_{ABE}\), and giving Eve an additional register \(E'\), such that \(\Tr[_{E'}]{\rho_{ABEE'}} = \rho_{ABE}\), executing \(\qproto{P}\) as if \(E'\) did not exist will achieve
+    The proof of the non-lockability of the device-dependent secret key capacity relies on proving that, for any protocol achieving the rate \(R\) using the state \(\rho_{ABE}\), a protocol for state \(\rho_{ABEE'}\) with rate \(R' \geq R - (1+\indic{E' \text{ quantum}})H{(E')}_{\rho}\) can be constructed~\cite[Thm. 5.1]{CQKeyDistill}. Applying this result to the optimal protocol shows that the secret key capacity is not lockable, while applying it to a scenario where \(E'\) contains a PSK shows that the use of a PSK cannot increase the net key rate~\cite[Cor. 5.3]{CQKeyDistill}.
+
+    The proof proceeds by arguing that, given a protocol \(\qproto{P}\) for \(\rho_{ABE}\), and giving Eve an additional register \(E'\), such that \(\Tr[_{E'}]{\rho_{ABEE'}} = \rho_{ABE}\), executing \(\qproto{P}\) as if \(E'\) did not exist will achieve
               \begin{equation}
-                r\left(\qproto{P}, {\{\rho_{ABEE'}^{\otimes n}\}} \right) \geq r\left(\qproto{P}, {\{\rho_{ABE}^{\otimes n}\}} \right) - (1+\indic{E' \text{ classical}})H{(E')}_{\rho}.
+                r\left(\qproto{P}, {\{\rho_{ABEE'}^{\otimes n}\}} \right) \geq r\left(\qproto{P}, {\{\rho_{ABE}^{\otimes n}\}} \right) - (1+\indic{E' \text{ quantum}})H{(E')}_{\rho}.
               \end{equation}
-            In particular, if Alice and Bob share a uniformly-distributed PSK such that the joint state \(\rho_{A'B'E} \cong \rho_{ABE} \otimes \tau_{\crv{K}_{A} \crv{K}_{B}}\), then we can set \(E'\) to hold the value of \(\crv{K}_{A} \crv{K}_{B}\), which would reduce the key rate of any protocol by at most \(H{(\crv{K}_{A} \crv{K}_{B})}_{\tau}\). However, given protocol \(\qproto{P}\), we can define a new protocol \(\qproto['_{\Omega',\ell'}]{P}\) that uses public randomness instead of the PSK, and then uses the PSK as part of the final secret key. This effectively gives the value of the shared randomness used in the protocol to Eve, and so is equivalent to giving her \(E'\), but entirely recovers the loss in the key rate by using the data in \(\crv{K}_{A} \crv{K}_{B}\) directly as a secret key. Formally,
+              In particular, if Alice and Bob share a uniformly-distributed PSK such that the joint state \(\rho_{A'B'E} \cong \rho_{ABE} \otimes \tau_{\crv{K}_{A} \crv{K}_{B}}\), then we can set \(E'\) to hold the value of \(\crv{K}_{A} \crv{K}_{B}\), which would reduce the key rate of any protocol by at most \(H{(\crv{K}_{A} \crv{K}_{B})}_{\tau}\). However, given protocol \(\qproto{P}\), we can define a new protocol \(\qproto['_{\Omega',\ell'}]{P}\) that uses public randomness instead of the PSK, and then uses the PSK as part of the final secret key. This protocol is equivalent to running \(\qproto{P}\) on \(\rho_{ABEE'}\) with the PSK in \(E'\), but entirely recovers the loss in the key rate by using the data in \(\crv{K}_{A} \crv{K}_{B}\) directly as a secret key. Formally,
               \begin{align}
-                r\left(\qproto['_{\Omega',\ell'}]{P}, {\{\rho_{A'B'E}^{\otimes n}\}} \right) &\geq r\left(\qproto{P}, {\{\rho_{A'B'E}^{\otimes n}\}} \right) - (1+\indic{E' \text{ classical}})H{(E')}_{\rho} + H{(\crv{K}_{A} \crv{K}_{B})}_{\tau} \\
+                r\left(\qproto['_{\Omega',\ell'}]{P}, {\{\rho_{A'B'E}^{\otimes n}\}} \right) &\geq r\left(\qproto{P}, {\{\rho_{A'B'E}^{\otimes n}\}} \right) - (1+\indic{E' \text{ quantum}})H{(E')}_{\rho} + H{(\crv{K}_{A} \crv{K}_{B})}_{\tau} \\
                                                                                                       &= r\left(\qproto{P}, {\{\rho_{A'B'E}^{\otimes n}\}} \right),
               \end{align}
-              which means that using a PSK in a protocol can never be better than using public shared randomness in the protocol, and using the PSK as part of the secret key.
+              which means that using a PSK in a protocol can never be better than using public shared randomness in the protocol and using the PSK as part of the secret key.
 
-            When extending non-lockability to the DIQKD setting, however, it is important to clarify what this means, since we are no longer dealing with a specific state \(\rho_{ABE}\), but rather an optimisation over a set of states that are compatible with the observed behaviour. If the system \(E'\) is independent of the behaviour \(p\) and the input distribution \(\prin\), then the non-lockability proof still works, since the presence or absence of \(E'\) does not affect the optimisation of \(\rho\) over \(\compatstates{p}{\prin}\). In fact, the optimisation gives Eve every possible advantage already, aside from the data assumed to be private (\Cref{def:diqkdassump}), so any possible \(E'\) would be redundant.
+              When extending non-lockability to the DIQKD setting, however, it is important to clarify what this means, since we are no longer dealing with a specific state \(\rho_{ABE}\), but rather an optimisation over a set of states that are compatible with the observed behaviour. If the behaviour \(p\) cannot be changed in response to \(E'\), then the presence or absence of \(E'\) does not affect the optimisation of \(\rho\) over \(\compatstates{p}{\prin}\), the same \(\rho_{ABE}\) is obtained from the optimisation, and the non-lockability proof still works.
 
-            On the other hand, if \(E'\) is made available to Eve before the states and measurements are decided, then the proof above would no longer work, since Eve could change the state preparation arbitrarily in response to \(E'\), so that tracing out \(E'\) may not recover the original state. In fact, we have an explicit example illustrating that the secret key rate can decrease by \emph{more} than its entropy. This may be true even in the device-dependent case---a suggestive example is the revelation of Bob's measurement settings in the BB84 protocol, enabling an intercept-resend attack~\cite{PracticalQKD}, although in that case one bit is revealed each round, and the key rate is less than one bit per round and non-lockability is not vilated. However, the protocol in~\cite[Prot. 2]{DIQKD_FiniteSize} illustrates a clear violation of non-lockability for the DIQKD key rate.
+            On the other hand, if \(E'\) is made available to Eve before the states and measurements are decided, then the proof above would no longer work, since Eve could change the state preparation arbitrarily in response to \(E'\), so that tracing out \(E'\) may not recover the original state. In fact, we have an explicit example illustrating that the key rate of a specific protocol can decrease by \emph{more} than its entropy. This may be true even in the device-dependent case---a suggestive example is the revelation of Bob's measurement settings in the BB84 protocol, enabling an intercept-resend attack~\cite{PracticalQKD}, although in that case one bit is revealed each round, and the key rate is less than one bit per round, so non-lockability is not violated. However, the protocol in~\cite[Prot. 2]{DIQKD_FiniteSize} illustrates a clear violation of non-lockability for the DIQKD key rate.
             \begin{lemma}[Lockability of DIQKD Key Rate]\label{thm:dilock}
               The increase in the key rate of a DIQKD protocol that arises from removing a system from Eve's control \emph{before} the implementation is fixed is not bounded by the entropy of that system.
             \end{lemma}
             \begin{proof}
-              Denote Alice's input string, shared with Bob, by \(\crv{X}^n\), and let rate of net secrecy produced per round by~\cite[Prot. 2]{DIQKD_FiniteSize} be \(r_n\) bits per round. Since that protocol allows all of \(\crv{X}^n\) to be incorporated into the resulting key, the final key will have length \((1+r_n)n - o(n)\). However, giving \(\crv{X}^n\) to Eve would allow her to choose the state in each round based on Alice's input which maximises her information about Alice and Bob's outputs. The key generated would then be of length \(r_n'n - o(n)\), with \(r'_n < r_n\). The loss of \(n\) bits of key arises from \(\crv{X}^n\) no longer being usable in the key, and \(r'_n < r_n\) from the attack above. However, if the key rate is not lockable, then the key should be of length \(\ell \geq (1+r_n)n - o(n) - H(\crv{X}^n) = r_nn - o(n)\), which is a contradiction.
+              Denote Alice's input string, private from Eve and pre-shared with Bob, by \(\crv{X}^n\), and let the net rate of secrecy produced by~\cite[Prot. 2]{DIQKD_FiniteSize} be \(r_n\) bits per round. Since that protocol allows all of \(\crv{X}^n\) to be incorporated into the resulting key, the length of the final key will asymptotically approach \((1+r_n)n\). However, giving \(\crv{X}^n\) to Eve would allow her to choose the state in each round based on Alice's input which maximises her information about Alice and Bob's outputs. The key generated would then be of length \(r_n'n\), with \(r'_n < r_n\). The loss of \(n\) bits of key arises from \(\crv{X}^n\) no longer being usable in the key, and \(r'_n < r_n\) from Eve's attack using her knowledge of the measurement settings. However, if the key rate is not lockable, then the key should be of length \(\ell \geq (1+r_n)n - H(\crv{X}^n) = r_nn > r'_nn\), which is a contradiction.
             \end{proof}
 
             This result is unfortunate, because it would otherwise allow us to rule out the use of PSKs for generating input distributions, which, as noted in \Cref{sec:diqkd_proto}, is difficult to analyse. This also has implications for the use of PSKs in wirings, as discussed in \Cref{sec:locwir_dist}. For now, we leave the following question open, although finding a counter-example would likely not be difficult:
@@ -1028,7 +1041,9 @@
     \end{equation}
   where \(\behav{\rho^L}{ \sM} \in \Ls\) and \(\behav{\rho^{NL}}{ \sM} \not\in \Ls\). Essentially, we decompose the state into local and nonlocal parts (where states are classified as local or nonlocal based on the behaviour produced using the chosen measurement strategy), and compute the relative entropy of entanglement for each part, then minimise over the possible states, measurements and decompositions. Due to the device-independence of the distillation protocol, Eve is free to choose any states and measurements that would not be device-independently distinguishable from the expected states and measurements used in the device.
 
-    While highly general, this bound is extremely difficult to compute, because of the vast, unstructured search space and the nested optimisation, including the optimisation for the relative entropy of entanglement. Fortunately, since all the optimisations are infima, any choice for the parameters is by definition an upper bound, and this bound can be used to evaluate the performance of a protocol on a given implementation. The authors themselves computed this bound only for a specific choice of measurements and states, parametrised by CHSH values, as shown in \Cref{fig:genubound}. Writing \(S\) for \(S_{0101}\) (\Cref{sec:nl_Q}), these states are the \emph{isotropic states} with
+  While highly general, this bound is extremely difficult to compute, because of the vast, unstructured search space and the nested optimisation, including the optimisation for the relative entropy of entanglement. Fortunately, since all the optimisations are infima, any choice for the parameters is by definition an upper bound, and this bound can be used to evaluate the performance of a protocol on a given implementation. The authors themselves computed this bound only for a specific choice of measurements and states, parametrised by CHSH values, as shown in \Cref{fig:genubound}. Writing \(S\) for \(S_{0101}\) (\Cref{sec:nl_Q}), these states are the \emph{isotropic states} and the \emph{Bell diagonal states}.
+
+  The isotropic states are
     \begin{equation}
       \rho^{I}(v) = v\ket{\Phi_+}\bra{\Phi_+} + \frac{1-v}{4}I
     \end{equation}
@@ -1039,7 +1054,9 @@
     \end{gather*}
     where
     \[ \sigma_1 = \begin{bmatrix} 0 & 1 \\ 1 &  0 \end{bmatrix} \qquad \sigma_3 = \begin{bmatrix} 1 & 0 \\ 0 & -1 \end{bmatrix} \]
-    are the \(X\) and \(Z\) Pauli matrices, achieving \(S = 2\sqrt{2}v\), and the decompositions are then accomplished with and \emph{Bell diagonal states} with
+    are the \(X\) and \(Z\) Pauli matrices, achieving \(S = 2\sqrt{2}v\).
+
+    The Bell diagonal states are
     \begin{equation}
       \rho^{\Psi}(C) = \frac{1+C}{2}\ket{\Psi_+}\bra{\Psi_+} + \frac{1-C}{2}\ket{\Psi_-}\bra{\Psi_-},
     \end{equation}
@@ -1053,7 +1070,9 @@
     B_0 = \frac{1}{\sqrt{1+C^2}}\sigma_3 + \frac{C}{\sqrt{1+C^2}}\sigma_1 \qquad B_1 = \frac{1}{\sqrt{1+C^2}}\sigma_3 - \frac{C}{\sqrt{1+C^2}}\sigma_1 \\
     B_2 = \sigma_3,
     \end{gather*}
-    achieving \(S = 2\sqrt{C^2+1}\). However, these bounds are faithful, at least for the implementations considered.
+    achieving \(S = 2\sqrt{C^2+1}\).
+
+    However, the bound obtained from \Cref{eqn:genubound_state} using these two families of states and measurements is faithful.
 
     The \emph{quantum intrinsic nonlocality} is defined as~\cite{DIQKD_Limits}
     \begin{equation}
@@ -1306,7 +1325,7 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
                 Can local wirings increase the secret key capacity of a behaviour? In particular, can they produce revival of a behaviour with zero secret key capacity?
               \end{funqn}
 
-              From a theoretical standpoint, answering this question would develop our currently limited understanding of the nature of the secret key capacity, and practically, the use of such wirings would be an easily-implemented technique that can squeeze secrecy out of a poorly-functioning system. Our hope for this operation being possible derives from these preliminary results, and the wealth of results on how \emph{quantum} operations can strenghten nonlocal correlations significantly. Some of the seminal results in this area, generally termed \emph{revealing hidden nonlocality}, are:
+              From a theoretical standpoint, answering this question would develop our currently limited understanding of the nature of the secret key capacity, and as a practical application, such wirings can be easily implemented to squeeze secrecy out of a poorly-functioning system. Our hope for wirings being capable of producing such an increase derives from these preliminary results, and the wealth of results on how \emph{quantum} operations can strenghten nonlocal correlations significantly. Some of the seminal results in this area, generally termed \emph{revealing hidden nonlocality}, are:
               \begin{itemize}
                 \item States which only produce behaviours in \(\Ls\) for any choice of POVM can, if measured multiple times in sequence, produce nonlocal behaviours (and even maximally violate Bell inequalities)~\cite{HiddenNLAllMeas}.
                 \item States can be \emph{super-activated}: \(\rho\) can be local while \(\rho \otimes \rho\) is nonlocal~\cite{SuperActivationBipartite}, and the increase in the violation can be arbitrarily large.
@@ -1315,7 +1334,7 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
 
               One possible approach considered was to examine the operations used in revealing hidden nonlocality, and to see how closely they can be simulated using classical operations on classical data. While we were unable to do so, we leave this research direction open.
               \begin{question}
-                What separates quantum from classical operations? How closely can we approximate quantum effects with classical operations.
+                How closely can we approximate quantum operations that reveal hidden nonlocality with classical operations?
               \end{question}
 
               Lastly, these results have previously been investigated in more detail in~\cite{JanLiThesis}. This work focused on a claimed class of extremal wirings, based on the work in~\cite{ShortEntangleSwap}, and studied their effect on the standard protocol key rate \(r_{\std}\). It was not able to establish that extremal wirings maximise \(r_{\std}\)~\cite[Sec. 7.2]{JanLiThesis}, but was able to establish that certain extremal wirings do not increase it, or are equivalent when the two boxes are iid~\cite[Sec. 7.3]{JanLiThesis}. It also attempted to find a parameter region in a more realistic experimental model where this revival is possible, but was unable to do so~\cite[Sec. 9]{JanLiThesis}. Although this project can be seen as a continuation of~\cite{JanLiThesis}, we wish to broaden our scope to consider the secret key capacity in general, not just for the standard protocol. Further, their extension of the results of~\cite{ShortEntangleSwap} to the QKD setting is incorrect, as we will demonstrate in \Cref{sec:locwir_SPG}. We will therefore refer minimally to this work in the course of our exploration.
@@ -1422,8 +1441,8 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
                 \end{align}
                 where in the last line we have used the no-retrocausation conditions in \Cref{eqn:wiringnoretro}. That any such collection of probabilistic maps can be combined into a single distribution can be shown with a calculation similar to that in \Cref{eqn:opmap}.
 
-              Physically, a probabilistic wiring must actually execute some deterministic wiring, and its joint wiring distribution is then a convex combination of the deterministic joint wiring distributions, of which there are finitely many. This is the intuition behind the proof of Fine's theorem presented in~\cite{BellNonlocality}, which can be straightforwardly adapted to \(\sW^n\). Informally, we can express a wiring distribution as a convex combination of marginal wiring distributions, and these marginal wirings can be decomposed further into convex combinations of ``more deterministic'' marginal wiring distributions, offloading the indeterminism they contain into an auxiliary random variable, and redefining \(\lambda\) to incorporate this auxliary variable.
-              \begin{theorem}[Fine's Theorem for Wirings]
+                Physically, a probabilistic wiring must actually execute some deterministic wiring, and its joint wiring distribution is then a convex combination of the deterministic joint wiring distributions, of which there are finitely many. This is the intuition behind the proof of Fine's theorem (\Cref{thm:finethm}) presented in~\cite{BellNonlocality}, which can be straightforwardly adapted to \(\sW^n\). Informally, we can express a wiring distribution as a convex combination of marginal wiring distributions, and these marginal wirings can be recursively decomposed into convex combinations of ``more deterministic'' marginal wiring distributions, offloading the indeterminism they contain into an auxiliary random variable, and redefining \(\lambda\) to incorporate this auxliary variable.
+                \begin{theorem}[Fine's Theorem for Wirings]
                 The set of marginal wirings \(\sW\) forms a polytope, whose vertices are the set of deterministic marginal wirings obeying the no-retrocausation relations \(\sW_D\). All \(n\)-partite wirings are then elements of the polytope generated by the vertices \(\sW_D^n\).
               \end{theorem}
               \begin{proof}
@@ -1704,7 +1723,7 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
                         No-retrocausation & \(128\), -- & \(432\), -- \\
                         \bottomrule
                       \end{Tabular}
-                      \caption{Number of marginal conditional wiring functions computed through different methods, followed by number of inequalities defining the polytope. -- means the value was not computed.}\label{tab:polys}
+                      \caption{\((v,h)\) of polytopes defined by various methods, where \(v\) is the number of extremal marginal conditional wiring functions, and \(h\) is the number of inequalities defining the polytope. -- means the value was not computed.}\label{tab:polys}
               \end{table}
 
                   The possible wirings between boxes are sometimes claimed to be classified by the scheme of Short, Popescu and Gisin~\cite{ShortEntangleSwap}, for example in~\cite{ShortClassClaim}. Their work attempts to generalise quantum joint measurements for general no-signalling systems, and finds a polytope of possible operations (termed \emph{couplers}) which happens to have local wirings at its extremal points. For the  \((2,2;2,2)\) setting, there are 82 extremal points, grouped into 5 possible types of wirings, each of which admits a simple functional description (namely AND of two outputs, XOR of two outputs, use of only one box, deterministic output, and the use of one output as another box's input).
@@ -1730,7 +1749,7 @@ If additionally \(\rho \leq \lambda\sigma\) for some \(\lambda \in \R_+\), then 
 
                   Our results suggest that the 176-vertex polytope identified in~\cite[Sec. 7.1]{JanLiThesis} does not actually capture the possible couplers in \((2,3;2,3)\). This latter polytope was derived by extending the functional definitions for the 5 classes of couplers identified in the \((2,2;2,2)\) case to \((2,3;2,3)\) and claiming them to be extremal, but there is no justification for such a claim, and as our computational results show, this claim is likely to be incorrect. The results in~\cite{JanLiThesis} on the claimed extremal classes of wirings (reviewed in \Cref{sec:preres}) are hence even more limited than they originally seemed.
 
-                  It does not seem feasible to use this coupler polytope beyond the simplest case. The computation for the \((2,2;2,3)\) setting took about 30 minutes on a standard laptop, running in single-threaded mode. If we wish to consider \(c=3\), for the simplest tripartite scenario of \((2,2; 2,2; 2,2)\), \(\NSs\) has 53856 extremal points~\cite{Tripartite}. Since the polytope of wirings is defined by two inequalities per extremal point, this would yield a polytope defined by 107712 inequalities, which is unlikely to be tractable.
+                  It does not seem feasible to use this coupler polytope beyond the simplest case. The computation for the \((2,2;2,3)\) setting took about 30 minutes on a standard laptop, running in single-threaded mode. If we wish to consider \(c=3\), for the simplest tripartite scenario of \((2,2; 2,2; 2,2)\), \(\NSs\) has 53856 extremal points~\cite{Tripartite}. Since the polytope of wirings is defined by two inequalities per extremal point, this would yield a polytope defined by 107712 inequalities, which is unlikely to be tractable in a reasonable amount of time.
 
                   % NEXT classify the extremal points for the QKD setting
 
@@ -1756,7 +1775,7 @@ Any[]
 
                   This phenomenon may be related to the results in~\cite[Sec. 1.5]{LocalTransformations}, where local transformations that are \emph{completely positive}, that is, the resultant behaviour is positive and normalised when the transformation is applied to one part of a behaviour while the other part is left unchanged, iff the transformation admits a causal decomposition as per \Cref{eqn:opmap}. Interestingly, they prove this fact using signalling behaviours, and also exhibit an example of a behaviour that is positive but not completely positive: it maps marginal behaviours to marginal behaviours, but when applied to part of a signalling behaviour, with no transformation done by the other party, the resultant joint behaviour is no longer valid. These results, together with our computational evidence, suggest that there is a deeper connection between complete positivity and no-signalling. In fact, a cursory analysis already suggests an answer: due to the signalling between the boxes, the local transformations performed by one party can influence the marginals of the other party, so that, even if one party does not physically modify or process his device, his observed marginal behaviour may be different, so that there is effectively some transformation being applied to his part of the system. Nonetheless, we leave the deeper exploration of this question to future work.
                   \begin{question}
-                    How can the results of~\cite{LocalTransformations} on complete positivity be generalised to the case of wirings? What is the mechanism by which signalling behaviours prevent the use of certain local operations?
+                    How can the results of~\cite{LocalTransformations} on complete positivity be generalised to the case of wirings? Can we characterise the effect of signalling influence on the transformation implemented by physically realisable wirings?
                   \end{question}
 
                   A further intriguing extension would be to analyse the couplers for three-input boxes to see if they do, in fact, correspond to physically realisable wirings. The results of~\cite{ShortEntangleSwap} imply that all binary-input couplers are simply wirings, but since we have extended the number of inputs to 3, this implication does not apply to our scenario. Although we have the raw data necessary, we were not able to do this in the course of this project.
@@ -1764,7 +1783,7 @@ Any[]
                     Are there couplers for three-input boxes that cannot be implemented by wirings?
                   \end{question}
 
-                  Finally, we can analyse the structure of the space of wirings using the other formulations established in this section in order to gain a deeper insight into these issues. A good first step would be to explicitly compute the polytope corresponding to the marginal conditional wiring functions based on our formulation, and to compare it with the coupler polytopes. Based on the results of~\cite{LocalTransformations} connecting completely positive transformations to causal transformations, we expect it to be equivalent to the polytope derived from general behaviours, rather than no-signalling behaviours. However, this leaves us with the anomalous fact that some physically-realisable wirings seem to lie outside this polytope. We leave the exploration of this issue to future work.
+                  Finally, we can analyse the structure of the space of wirings using the other formulations established in this section in order to gain a deeper insight into these issues. A good first step would be to explicitly compute the polytope corresponding to the marginal conditional wiring functions based on our formulation, and to compare it with the coupler polytopes. Based on the results of~\cite{LocalTransformations} connecting completely positive transformations to causal transformations, we expect it to be equivalent to the polytope derived from general behaviours, rather than no-signalling behaviours. This still leaves us with the anomalous fact that some physically-realisable wirings seem to lie outside this polytope, but we expect this to be resolved by closer study of the effects of signalling. We leave the exploration of this issue to future work.
                   \begin{question}
                     What are the minimal characterisations of the polytopes defined by wirings?
                   \end{question}
@@ -1790,7 +1809,7 @@ Any[]
                 \begin{equation}\label{eqn:nooutputdep}
                   \chi(\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \chi(\cvec{x}^c\cvec{y}^c|xy).
                 \end{equation}
-                Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring without output dependency cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p]\), where \(\chi\) is a wiring without output dependency, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p)\).
+                Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring without output dependency cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p^{\otimes c}]\), where \(\chi\) is a wiring without output dependency, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p)\).
               \end{lemma}
               \begin{proof}
                 From \Cref{eqn:nooutputdep} and using \Cref{eqn:mwirdistdef}, for any given \(\cvec{a}^c\) and \(\cvec{b}^c\),
@@ -1901,9 +1920,11 @@ Any[]
 
               % NEXT extend to non-iid secret key capacity
 
+              % TODO rework proof to incorporate optimisation over c
+
                   Let \(C^{W}_{\sk}(p)\) be the iid secret key capacity of a behaviour with wiring, that is
                   \begin{equation}
-                    C^{W}_{\sk}(p) \coloneqq \sup_{\chi\in\sW^2} C^{\otimes}_{\sk}(\chi[p]).
+                    C^{W}_{\sk}(p) \coloneqq \sup_{\chi\in\sW^2, c} C^{\otimes}_{\sk}(\chi[p^{\otimes c}]).
                   \end{equation}
 
                   From this simple definition, and the linearity of wirings, we have another major result.
@@ -1970,7 +1991,7 @@ Any[]
                     \begin{equation}
                       \Tr{\matr{X}\matr{Y}} = \sum_{ij} \matr{X}_{ij} \matr{Y}_{ji} = \sum_{ij} \matr{X}_{ij} \matr{Y}_{ij}
                     \end{equation}
-                    for symmetric matrices, with the last equality following by symmetry of \(\matr{Y}\), and this allows arbitrary linear functions of the entries of \(\matr{X}\) to be encoded. The dual problem's optimal value is always a lower bound to the optimal value of the primal problem, which is termed \emph{weak duality}. The dual program is an SDP in \emph{inequality form}~\cite[Ch. 5.9]{BoydVand}:
+                    for symmetric matrices, with the last equality following by symmetry of \(\matr{Y}\), and this allows arbitrary linear functions of the entries of \(\matr{X}\) to be encoded, with the corresponding entries of \(\matr{Y}\) as the coefficients. The dual problem's optimal value is always a lower bound to the optimal value of the primal problem, which is termed \emph{weak duality}. The dual program is an SDP in \emph{inequality form}~\cite[Ch. 5.9]{BoydVand}:
                     \begin{equation}
                       \begin{aligned}[c]
                         \max_{\cvec{y}} & \sum_{i} b_i y_i \\
@@ -1996,7 +2017,7 @@ Any[]
                       \lambda f(\cvec{x}) + (1-\lambda)f(\cvec{y}) &= \lambda{x_1x_2} + (1-\lambda){y_1y_2} \\
                       f(\lambda\cvec{x} + (1-\lambda)\cvec{y}) &= \lambda{x_1x_2} + \lambda(1-\lambda)\underbrace{(x_1y_2 + y_1x_2)}_{\text{unknown sign}} + (1-\lambda){y_1y_2}.
                     \end{align}
-                  While we have that all \(\chi\) variables are positive, there is no constraint on the sign of the dual variables \(\cvec{\mu}\). At any rate, the function \(-H{(\crv{A}|\crv{B})}_{\rho}\) is not convex, so the whole optimisation is nonconvex anyway. This makes it unlikely to be computationally tractable, given the size of the SDP approximations required.
+                    While we have that all \(\chi\) variables are positive, there is no constraint on the sign of the dual variables \(\cvec{\mu}\). At any rate, \(H{(\crv{A}|\crv{B})}_{\chi[p]}\) is concave in \(\chi[p]\), so the whole optimisation is nonconvex anyway. This makes it unlikely to be computationally tractable, given the size of the SDP approximations required.
 
                   Another possible approach to solving this problem is the \emph{max-min inequality}~\cite[Sec. 5.4]{BoydVand}, which states that 
                   \begin{equation}
@@ -2004,7 +2025,7 @@ Any[]
                   \end{equation}
                   for any sets \(\sX\) and \(\sY\), and any function \(f : \sX\times\sY \to \R\). Intuitively, the ``second mover'' (who performs the inner optimisation) always has the advantage, in being able to adapt his strategy to that of the ``first mover''. However, for the purpose of obtaining a lower bound, this does not help us. An attempted solution was to use the \emph{minimax theorem}, which strengthens this relation to an equality when \(f(\cdot,Y)\) is concave for all \(Y\in\sY\) and \(f(X,\cdot)\) is convex for all \(X\in\sX\). While \(Q_{m,k}(\matr{M}, p)\) is convex in \(\matr{M}\) for a fixed \(p\) as required, since it is a linear objective function in the entries of the moment matrix, \(-H{(\crv{A}|\crv{B})}_p\) is convex in \(p\) as noted above, and even worse, the feasible region \(\sM\) depends on the choice of \(\chi\), making it unclear if performing such a commutation would even be well-defined.
 
-                  We conclude that we are unable to find a computationally tractable way to optimise key rates over the space of wirings, aside from brute-force enumeration of extremal wirings. Another possible avenue for further research, harnessing the fact that the key rate is maximised on the extremal points of a polytope, is to try to modify techniques from linear programming, where the objective function is always maximised (or minimised) by an extremal point~\cite{LuenbergerYe}. However, we do not investigate this in detail here, and leave it for future work.
+                  We conclude that we are unable to find a computationally tractable way to optimise key rates over the space of wirings using \Cref{eqn:bff_npa}. However, there may be other techniques that are worth considering. One method, harnessing the fact that the key rate is maximised on the extremal points of a polytope, is to try to modify techniques from linear programming, where the objective function is always maximised (or minimised) by an extremal point~\cite{LuenbergerYe}. However, we do not investigate this in detail here, and leave it for future work.
                   \begin{question}
                     Can linear programming techniques make the search for optimal wirings more efficient?
                   \end{question}
@@ -2373,7 +2394,7 @@ Any[]
 
                     \section{Preliminaries}\label{sec:prelim}
 
-                    As this report is expected to be read by a diverse audience, concepts that may be entirely elementary to some readers may be utterly unknown to others. Background information of this nature, from a variety of domains, is collected here, but assumed throughout the main text to avoid cluttering the exposition. The only assumptions for this section are a junior-college level grasp of probability, calculus, vectors and complex numbers (although I heard they dropped that from the syllabus recently).
+                    As this report is expected to be read by a diverse audience, concepts that may be entirely elementary to some readers may be utterly unknown to others. Background information of this nature, from a variety of domains, is collected here, but assumed throughout the main text to avoid cluttering the exposition. The only assumptions for this section are a junior-college level grasp of probability, calculus, vectors and complex numbers.
 
                     \subsection{Convex Geometry and Analysis}\label{sec:prelim_cvxgeom}
 
@@ -2397,7 +2418,7 @@ Any[]
 
                     Convex combinations are particularly interesting to us, because they represent \emph{probabilistic mixture} of \(\{x_i\}\), with \(\{w_i\}\) specifying the pmf. An \emph{extreme point} is a point that cannot be written as a convex combination of other points. All extreme points are located on the boundary of a convex set, and closed bounded convex set is the convex hull of its extreme points~\cite[Ch. B.4]{LuenbergerYe}. \emph{Caratheodory's theorem on convex hulls} tells us that, for the convex hull \(S\) of a set of points \(V \subseteq \R^{d}\), any point in \(S\) can be expressed as the convex combination of at most \(d+1\) points of \(V\)~\cite{Caratheodory,CaratheodorySteinitz}.
 
-                    The subset of \(\R^d\), \(d \in \Z_{++}\) that obeys an \emph{affine inequality constraint} of the form \(\rvec{a}\cvec{x} - \cvec{b} \leq 0\) is called a \emph{half-space}, which is a convex set, but not affine. \emph{Affine equality constraints} \(\rvec{a}\cvec{x} + b = 0\) define \emph{hyperplanes}, which are affine sets, but which can equivalently be seen as the intersection of \(\rvec{a}\cvec{x} + b \leq 0\) and \(\rvec{a}\cvec{x} + b \geq 0\). Analytically, then, we need only consider half-spaces to model all possible affine constraints. Further, while each hyperplane/equality constraint corresponds to a \emph{redundant} coordinate, which can be eliminated (cf.\ the derivation of the Collins-Gisin representation in \Cref{sec:nl_ns}), expressing constraints in terms of hyperplanes can make it easier to interpret computational results.
+                    The subset of \(\R^d\), \(d \in \Z_{++}\) that obeys an \emph{affine inequality constraint} of the form \(\rvec{a}\cvec{x} - b \leq 0\) is called a \emph{half-space}, which is a convex set, but not affine. \emph{Affine equality constraints} \(\rvec{a}\cvec{x} + b = 0\) define \emph{hyperplanes}, which are affine sets, but which can equivalently be seen as the intersection of \(\rvec{a}\cvec{x} + b \leq 0\) and \(\rvec{a}\cvec{x} + b \geq 0\). Analytically, then, we need only consider half-spaces to model all possible affine constraints. Further, while each hyperplane/equality constraint corresponds to a \emph{redundant} coordinate, which can be eliminated (cf.\ the derivation of the Collins-Gisin representation in \Cref{sec:nl_ns}), keeping the constraints and the extra coordinates can make it easier to interpret computational results.
 
                     In convex geometry, the intersection of a finite number of half-spaces is a \emph{polyhedron}, which is a convex set. With \(n\) half-spaces defined by \(n\) affine inequality constraints, all vectors \(\{\cvec{a}\}\) and scalars \(\{b\}\) may be combined into a \(d\times{n}\) matrix \(\matr{A}\) and a vector \(\cvec{b}\) of length \(d\), respectively, defining an \emph{affine map} \(\matr{A}\cvec{x} + \cvec{b}\), such that \(\matr{A}\cvec{x} + \cvec{b} \leq \cvec{0}\), where inequality here is componentwise, characterises the polyhedron completely.
 
@@ -2464,7 +2485,7 @@ Any[]
 
                     The Hilbert space of a quantum system defines the possible states it can be in. For concreteness, we work in a Hilbert space \(\C^d\). A system in a \emph{pure state} is one we have perfect knowledge about. Pure states are represented by normalised vectors in the Hilbert space, and are written as \(\ket{\psi}\). To each vector is associated its \emph{dual}, basically its complex conjugate, \(\bra{\psi}\). The \emph{inner product} on a Hilbert space between two vectors \(\ket{\psi}\) and \(\ket{\phi}\) is \(\braket{\phi|\psi}\), where in the regular notation for vectors we would write \(\cvec{u} \cdot \cvec{v} = \cvec{u}^{\dagger}\cvec{v} = \sum_i u^*_i v_i\), where \(a^*\) is the complex conjugate. Pure states are normalised in that \(\braket{\psi|\psi}  = 1\). The \emph{norm} of a vector \(\norm{\ket{v}}\) is defined as \(\sqrt{\braket{v|v}}\), and is always nonnegative, even if \(\ket{v}\) is not a normalised state.
 
-                    To each pure state is associated a \emph{projector} \(\ket{\psi}\bra{\psi}\) (the product \(\cvec{v}\cvec{v}^{\dagger}\)), an operator that \emph{projects} whatever it multiplies onto \(\ket{\psi}\). This allows us to introduce the concept of eigenstates and eigenvalues: the \emph{eigenstates} of an operator \(A\) are the states \(\ket{a_i}\) such that \(A\ket{a_i} = \alpha_i\ket{a_i}\), for some \(\alpha_i \in \C\), the \emph{eigenvalue}. Clearly, \(\ket{\psi}\bra{\psi}\) has \(\ket{\psi}\) as an eigenstate, with eigenvalue 1, and no others.
+                    To each pure state is associated a \emph{projector} \(\ket{\psi}\bra{\psi}\) (the product \(\cvec{v}\cvec{v}^{\dagger}\)), an operator that \emph{projects} whatever it multiplies onto \(\ket{\psi}\). This allows us to introduce the concept of eigenstates and eigenvalues: the \emph{eigenstates} of an operator \(A\) are the states \(\ket{a_i}\) such that \(A\ket{a_i} = \alpha_i\ket{a_i}\), for some \(\alpha_i \in \C\), the \emph{eigenvalue}. Clearly, \(\ket{\psi}\bra{\psi}\) has \(\ket{\psi}\) as an eigenstate, with eigenvalue 1, and all vectors orthogonal to \(\ket{\psi}\) as eigenvectors with eigenvalue 0.
 
                     An \emph{orthonormal basis} (just ``basis'' for short) consists of \(d\) states \(\{\ket{e_i}\}\) such that \(\braket{e_i|e_j} = \delta_{ij}\). Given a basis, it is always possible to write all other vectors and operators in terms of the basis, by using the \emph{outer products} \(\ket{e_i}\bra{e_j}\) of the basis states to write the operators. The projector construction above is a special case of the outer product. Explicitly, the \(i\)th coefficient of the vector \(\psi\) in the basis \(\{\ket{e_i}\}\) is \(\braket{e_i|\psi}\), while the \((i,j)\)th coefficient of the operator \(A\) is \(\bra{e_i}A\ket{e_j}\). When working with an explicit representation of states and operators, the \emph{computational basis} refers to the basis the explicit representation is written it.
 
@@ -2479,7 +2500,7 @@ Any[]
                     \end{theorem}
                     In particular, unitary and Hermitian operators are normal, and hence admit a spectral decomposition.
 
-                    Positive-definite, positive-semidefinite, negative-semidefinite and negative-definite operators are special cases of Hermitian operators, that have all eigenvalues positive, nonnegative, nonpositive or negative, respectively. In particular, for any state \(\ket{\psi}\), we have \(\bra{\psi}A\ket{\psi}\) positive, nonnegative, nonpositive or negative accordingly. Notably, PSD operators form a cone, and this cone is typically given the partial order \(\succeq\), where \(M \succeq 0\) implies that \(M\) is PSD, and \(M \succeq N\) implies that \(M-N \succeq 0\). 
+                    \emph{Positive-definite}, \emph{positive-semidefinite} (PSD), \emph{negative-semidefinite} and \emph{negative-definite} operators are special cases of Hermitian operators, that have all eigenvalues positive, nonnegative, nonpositive or negative, respectively. In particular, for any state \(\ket{\psi}\), we have \(\bra{\psi}A\ket{\psi}\) positive, nonnegative, nonpositive or negative accordingly. Notably, PSD operators form a cone, and this cone is typically given the partial order \(\succeq\), where \(M \succeq 0\) implies that \(M\) is PSD, and \(M \succeq N\) implies that \(M-N \succeq 0\). 
 
                     An important operation is the \emph{trace}:
                     \begin{equation}
@@ -2487,33 +2508,41 @@ Any[]
                     \end{equation}
                     for some basis \(\{e_i\}\). Remarkably, this operation is basis-independent: any basis will give the same answer, which is the sum of \(M\)'s eigenvalues, or in a matrix representation, the sum of the diagonal elements. A crucial property of the trace is that the trace is \emph{invariant under cyclic permutations}: \(\Tr{A_1 A_2 \cdots A_n} = \Tr{A_n A_1 \cdots A_{n-1}}\).
 
-                    While a pure state represents complete knowledge of a system, a \emph{mixed state} represents incomplete knowledge: for example, if I flip a coin and pick one of two quantum states, \(\ket{0}\) and \(\ket{1}\), to send to you, without revealing the outcome, you can model your knowledge of the system as a mixed state. The mixed state cannot be represented as a vector, but an operator, a \emph{density matrix}:
+                    While a pure state represents complete knowledge of a system, a \emph{mixed state} represents incomplete knowledge: for example, if Alice flips a coin and picks one of two quantum states, \(\ket{0}\) and \(\ket{1}\), to send to Bob, without revealing the outcome, he can model his knowledge of the system as a mixed state. The mixed state cannot be represented as a vector, but an operator, a \emph{density matrix}:
                     \[ \rho = \frac{1}{2} \ket{0}\bra{0} + \frac{1}{2} \ket{1}\bra{1}. \]
-                    The mixing in a mixed state represents classical uncertainty, rather than any quantum phenomenon. However, if you had the coin, you would know which pure state you actually received: the coin is the \emph{purification} of the mixed state that reveals what it contains.
+                    The mixing in a mixed state represents classical uncertainty, rather than any quantum phenomenon. However, if Bob had the coin, he would know which pure state he actually received: the coin is the \emph{purification} of the mixed state that removes the classical uncertainty.
 
-                    Mathematically, a density operator is a positive-semidefinite operator whose trace sums to one. This represents a normalised probability distribution over the basis of its eigenstates. Even if the states that are actually mixed are not orthogonal, they are statistically indistinguishable from such a mixture.
+                    Mathematically, a density operator is a positive-semidefinite operator whose trace sums to one. This can be interpreted as a normalised probability distribution over the basis of its eigenstates, which, by the spectral theorem, are orthogonal. Even if the states that are actually mixed are not orthogonal, they are statistically indistinguishable from such a mixture.
 
                     We can extract classical information about a quantum system by measuring it. The statistics from measurements are described by the state of the system and a \emph{positive-operator valued measurement} (POVM), a collection of positive-semidefinite \emph{measurement operators} \(\{M_a\}\) that sum to the identity operator\footnote{This is not the most general description of a measurement~\cite[Box 2.5]{NielsenChuang}, but is sufficient for describing the generated behaviour.}. The probability of obtaining the outcome \(a\) given state \(\rho\) is then
                     \begin{equation}
                       p(a) = \Tr{\rho M_a}.
                     \end{equation}
 
-                    When discussing two Hilbert spaces \(A\) and \(B\) of dimensions \(d_A\) and \(d_B\) (Alice and Bob's, say), their joint state, denoted by \(\rho_{AB}\), lives in lives in the \emph{tensor product} of their Hilbert spaces \(A \otimes B\), of dimension \(d_A d_B\). The tensor product between operators in finite dimensions, representing two operations carried out independently on the two parts of the joint system, can be computed explicitly as the \emph{Kronecker product} of the corresponding matrices. Therefore, if Alice and Bob were to randomly pick from POVMs indexed by \(x\) and \(y\) respectively, this would be represented by The POVMs \({\{M_{a|x}\}}_a\) and \({\{N_{b|y}\}}_b\), with \(M_{a|x} \in \Lin{A}\) and \(N_{b|y} \in \Lin{B}\) corresponding to outputs \(a\) and \(b\) respectively. The conditional probability distribution is then
+                    When discussing two Hilbert spaces \(A\) and \(B\) of dimensions \(d_A\) and \(d_B\) (Alice and Bob's, say), their joint state, denoted by \(\rho_{AB}\), lives in lives in the \emph{tensor product} of their Hilbert spaces \(A \otimes B\), of dimension \(d_A d_B\). The tensor product between operators in finite dimensions, representing two operations carried out independently on the two parts of the joint system, can be computed explicitly as the \emph{Kronecker product} of the corresponding matrices.
+
+                    We use the symbol \(\rho \cong \sigma\) to denote \emph{isomorphism} between states \(\rho\) and \(\sigma\), which is to say that there exists a bijective map \(\Phi : \Phi(\rho) = \sigma\) that respects the operations of addition and multiplication between operators, and the multiplication of operators by scalars:
+                    \begin{equation}
+                      \Phi(aM + NO) = a\Phi(M) + \Phi(N)\Phi(O).
+                    \end{equation}
+                    We typically use this notation to avoid some tedious clarifications when working with tensor products of Hilbert spaces. For example, let \(\rho \coloneqq \rho_{ABC}\) and \(\sigma \coloneqq \rho_{ACB}\). Then we have \(\rho \cong \sigma\), with the isomorphism being a particular reordering of the matrix elements. If we have an operator \(M \in \Lin{A \otimes C \otimes B}\), in order to show its effect on \(\rho\), we can conveniently remark that \(\rho \cong \sigma\) and show its effect on \(\sigma\). Alternatively, if writing the state as an element of \(\Lin{A \otimes C \otimes B}\) reveals an important detail about its structure, we can make a similar remark.
+
+                    If Alice and Bob were to randomly pick from POVMs indexed by \(x\) and \(y\) respectively, this would be represented by the POVMs \({\{M_{a|x}\}}_a\) and \({\{N_{b|y}\}}_b\), with \(M_{a|x} \in \Lin{A}\) and \(N_{b|y} \in \Lin{B}\) corresponding to outputs \(a\) and \(b\) respectively. The conditional probability distribution is then
                     \begin{equation}
                       p(ab|xy) = \Tr{\rho_{AB} \left(M_{a|x} \otimes N_{b|y}\right) }.
                     \end{equation}
 
                     Given a joint state, we may wish to focus only on one subsystem. The part of the joint state accessible to the subsystem is called its \emph{marginal} state, and is derived from the joint state by taking a \emph{partial trace}:
-                    \begin{equation}
-                      \Tr[_B]{\ket{a_1}\bra{a_2} \otimes \ket{b_1}\bra{b_2}} = \ket{a_1}\bra{a_2} \Tr{\ket{b_1}\bra{b_2}} \Rightarrow \rho_A = \Tr[_B]{\rho_{AB}}.
-                    \end{equation}
+                    \begin{align}
+                      \Tr[_B]{\ket{a_1}\bra{a_2} \otimes \ket{b_1}\bra{b_2}} &\coloneqq \ket{a_1}\bra{a_2} \Tr{\ket{b_1}\bra{b_2}}
+                    \end{align}
                     The convention for joint states is to label all their subsystems, so that the state \(\rho_{AB}\) has two subsystems corresponding to the Hilbert spaces \(A\) and \(B\). In that case, we obtain marginal state on \(A\) by tracing out \(B\): \(\Tr[_B]{\rho_{AB}} = \rho_{A}\); and the marginal state on \(B\) by tracing out \(A\): \(\Tr[_A]{\rho_{AB}} = \rho_{B}\).
 
-                    Lastly, we describe the allowable operations on a quantum system. These are described by \emph{completely positive trace preserving (CPTP) maps}, which are described simply by any set of operators \(\{E_k\}\) such that \(\sum_k E_k^{\dagger}E_k = I\). This is referred to as the \emph{operator-sum representation} of a CPTP map. The overall state after the application of the map is \(\sum_k E_k \rho E_k^{\dagger}\).
+                    Lastly, we characterise the allowable operations on a quantum system. These are described by \emph{completely positive trace preserving (CPTP) maps}, which are described simply by any set of operators \(\{E_k\}\) such that \(\sum_k E_k^{\dagger}E_k = I\). This is referred to as the \emph{operator-sum representation} of a CPTP map. The overall state after the application of the map is \(\sum_k E_k \rho E_k^{\dagger}\).
 
                     One important class of CPTP maps, which we call \emph{classical stochastic maps}, represents classical mapping from one rv to another. 
                     \begin{defn}[Classical Stochastic Maps]\label{def:classop}
-                      For an input rv \(\rho \sum_b p(b)\ket{b}\bra{b}\), a classical stochastic map is a CPTP map with the operator-sum representation:
+                      For an input rv \(\rho = \sum_b p(b)\ket{b}\bra{b}\), a classical stochastic map is a CPTP map with the operator-sum representation:
                     \begin{align*}
                       V_{ab} = \sqrt{p(a|b)}\ket{a}\bra{b}.
                     \end{align*}
@@ -2534,57 +2563,84 @@ Any[]
     \begin{equation}
     \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}}
   \end{equation}
-  is finite~\cite{HallQuantumForMath}. For bounded operators in infinite dimensions, the trace may not exist. The set of operators on which the trace exists is referred to as the set of \emph{trace class} operators, and consists of all operators \(A \in \mathcal{B}{\Hs}\) where \(\sum_i \bra{e_i}\sqrt{A^{\dagger}A}\ket{e_i} < +\infty\). \(\sqrt{A^{\dagger}A}\) is PSD and self-adjoint, guaranteeing that this quantity will be real and non-negative. If \(A\) is trace class, then the trace is basis independent, and for any \(B \in \mathcal{B}(\Hs)\), \(AB\) and \(BA\) are also trace class, and the cyclic permutation invariance also applies~\cite[Sec. 19.2]{HallQuantumForMath}.
+  is finite~\cite{HallQuantumForMath}. For bounded operators in infinite dimensions, the trace may not exist. The set of operators on which the trace exists is referred to as the set of \emph{trace class} operators, and consists of all operators \(A \in \mathcal{B}(\Hs)\) where \(\sum_i \bra{e_i}\sqrt{A^{\dagger}A}\ket{e_i} < +\infty\). \(\sqrt{A^{\dagger}A}\) is PSD and self-adjoint, guaranteeing that this quantity will be real and non-negative. If \(A\) is trace class, then the trace is basis independent, and for any \(B \in \mathcal{B}(\Hs)\), \(AB\) and \(BA\) are also trace class, and the cyclic permutation invariance also applies~\cite[Sec. 19.2]{HallQuantumForMath}.
 
                     \subsection{Information Theory}\label{sec:prelim_infot}
 
                     In this section, we discuss information measures on classical and quantum systems. The most important observation is that a classical random variable with \(d\) outcomes can be represented as a density matrix in \(d\) dimensions \(\sum_i p_i \ket{i}\bra{i}\). This gives us a unified way to treat classical and quantum systems. The information here is taken from~\cite{NielsenChuang,ElemInfo}.
 
-                    The basic way to measure the information content of a random variable \(\crv{X}\) is its \emph{Shannon entropy} \(H(\crv{X}) = \sum_{x} - P_{\crv{X}}(x) \log P_{\crv{X}}(x)\). Intuitively, this is a measure of ``how unexpected on average'' the outcome of the random variable is, or how \emph{uncertain} the variable is given our current state of knowledge. It can be extended to quantum systems by defining the \emph{von Neumann entropy} for a quantum system \(X\) in a state \(\rho\) as \({H(A)}_{\rho} = -\Tr{\rho_{A}\log\rho_{A}}\), and functions are evaluated on the eigenvalues of a state, that is, \(f(\rho) = \sum_i f(\lambda_i) \ket{i}\bra{i}\) for an operator admitting a spectral decomposition. This definition then reduces to the Shannon entropy for a classical system. Further, the Shannon entropy is concave in the pmf, which is an incredibly useful fact in information theory
+                    The basic way to measure the information content of a random variable \(\crv{X}\) is its \emph{Shannon entropy}
+                    \begin{equation}
+                      H(\crv{X}) = \sum_{x} - P_{\crv{X}}(x) \log P_{\crv{X}}(x).
+                    \end{equation}
+                    Intuitively, this is a measure of ``how unexpected on average'' the outcome of the random variable is, or how \emph{uncertain} the variable is given our current state of knowledge. It can be extended to quantum systems by defining the \emph{von Neumann entropy} for a quantum system \(X\) in a state \(\rho\) as 
+                    \begin{equation}
+                        {H(A)}_{\rho} = -\Tr{\rho_{A}\log\rho_{A}},
+                    \end{equation}
+                    and functions are evaluated on the eigenvalues of a state, that is,
+                    \begin{equation}
+                      f(\rho) = \sum_i f(\lambda_i) \ket{i}\bra{i}
+                    \end{equation}
+                    for an operator admitting a spectral decomposition. This definition then reduces to the Shannon entropy for a classical system. Further, the Shannon entropy is concave in the pmf, which is an incredibly useful fact in information theory
 
                     A few extensions are immediate. The joint entropy \(H{(AB)}_{\rho}\) is straightforwardly
                     \begin{equation}
-                      H{(AB)}_{\rho} = -\Tr{\rho_{AB}\log\rho_{AB}}
+                      H{(AB)}_{\rho} = -\Tr{\rho_{AB}\log\rho_{AB}}.
                     \end{equation}
-                    The conditional entropy quantifies how much uncertainty we have about \(A\) given that we have access to system \(B\). When conditioning on a quantum system, however, it is significantly more difficult to compute and interpret (it can be negative for entangled systems, for example). There is an explicit expression for the classical case:
+                    The conditional entropy quantifies how much uncertainty we have about \(A\) given that we have access to system \(B\). There is an explicit expression for the classical case:
                     \begin{equation}
                       H(\crv{X}|\crv{Y}) = \sum_{xy} - P_{\crv{XY}}(x,y) \log P_{\crv{X}|\crv{Y}}(x|y).
                     \end{equation}
-                    Also, we have that \(H{(\crv{A}|\crv{B})}_p\) is concave in \(p\), since for any \(p' = qp_1 + (1-q)p_2\), we have that, for any \(b\), \(qp_1(b)/p'(b) + (1-q)p_2(b)/p'(b) = 1\). Therefore, by the concavity of the Shannon entropy,
+                    Also, we have that \(H{(\crv{X}|\crv{Y})}_p\), where \(p(x,y) \coloneqq P_{\crv{XY}}(x, y)\), is concave in \(p\), since for any \(p' = qp_1 + (1-q)p_2\), we have that, for any \(y\), \(qp_1(y)/p'(y) + (1-q)p_2(y)/p'(y) = 1\). Therefore, by the concavity of the Shannon entropy,
                   \begin{align}
-                    H{(\crv{A}|\crv{B})}_{p'} &= \sum_b p'(b) H{(\crv{A}|\crv{B}=b)}_{p'} \\
-                    H{(\crv{A}|\crv{B}=b)}_{p'} &\geq \frac{qp_1(b)}{p'(b)}H{(\crv{A}|\crv{B}=b)}_{p_1} + \frac{(1-q)p_2(b)}{p'(b)}H{(\crv{A}|\crv{B}=b)}_{p_2} \\
-                    \therefore H{(\crv{A}|\crv{B})}_{p'} &\geq \sum_b p'(b) \left[ \frac{qp_1(b)}{p'(b)}H{(\crv{A}|\crv{B}=b)}_{p_1} + \frac{(1-q)p_2(b)}{p'(b)}H{(\crv{A}|\crv{B}=b)}_{p_2} \right] \\
-                                                         &= qH{(\crv{A}|\crv{B})}_{p_1} + (1-q)H{(\crv{A}|\crv{B})}_{p_2},
+                    H{(\crv{X}|\crv{Y})}_{p'} &= \sum_y p'(y) H{(\crv{X}|\crv{Y}=y)}_{p'} \\
+                    H{(\crv{X}|\crv{Y}=y)}_{p'} &\geq \frac{qp_1(y)}{p'(y)}H{(\crv{X}|\crv{Y}=y)}_{p_1} + \frac{(1-q)p_2(y)}{p'(y)}H{(\crv{X}|\crv{Y}=y)}_{p_2} \\
+                    \therefore H{(\crv{X}|\crv{Y})}_{p'} &\geq \sum_y p'(y) \left[ \frac{qp_1(y)}{p'(y)}H{(\crv{X}|\crv{Y}=y)}_{p_1} + \frac{(1-q)p_2(y)}{p'(y)}H{(\crv{X}|\crv{Y}=y)}_{p_2} \right] \\
+                                                         &= qH{(\crv{X}|\crv{Y})}_{p_1} + (1-q)H{(\crv{X}|\crv{Y})}_{p_2},
                   \end{align}
-                  and hence \(H{(\crv{A}|\crv{B})}_p\) is concave in \(p\). For the quantum case, it can be computed using the identity \(H{(A|B)}_{\rho} = H{(AB)}_{\rho} - H{(B)}_{\rho}\): the amount of uncertainty about \(A\) and \(B\) assuming we have all the knowledge about \(B\).
+                  and hence \(H{(\crv{X}|\crv{Y})}_p\) is concave in \(p\).
 
-                    The \emph{conditional mutual information} \(I{(A:B|E)}_{\rho}\) is a measure of how much information \(A\) and \(B\) share about each other that is not contained in \(E\). We give multiple equivalent expressions for it, and note that by letting \(E\) be the trivial system (``nothing''), we recover the unconditional mutual information.
+                  When conditioning on a quantum system, however, the conditional entropy is more difficult to compute and interpret (it can be negative for entangled states \(\rho_{AB}\), for example). It can be computed using the identity
+                  \begin{equation}
+                    H{(A|B)}_{\rho} = H{(AB)}_{\rho} - H{(B)}_{\rho},
+                  \end{equation}
+                  which intuitively represents the fact that \(H{(A|B)}_{\rho}\) is the amount of uncertainty about \(A\) and \(B\) assuming we have all the knowledge about \(B\). The negativity of the conditional entropy reflects the ability of entanglement to encode more information than classical correlation. Despite its possible negativity, however, we have the \emph{strong subadditivity of conditional entropy}
+                  \begin{equation}
+                    H{(A|B)}_{\rho} \geq H{(A|BC)}_{\rho},
+                  \end{equation}
+                  from which many important results follow.
+
+                  The \emph{conditional mutual information} \(I{(A:B|E)}_{\rho}\) is a measure of how much information \(A\) and \(B\) share about each other that is not contained in \(E\). We give multiple equivalent expressions for it, and note that by letting \(E\) be the trivial system (``nothing''), we recover the unconditional mutual information.
                     \begin{align}
                       I{(A:B|E)}_{\rho} &= H{(AE)}_{\rho} + H{(BE)}_{\rho} - H{(ABE)}_{\rho} + H{(E)}_{\rho} \\
                                         &= H{(A|E)}_{\rho} + H{(B|E)}_{\rho} - H{(AB|E)}_{\rho} \\
                                         &= H{(A|E)}_{\rho} - H{(A|BE)}_{\rho} \\
-                                        &= H{(B|E)}_{\rho} - H{(B|AE)}_{\rho}
+                                        &= H{(B|E)}_{\rho} - H{(B|AE)}_{\rho}.
                     \end{align}
 
-                  Many information-theoretic quantities can be expressed in terms of the \emph{relative entropy}
+                  All of the above information-theoretic quantities can be expressed in terms of the \emph{relative entropy}
                   \begin{equation}
-                    D(\rho||\sigma) = \Tr{ \rho (\log \rho - \log \sigma) }.
+                    D(\rho||\sigma) = \Tr{ \rho (\log \rho - \log \sigma) },
                   \end{equation}
-
-                  Three random variables \(\crv{U}\), \(\crv{V}\) and \(\crv{W}\) form a Markov chain \(\crv{U} \markov \crv{V} \markov \crv{W}\) iff all their joint distribution is such that each variable is independent of all other variables conditioned on the one adjacent to it. Symbolically, \(P_{\crv{U}|\crv{VW}} = P_{\crv{U}|\crv{V}}\) and \(P_{\crv{W}|\crv{UV}} = P_{\crv{W}|\crv{V}}\).
+                  which is always nonnegative, and 0 iff \(\rho = \sigma\). Explicitly, with \(d_A\) and \(d_B\) being the dimensions of \(A\) and \(B\) respectively, we have
+                  \begin{align}
+                    H{(A)}_{\rho} &= \log d_A - D(\rho_A || I_A/d_A) \\
+                    H{(A|B)}_{\rho} &= \log d_A - D(\rho_{AB} || I_A/d_A \otimes \rho_B) \\
+                    I{(A:B)}_{\rho} &= D(\rho_{AB} || \rho_A \otimes \rho_B).
+                  \end{align}
 
       The maximal probability of distinguishing between two states \(\rho\) and \(\sigma\) of a system is given by the \emph{trace distance} \(\Trdist{\rho}{\sigma}\) 
       \begin{equation}
       \Trdist{\rho}{\sigma} = \frac{1}{2}\norm{\rho - \sigma}_1,
       \end{equation}
-      which generalises the classical total variational distance
+      which generalises the classical total variation distance
       \[ \Trdist{p(x)}{q(x)} = \frac{1}{2} \sum_{x} \abs{p(x)-q(x)} \]
       and is written in terms of the \emph{trace norm}
       \begin{equation}
         \norm{\rho}_1 = \Tr{ \sqrt{\rho^{\dagger}\rho} } = \Tr{\abs{\rho}}.
       \end{equation}
 
+      Lastly, we introduce the concept of \emph{Markov chains}. Three random variables \(\crv{U}\), \(\crv{V}\) and \(\crv{W}\) form a Markov chain \(\crv{U} \markov \crv{V} \markov \crv{W}\) iff all their joint distribution is such that each variable is independent of all other variables conditioned on the one adjacent to it. Symbolically, \(P_{\crv{U}|\crv{VW}} = P_{\crv{U}|\crv{V}}\) and \(P_{\crv{W}|\crv{UV}} = P_{\crv{W}|\crv{V}}\).
 
                     \section{Technicalities for Quasi-Relative Entropies}\label{sec:qretech}
 
@@ -2617,14 +2673,14 @@ Any[]
 
                     This elaboration follows the exposition in~\cite{HallQuantumForMath}. We begin with some additional definitions. \emph{Spectral measures}, or \emph{projector-valued measures} (PVMs), map a subset of the spectrum to a projector. More formally, they are functions between the \emph{\(\sigma\)-algebra} \(\Omega(\sigma(A))\) of \(\sigma(A)\) to \(\mathcal{B}(\Hs)\). A \(\sigma\)-algebra contains subsets of its underlying set, and is closed under set complements and unions of countable sequences, so in this case it represents subsets of the spectrum that it would be sensible to attach a projector to.
 
-                    In the finite-dimensional case, the projector associated to each eigenvalue \(\lambda\) in the spectrum is the projector onto the associated eigenspace, and the direct sum of the projectors is the projector onto \(\Hs\), that is, \(I\). With a continuous spectrum, we want to divide \(\Hs\) into orthogonal spaces in the same way, providing a systematic way to attach a subspace to each element \(\omega \in \Omega(\sigma(A))\), that is, each ``reasonable'' subset of \(\sigma(A)\). Under a given spectral measure \(E : \Omega(\sigma(A)) \to \mathcal{B}(\Hs)\), the subspace \(V_{\omega} \subseteq \Hs\) associated to \(\omega\) is called a \emph{spectral subspace}, and \(E(\omega)\) is the projector onto \(V_{\omega}\). These \(V_{\omega}\) are ``generalised eigenspaces'' in the sense that they are \emph{invariant} under \(A\), that is, \(\psi \in V_{\omega} \Rightarrow A\psi \in V_{\omega}\), and that, for \(\omega \subseteq [\lambda - \epsilon, \lambda + \epsilon]\), we have \(\norm{(A - \lambda I)\psi} \leq \epsilon\norm{\psi}\), from which recover the familiar behaviour when the spectrum is discrete.
+                    In the finite-dimensional case, the projector associated to each eigenvalue \(\lambda\) in the spectrum is the projector onto the associated eigenspace, and the sum of the projectors is the projector onto \(\Hs\), that is, \(I\). With a continuous spectrum, we want to divide \(\Hs\) into orthogonal spaces in the same way, providing a systematic way to attach a subspace to each element \(\omega \in \Omega(\sigma(A))\), that is, each ``reasonable'' subset of \(\sigma(A)\). Under a given spectral measure \(E : \Omega(\sigma(A)) \to \mathcal{B}(\Hs)\), the subspace \(V_{\omega} \subseteq \Hs\) associated to \(\omega\) is called a \emph{spectral subspace}, and \(E(\omega)\) is the projector onto \(V_{\omega}\). These \(V_{\omega}\) are ``generalised eigenspaces'' in the sense that they are \emph{invariant} under \(A\), that is, \(\psi \in V_{\omega} \Rightarrow A\psi \in V_{\omega}\), and that, for \(\omega \subseteq [\lambda - \epsilon, \lambda + \epsilon]\), we have \(\norm{(A - \lambda I)\psi} \leq \epsilon\norm{\psi}\), from which recover the familiar behaviour when the spectrum is discrete.
 
                     Now, let us define integration against this measure. We have that
                     \[ \int_{\lambda \in \sigma(A)} \indic{\lambda \in \omega} \dif{E(\lambda)} = E(\omega). \]
                     This property can be used to define the integral for any other function. For example, for a given function \(f : \R \to \C\), we can define a sequence of functions
                     \[ f_n(\lambda) = \sum_{j = -\infty}^{\infty} f(j/n) \indic{\lambda \in \cointv{j/n}{(j+1)/n}}, \]
                     and if this sequence \emph{converges uniformly} to \(f(\lambda)\), that is,
-                    \[ \forall \lambda \in \C : \lim_{n \to \infty} \norm{f_n(\lambda) - f(\lambda)} = 0, \]
+                    \[ \forall \lambda \in \R : \lim_{n \to \infty} \norm{f_n(\lambda) - f(\lambda)} = 0, \]
                     then
                     \[ f(A) = \lim_{n\to\infty} \int_{\lambda \in \sigma(A)} f_n(\lambda) \dif{E(\lambda)} = \lim_{n\to\infty} \sum_{j = -\infty}^{\infty} f\left(\frac{j}{n}\right) E\left(\cointv*{\frac{j}{n}}{\frac{j+1}{n}}\right) \]
                     so that, roughly speaking, the effect of \(f(A)\) on \(E(\cointv{\lambda}{\lambda+\dif{\lambda}})\psi\) is multiplication by \(f(\lambda)\). The \emph{spectral theorem} then asserts that there is a \emph{unique} measure \(E_A\) on the Borel \(\sigma\)-algebra \(\Omega_B(A)\), that is, the smallest \(\sigma\)-algebra containing all open sets in \(\sigma(A)\), such that
