@@ -700,8 +700,6 @@
 
     We now state our definitions formally. We work within the framework for key distillation by local operations and public communication established in~\cite{CQKeyDistill}, which was adapted to DIQKD recently in~\cite{DIQKD_Limits}. However, we extend and generalise these definitions to apply to more classes of protocols. Let \(\crv{A}^{n}\crv{X}^{n}\), \(\crv{B}^{n}\crv{Y}^{n}\) and \(E^n\) be the systems of Alice, Bob, and Eve respectively after executing \(n\) rounds of Bell tests, with the inputs being recorded in \(\crv{X}^{n}\) and \(\crv{Y}^{n}\), and the outputs in \(\crv{A}^{n}\) and \(\crv{B}^{n}\). Let their joint \emph{ccq} (classical-classical-quantum) state be \(\rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n}\), so called because \(\crv{A}^n\crv{X}^n\) and \(\crv{B}^n\crv{Y}^n\) store classical data, while Eve's system is quantum. We write the systems in the order ``AXBY'', rather than the regular ``ABXY'', to emphasise the bipartition between Alice and Bob's systems.
 
-    TODO rework definitions to account for PSK (required for authentication etc.)
-
     \begin{defn}[General ccq States]\label{def:ccq_belltest}
       The most general definition of the joint state of Alice, Bob and Eve is given by
       \begin{equation}
@@ -716,8 +714,8 @@
     \end{defn}
 
     At the most general level, the execution of a DIQKD protocol consists of carrying out a finite sequence of operations within the set of \emph{local operations and public communication} (LOPC), that distills a key of length \(\ell_n\) from the data from \(n\) rounds of Bell tests. In the device-independent setting, where Alice and Bob only have classical data, ``local operations'' refer to \emph{classical} local operations; that is, \emph{channels} or \emph{stochastic maps} in classical information theory, applied independently by each party. Channels are fully characterised by a conditional probability of each output symbol based on each input symbol. In contrast, local operations in a generic device-dependent protocol may be general CPTP maps, which are the sort discussed in~\cite{CQKeyDistill}. We provide here an explicit definition of the LOPC operations allowable in a DIQKD protocol, expressed in terms of operators acting on states.
-    \begin{defn}[LOPC Operations]
-      Before executing the \(k\)th step of a protocol, let \(\crv{S}_A^{(k)}\), and \(\crv{D}_A^{(k)}\) represent Alice's private data and her local copy of the publicly transmitted data, and let \(\crv{T}^{(k)}_A\) be her transmitted public data. Define \(\crv{S}_B^{(k)}\), \(\crv{D}_B^{(k)}\) and \(\crv{T}_B^{(k)}\) analogously for Bob. Note that \(\crv{D}^{(0)}_A\) is a trivial system, and \(\crv{S}_A^{(1)}\) is \(\crv{A}^{n}\crv{X}^{n}\), likewise for Bob. Further, let \(\crv{D}^{(k)}\) be the public record of all data exchanged thus far. Then, if the \(k\)th step is an LOPC operation \(\Omega^{(k)}\), its overall effect can be described as the composition of the following maps:
+    \begin{defn}[Classical LOPC Operations]\label{def:lopc}
+      Before executing the \(k\)th step of a protocol, let \(\crv{S}_A^{(k)}\), and \(\crv{D}_A^{(k)}\) represent Alice's private data and her local copy of the publicly transmitted data, and let \(\crv{T}^{(k)}_A\) be her transmitted public data. Define \(\crv{S}_B^{(k)}\), \(\crv{D}_B^{(k)}\) and \(\crv{T}_B^{(k)}\) analogously for Bob. Further, let \(\crv{D}^{(k)}\) be the public record of all data exchanged thus far. Then, if the \(k\)th step is a classical LOPC operation \(\Omega^{(k)}\), its overall effect can be described as the composition of the following maps:
       \begin{enumerate}
         \item \(\Omega_A^{(k)}\) is a classical stochastic map (\Cref{def:classop})
       \begin{equation}
@@ -749,8 +747,8 @@
       \end{gather}
     \end{defn}
 
-    \begin{defn}[DIQKD Protocols]
-      A DIQKD protocol \(\proto{P}\) is a family of sequences of LOPC operations \({\{{\{\Omega^{(k)}_{n}\}}_{k=1}^{m_n}\}}_{n\in\Z_{++}}\), such that
+    \begin{defn}[DIQKD Protocols]\label{def:diqkdproto}
+      A DIQKD protocol \(\proto{P}\) is a family of sequences of classical LOPC operations \({\{{\{\Omega^{(k)}_{n}\}}_{k=1}^{m_n}\}}_{n\in\Z_{++}}\) such that 
       \begin{gather}
         \Omega_n \coloneqq \bigcirc_{k=1}^{m_n} \Omega^{(m_n - k + 1)}_{n} \\
         {\Omega[\rho]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n} \coloneqq \Tr[_{\crv{D}^{(m_n)}_A \crv{D}^{(m_n)}_B}]{ \Omega_n \left[ \rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n} \right] },
@@ -758,24 +756,26 @@
       where \(\bigcirc\) denotes function composition, \(\crv{K}_{A}^{\ell_n} = \crv{S}_{A}^{(m_n)}\) and \(\crv{K}_{B}^{\ell_n} = \crv{S}_{B}^{(m_n)}\) hold Alice and Bob's keys of length \(\ell_n\), respectively, while \(\crv{D}^n = \crv{D}^{(m_n)}\) is all the public data that is communicated during the protocol.
     \end{defn}
 
+    Note that, in DIQKD protocols, \(\crv{D}^{(1)}_A\) and \(\crv{D}^{(1)}_B\) are trivial systems (``nothing''). However, we want to create a more general framework where Alice and Bob can use a \emph{pre-shared key} (PSK) in their protocols. Alice and Bob must already have some shared secrecy to perform authentication (\Cref{def:diqkdassump}), so this is only a slight modification of the standard DIQKD scenario, as noted in~\cite{DIQKD_FiniteSize}. If we consider a more general and realistic scenario, with the DIQKD protocol being executed multiple times to generate a stream of key data, the key data generated in previous rounds could be used to provide the inputs of subsequent rounds, relying on the universal composability of our security definitions to bound the overall security of such a system~\cite{QCryptCompose}. Therefore, we define \(\crv{S}_A^{(1)} \coloneqq \crv{A}^n\crv{X}^n\crv{P}_A^n\) and \(\crv{S}_B^{(1)} \coloneqq \crv{B}^n\crv{Y}^n\crv{P}_B^n\), where \(\crv{P}_A^n\) and \(\crv{P}_B^n\) are Alice and Bob's local copies of their PSK\@.
+
     We can now define what it means for a key to be \emph{secure}, or for a protocol to have a certain \emph{key rate}.
 
     \begin{defn}[\(\epsilon\)-security]
-    Alice and Bob share an \emph{\(\epsilon\)-secure key} iff the overall state of their systems, Eve's system, and the publicly transmitted data \({\Omega[\rho]}_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}^n}\) satisfies
+      Starting from a joint state \(\rho_{\crv{S}_A^{(1)} \crv{S}_B^{(1)} E^n}\), Alice and Bob share an \emph{\(\epsilon\)-secure key} iff the overall state of their systems, Eve's system, and the publicly transmitted data \({\Omega[\rho]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n}\) satisfies
       \begin{equation}
-        \Trdist{{\Omega[\rho]}_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}^n}}{\tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}} \otimes \rho_{E^n} \otimes {\Omega[\rho]}_{\crv{D}^n}} \leq \epsilon,
+        \Trdist{{\Omega[\rho]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n}}{\tau_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n}} \otimes \rho_{E^n} \otimes {\Omega[\rho]}_{\crv{D}^n}} \leq \epsilon,
       \end{equation}
-      where \(\Trdist{\cdot}{\cdot}\) is the trace distance (\Cref{sec:prelim_infot}), \(\tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}}\) is the \emph{ideal key}
+      where \(\Trdist{\cdot}{\cdot}\) is the trace distance (\Cref{sec:prelim_infot}), \(\tau_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n}}\) is the \emph{ideal key}
       \begin{equation}
-        \tau_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell}} = \frac{1}{2^{\ell}} \sum_{j=1}^{2^{\ell}} \proj[\crv{K}_{A}^{\ell}]{j} \otimes \proj[\crv{K}_{B}^{\ell}]{j},
+        \tau_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n}} = \frac{1}{2^{\ell_n}} \sum_{j=1}^{2^{\ell_n}} \proj[\crv{K}_{A}^{\ell_n}]{j} \otimes \proj[\crv{K}_{B}^{\ell_n}]{j},
       \end{equation}
-      a uniformly distributed mixture amongst all possible keys of length \(\ell\), \(\rho_{E^n}\) is Eve's marginal state
+      a uniformly distributed mixture amongst all possible keys of length \(\ell_n\), \(\rho_{E^n}\) is Eve's marginal state
       \begin{equation}
-        \rho_{E^n} = \Tr[_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n}]{ \rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n} },
+        \rho_{E^n} = \Tr[_{\crv{S}_A^{(1)} \crv{S}_B^{(1)}}]{ \rho_{\crv{S}_A^{(1)} \crv{S}_B^{(1)} E^n} },
       \end{equation}
       and \({\Omega[\rho]}_{\crv{D}^n}\) is the publicly exchanged data
       \begin{equation}
-        {\Omega[\rho]}_{\crv{D}^n} = \Tr[_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n}]{ {\Omega[\rho]}_{\crv{K}_{A}^{\ell} \crv{K}_{B}^{\ell} E^n \crv{D}^n} },
+        {\Omega[\rho]}_{\crv{D}^n} = \Tr[_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n}]{ {\Omega[\rho]}_{\crv{K}_{A}^{\ell_n} \crv{K}_{B}^{\ell_n} E^n \crv{D}^n} },
       \end{equation} 
       which is to say that Alice and Bob's keys should ideally be uniformly distributed and independent of Eve's quantum side information and the publicly exchanged data. Eve's marginal state is left unchanged because the protocol is executed only by Alice and Bob.
     \end{defn}
@@ -783,7 +783,7 @@
     This definition of security is \emph{universally composable} (UC), which is crucial for applications---if two resources are \(\epsilon_1\) and \(\epsilon_2\) secure under a UC definition, then a protocol that uses only these two resources is \(\epsilon\)-secure under the same definition, with \(\epsilon \leq \epsilon_1 + \epsilon_2\)~\cite{SecurityQKD}.\footnote{A minor caveat is that, strictly speaking, UC security would require the devices in DIQKD to be used only once for key generation, or would otherwise require the explicit assumption that information about previous keys generated using the device are not leaked out when the device is used on a separate occasion to generate keys. See~\cite{SecurityQKD} for a detailed study of this technical issue.}
 
     \begin{defn}[Key Rate]
-      The \emph{asymptotic key rate} \(r\) of a protocol \(\proto{P}\) on a family of ccq states \({\{\rho^{n}\}}\), with \(\rho^{n} = \rho_{\crv{A}^n\crv{X}^n \crv{B}^n\crv{Y}^n E^n}\), is
+      The \emph{asymptotic key rate} \(r\) of a protocol \(\proto{P}\) on a family of ccq states \({\{\rho^{n}\}}\), with \(\rho^{n} \coloneqq \rho_{\crv{A}^n\crv{X}^n\crv{P}_A^n \crv{B}^n\crv{Y}^n\crv{P}_B^n E^n}\) and \(\prin^n\) being the probability distribution represented by the classical state \(\rho_{\crv{X}^n \crv{Y}^n}\), is
     \begin{equation}
       r(\proto{P}, \{\rho^n\}) = \lim_{n\to\infty} \frac{\ell_n - L_{\Omega}(\prin^n)}{n}
     \end{equation}
@@ -794,9 +794,7 @@
 
     Note that \(L_{\Omega}\) is a very general expression that subsumes all modifications that must be made to the key rate in order to account for the generation of the inputs. For example, it might be possible to \emph{post-select} a fraction of the rounds based on the inputs used so that the effective input distribution simulates the desired \(\prin^n\), or to \emph{recover} the entropy of the input data, allowing it to be used in the final secret key generated, as was done in~\cite[Prot. 2]{DIQKD_FiniteSize}. This necessitates a dependence on the protocol, denoted via the subscript \(\Omega\), since the protocol will determine how much secrecy is irretrievably lost in establishing the correlation. We do not investigate such mechanisms and their impact on security further, but make the note that for these particular examples, the resulting changes in the key rate are multiplicative, not additive, so they cannot bring the key rate of a behaviour from zero to non-zero or vice versa.
 
-    One strategy that is available to Alice and Bob is to use a \emph{pre-shared key} (PSK) to generate their inputs. Alice and Bob must already have some shared secrecy to perform authentication (\Cref{def:diqkdassump}), so this is only a slight modification of the standard DIQKD scenario, as noted in~\cite{DIQKD_FiniteSize}. If we consider a more general and realistic scenario, with the DIQKD protocol being executed multiple times to generate a stream of key data, the key data generated in previous rounds could be used to provide the inputs of subsequent rounds, relying on the universal composability of our security definitions to bound the overall security of such a system~\cite{QCryptCompose}. Since DIQKD (and QKD in general) produces uniform randomness, and authentication schemes require uniform randomness anyway (see e.g.~\cite{AuthKeyRecycling} for a recent analysis), we make the natural assumption that the PSK is uniformly distributed.
-
-    The general problem of two independent parties generating a specific joint distribution from shared uniform randomness is well-studied in information theory, where it is called \emph{distributed source synthesis} or \emph{simulation}. The amount of shared randomness required is therefore an upper bound on the secrecy cost \(L_{\Omega}\), since, as discussed above, the expended secrecy could be recovered or generated more efficiently in the course of the protocol.
+    One strategy that is available to Alice and Bob is to use their PSK to generate their inputs. Since DIQKD (and QKD in general) produces uniform randomness, and authentication schemes require uniform randomness anyway (see e.g.~\cite{AuthKeyRecycling} for a recent analysis), we make the natural assumption that the PSK is uniformly distributed. The general problem of two independent parties generating a specific joint distribution from shared uniform randomness is well-studied in information theory, where it is called \emph{distributed source synthesis} or \emph{simulation}. The amount of shared randomness required is therefore an upper bound on the secrecy cost \(L_{\Omega}\), since, as discussed above, the expended secrecy could be recovered or generated more efficiently in the course of the protocol.
 
     In the case where \(\crv{X}^n\) and \(\crv{Y}^n\) are independent, the required expenditure is trivially zero. If \(\prin^n\) consists of iid copies of some distribution \(\prin\), then the cost is \(n\) times the \emph{Wyner common information} \(I^{\mathtt{Wyn}}\) between \(\crv{X}\) and \(\crv{Y}\), which has an asymptotically tight characterisation~\cite[Thm V.3]{CorrReview}
     \begin{equation}
@@ -999,22 +997,23 @@
 
     \subsection{Locking}\label{sec:diqkd_lock}
 
-    The proof of the non-lockability of the device-dependent secret key capacity relies on the fact that, given a protocol \(\qproto{P}\) for \(\rho_{ABE}\), and giving Eve an additional register \(E'\), such that \(\Tr[_{E'}]{\rho_{ABEE'}} = \rho_{ABE}\), executing \(\qproto{P}\) as if \(E'\) did not exist will achieve~\cite[Thm 5.1]{CQKeyDistill}
+    The proof of the non-lockability of the device-dependent secret key capacity relies on the fact that, given a protocol \(\qproto{P}\) for \(\rho_{ABE}^n\) (recall that \(\rho_{ABE}^n \coloneqq \rho_{A^n B^n E^n}\)), and giving Eve an additional system \(\bar{E}^n\), such that \(\Tr[_{\bar{E}^n}]{\rho_{ABE\bar{E}}^n} = \rho_{ABE}^n\), executing \(\qproto{P}\) as if \(\bar{E}^n\) did not exist will achieve~\cite[Thm 5.1]{CQKeyDistill}
               \begin{equation}
-                r\left(\qproto{P}, {\{\rho_{ABEE'}^{\otimes n}\}} \right) \geq r\left(\qproto{P}, {\{\rho_{ABE}^{\otimes n}\}} \right) - (1+\indic{E' \text{ quantum}})H{(E')}_{\rho}.
+                r\left(\qproto{P}, {\{\rho_{ABE\bar{E}}^{n}\}} \right) \geq r\left(\qproto{P}, {\{\rho_{ABE}^{n}\}} \right) - \lim_{n\to\infty} \frac{1}{n}(1+\indic{\bar{E}^n \text{ quantum}})H{(\bar{E}^n)}_{\rho^n}.
               \end{equation}
+              We refer to this fact as \emph{protocol non-lockability}.
 
-              In particular, if Alice and Bob share a uniformly-distributed PSK such that the joint state \(\rho_{A'B'E} \cong \rho_{ABE} \otimes \tau_{\crv{K}_{A} \crv{K}_{B}}\), then we can set \(E'\) to hold the value of \(\crv{K}_{A} \crv{K}_{B}\), which would reduce the key rate of any protocol by at most \(H{(\crv{K}_{A} \crv{K}_{B})}_{\tau}\). However, given protocol \(\qproto{P}\), we can define a new protocol \(\qproto['_{\Omega',\ell'}]{P}\) that uses public randomness instead of the PSK, and then uses the PSK as part of the final secret key. This protocol is equivalent to running \(\qproto{P}\) on \(\rho_{ABEE'}\) with the PSK in \(E'\), but entirely recovers the loss in the key rate by using the data in \(\crv{K}_{A} \crv{K}_{B}\) directly as a secret key. Formally,
+              In particular, if Alice and Bob share a uniformly-distributed PSK of length \(k_n\) in systems \(\crv{P}_{A}^n\) and \(\crv{P}_{B}^n\), such that their joint qqq state is \(\rho_{\hat{A}\hat{B}E}^n \cong \rho_{ABE}^n \otimes \tau_{\crv{P}_{A} \crv{P}_{B}}^{n}\), then we can set \(\bar{E}^n\) to hold the contents of \(\crv{P}_{A}^n \crv{P}_{B}^n\), which would reduce the key rate of any protocol by at most \({H(\bar{E}^n)}_{\rho^n} = H{( \crv{P}_{A}^n \crv{P}_{B}^n )}_{\tau^{n}} = k_n\). However, given protocol \(\qproto{P}\), we can define a new protocol \(\qproto['_{\Omega',\ell'}]{P}\) that uses public randomness instead of the PSK, and then uses the PSK as part of the final secret key. This protocol is equivalent to g \(\qproto{P}\) on \(\rho_{ABE\bar{E}}^n\) with the PSK in \(\bar{E}^n\), but entirely recovers the loss in the key rate by using the data in \( \crv{P}_{A}^n \crv{P}_{B}^n \) directly as a secret key. Formally,
               \begin{align}
-                r\left(\qproto['_{\Omega',\ell'}]{P}, {\{\rho_{A'B'E}^{\otimes n}\}} \right) &= r\left(\qproto{P}, {\{\rho_{A'B'EE'}^{\otimes n}\}} \right) + H{(\crv{K}_{A} \crv{K}_{B})}_{\tau} \\
-                &\geq r\left(\qproto{P}, {\{\rho_{A'B'E}^{\otimes n}\}} \right) - (1+\indic{E' \text{ quantum}})H{(E')}_{\rho} + H{(\crv{K}_{A} \crv{K}_{B})}_{\tau} \\
-                                                                                                      &= r\left(\qproto{P}, {\{\rho_{A'B'E}^{\otimes n}\}} \right),
+                r\left(\qproto['_{\Omega',\ell'}]{P}, {\{\rho_{\hat{A}\hat{B}E}^{n}\}} \right) &= r\left(\qproto{P}, {\{\rho_{\hat{A}\hat{B}E\bar{E}}^{n}\}} \right) + \lim_{n\to\infty} \frac{1}{n}H{(\crv{P}_{A}^n \crv{P}_{B}^n)}_{\tau^{n}} \\
+                &\geq r\left(\qproto{P}, {\{\rho_{\hat{A}\hat{B}E}^{n}\}} \right) - \lim_{n\to\infty} \frac{1}{n}(1+\indic{\bar{E}^n \text{ quantum}}){H(\bar{E}^n)}_{\rho^n} + \frac{1}{n}H{( \crv{P}_{A}^n \crv{P}_{B}^n )}_{\tau^{n}} \\
+                                                                                                      &= r\left(\qproto{P}, {\{\rho_{\hat{A}\hat{B}E}^{n}\}} \right),
               \end{align}
               which means that using a PSK in a protocol can never be better than using public shared randomness in the protocol and using the PSK as part of the secret key.
 
-              When extending non-lockability to the DIQKD setting, however, it is important to clarify what this means, since we are no longer dealing with a specific state \(\rho_{ABE}\), but rather an optimisation over a set of states that are compatible with the observed behaviour. If the behaviour \(p\) cannot be changed in response to \(E'\), then the presence or absence of \(E'\) does not affect the optimisation of \(\rho\) over \(\compatstates{p}{\prin}\), the same \(\rho_{ABE}\) is obtained from the optimisation, and the non-lockability proof still works.
+              Since this proof applies to \emph{any} state and \emph{any} protocol, however, it also applies to DIQKD protocols cast in this device-dependent framework by treating Alice and Bob's classical inputs and pre-shared keys as part of the overall qqq state. However, this result must be applied with some care. For example, a seemingly obvious counterexample to non-lockability would be~\cite[Prot. 2]{DIQKD_FiniteSize}, which uses an \(n\)-bit PSK as part of the key, but \emph{also} as Alice's input setting, which increases the key rate of the protocol. The protocol non-lockability construction would involve publicly announcing the measurement settings \emph{before} the measurement is performed, resulting in the key rate of the protocol just being 1
 
-            On the other hand, if \(E'\) is made available to Eve before the states and measurements are decided, then the proof above would no longer work, since Eve could change the state preparation arbitrarily in response to \(E'\), so that tracing out \(E'\) may not recover the original state. In fact, we have an explicit example illustrating that the key rate of a specific protocol can decrease by \emph{more} than its entropy. This may be true even in the device-dependent case---a suggestive example is the revelation of Bob's measurement settings in the BB84 protocol, enabling an intercept-resend attack~\cite{PracticalQKD}, although in that case one bit is revealed each round, and the key rate is less than one bit per round, so non-lockability is not violated. However, the protocol in~\cite[Prot. 2]{DIQKD_FiniteSize} illustrates a clear violation of non-lockability for the DIQKD key rate.
+            On the other hand, if \(\bar{E}\) is made available to Eve before the states and measurements are decided, then the proof above would no longer work, since Eve could change the state preparation arbitrarily in response to \(\bar{E}\), so that tracing out \(\bar{E}\) may not recover the original state. In fact, we have an explicit example illustrating that the key rate of a specific protocol can decrease by \emph{more} than its entropy. This may be true even in the device-dependent case---a suggestive example is the revelation of Bob's measurement settings in the BB84 protocol, enabling an intercept-resend attack~\cite{PracticalQKD}, although in that case one bit is revealed each round, and the key rate is less than one bit per round, so non-lockability is not violated. However, the protocol in~\cite[Prot. 2]{DIQKD_FiniteSize} illustrates a clear violation of non-lockability for the DIQKD key rate.
             \begin{lemma}[Lockability of DIQKD Key Rate]\label{thm:dilock}
               The increase in the key rate of a DIQKD protocol that arises from removing a system from Eve's control \emph{before} the implementation is fixed is not bounded by the entropy of that system.
             \end{lemma}
