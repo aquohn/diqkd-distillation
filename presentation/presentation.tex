@@ -369,8 +369,8 @@
     \newcommand{\PR}{\mathrm{PR}}
     \newcommand{\sWB}{\mathcal{WB}}
     \newcommand{\compatstates}[3][]{\hat{\mathcal{P}}#1(#2,#3)}
-    \newcommand{\proto}[2][_{\Omega,\ell}]{\mathfrak{#2}#1}
-    \newcommand{\qproto}[2][_{\Omega,\ell}]{\tilde{\mathfrak{#2}}#1}
+    \newcommand{\proto}[2][\ell]{\mathfrak{P}_{#2, #1}}
+    \newcommand{\qproto}[2][\ell]{\tilde{\mathfrak{P}}_{#2, #1}}
     \newcommand{\prin}[1][p]{#1_{\mathrm{in}}}
     \newcommand{\behav}[2]{\mathbb{P}\left[#1, #2\right]}
     \newcommand{\sk}{\rm sk}
@@ -670,7 +670,7 @@
             & \rho_{E^n|\cvec{a}^n\cvec{b}^n\cvec{x}^n\cvec{y}^n}
           \end{aligned} \]
     \item \emph{Asymptotic key rate} of a sequence of states \(\{\rho^n\}\)
-      \[ r(\proto{P}, \{\rho^n\}) = \lim_{n\to\infty} \frac{\ell_n - L_{\Omega}(\prin^n)}{n} \]
+      \[ r(\proto{\Omega}, \{\rho^n\}) = \lim_{n\to\infty} \frac{\ell_n - L_{\Omega}(\prin^n)}{n} \]
     \item \(L_{\Omega}(\prin^n)\): minimum cost for generating \(\prin^n\) (\alert{novel definition})
     \item Dependent on protocol in general
     \item Upper bounded by \emph{Wyner common information} if iid
@@ -688,8 +688,8 @@
         \end{itemize}
       \item Well-established methods for reducing to iid
       \item Focus on \emph{iid secret key capacity}
-        \[ C_{\sk}^{\otimes}(p) = \sup_{\proto{P}} \sup_{\prin} \inf_{\substack{\rho : \\ \rho \in \compatstates{p}{\prin}}} r(\proto{P}, \{\rho^{\otimes{n}}\}) \]
-        over asymptotically secure protocols \(\proto{P}\)
+        \[ C_{\sk}^{\otimes}(p) = \sup_{\proto{\Omega}} \sup_{\prin} \inf_{\substack{\rho : \\ \rho \in \compatstates{p}{\prin}}} r(\proto{\Omega}, \{\rho^{\otimes{n}}\}) \]
+        over asymptotically secure protocols \(\proto{\Omega}\)
     \end{itemize}
 \end{frame}
 
@@ -840,11 +840,11 @@
 
 \begin{frame}{Simple Wirings Cannot Help}
   \begin{lemma}
-    Define a \emph{wiring without feedforward} as a wiring for which all inputs are independent of previous outputs, that is, a wiring \(\chi\) that obeys
-    \[
-      \chi(\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \chi(\cvec{x}^c\cvec{y}^c|xy).
-    \]
-    Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring without feedforward cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p]\), where \(\chi\) is a wiring without feedforward, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p)\).
+                Define a \emph{wiring without feedforward} as a wiring for which all inputs generated are independent of the outputs of previous boxes, that is, a wiring \(\chi\) which obeys
+                \[
+                  \chi(\cvec{x}^c\cvec{y}^c|\cvec{a}^c\cvec{b}^cxy) = \chi(\cvec{x}^c\cvec{y}^c|xy).
+                \]
+                Make the weak assumption that operations that do not broadcast or discard information about the inputs will not impact the net cost of generating the input distribution. Then, any wiring without feedforward cannot increase the secret key capacity of a behaviour. That is, if \(p' = \chi[p^{c}]\), where \(\chi\) is a wiring without feedforward, then \(C_{\sk}^{\otimes}(p') \leq C_{\sk}^{\otimes}(p^c)\).
   \end{lemma}
 \end{frame}
 
