@@ -1139,8 +1139,8 @@
     \begin{table}
       \begin{Tabular}{| >{\centering}m{\tableline{0.3}}|m{\tableline{0.7}}|}
         \hline
-        \( E^{cc,(x^{\star},y^{\star})}_{sq,par} \leq \LCxE{\{I_{AL}, I_{FBL+}\}} \) & For any protocol that uses one key-generating basis and the statistics \(Q\) and \(\hat{S}\), if these statistics can be generated from Werner states with projective measurements, \(I_{AL}\) is an upper bound for intrinsic information computed in~\cite{RevisedPeres}, while \(I_{FBL+}\) is the non-faithful upper bound from~\cite{NotSufficient}. However, \(E^{cc,(x^{\star},y^{\star})}_{sq,par}\) is a convex upper bound for the key rate, and a lower bound for their lower convex envelope, which itself is a convex upper bound for the key rate. \\ \hline
-        \( E^{cc,(x^{\star},y^{\star})}_{sq,dev} \leq I_{FBL+} \) & For any behaviour that can be generated from Werner states with projective measurements, and any protocol that broadcasts the input settings, \(I_{FBL+}\) is the non-faithful upper bound from~\cite{NotSufficient}. However, \(E^{cc,(x^{\star},y^{\star})}_{sq,par}\) is a convex upper bound for the key rate, and a lower bound for \(I_{FBL+}\). \\ \hline
+        \( E^{cc,(x^{\star},y^{\star})}_{sq,par} \leq \LCxE{\{I_{AL}, I_{FBL+}\}} \) & For any protocol that uses one key-generating basis and the statistics \(Q\) and \(\hat{S}\), \(I_{AL}\) is an upper bound for intrinsic information computed in~\cite{RevisedPeres}. For any protocol that broadcasts the input settings, \(I_{FBL+}\) is the non-faithful upper bound on the key rate from~\cite{NotSufficient} for any behaviour that can be generated from Werner states with projective measurements. However, \(E^{cc,(x^{\star},y^{\star})}_{sq,par}\) is a convex upper bound for the key rate when the protocol and behaviour satisfy both sets of conditions, and a lower bound for the lower convex envelope of these quantities. \\ \hline
+        \( E^{cc}_{sq,dev} \leq I_{FBL+} \) & For any protocol that broadcasts the input settings, \(I_{FBL+}\) is the non-faithful upper bound on the key rate from~\cite{NotSufficient} for any behaviour that can be generated from Werner states with projective measurements. However, \(E^{cc}_{sq,dev}\) is a convex upper bound for the key rate of such protocols, and a lower bound for \(I_{FBL+}\) for such behaviours. \\ \hline
       \end{Tabular}
       \caption{\label{tab:ccsqcomp} Comparison between bounds from cc-squashed entanglement and earlier results.}
     \end{table}
@@ -2325,16 +2325,20 @@ Any[]
 
                         Although we cannot bound the cardinality \(o_E\) of \(\crv{E}\), we will have to fix it to some finite number in order to specify the number of measurement operators \(O_e\). This will still provide a valid upper bound, but we lose some tightness. The cardinality \(o_{\crv{J}}\) of \(\crv{J}\) can be upper bounded by the product of the cardinalities of \(\crv{V}_1\), \(\crv{V}_2\) and \(\crv{E}\), as explained in~\cite[Cor. 2 Proof]{ClassicalUpperBounds}, and the conditional distribution \(P_{\crv{J|V_1V_2E}}\) can then be parametrised by \(o_{\crv{J}} i_A o_A i_B o_B o_E = o_{\crv{J}}^2\) probabilities, with the corresponding normalisation conditions.
 
-                        In order to parametrise states and measurements, we work with a parametrisation of \(d\)-dimensional operators in terms of \(d^2\) angles \(\{\theta_{1,1},\ldots,\theta_{d,d}\}\)~\cite{CompositeParam}:
+                        In order to parametrise states and measurements, we work with a parametrisation of \(d\)-dimensional unitary operators in terms of \(d^2\) angles \(\{\theta_{1,1},\ldots,\theta_{d,d}\}\)~\cite{CompositeParam}:
                         \begin{equation}
                           U = \left[ \prod_{j=1}^{d-1} \left(\prod_{k={j+1}}^d \underbrace{\exp\left(i\theta_{k,j}\ket{k}\bra{k}\right)\exp\left(i\theta_{j,k}\sigma_{j,k}\right)}_{\Theta_{j,k}} \right) \right] \left[ \prod_{l=1}^d \exp\left(i\theta_{l,l}\ket{l}\bra{l}\right) \right],
                         \end{equation}
                         where \(\theta_{j,k} \in \ccintv{0}{\pi/2}\) for \(j<k\) and \(\theta_{j,k} \in \ccintv{0}{2\pi}\) otherwise, and \(\sigma_{j,k}\) is the anti-symmetric matrix \(\sigma_{j,k} = -i\ket{j}\bra{k} +i\ket{k}\bra{j}\). Each matrix \(\Theta_{j,k}\) represents a rotation in the subspace spanned by the two columns \(\ket{j}\) and \(\ket{k}\), and can be explicitly expressed as
-                        \begin{equation}
-                          \Theta_{j,k} = \cos(\theta_{j,k})\ket{j}\bra{j} + e^{i\theta_{k,j}}\cos(\theta_{j,k})\ket{k}\bra{j} + \sin(\theta_{j,k})\ket{j}\bra{k} + e^{i\theta_{k,j}}\cos(\theta_{j,k})\ket{k}\bra{k}.
+                        \begin{equation}\label{eqn:unitaryparam_Theta}
+                          \Theta_{j,k} = \begin{aligned}
+                          & \cos(\theta_{j,k}) & \ket{j}\bra{j} & - \sin(\theta_{j,k}) & \ket{j}\bra{k} \\
+                            + & e^{i\theta_{k,j}}\sin(\theta_{j,k}) & \ket{k}\bra{j} & + e^{i\theta_{k,j}}\cos(\theta_{j,k}) & \ket{k}\bra{k} \\
+                            + & \sum_{l \neq j, k} \ket{l}\bra{l} & & &
+                          \end{aligned}
                         \end{equation}
                         Each matrix \(\exp\left(i\theta_{l,l}\ket{l}\bra{l}\right)\) multiplies column \(l\) by a phase factor, and so their product can be explicitly expressed as
-                        \begin{equation}
+                        \begin{equation}\label{eqn:unitaryparam_phase}
                           \prod_{l=1}^d \exp\left(i\theta_{l,l}\ket{l}\bra{l}\right) = \sum_{l=1}^d e^{i\theta_{l,l}}\ket{l}\bra{l}.
                         \end{equation}
 
@@ -2352,25 +2356,14 @@ Any[]
                         \begin{equation}
                           V = \sum_{a=1}^o \ket{a}_O \otimes \sqrt{M_a} = \begin{bmatrix} \sqrt{M_1} \\ \sqrt{M_2} \\ \vdots \\ \sqrt{M_o} \end{bmatrix}.
                         \end{equation}
-                        Each measurement operator can be written using its spectral decomposition as
-                        \begin{equation}
-                          M_a = \sum_{j=1}^d m_a^{(j)} U_a \ket{j}\bra{j} U_a^{\dagger} \Rightarrow \sqrt{M_a} = \sum_{j=1}^d \sqrt{m_a^{(j)}} U_a \ket{j}\bra{j} U_a^{\dagger},
-                        \end{equation}
-                        where, since all \(M_a\)'s are PSD and we require \(\sum_a M_a = I_A \Rightarrow (\sum_a M_a) U_a\ket{j} = 1\), we have \(m_a^{(j)}\in\ccintv{0}{1}\) for all \(a\) and \(j\), and further that \(\sqrt{M_a}\) is also PSD\@.
 
                         Now, since
                         \begin{equation}
                           V^{\dagger}V = \begin{bmatrix} \sqrt{M_1}^{\dagger} & \sqrt{M_2}^{\dagger} & \cdots & \sqrt{M_o}^{\dagger} \end{bmatrix} \begin{bmatrix} \sqrt{M_1} \\ \sqrt{M_2} \\ \vdots \\ \sqrt{M_o} \end{bmatrix} = \sum_a \sqrt{M_a}^{\dagger}\sqrt{M_a} = \sum_a M_a = I_A,
                         \end{equation}
-                        where we have used \(\sqrt{M_a}^{\dagger} = \sqrt{M_a}\), the columns of \(V\) form an orthonormal basis for a \(d\)-dimensional subspace of \(\Hs\). Although mapping the isometry to an orthonormal basis would seem to discard information about the phases between the columns of \(\sqrt{M_a}\), \(M_a\) does not change even if we multiply each column of \(\sqrt{M_a}\) by an arbitrary phase:
-                        \begin{gather}
-                          {\left(\left(\sum_j e^{i\phi_j} \ket{j}\bra{j}\right)\sqrt{M_a}\right)}^{\dagger} {\left(\left(\sum_k e^{i\phi_k} \ket{k}\bra{k}\right)\sqrt{M_a}\right)} \\
-                          = \sqrt{M_a}^{\dagger}\left(\sum_j e^{i\phi_j} \ket{j}\bra{j}\right) \left(\sum_k e^{-i\phi_k} \ket{k}\bra{k}\right)\sqrt{M_a} \\
-                          = \sqrt{M_a}^{\dagger}\sqrt{M_a} = M_a.
-                        \end{gather}
-                        Therefore, each POVM induces a unique basis for a \(d\)-dimensional subspace in \(\Hs\).
+                        where we have used \(\sqrt{M_a}^{\dagger} = \sqrt{M_a}\), the columns of \(V\) are a set of \(d\) orthonormal vectors in \(\Hs\). Therefore, the operators \(M_a\) induce a unique set of \(d\) orthonormal vectors in \(\Hs\).
 
-                        Conversely, any such basis \({\{\ket{\gamma^{(g)}}_{\Hs}\}}_{g=1}^d\) induces a unique valid POVM on \(A\). We decompose each vector as \(\ket{\gamma^{(g)}}_{\Hs} = \oplus_{a=1}^o g_a \ket{\gamma^{(g)}_a}\), with normalisation factors \(g_a\), and construct \(o\) \(d\times{d}\) operators 
+                        Conversely, any orthonormal set of \(d\) vectors \({\{\ket{\gamma^{(g)}}_{\Hs}\}}_{g=1}^d\) induces a unique valid POVM on \(A\). We decompose each state as \(\ket{\gamma^{(g)}}_{\Hs} = \oplus_{a=1}^o g_a \ket{\gamma^{(g)}_a}\), with normalisation factors \(g_a \in \R_{+}\), and construct \(o\) \(d\times{d}\) operators 
                         \begin{equation}
                           \sqrt{\Gamma_a} = \sum_{g=1}^d g_a \ket{\gamma^{(g)}_a}\bra{g} = \begin{bmatrix} 1_a \ket{\gamma^{(1)}_a} & 2_a \ket{\gamma^{(2)}_a} & \cdots & d_a \ket{\gamma^{(d)}_a} \end{bmatrix},
                         \end{equation}
@@ -2382,15 +2375,17 @@ Any[]
                         \begin{equation}
                           \bra{h}\Gamma\ket{g} = \sum_a h_a g_a \braket{\gamma^{(h)}_a|\gamma^{(g)}_a} = \braket{\gamma^{(h)}|\gamma^{(g)}}_{\Hs} = \delta_{gh} \Rightarrow \Gamma = I_A
                         \end{equation}
-                        and therefore any orthonormal basis for this subspace generates a unique POVM in this way. This is in agreement with~\cite{RandPOVM}, where a distribution over the isometries \(V\) is shown to recover the uniform distribution on the Lebesgue measure over the set of POVMs.
+                        and therefore any orthonormal set of vectors generates a unique POVM in this way, and it is clear that this construction inverts the previous mapping from POVMs to sets of vectors. This is in agreement with~\cite{RandPOVM}, where a distribution over the isometries \(V\) (that is, the sets of \(d\) orthonormal vectors) is shown to recover the uniform distribution on the Lebesgue measure over the set of POVMs.
 
-                        Because we only need \(d\) basis vectors, the unitary that generates these bases admits the same parametrisation as the unitary for generating a rank \(d\) density matrix from the computational basis \({\{\ket{g}_{\Hs}\}}_{g=1}^{od}\) in~\cite{CompositeParam}, which uses \(d(2od-d-1)\) real parameters \(\theta_{j,k}\):
+                        We parametrise the sets of orthonormal \(d\) vectors \({\{\ket{\gamma^{(g)}}_{\Hs}\}}_{g=1}^{d}\) by parametrising the unitary \(U_{\gamma}\) that generates them from the computational basis \({\{\ket{g}_{\Hs}\}}_{g=1}^{od}\) as \(\ket{\gamma^{(g)}}_{\Hs} = U_{\gamma}\ket{g}_{\Hs}\). From \Cref{eqn:unitaryparam_Theta} and \Cref{eqn:unitaryparam_phase}, it is clear that parameters \(\theta_{j,k}\) with \(j > d\) and \(k > d\) will not appear in the expression for the set of orthonormal vectors. Therefore, we can write
                         \begin{equation}
-                          U_{\gamma} = \prod_{j=1}^d \left( \prod_{k=j+1}^{od} \exp(i\theta_{k,j}\ket{k}\bra{k}) \exp(i\theta_{j,k}\sigma_{j,k}) \right),
+                          U_{\gamma} = \prod_{j=1}^d \left( \prod_{k=j+1}^{od} \exp(i\theta_{k,j}\ket{k}\bra{k}) \exp(i\theta_{j,k}\sigma_{j,k}) \right) \left[ \prod_{l=1}^d \exp\left(i\theta_{l,l}\ket{l}\bra{l}\right) \right],
                         \end{equation}
-                        giving
+                        specifying the unitary with \((2o-1)d^2\) real parameters.
+
+                        Decomposing \(\ket{\gamma^{(g)}}\) as a direct sum, we have
                         \begin{align}
-                          \ket{\gamma^{(g)}}_{\Hs} &= U_{\gamma}\ket{g}_{\Hs} \Rightarrow g_a\ket{\gamma^{(g)}_a} = \left(\bra{a}_O \otimes I_A\right)U_{\gamma}\ket{g}_{\Hs} \\
+                          g_a\ket{\gamma^{(g)}_a} &= \left(\bra{a}_O \otimes I_A\right)U_{\gamma}\ket{g}_{\Hs} \\
                           \therefore \Gamma_a &= \sum_{gh} \ket{h}\bra{h}_{\Hs} U_{\gamma}^{\dagger} \left(\ket{a}_O \otimes I_A\right) \left(\bra{a}_O \otimes I_A\right)U_{\gamma}\ket{g}_{\Hs}\bra{g} \\
                                               &= \underbrace{\left(\sum_{h} \ket{h}\bra{h}_{\Hs} U_{\gamma}^{\dagger}\right)}_{V^\dagger} \left(\ket{a}\bra{a}_O \otimes I_A\right) \underbrace{\left(\sum_{g} U_{\gamma}\ket{g}_{\Hs}\bra{g}\right)}_{V}.
                         \end{align}
@@ -2422,11 +2417,11 @@ Any[]
 
                           \section{Preliminaries}\label{sec:prelim}
 
-                          As this report is expected to be read by a diverse audience, concepts that may be entirely elementary to some readers may be utterly unknown to others. Background information of this nature, from a variety of domains, is collected here, but assumed throughout the main text to avoid cluttering the exposition. The only assumptions for this section are a junior-college level grasp of probability, calculus, vectors and complex numbers.
+                          As this report is expected to be read by a diverse audience, concepts that may be entirely elementary to some readers may be utterly unknown to others. Background information of this nature, from a variety of domains, is collected here, but assumed throughout the main text to avoid cluttering the exposition. The only assumptions for this \lcnamecref{sec:prelim} are a junior-college level grasp of probability, calculus, vectors and complex numbers.
 
                           \subsection{Convex Geometry and Analysis}\label{sec:prelim_cvxgeom}
 
-                          The phenomenon of convexity arises naturally from physical constraints, and is an essential tool for enabling global optimisation. All statements made without citation in this section can be found in Chapters 2 and 3 of~\cite{BoydVand}.
+                          The phenomenon of convexity arises naturally from physical constraints, and is an essential tool for enabling global optimisation. All statements made without citation in this \lcnamecref{sec:prelim_cvxgeom} can be found in Chapters 2 and 3 of~\cite{BoydVand}.
 
                           \begin{table}[H]
                             \centering
@@ -2919,7 +2914,7 @@ Any[]
                             \sqrt{\frac{2}{l(l+1)}} \left( \sum_{j=1}^l \ket{j}\bra{j} - l\ket{l}\bra{k} \right), & 1 \leq l \leq d-1 \\
                           \end{Array}
 
-                          However, a major issue with this parametrisation for density matrices is that it is very difficult to check that the generated Hermitian matrix is PSD in general dimensions, which was accomplished by the simple normalisation constraint in the qubit case~\cite{DensMatParam}. In fact, the complexity of the generated parametrisation is both unavoidable~\cite{NoHigherEuclideanRepr} and of fundamental significance~\cite{InfoAsymStateSpace}. These and other issues related to state parametrisation are reviewed in~\cite{DensMatParam}. A more recent parametrisation that automatically enforces PSD is given by~\cite{SquaringParam}, at the cost of injectivity between parameters and states.
+                          However, a major issue with this parametrisation for density matrices is that it is very difficult to check that the generated Hermitian matrix is PSD in general dimensions, which was accomplished by the simple normalisation constraint in the qubit case~\cite{DensMatParam}. In fact, the complexity of the generated parametrisation is both unavoidable~\cite{NoHigherEuclideanRepr} and of fundamental significance~\cite{InfoAsymStateSpace}. These and other issues related to state parametrisation are reviewed in~\cite{DensMatParam}. A more recent parametrisation that automatically enforces PSD is given by~\cite{SquaringParam}, although it sacrifices injectivity from parameters to states.
 
                           One notable application of the Bloch vector parametrisation that may be relevant to us is the construction of generalised Werner and isotropic states in dimensions greater than 2~\cite{WernerIsotropicDecomp}. These states are somewhat easier to study due to their degree of symmetry, and may facilitate study of the behaviours generated by higher-dimensional states. 
 
