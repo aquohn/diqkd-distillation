@@ -31,7 +31,7 @@ function poly_setup(us::UpperSetting, pin::AbstractArray, p, m::Integer; pJ=noth
   probs = full_probs(us, pin, p, pJ, pvgv, M, N, O, P)
   polypairs, polypart = gr_relent_polypairs(probs, m; kwargs...)
   idxit = itprod(1:m, 1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)
-  obj = apply_epigraph!(eqconstrs, polypairs, polypart, R, idxit) 
+  obj = apply_epigraph!(eqconstrs, polypairs, polypart, R, idxit)
 
   return obj, ineqconstrs, eqconstrs, vars
 end
@@ -55,14 +55,14 @@ function simple_poly_setup(us::UpperSetting, pin::AbstractArray, p, m::Integer, 
   pvve = [pin[x,y] * sum(M[kA, a, x] * N[kB, b, y] * O[kE, e] * P[kA, kB, kE]
                           for (kA, kB, kE) in itprod(1:dA, 1:dB, 1:dE))
           for (a, x, b, y, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oE)]
-  pvvje = [pJ[j, a, x, b, y, e] * pvve[a, x, b, y, e] 
+  pvvje = [pJ[j, a, x, b, y, e] * pvve[a, x, b, y, e]
            for (a, x, b, y, j, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)]
   pjge = [sum(pJ[j, a, x, b, y, e] * pvv[a, x, b, y]
-              for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB)) 
+              for (a, x, b, y) in itprod(1:oA, 1:iA, 1:oB, 1:iB))
          for (j, e) in itprod(1:oJ, 1:oE)]
   pv2je = [sum(pvvje[:, :, b, y, j, e])
          for (b, y, j, e) in itprod(1:oB, 1:iB, 1:oJ, 1:oE)]
-  fvvje = [pJ[j, a, x, b, y, e] / (pvgv[a, x, b, y] * pjge[j, e]) 
+  fvvje = [pJ[j, a, x, b, y, e] / (pvgv[a, x, b, y] * pjge[j, e])
            for (a, x, b, y, j, e) in itprod(1:oA, 1:iA, 1:oB, 1:iB, 1:oJ, 1:oE)]
 
   T, W = loglb_gaussradau(m)
@@ -100,7 +100,7 @@ function CMI_poly_setup(us::UpperSetting, pin::AbstractArray, p, m::Integer; kwa
   probs = CMI_probs(us, pin, M, N, O, P)
   polypairs, polypart = gr_relent_polypairs(probs, m; kwargs...)
   idxit = itprod(1:m, 1:oA, 1:iA, 1:oB, 1:iB, 1:oE)
-  obj = apply_epigraph!(eqconstrs, polypairs, polypart, R, idxit) 
+  obj = apply_epigraph!(eqconstrs, polypairs, polypart, R, idxit)
 
   return obj, ineqconstrs, eqconstrs, vars
 end
@@ -121,7 +121,7 @@ function HAgE_poly_setup(us::UpperSetting, pin::AbstractArray, p, m::Integer; kw
   probs = HAgE_probs(us, pin, M, N, O, P)
   polypairs, polypart = gr_relent_polypairs(probs, m; kwargs...)
   idxit = itprod(1:m, 1:oA, 1:iA, 1:oE)
-  obj = apply_epigraph!(eqconstrs, polypairs, polypart, R, idxit) 
+  obj = apply_epigraph!(eqconstrs, polypairs, polypart, R, idxit)
 
   return obj, ineqconstrs, eqconstrs, vars
 end

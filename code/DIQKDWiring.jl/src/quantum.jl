@@ -101,7 +101,7 @@ function Behaviour(rho::AbstractMatrix{<:Number}, Ms::AbstractVector{<:POVMMeasu
   oA = first(Ms).odim; oB = first(Ns).odim;
   @assert all([M.odim == oA && M.idim == dA for M in Ms])
   @assert all([N.odim == oB && N.idim == dB for N in Ns])
-  types = [eltype(rho); 
+  types = [eltype(rho);
            [[eltype(Mmat) for Mmat in M.matrices] for M in Ms]...;
            [[eltype(Nmat) for Nmat in N.matrices] for N in Ns]...]
   T = promote_type(types...) |> real
@@ -152,7 +152,7 @@ function unitarylist(L::AbstractMatrix)
   ulist = [rotmat(d, m, n, L) for m in 1:(d-1) for n in (m+1):d]
   phases = [exp(im * L[i, i]) for i in 1:d]
   push!(ulist, diagmat(phases))
-  
+  return ulist
 end
 unitary(L) = prod(unitarylist(L))
 function densmat_unitarylist(L::AbstractMatrix, k=0)
@@ -242,7 +242,7 @@ function meas_corrs(; theta=0.15*pi, mus=[pi, 2.53*pi], nus=[2.8*pi, 1.23*pi, pi
 end
 
 function expt_corrs(nc, eta, tldcorrs)
-  Atlds, Btlds, ABtlds = tldcorrs 
+  Atlds, Btlds, ABtlds = tldcorrs
   iA, iB = length(Atlds), length(Btlds)
   Eax = [-nc-(1-nc)*((1-eta)-eta*Atlds[x]) for x in 1:iA]
   Eby = [-nc-(1-nc)*((1-eta)-eta*Btlds[y]) for y in 1:iB]
@@ -275,7 +275,7 @@ end
 
 function expt_grads(nc, eta, Atlds, Btlds, ABtlds)
   iA, iB = length(Atlds), length(Btlds)
-  etagrad = [ (1-nc)*((1-2*eta)*(Atlds[x] + Btlds[y]) - 2*eta*ABtlds[x,y] + 2 - 2*eta) for x in 1:iA, y in 1:iB ] 
+  etagrad = [ (1-nc)*((1-2*eta)*(Atlds[x] + Btlds[y]) - 2*eta*ABtlds[x,y] + 2 - 2*eta) for x in 1:iA, y in 1:iB ]
   ncgrad = [ eta*((1-eta)*(Atlds[x] + Btlds[y]) - eta*ABtlds[x,y] + 2 - eta) for x in 1:iA, y in 1:iB ]
   return ncgrad, etagrad
 end

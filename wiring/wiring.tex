@@ -1030,6 +1030,8 @@
 
     This, of course, is not really a counterexample, because tracing out \(\bar{E}\) of this new state would not recover the original state: \(A\) and \(B\) are now correlated with \(\crv{X}\) and \(\crv{Y}\). However, this illustrates an important point: non-lockability cannot rule out the use of PSKs \emph{before} the tripartite state is fixed. This may be true even in the device-dependent case---a suggestive example is the revelation of Bob's measurement settings in the BB84 protocol, enabling an intercept-resend attack~\cite{PracticalQKD} if the state is not partitioned yet and Eve is able to manipulate Bob's subsystem, although in that case one bit is revealed each round, and the key rate is less than one bit per round, so non-lockability is not violated. Nonetheless, the protocol in~\cite[Prot. 2]{DIQKD_FiniteSize} is a clear illustration of this apparent violation of non-lockability for the DIQKD key rate.
 
+    TODO we assume that the PSK is kept secret while quantum communication is ongoing. The quantum state will be fixed by then.
+
     This result is unfortunate, because it would otherwise allow us to rule out the use of PSKs for generating input distributions, which, as noted in \Cref{sec:diqkd_proto}, is difficult to analyse. This also has implications for the use of PSKs in wirings, as discussed in \Cref{sec:locwir_dist}. For now, we leave the following question open, although finding a counter-example would likely not be difficult:
     \begin{question}
       Can locking be demonstrated for PSKs used before the quantum state is determined in device-dependent QKD\@?
@@ -2352,6 +2354,8 @@ Any[]
                         \end{equation}
                         where \(\phi_d \coloneqq 0\) and \(\prod_{k=1}^{0}\sin^2\phi_k \coloneqq 1\), in either case yielding \(d-1\) independent real parameters. However, expressing the density matrix in terms of the unitary operators shows that the \(d\) parameters \(\theta_{j,j}\) can be neglected~\cite{CompositeParam}, allowing an arbitrary density matrix to be fully parametrised by \(d^2 -d + d - 1 = d^2-1\) real numbers.
 
+                        TODO this needs to be fixed; define \(\bar{M}_a\) such that \(\bar{M}_a^{\dagger} \bar{M}_a = M_a\), and note that there is unitary freedom in the definition: \(\bar{M}_a^{\dagger} U^{\dagger} U \bar{M}_a = M_a\).
+
                         The parametrisation of POVMs is more involved, but we can leverage our parametrisation of unitary matrices here as well. We begin with Naimark's dilation theorem, which tells us that an \(o\)-outcome POVM \(\{M_a\}\) on a \(d\)-dimensional Hilbert space \(A\) can be viewed as a projective measurement on a larger Hilbert space \(\Hs \cong O \otimes A\) of dimension \(od\). Throughout this section, kets and inner products without subscripts refer to the Hilbert space \(A\). We relate \(A\) to \(\Hs\) via the \(od \times d\) \emph{isometry}
                         \begin{equation}
                           V = \sum_{a=1}^o \ket{a}_O \otimes \sqrt{M_a} = \begin{bmatrix} \sqrt{M_1} \\ \sqrt{M_2} \\ \vdots \\ \sqrt{M_o} \end{bmatrix}.
@@ -2361,9 +2365,9 @@ Any[]
                         \begin{equation}
                           V^{\dagger}V = \begin{bmatrix} \sqrt{M_1}^{\dagger} & \sqrt{M_2}^{\dagger} & \cdots & \sqrt{M_o}^{\dagger} \end{bmatrix} \begin{bmatrix} \sqrt{M_1} \\ \sqrt{M_2} \\ \vdots \\ \sqrt{M_o} \end{bmatrix} = \sum_a \sqrt{M_a}^{\dagger}\sqrt{M_a} = \sum_a M_a = I_A,
                         \end{equation}
-                        where we have used \(\sqrt{M_a}^{\dagger} = \sqrt{M_a}\), the columns of \(V\) are a set of \(d\) orthonormal vectors in \(\Hs\). Therefore, the operators \(M_a\) induce a unique set of \(d\) orthonormal vectors in \(\Hs\).
+                        where we have used \(\sqrt{M_a}^{\dagger} = \sqrt{M_a}\), the columns of \(V\) are a set of \(d\) orthonormal vectors in \(\Hs\). Therefore, the sequence of operators \((M_a)_{a=1}^o\) forming a POVM induces a unique set of \(d\) orthonormal vectors in \(\Hs\).
 
-                        Conversely, any orthonormal set of \(d\) vectors \({\{\ket{\gamma^{(g)}}_{\Hs}\}}_{g=1}^d\) induces a unique valid POVM on \(A\). We decompose each state as \(\ket{\gamma^{(g)}}_{\Hs} = \oplus_{a=1}^o g_a \ket{\gamma^{(g)}_a}\), with normalisation factors \(g_a \in \R_{+}\), and construct \(o\) \(d\times{d}\) operators 
+                        Conversely, any orthonormal set of \(d\) vectors \({\{\ket{\gamma^{(g)}}_{\Hs}\}}_{g=1}^d\) induces a unique valid POVM on \(A\). We decompose each state as \(\ket{\gamma^{(g)}}_{\Hs} = \oplus_{a=1}^o g_a \ket{\gamma^{(g)}_a}\), with normalisation factors \(g_a \in \R_{+}\), and construct \(o\) \(d\times{d}\) operators
                         \begin{equation}
                           \sqrt{\Gamma_a} = \sum_{g=1}^d g_a \ket{\gamma^{(g)}_a}\bra{g} = \begin{bmatrix} 1_a \ket{\gamma^{(1)}_a} & 2_a \ket{\gamma^{(2)}_a} & \cdots & d_a \ket{\gamma^{(d)}_a} \end{bmatrix},
                         \end{equation}
@@ -2375,7 +2379,7 @@ Any[]
                         \begin{equation}
                           \bra{h}\Gamma\ket{g} = \sum_a h_a g_a \braket{\gamma^{(h)}_a|\gamma^{(g)}_a} = \braket{\gamma^{(h)}|\gamma^{(g)}}_{\Hs} = \delta_{gh} \Rightarrow \Gamma = I_A
                         \end{equation}
-                        and therefore any orthonormal set of vectors generates a unique POVM in this way, and it is clear that this construction inverts the previous mapping from POVMs to sets of vectors. This is in agreement with~\cite{RandPOVM}, where a distribution over the isometries \(V\) (that is, the sets of \(d\) orthonormal vectors) is shown to recover the uniform distribution on the Lebesgue measure over the set of POVMs.
+                        and therefore any orthonormal set of vectors generates a unique sequence of operators forming a POVM in this way, and it is clear that this construction inverts the previous mapping from sequences of operators forming a POVM to sets of vectors. While this is not a bijective mapping between POVMs and orthonormal sets of vectors, since any POVM gives rise to \(2^{o} o!\) such sequences (since any of the operators \(\sqrt{M_a}\) could be replaced by \(\sqrt{M_a}^{\dagger}\), and the operators permuted, while giving the same POVM up to relabelling of outcomes), every POVM gives rise to the same number of sequences. This is in agreement with~\cite{RandPOVM}, where a distribution over the isometries \(V\) (that is, the sets of \(d\) orthonormal vectors) is shown to recover the uniform distribution on the Lebesgue measure over the set of POVMs.
 
                         We parametrise the sets of orthonormal \(d\) vectors \({\{\ket{\gamma^{(g)}}_{\Hs}\}}_{g=1}^{d}\) by parametrising the unitary \(U_{\gamma}\) that generates them from the computational basis \({\{\ket{g}_{\Hs}\}}_{g=1}^{od}\) as \(\ket{\gamma^{(g)}}_{\Hs} = U_{\gamma}\ket{g}_{\Hs}\). From \Cref{eqn:unitaryparam_Theta} and \Cref{eqn:unitaryparam_phase}, it is clear that parameters \(\theta_{j,k}\) with \(j > d\) and \(k > d\) will not appear in the expression for the set of orthonormal vectors. Therefore, we can write
                         \begin{equation}
@@ -2419,88 +2423,20 @@ Any[]
 
                           As this report is expected to be read by a diverse audience, concepts that may be entirely elementary to some readers may be utterly unknown to others. Background information of this nature, from a variety of domains, is collected here, but assumed throughout the main text to avoid cluttering the exposition. The only assumptions for this \lcnamecref{sec:prelim} are a junior-college level grasp of probability, calculus, vectors and complex numbers.
 
-                          \subsection{Convex Geometry and Analysis}\label{sec:prelim_cvxgeom}
-
-                          The phenomenon of convexity arises naturally from physical constraints, and is an essential tool for enabling global optimisation. All statements made without citation in this \lcnamecref{sec:prelim_cvxgeom} can be found in Chapters 2 and 3 of~\cite{BoydVand}.
-
-                          \begin{table}[H]
-                            \centering
-                            \begin{Tabular}{ccl} 
-                              \toprule
-                              \(S\) is\ldots & Iff for all \(\{x_i\} \subseteq S\), \\
-                              \midrule
-                              Affine & \(\sum_i w_i x_i \in S\;\forall \{w_i\} : w_i \in \R \land \sum_i w_i = 1 \)  \\
-                              Conic & \(\sum_i w_i x_i \in S\;\forall \{w_i\} : w_i \geq 0\)  \\
-                              Convex & \(\sum_i w_i x_i \in S\;\forall \{w_i\} : w_i \geq 0 \land \sum_i w_i = 1 \)  \\
-                              \bottomrule
-                            \end{Tabular}
-                            \caption{Characterisations of convex, affine and conic sets (cones).}\label{tab:sets}
-                          \end{table}
-
-                          \Cref{tab:sets} concisely summarises different types of sets we are concerned with in convex geometry. In particular, all affine sets are convex. The weighted sums of \(\{x_i\}\) that define each type of set are referred to as affine, conic and convex \emph{combinations}, and are special cases of linear combinations. Note that, to establish any of these properties, we need only establish that the set is closed under the corresponding combination of two elements. The affine, conic and convex \emph{hulls} of a set of points are the sets defined by all affine, conic and convex combinations of the points, respectively.
-
-                          Convex combinations are particularly interesting to us, because they represent \emph{probabilistic mixture} of \(\{x_i\}\), with \(\{w_i\}\) specifying the pmf. An \emph{extreme point} is a point that cannot be written as a convex combination of other points. All extreme points are located on the boundary of a convex set, and closed bounded convex set is the convex hull of its extreme points~\cite[Ch. B.4]{LuenbergerYe}. \emph{Caratheodory's theorem on convex hulls} tells us that, for the convex hull \(S\) of a set of points \(V \subseteq \R^{d}\), any point in \(S\) can be expressed as the convex combination of at most \(d+1\) points of \(V\)~\cite{Caratheodory,CaratheodorySteinitz}.
-
-                          The subset of \(\R^d\), \(d \in \Z_{++}\) that obeys an \emph{affine inequality constraint} of the form \(\rvec{a}\cvec{x} - b \leq 0\) is called a \emph{half-space}, which is a convex set, but not affine. \emph{Affine equality constraints} \(\rvec{a}\cvec{x} + b = 0\) define \emph{hyperplanes}, which are affine sets, but which can equivalently be seen as the intersection of \(\rvec{a}\cvec{x} + b \leq 0\) and \(\rvec{a}\cvec{x} + b \geq 0\). Analytically, then, we need only consider half-spaces to model all possible affine constraints. Further, while each hyperplane/equality constraint corresponds to a \emph{redundant} coordinate, which can be eliminated (cf.\ the derivation of the Collins-Gisin representation in \Cref{sec:nl_ns}), keeping the constraints and the extra coordinates can make it easier to interpret computational results.
-
-                          In convex geometry, the intersection of a finite number of half-spaces is a \emph{polyhedron}, which is a convex set. With \(n\) half-spaces defined by \(n\) affine inequality constraints, all vectors \(\{\cvec{a}\}\) and scalars \(\{b\}\) may be combined into a \(d\times{n}\) matrix \(\matr{A}\) and a vector \(\cvec{b}\) of length \(d\), respectively, defining an \emph{affine map} \(\matr{A}\cvec{x} + \cvec{b}\), such that \(\matr{A}\cvec{x} + \cvec{b} \leq \cvec{0}\), where inequality here is componentwise, characterises the polyhedron completely.
-
-                          Polyhedra can either be defined by the inequalities corresponding to their half-spaces (the \emph{H-representation}), or by their \emph{vertices} and \emph{extreme rays} (the \emph{V-representation})~\cite[Sec. 2]{LRS}. Formally,
-                          \begin{itemize}
-                            \item A set of vectors \({\{\cvec{a}_i\}}_{i=1}^n\) is \emph{affinely independent} if the set \(\{\cvec{a}_1-\cvec{a}_2, \ldots, \cvec{a}_{n-1}-\cvec{a}_n\}\) is linearly independent, which is possible for \(n \leq d+1\).
-                            \item When constraints are referred to as being affinely independent, this refers to the above definition applied to the vectors \(\{\cvec{a}\}\)
-                            \item A \emph{vertex} of a polyhedron \(P\) is a point in \(P\) that satisfies \(d\) affinely independent inequality constraints with equality~\cite[Sec. 2]{LRS} (intuitively, a corner where \(d\) half-spaces intersect). The set of vertices is precisely the set of extreme points of a polyhedron.
-                            \item An \emph{extreme ray} of a polyhedron \(P\) is a vector \(\cvec{r}\in\R^d\) such that for some vertex \(\cvec{v}\in{P}\) and any positive scalar \(t\), \(\cvec{v} + t\cvec{r} \in P\) and satisfies \(d-1\) affinely independent inequality constraints with equality~\cite[Sec. 2]{LRS} (intuitively, this occurs when we can always choose \(\cvec{x}\) to make \(\rvec{a}\cvec{x} + b\) more negative for some constraint \(\rvec{a}\cvec{x} + b \leq 0\), while remaining on the face defined by the other \(d-1\) inequalities)
-                          \end{itemize}
-
-                          A bounded polyhedron, which does not have any rays, is called a \emph{polytope}~\cite[Ch. 1]{Ziegler}. For a polytope \(P\) of dimension \(d\), given a linear inequality \(\rvec{c}\cvec{x} \leq c_0\;\forall\cvec{x}\in{P}\), the set
-                          \begin{equation}
-                            F = P \cup \{\cvec{x}\in\R^d : \rvec{c}\cvec{x} = c_0\}
-                          \end{equation}
-                          is called a \emph{face}, and \emph{dimension} of a face is the dimension of its affine hull. Vertices are then faces of dimension \(0\), while \emph{facets} are faces of dimension \(d-1\). The facet-defining inequalities are the half-spaces that describe the polytope~\cite[Ch. 2]{Ziegler}.
-
-                          Convex \emph{functions} are those with a convex domain \(\Omega\in\R^d\) and a convex \emph{epigraph}, that is
-                          \begin{equation}
-                            f : \Omega \to \R \text{ convex} \Leftrightarrow \{\cvec{x} \oplus t : f(\cvec{x}) \leq t\}\text{ convex}. 
-                          \end{equation}
-                          A function \(f\) is \emph{concave} iff \(-f\) is convex. Affine maps (of which linear maps are a special case) are both convex and concave.
-
-                          Perhaps the most useful characterisation of convex functions is via \emph{Jensen's inequality}:
-                          \begin{equation}
-                            f\text{ convex} \Leftrightarrow \int p(\cvec{x}) f(\cvec{x}) \dif{\cvec{x}} \geq f\left(\int p(\cvec{x}) \dif{\cvec{x}}\right)\;\forall p: p(\cvec{x}) \geq 0 \land \int p(\cvec{x}) \dif{x} = 1,
-                          \end{equation}
-                          that is, for all probability distributions on \(\Omega\).\footnote{This applies to discrete distributions as well, but for convenience we give only the integral form.}
-
-                          For differentiable \(f\), a more convenient characterisation is~\cite[Ch. 7.4]{LuenbergerYe}
-                          \begin{equation}
-                            f\text{ convex} \Leftrightarrow f(\cvec{y}) \geq f(\cvec{x}) + \nabla{f}(\cvec{y}-\cvec{x}) \;\forall \cvec{x},\cvec{y} \in \Omega,
-                          \end{equation}
-                          and if \(f\) is twice-differentiable~\cite[Ch. 7.4]{LuenbergerYe},
-                          \begin{equation}
-                            f\text{ convex} \Leftrightarrow \nabla^2{f}(\cvec{x}) \geq 0 \;\forall \cvec{x} \in \Omega.
-                          \end{equation}
-
-                          Convex functions \(f\) have several properties that make them particularly easy to optimise~\cite[Ch. 7.5]{LuenbergerYe}:
-                          \begin{itemize}
-                            \item All local minimisers of \(f\) are global minimisers
-                            \item An easy consequence: any point \(\cvec{x}\) such that \(\nabla{f}(\cvec{y}-\cvec{x}) \geq 0\;\forall \cvec{y}\in\Omega\) is a global minimiser
-                            \item The global maximum of \(f\) is achieved by an extremal point of its domain
-                          \end{itemize}
-
                           \subsection{Linear Algebra and Quantum Mechanics}\label{sec:prelim_linalg}
 
-                          The mathematical models of quantum mechanics are expressed in the language of linear algebra. This brief review will focus on explaining the correspondence between physical features of quantum systems and their mathematical expression. All statements made without citation in this section can be found in~\cite{NielsenChuang}.
+                          The mathematical models of quantum mechanics are expressed in the language of linear algebra. This brief review will focus on explaining the correspondence between physical features of quantum systems and the mathematical expressions representing them. All statements made without citation or proof in this section can be found in~\cite{NielsenChuang}.
 
                           While linear algebra is typically introduced as the study of operations in \(\R^n\), it can be generalised to \(\C^n\), and even infinite-dimensional vector spaces. Fundamentally, a vector space \(V\) over a field \(\mathbb{F}\), typically \(\R\) or \(\C\), is a collection of objects such that the following operations are defined:
                           \begin{enumerate}
                             \item \emph{Vector addition}: \(\forall \cvec{u}, \cvec{v} \in V : \cvec{u} + \cvec{v} \in V\)
                             \item \emph{Scalar multiplication}: \(\forall a \in \mathbb{F}, \cvec{v} \in V : a\cvec{v} \in V\)
                           \end{enumerate}
-                          with the usual arithmetic properties one would expect. Under such a definition, for example, (a class of) \emph{functions} can be considered an infinite dimensional vector space, and indeed they are used as such in quantum mechanics. The particular infinite-dimensional vector space being used is a \emph{complex separable Hilbert space}, but the typical parlance of physicists is to call even finite-dimensional vector spaces Hilbert spaces if they describe quantum systems. We follow this convention.
+                          with the usual arithmetic properties one would expect. Under such a definition, for example, (a class of) \emph{functions} can be considered an infinite-dimensional vector space, and indeed they are used as such in quantum mechanics. The particular infinite-dimensional vector space being used is a \emph{complex separable Hilbert space}, but the typical parlance of physicists is to call even finite-dimensional vector spaces Hilbert spaces if they describe quantum systems. We follow this convention.
 
                           In addition to vectors, we are concerned about the \emph{operators} that act on them. A linear operator \(M \in \Lin{V \to U}\) sends vectors from the vector space \(V\) to the vector space \(U\), but is linear in the sense that
                           \begin{equation}
-                            M\left(\sum_i a_i\cvec{v}_i\right) = \sum_i a_i M\cvec{v}.
+                            M\left(\sum_i a_i\cvec{v}_i\right) = \sum_i a_i M\cvec{v}_i.
                           \end{equation}
                           In finite dimenstions, linear operators \(\Lin{\mathbb{F}^m \to \mathbb{F}^n}\) are represented by \(n \times m\) matrices. We write \(\Lin{V}\) for \(\Lin{V \to V}\). One important operator is the \emph{identity operator} \(I\), sometimes written \(I_A\), where \(A\) denotes the system it operates on. This is simply the identity matrix in finite dimensions.
 
@@ -2529,7 +2465,7 @@ Any[]
                           \begin{equation}
                             \Tr{M} = \sum_i \bra{e_i}M\ket{e_i},
                           \end{equation}
-                          for some basis \(\{e_i\}\). Remarkably, this operation is basis-independent: any basis will give the same answer, which is the sum of \(M\)'s eigenvalues, or in a matrix representation, the sum of the diagonal elements. A crucial property of the trace is that the trace is \emph{invariant under cyclic permutations}: \(\Tr{A_1 A_2 \cdots A_n} = \Tr{A_n A_1 \cdots A_{n-1}}\).
+                          for some basis \(\{e_i\}\). It is linear: \(\Tr{M+N} = \Tr{M} + \Tr{N}\). Remarkably, this operation is basis-independent: any basis will give the same answer, which is the sum of \(M\)'s eigenvalues, or in a matrix representation, the sum of the diagonal elements. A crucial property of the trace is that it is \emph{invariant under cyclic permutations}: \(\Tr{A_1 A_2 \cdots A_n} = \Tr{A_n A_1 \cdots A_{n-1}}\).
 
                           While a pure state represents complete knowledge of a system, a \emph{mixed state} represents incomplete knowledge: for example, if Alice flips a coin and picks one of two quantum states, \(\ket{0}\) and \(\ket{1}\), to send to Bob, without revealing the outcome, he can model his knowledge of the system as a mixed state. The mixed state cannot be represented as a vector, but an operator, a \emph{density matrix}:
                           \[ \rho = \frac{1}{2} \ket{0}\bra{0} + \frac{1}{2} \ket{1}\bra{1}. \]
@@ -2542,13 +2478,19 @@ Any[]
                             p(a) = \Tr{\rho M_a}.
                           \end{equation}
 
-                          When discussing two Hilbert spaces \(A\) and \(B\) of dimensions \(d_A\) and \(d_B\) (Alice and Bob's, say), their joint state, denoted by \(\rho_{AB}\), lives in lives in the \emph{tensor product} of their Hilbert spaces \(A \otimes B\), of dimension \(d_A d_B\). The tensor product between operators in finite dimensions, representing two operations carried out independently on the two parts of the joint system, can be computed explicitly as the \emph{Kronecker product} of the corresponding matrices.
+                          When discussing two Hilbert spaces \(A\) and \(B\) of dimensions \(d_A\) and \(d_B\) (Alice and Bob's, say), their joint state, denoted by \(\rho_{AB}\), lives in the \emph{tensor product} of their Hilbert spaces \(A \otimes B\), of dimension \(d_A d_B\). The tensor product between operators in finite dimensions, representing two operations carried out independently on the two parts of the joint system, can be computed explicitly as the \emph{Kronecker product} of the corresponding matrices.
+
+                          TODO direct sum
 
                           We use the symbol \(\rho \cong \sigma\) to denote \emph{isomorphism} between states \(\rho\) and \(\sigma\), which is to say that there exists a bijective map \(\Phi : \Phi(\rho) = \sigma\) that respects the operations of addition and multiplication between operators, and the multiplication of operators by scalars:
                           \begin{equation}
                             \Phi(aM + NO) = a\Phi(M) + \Phi(N)\Phi(O).
                           \end{equation}
-                          We typically use this notation to avoid some tedious clarifications when working with tensor products of Hilbert spaces. For example, let \(\rho \coloneqq \rho_{ABC}\) and \(\sigma \coloneqq \rho_{ACB}\). Then we have \(\rho \cong \sigma\), with the isomorphism being a particular reordering of the matrix elements. If we have an operator \(M \in \Lin{A \otimes C \otimes B}\), in order to show its effect on \(\rho\), we can conveniently remark that \(\rho \cong \sigma\) and show its effect on \(\sigma\). Alternatively, if writing the state as an element of \(\Lin{A \otimes C \otimes B}\) reveals an important detail about its structure, we can make a similar remark.
+                          We typically use this notation to avoid some tedious clarifications when working with tensor products of Hilbert spaces. For example, let \(\rho \coloneqq \rho_{ABC}\) and \(\sigma \coloneqq \rho_{ACB}\). Then we have \(\rho \cong \sigma\), and with bases \({\{\ket{a_i}\}}_i\), \({\{\ket{b_j}\}}_j\), \({\{\ket{c_k}\}}_k\), the isomorphism is \(\rho \mapsto N\rho{N}^{\dagger}\), with
+                          \[ N = \sum_{ijk} \bra{a_i \otimes c_k \otimes b_j} \ket{a_i \otimes b_j \otimes c_k}, \]
+                          and this can be computed efficiently by reordering the elements of the matrix representing the state.
+
+                          If we have an operator \(M \in \Lin{A \otimes C \otimes B}\), in order to show its effect on \(\rho\), we can conveniently remark that \(\rho \cong \sigma\) and show its effect on \(\sigma\). Alternatively, if writing the state as an element of \(\Lin{A \otimes C \otimes B}\) reveals an important detail about its structure, we can make a similar remark.
 
                           If Alice and Bob were to randomly pick from POVMs indexed by \(x\) and \(y\) respectively, this would be represented by the POVMs \({\{M_{a|x}\}}_a\) and \({\{N_{b|y}\}}_b\), with \(M_{a|x} \in \Lin{A}\) and \(N_{b|y} \in \Lin{B}\) corresponding to outputs \(a\) and \(b\) respectively. The conditional probability distribution is then
                           \begin{equation}
@@ -2557,9 +2499,9 @@ Any[]
 
                           Given a joint state, we may wish to focus only on one subsystem. The part of the joint state accessible to the subsystem is called its \emph{marginal} state, and is derived from the joint state by taking a \emph{partial trace}:
                           \begin{align}
-                            \Tr[_B]{\ket{a_1}\bra{a_2} \otimes \ket{b_1}\bra{b_2}} &\coloneqq \ket{a_1}\bra{a_2} \Tr{\ket{b_1}\bra{b_2}}
+                            \Tr[_B]{\ket{a_1}\bra{a_2} \otimes \ket{b_1}\bra{b_2}} &\coloneqq \ket{a_1}\bra{a_2} \Tr{\ket{b_1}\bra{b_2}}.
                           \end{align}
-                          The convention for joint states is to label all their subsystems, so that the state \(\rho_{AB}\) has two subsystems corresponding to the Hilbert spaces \(A\) and \(B\). In that case, we obtain marginal state on \(A\) by tracing out \(B\): \(\Tr[_B]{\rho_{AB}} = \rho_{A}\); and the marginal state on \(B\) by tracing out \(A\): \(\Tr[_A]{\rho_{AB}} = \rho_{B}\).
+                          Like the trace, this is a linear operation, so this definition can be extended by linearity to compute the partial trace on any state. The convention for joint states is to label all their subsystems, so that the state \(\rho_{AB}\) has two subsystems corresponding to the Hilbert spaces \(A\) and \(B\). In that case, we obtain the marginal state on \(A\) by tracing out \(B\): \(\Tr[_B]{\rho_{AB}} = \rho_{A}\); and the marginal state on \(B\) by tracing out \(A\): \(\Tr[_A]{\rho_{AB}} = \rho_{B}\).
 
                           Lastly, we characterise the allowable operations on a quantum system. These are described by \emph{completely positive trace preserving (CPTP) maps}, which are described simply by any set of operators \(\{E_k\}\) such that \(\sum_k E_k^{\dagger}E_k = I\). This is referred to as the \emph{operator-sum representation} of a CPTP map. The overall state after the application of the map is \(\sum_k E_k \rho E_k^{\dagger}\).
 
@@ -2587,6 +2529,74 @@ Any[]
                             \norm{X} \coloneqq \sup_{\psi \in \Hs \setminus \{0\}} \frac{\norm{X\psi}}{\norm{\psi}}
                           \end{equation}
                           is finite~\cite{HallQuantumForMath}. For bounded operators in infinite dimensions, the trace may not exist. The set of operators on which the trace exists is referred to as the set of \emph{trace class} operators, and consists of all operators \(A \in \mathcal{B}(\Hs)\) where \(\sum_i \bra{e_i}\sqrt{A^{\dagger}A}\ket{e_i} < +\infty\). \(\sqrt{A^{\dagger}A}\) is PSD and self-adjoint, guaranteeing that this quantity will be real and non-negative. If \(A\) is trace class, then the trace is basis independent, and for any \(B \in \mathcal{B}(\Hs)\), \(AB\) and \(BA\) are also trace class, and the cyclic permutation invariance also applies~\cite[Sec. 19.2]{HallQuantumForMath}.
+
+                          \subsection{Convex Geometry and Analysis}\label{sec:prelim_cvxgeom}
+
+                          The phenomenon of convexity arises naturally from physical constraints, and is an essential tool for enabling global optimisation. All statements made without citation in this \lcnamecref{sec:prelim_cvxgeom} can be found in Chapters 2 and 3 of~\cite{BoydVand}.
+
+                          \begin{table}[H]
+                            \centering
+                            \begin{Tabular}{ccl} 
+                              \toprule
+                              \(S\) is\ldots & Iff for all \(\{x_i\} \subseteq S\), \\
+                              \midrule
+                              Affine & \(\sum_i w_i x_i \in S\;\forall \{w_i\} : w_i \in \R \land \sum_i w_i = 1 \)  \\
+                              Conic & \(\sum_i w_i x_i \in S\;\forall \{w_i\} : w_i \geq 0\)  \\
+                              Convex & \(\sum_i w_i x_i \in S\;\forall \{w_i\} : w_i \geq 0 \land \sum_i w_i = 1 \)  \\
+                              \bottomrule
+                            \end{Tabular}
+                            \caption{Characterisations of convex, affine and conic sets (cones).}\label{tab:sets}
+                          \end{table}
+
+                          \Cref{tab:sets} concisely summarises different types of sets we are concerned with in convex geometry. In particular, all affine sets are convex. The weighted sums of \(\{x_i\}\) that define each type of set are referred to as affine, conic and convex \emph{combinations}, and are special cases of linear combinations. Note that, to establish any of these properties, we need only establish that the set is closed under the corresponding combination of two elements. The affine, conic and convex \emph{hulls} of a set of points are the sets defined by all affine, conic and convex combinations of the points, respectively.
+
+                          Convex combinations are particularly interesting to us, because they represent \emph{probabilistic mixtures} of \(\{x_i\}\), with \(\{w_i\}\) specifying the pmf. An \emph{extreme point} is a point that cannot be written as a convex combination of other points. All extreme points are located on the boundary of a convex set, and closed bounded convex set is the convex hull of its extreme points~\cite[Ch. B.4]{LuenbergerYe}. \emph{Caratheodory's theorem on convex hulls} tells us that, for the convex hull \(S\) of a set of points \(V \subseteq \R^{d}\), any point in \(S\) can be expressed as the convex combination of at most \(d+1\) points of \(V\)~\cite{Caratheodory,CaratheodorySteinitz}.
+
+                          The subset of \(\R^d\), \(d \in \Z_{++}\) that obeys an \emph{affine inequality constraint} of the form \(\rvec{a}\cvec{x} - b \leq 0\) is called a \emph{half-space}, which is a convex set, but not affine. \emph{Affine equality constraints} \(\rvec{a}\cvec{x} + b = 0\) define \emph{hyperplanes}, which are affine sets, but which can equivalently be seen as the intersection of \(\rvec{a}\cvec{x} + b \leq 0\) and \(\rvec{a}\cvec{x} + b \geq 0\). Analytically, then, we need only consider half-spaces to model all possible affine constraints. Further, while each hyperplane/equality constraint corresponds to a \emph{redundant} coordinate, which can be eliminated (cf.\ the derivation of the Collins-Gisin representation in \Cref{sec:nl_ns}), keeping the constraints and the extra coordinates can make it easier to interpret computational results.
+
+                          In convex geometry, the intersection of a finite number of half-spaces is a \emph{polyhedron}, which is a convex set. With \(n\) half-spaces defined by \(n\) affine inequality constraints, all vectors \(\{\cvec{a}\}\) and scalars \(\{b\}\) may be combined into a \(d\times{n}\) matrix \(\matr{A}\) and a vector \(\cvec{b}\) of length \(d\), respectively, defining an \emph{affine map} \(\matr{A}\cvec{x} + \cvec{b}\), such that \(\matr{A}\cvec{x} + \cvec{b} \leq \cvec{0}\), where inequality here is componentwise, characterises the polyhedron completely.
+
+                          Polyhedra can either be defined by the inequalities corresponding to their half-spaces (the \emph{H-representation}), or by their \emph{vertices} and \emph{extreme rays} (the \emph{V-representation})~\cite[Sec. 2]{LRS}. Formally,
+                          \begin{itemize}
+                            \item A set of vectors \({\{\cvec{a}_i\}}_{i=1}^n\) is \emph{affinely independent} if the set \(\{\cvec{a}_1-\cvec{a}_2, \ldots, \cvec{a}_{n-1}-\cvec{a}_n\}\) is linearly independent, which is possible for \(n \leq d+1\).
+                            \item When constraints are referred to as being affinely independent, this refers to the above definition applied to the vectors \(\{\cvec{a}\}\)
+                            \item A \emph{vertex} of a polyhedron \(P\) is a point in \(P\) that satisfies \(d\) affinely independent inequality constraints with equality~\cite[Sec. 2]{LRS} (intuitively, a corner where \(d\) half-spaces intersect). The set of vertices is precisely the set of extreme points of a polyhedron.
+                            \item An \emph{extreme ray} of a polyhedron \(P\) is a vector \(\cvec{r}\in\R^d\) such that for some vertex \(\cvec{v}\in{P}\) and any positive scalar \(t\), \(\cvec{v} + t\cvec{r} \in P\) and satisfies \(d-1\) affinely independent inequality constraints with equality~\cite[Sec. 2]{LRS} (intuitively, this occurs when we can always choose \(\cvec{x}\) to make \(\rvec{a}\cvec{x} + b\) more negative for some constraint \(\rvec{a}\cvec{x} + b \leq 0\), while remaining on the face defined by the other \(d-1\) inequalities)
+                          \end{itemize}
+
+                          A bounded polyhedron, which does not have any rays, is called a \emph{polytope}~\cite[Ch. 1]{Ziegler}. For a polytope \(P\) of dimension \(d\), given a linear inequality \(\rvec{c}\cvec{x} \leq c_0\;\forall\cvec{x}\in{P}\), the set
+                          \begin{equation}
+                            F = P \cup \{\cvec{x}\in\R^d : \rvec{c}\cvec{x} = c_0\}
+                          \end{equation}
+                          is called a \emph{face}, and \emph{dimension} of a face is the dimension of its affine hull. Vertices are then faces of dimension \(0\), while \emph{facets} are faces of dimension \(d-1\). The facet-defining inequalities are the half-spaces that describe the polytope~\cite[Ch. 2]{Ziegler}.
+
+                          Convex \emph{functions} are those with a convex domain \(\Omega\subseteq\R^d\) and a convex \emph{epigraph}, that is
+                          \begin{equation}
+                            f : \Omega \to \R \text{ convex} \Leftrightarrow \{\cvec{x} \oplus t : f(\cvec{x}) \leq t\}\text{ convex}. 
+                          \end{equation}
+                          A function \(f\) is \emph{concave} iff \(-f\) is convex. Affine maps (of which linear maps are a special case) are both convex and concave.
+
+                          Perhaps the most useful characterisation of convex functions is via \emph{Jensen's inequality}:
+                          \begin{equation}
+                            f\text{ convex} \Leftrightarrow \int p(\cvec{x}) f(\cvec{x}) \dif{\cvec{x}} \geq f\left(\int p(\cvec{x}) \dif{\cvec{x}}\right)\;\forall p: p(\cvec{x}) \geq 0 \land \int p(\cvec{x}) \dif{x} = 1,
+                          \end{equation}
+                          that is, for all probability distributions on \(\Omega\).\footnote{This applies to discrete distributions as well, but for brevity we give only the integral form.}
+
+                          For differentiable \(f\), a more convenient characterisation is~\cite[Ch. 7.4]{LuenbergerYe}
+                          \begin{equation}
+                            f\text{ convex} \Leftrightarrow f(\cvec{y}) \geq f(\cvec{x}) + \nabla{f}(\cvec{y}-\cvec{x}) \;\forall \cvec{x},\cvec{y} \in \Omega,
+                          \end{equation}
+                          and if \(f\) is twice-differentiable~\cite[Ch. 7.4]{LuenbergerYe},
+                          \begin{equation}
+                            f\text{ convex} \Leftrightarrow \nabla^2{f}(\cvec{x}) \succeq 0 \;\forall \cvec{x} \in \Omega.
+                          \end{equation}
+
+                          Convex functions \(f\) have several properties that make them particularly easy to optimise~\cite[Ch. 7.5]{LuenbergerYe}:
+                          \begin{itemize}
+                            \item All local minimisers of \(f\) are global minimisers
+                            \item An easy consequence: any point \(\cvec{x}\) such that \(\nabla{f}(\cvec{y}-\cvec{x}) \geq 0\;\forall \cvec{y}\in\Omega\) is a global minimiser
+                            \item The global maximum of \(f\) is achieved by an extremal point of its domain
+                          \end{itemize}
 
                           \subsection{Information Theory}\label{sec:prelim_infot}
 
